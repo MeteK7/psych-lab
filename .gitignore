@@ -1,0 +1,13 @@
+# Local configuration and data
+.env
+data/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Node / Angular (web/.gitignore covers the rest)
+node_modules/

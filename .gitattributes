@@ -1,0 +1,2 @@
+# Schedules are hashed byte for byte; never let git convert their line endings.
+analysis/schedules/** -text
