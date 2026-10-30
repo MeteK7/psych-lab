@@ -1,0 +1,30 @@
+{
+  "id": "state-reset",
+  "version": "2",
+  "title": "Follow the dot",
+  "timing": {
+    "hold_seconds": 10,
+    "sets": 8,
+    "set_seconds": 24,
+    "rest_seconds": 10
+  },
+  "game": {
+    "instructions": "Keep your pointer inside the ring around the moving dot. You can also use the arrow keys after clicking or tabbing into the game area.",
+    "speed": 1,
+    "reduced_motion_speed": 0.5,
+    "ring_radius": 28
+  },
+  "image_variant": {
+    "intro": "Bring to mind a picture of starting today's study, or of getting stuck in it, the moment that feels unpleasant. Keep it about today's study only, not other memories. You can stop at any time.",
+    "hold": "Hold that picture in mind.",
+    "during_play": "Keep the picture in mind while you follow the dot.",
+    "rest": "Short pause. Bring the picture back to mind."
+  },
+  "game_only_variant": {
+    "intro": "A short dot-following game. You can stop at any time.",
+    "hold": "Get ready.",
+    "during_play": "Follow the dot.",
+    "rest": "Short pause."
+  },
+  "stop_label": "Stop the session"
+}

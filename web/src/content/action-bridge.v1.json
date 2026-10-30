@@ -1,0 +1,31 @@
+{
+  "id": "action-bridge",
+  "version": "1",
+  "title": "Plan the first step",
+  "intro": "Turn today's study goal into a concrete if-then plan: when and where you start, and the very first small thing you will do.",
+  "goal": {
+    "label": "What are you studying today?",
+    "placeholder": "e.g. backpropagation in a 2-layer network"
+  },
+  "cue_types": [
+    { "value": "time", "label": "A time", "prefix": "When it is", "placeholder": "e.g. 19:00" },
+    { "value": "place", "label": "A place", "prefix": "When I sit down at", "placeholder": "e.g. my desk" },
+    { "value": "after_event", "label": "After something I already do", "prefix": "After I", "placeholder": "e.g. finish dinner" }
+  ],
+  "first_step": {
+    "label": "Then I will… (one small first action, under two minutes)",
+    "placeholder": "e.g. open the lecture notes and read the first worked example"
+  },
+  "obstacle": {
+    "label": "Optional: what might get in the way?",
+    "placeholder": "e.g. I feel like checking my phone first"
+  },
+  "obstacle_response": {
+    "label": "If that happens, then I will…",
+    "placeholder": "e.g. put the phone in another room and start anyway"
+  },
+  "rehearsal": {
+    "instruction": "Read your plan to yourself twice, slowly, picturing the moment it happens.",
+    "confirm": "I have repeated my plan twice"
+  }
+}

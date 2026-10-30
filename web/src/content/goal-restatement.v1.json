@@ -1,0 +1,18 @@
+{
+  "id": "goal-restatement",
+  "version": "1",
+  "title": "Today's goal",
+  "intro": "Write down your study goal and today's topic.",
+  "goal": {
+    "label": "What is your study goal?",
+    "placeholder": "e.g. understand how neural networks learn"
+  },
+  "topic": {
+    "label": "What topic will you study today?",
+    "placeholder": "e.g. backpropagation"
+  },
+  "read_back": {
+    "instruction": "Read your goal and topic to yourself twice, slowly.",
+    "confirm": "I have read them twice"
+  }
+}

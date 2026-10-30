@@ -1,0 +1,21 @@
+{
+  "id": "ratings",
+  "version": "1",
+  "items": {
+    "unpleasant": {
+      "label": "Right now, how unpleasant does starting today's study feel?",
+      "min_label": "Not at all",
+      "max_label": "Extremely"
+    },
+    "image_vividness": {
+      "label": "How vivid is the image right now?",
+      "min_label": "Not vivid at all",
+      "max_label": "Extremely vivid"
+    },
+    "image_emotionality": {
+      "label": "How unpleasant does the image feel right now?",
+      "min_label": "Not at all",
+      "max_label": "Extremely"
+    }
+  }
+}

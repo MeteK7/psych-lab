@@ -1,0 +1,12 @@
+<a class="skip-link" href="#main">Skip to content</a>
+<header>
+  <nav aria-label="Main">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page">Today</a>
+    <a routerLink="/history" routerLinkActive="active" ariaCurrentWhenActive="page">History</a>
+    <a routerLink="/dev" routerLinkActive="active" ariaCurrentWhenActive="page">Development</a>
+  </nav>
+  <p class="notice">Local prototype · data stays on this computer</p>
+</header>
+<main id="main" tabindex="-1">
+  <router-outlet />
+</main>
