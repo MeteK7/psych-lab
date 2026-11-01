@@ -7,11 +7,12 @@ import { map } from 'rxjs';
 import { Condition } from '../../api/types';
 import { areaById } from '../../areas';
 import { conditionInfo } from '../../flow/conditions';
+import { MethodIcon } from '../../shared/method-icon';
 
 /** One area: its topics and their experiences, each with "Try it" (practice mode). */
 @Component({
   selector: 'app-area-page',
-  imports: [RouterLink],
+  imports: [MethodIcon, RouterLink],
   template: `
     @if (area(); as a) {
       <h1>{{ a.title }}</h1>
@@ -27,15 +28,15 @@ import { conditionInfo } from '../../flow/conditions';
                 <li class="card">
                   <h3>{{ e.label }}</h3>
                   <p>{{ e.description }} About {{ e.minutes }} minutes.</p>
+                  <!-- The method opens the exercise's science explanation ("Why this exercise?"). -->
+                  <a class="method" routerLink="/session" [queryParams]="{ mode: 'try', condition: e.value, why: 1 }">
+                    <app-method-icon [name]="e.method.icon" />
+                    {{ e.method.name }}<span class="sr-only">: the science behind {{ e.label }}</span>
+                  </a>
                   @if (e.experimental) {
                     <p><span class="badge">Experimental</span> This idea is still being tested.</p>
                   }
-                  <div class="card-actions">
-                    <button type="button" (click)="tryIt(e.value)">Try it</button>
-                    <a routerLink="/session" [queryParams]="{ mode: 'try', condition: e.value, why: 1 }">
-                      Why this exercise?<span class="sr-only"> ({{ e.label }})</span>
-                    </a>
-                  </div>
+                  <button type="button" class="try" (click)="tryIt(e.value)">Try it</button>
                 </li>
               }
             }
@@ -62,7 +63,12 @@ import { conditionInfo } from '../../flow/conditions';
                    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
     .experiences .card { margin: 0; display: flex; flex-direction: column; align-items: flex-start; }
     .experiences p { margin: 0 0 0.75rem; }
-    .card-actions { margin-top: auto; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .method {
+      display: inline-flex; align-items: center; gap: 0.4rem; margin: 0 0 0.75rem;
+      font-size: 0.9rem; color: var(--accent); text-decoration: none;
+    }
+    .method:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .try { margin-top: auto; }
     .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
     h2 { font-size: 1.25rem; }
     h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }

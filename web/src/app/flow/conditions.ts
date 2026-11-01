@@ -1,4 +1,5 @@
 import { Condition, Mode } from '../api/types';
+import { MethodIconName } from '../shared/method-icon';
 
 export type StepId =
   | 'pre_rating'
@@ -27,6 +28,8 @@ export interface ConditionInfo {
   summary: string[];
   minutes: number;
   experimental: boolean;
+  /** The scientific method the exercise rests on, shown on its card (plan §3.1). */
+  method: { name: string; icon: MethodIconName };
   /** Internal: the n-of-1 phase that compares this condition. Never shown on screen. */
   phase: 1 | 2;
 }
@@ -43,6 +46,7 @@ export const CONDITIONS: ConditionInfo[] = [
     ],
     minutes: 3,
     experimental: false,
+    method: { name: 'Implementation intentions', icon: 'route' },
     phase: 1,
   },
   {
@@ -56,6 +60,7 @@ export const CONDITIONS: ConditionInfo[] = [
     ],
     minutes: 3,
     experimental: false,
+    method: { name: 'Goal intentions', icon: 'flag' },
     phase: 1,
   },
   {
@@ -71,6 +76,7 @@ export const CONDITIONS: ConditionInfo[] = [
     ],
     minutes: 10,
     experimental: true,
+    method: { name: 'Working-memory taxation', icon: 'layers' },
     phase: 2,
   },
   {
@@ -85,6 +91,7 @@ export const CONDITIONS: ConditionInfo[] = [
     ],
     minutes: 9,
     experimental: false,
+    method: { name: 'Distraction', icon: 'focus' },
     phase: 2,
   },
 ];

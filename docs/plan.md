@@ -134,7 +134,7 @@ Every experience carries a **science explanation** in its own versioned content 
 **Presentation:**
 - **Preview screen** (before Begin): a native expandable section (`<details>`), closed by default, accessible by keyboard and screen reader.
 - **Done screen:** the same section.
-- **Area page card:** a link to the preview screen.
+- **Area page card:** the method the exercise rests on, as an icon and its name under the description (Implementation intentions, Goal intentions, Working-memory taxation, Distraction). It links to the preview screen with the section open. There is no separate "Why this exercise?" link on the cards.
 - **Never inside a running step,** and no pop-ups.
 - **Always available in Try it,** with no restriction.
 
@@ -675,6 +675,7 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | **Added** | Risks and open questions (§10); a departure row (§11) | Follow from the above |
 | **Retained** | The n-of-1 protocol (v1.4, approved) and State Reset's description are unchanged. Explanations aren't added to experiment exercises; Try it access is unchanged and unrestricted | User instruction |
 | **Built** | Phase S: four explanations (`web/src/content/science/*.v1.json`, sources with evidence marks in `sources.v1.json`); the "Why this exercise?" section on the practice preview and done screens, opened from a link on each area-page card; a content test enforcing §3.1; not shown in experiment or Test mode exercises | User go-ahead, 2026-11-01. Release waits for your content review |
+| **Changed** | Area-page cards name their method (icon and name, under the description) instead of repeating a "Why this exercise?" link; the method links to the explanation as before. The two baseline exercises are named by the research concepts they use (Goal intentions, Distraction), not "comparison" | User feedback: the repeated links cluttered the cards, and "comparison" means nothing to a Try it visitor |
 | **Corrected** | §3.1 wording rule: "Research found…" (✔F) and "Research suggests…" (✔A), because "study" isn't used on screen. The Webb 2012 reference link pointed to the authors' 2013 reply; it now points to the 2012 meta-analysis (PMID 22582737) | Accuracy |
 
 ## References

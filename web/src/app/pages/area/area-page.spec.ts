@@ -42,15 +42,21 @@ describe('AreaPage', () => {
     });
   });
 
-  it('links each card to its "Why this exercise?" explanation in practice mode', async () => {
+  it('names each card\'s method, linking to its explanation in practice mode', async () => {
     const fixture = create('action-growth');
     await fixture.whenStable();
-    const links = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('.card-actions a'),
-    );
-    expect(links).toHaveLength(4);
-    expect(links[2].textContent).toContain('Why this exercise?');
-    expect(links[2].textContent).toContain('(Picture it, then follow the dot)'); // for screen readers
+    const root = fixture.nativeElement as HTMLElement;
+    const links = Array.from(root.querySelectorAll<HTMLAnchorElement>('.experiences a.method'));
+    const names = links.map((a) => a.textContent!.split(':')[0].trim());
+    expect(names).toEqual([
+      'Implementation intentions',
+      'Goal intentions',
+      'Working-memory taxation',
+      'Distraction',
+    ]);
+    expect(root.textContent).not.toContain('Why this exercise?'); // no repeated links
+    expect(links[2].querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+    expect(links[2].textContent).toContain(': the science behind Picture it, then follow the dot');
     const url = new URL(links[2].href);
     expect(url.pathname).toBe('/session');
     expect(Object.fromEntries(url.searchParams)).toEqual({
