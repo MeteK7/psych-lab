@@ -30,9 +30,11 @@ def build_export(
     reveals: list[dict[str, Any]],
     sessions: list[dict[str, Any]],
     starts: dict[int, str],
+    others: list[dict[str, Any]] | None = None,
+    phase: int = 1,
 ) -> dict[str, Any]:
     return {
-        "phase": 1,
+        "phase": phase,
         "timezone": "Europe/Istanbul",
         "late_start_minutes": 15,
         "days": days,
@@ -41,6 +43,7 @@ def build_export(
         "study_starts": [
             {"session_date": f"2026-11-{d:02d}", "recorded_at": t} for d, t in starts.items()
         ],
+        "other_sessions": others or [],
     }
 
 
@@ -63,6 +66,7 @@ def reveal(n: int, slot: int, condition: str, minutes: int = 0) -> dict[str, Any
         "session_date": f"2026-11-{n:02d}",
         "revealed_at": at(n, "19:00"),
         "minutes_after_planned": minutes,
+        "day_start": at(n, "00:00"),
     }
 
 
@@ -216,6 +220,100 @@ def test_day_status_counts(tmp_path: Path) -> None:
         "ineligible": 1,
         "eligible_no_session": 2,
     }
+
+
+# ---------- additional exposure (protocol §7) ----------
+
+SR, GO = "state_reset+action_bridge", "game_only+action_bridge"
+
+
+def try_it(name: str, condition: str, start: str, status: str = "completed") -> dict[str, Any]:
+    return {
+        "id": name,
+        "mode": "try",
+        "condition": condition,
+        "status": status,
+        "started_at": start,
+        "ended_at": None if status == "aborted" else start,
+    }
+
+
+def test_try_it_runs_inside_the_window_are_classified(tmp_path: Path) -> None:
+    # Day 2 (Goal restatement) gets a Try it run of Action Bridge in the morning.
+    # Day 3 (Action Bridge) gets an extra Goal restatement run.
+    # Day 4 (Goal restatement): runs just outside the window on both sides.
+    # Day 5 (Goal restatement): an aborted Action Bridge run one minute before the window ends.
+    schedule = [Slot(2, 1, GR), Slot(3, 1, AB), Slot(4, 2, GR), Slot(5, 2, GR)]
+    data = build_export(
+        days=[day(n) for n in (2, 3, 4, 5)],
+        reveals=[reveal(2, 2, GR), reveal(3, 3, AB), reveal(4, 4, GR), reveal(5, 5, GR)],
+        sessions=[session(2, GR), session(3, AB), session(4, GR), session(5, GR)],
+        starts={},
+        others=[
+            try_it("t1", AB, at(2, "08:00")),
+            try_it("t2", GR, at(3, "19:30")),
+            try_it("t3", AB, at(3, "23:59")),  # day 3's window ended at 21:10
+            try_it("t4", AB, at(4, "21:10")),  # window end is exclusive
+            try_it("t5", SR, at(5, "21:09"), status="aborted"),
+        ],
+    )
+    outcomes, _ = assemble(from_dict(tmp_path, data), schedule)
+    assert [(o.day[-2:], o.exposure) for o in outcomes] == [
+        ("02", "contaminated"),
+        ("03", "extra_exposure"),
+        ("04", "clean"),
+        ("05", "contaminated"),  # aborted runs count; State Reset includes Action Bridge
+    ]
+    assert outcomes[0].exposure_sessions == [f"{AB} at 2026-11-02T08:00:00+03:00"]
+    assert outcomes[0].flags == []  # exposure is not a deviation flag
+
+
+def test_phase_2_contamination_is_holding_the_picture(tmp_path: Path) -> None:
+    schedule = [Slot(1, 1, GO), Slot(2, 1, SR), Slot(3, 2, GO)]
+    data = build_export(
+        days=[day(n) for n in (1, 2, 3)],
+        reveals=[reveal(1, 1, GO), reveal(2, 2, SR), reveal(3, 3, GO)],
+        sessions=[session(1, GO), session(2, SR), session(3, GO)],
+        starts={},
+        others=[
+            try_it("t1", SR, at(1, "12:00")),
+            try_it("t2", GO, at(2, "12:00")),
+            try_it("t3", AB, at(3, "12:00")),  # Action Bridge is in both phase-2 conditions
+        ],
+        phase=2,
+    )
+    outcomes, _ = assemble(from_dict(tmp_path, data), schedule)
+    assert [o.exposure for o in outcomes] == ["contaminated", "extra_exposure", "extra_exposure"]
+
+
+def test_exposure_counts_and_sensitivity_analyses(tmp_path: Path) -> None:
+    schedule = [Slot(i, (i + 1) // 2, AB if i % 2 else GR) for i in range(1, 7)]
+    conditions = {i: AB if i % 2 else GR for i in range(1, 7)}
+    data = build_export(
+        days=[day(i) for i in range(1, 7)],
+        reveals=[reveal(i, i, conditions[i]) for i in range(1, 7)],
+        sessions=[session(i, conditions[i]) for i in range(1, 7)],
+        starts={},
+        others=[try_it("t2", AB, at(2, "08:00")), try_it("t3", GR, at(3, "08:00"))],
+    )
+    outcomes, _ = assemble(from_dict(tmp_path, data), schedule)
+    summary = analyse(outcomes, 1)
+    assert summary["complete_pairs"] == 3  # primary analysis keeps every day
+    assert summary["exposure_by_condition"] == {
+        AB: {"clean": 2, "extra_exposure": 1, "contaminated": 0},
+        GR: {"clean": 2, "extra_exposure": 0, "contaminated": 1},
+    }
+    # A day left out takes its pair with it.
+    assert summary["sensitivity_excluding_contaminated_days"]["complete_pairs"] == 2
+    assert summary["sensitivity_excluding_any_extra_exposure"]["complete_pairs"] == 1
+
+
+def test_an_export_without_exposure_data_still_loads(tmp_path: Path) -> None:
+    data = build_export([day(2)], [reveal(2, 1, AB)], [session(2, AB)], {})
+    del data["other_sessions"]
+    del data["reveals"][0]["day_start"]
+    (outcome,), _ = assemble(from_dict(tmp_path, data), SCHEDULE)
+    assert (outcome.exposure, outcome.exposure_sessions) == ("clean", [])
 
 
 # ---------- randomisation test ----------

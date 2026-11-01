@@ -9,6 +9,12 @@ after the session ends (started yes/no; latency censored at the window). Every r
 slot is analysed under its assigned condition, whatever its completion status; a session
 that never finished is timed from its last saved step, one never begun from the reveal.
 
+Additional exposure (protocol §7): other exercises (Try it) started between the day's
+local midnight and the end of its outcome window are recorded per day. A day is
+"contaminated" when such an exercise contains the active component the assigned
+condition lacks, "extra_exposure" for any other additional exercise, otherwise "clean".
+The primary analysis is unchanged; two prespecified sensitivity analyses exclude them.
+
     uv run python n_of_1.py --phase 1 --export ../data/exports/phase1.json \
         --out ../data/exports/phase1-days.csv
 """
@@ -22,7 +28,7 @@ import sys
 from collections import Counter
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass, field
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +37,9 @@ from make_schedule import PHASE_CONDITIONS, SCHEDULE_DIR, sha256_of
 WINDOW_MINUTES = 120
 MIN_SESSION_DAYS = 20
 MAX_EXACT_PAIRS = 20  # 2^20 sign patterns; beyond that, Monte Carlo
+# The component each phase tests; phase 0 (test phase) mirrors phase 1.
+ACTIVE_COMPONENT = {0: "action_bridge", 1: "action_bridge", 2: "state_reset"}
+EXPOSURES = ("clean", "extra_exposure", "contaminated")
 
 
 @dataclass(frozen=True)
@@ -48,6 +57,9 @@ class Reveal:
     session_date: date
     revealed_at: datetime
     minutes_after_planned: int
+    # Local midnight of session_date; older exports lack it (the window then opens at
+    # the reveal).
+    day_start: datetime | None = None
 
 
 @dataclass(frozen=True)
@@ -67,6 +79,18 @@ class Session:
 
 
 @dataclass(frozen=True)
+class OtherSession:
+    """An exercise not assigned by a reveal (Try it); no answers, no free text."""
+
+    id: str
+    mode: str
+    condition: str
+    status: str
+    started_at: datetime
+    ended_at: datetime | None
+
+
+@dataclass(frozen=True)
 class Day:
     date: date
     barrier: bool
@@ -81,6 +105,7 @@ class Export:
     reveals: list[Reveal]
     sessions: list[Session]
     study_starts: dict[date, datetime]
+    other_sessions: list[OtherSession] = field(default_factory=list)
 
 
 @dataclass
@@ -98,6 +123,8 @@ class DayOutcome:
     started: bool
     late_start: bool
     flags: list[str] = field(default_factory=list)
+    exposure: str = "clean"  # clean · extra_exposure · contaminated
+    exposure_sessions: list[str] = field(default_factory=list)
 
 
 # ---------- loading ----------
@@ -124,6 +151,7 @@ def load_export(path: Path) -> Export:
                 session_date=date.fromisoformat(r["session_date"]),
                 revealed_at=datetime.fromisoformat(r["revealed_at"]),
                 minutes_after_planned=r["minutes_after_planned"],
+                day_start=_dt(r.get("day_start")),
             )
             for r in data["reveals"]
         ],
@@ -143,6 +171,17 @@ def load_export(path: Path) -> Export:
             date.fromisoformat(s["session_date"]): datetime.fromisoformat(s["recorded_at"])
             for s in data["study_starts"]
         },
+        other_sessions=[
+            OtherSession(
+                id=s["id"],
+                mode=s["mode"],
+                condition=s["condition"],
+                status=s["status"],
+                started_at=datetime.fromisoformat(s["started_at"]),
+                ended_at=_dt(s["ended_at"]),
+            )
+            for s in data.get("other_sessions", [])
+        ],
     )
 
 
@@ -202,6 +241,12 @@ def assemble(
             flags.append(f"reveal condition {reveal.condition} differs from the schedule")
         if session is not None and session.condition != slot.condition:
             flags.append(f"deviation: assigned {slot.condition}, delivered {session.condition}")
+        window_end = window_from + timedelta(minutes=window_min)
+        exposed = [
+            o
+            for o in export.other_sessions
+            if (reveal.day_start or reveal.revealed_at) <= o.started_at < window_end
+        ]
         outcomes.append(
             DayOutcome(
                 slot=slot.slot,
@@ -217,9 +262,29 @@ def assemble(
                 started=started,
                 late_start=late,
                 flags=flags,
+                exposure=classify_exposure(slot.condition, exposed, export.phase),
+                exposure_sessions=[f"{o.condition} at {o.started_at.isoformat()}" for o in exposed],
             )
         )
     return outcomes, notes
+
+
+def classify_exposure(assigned: str, others: Sequence[OtherSession], phase: int) -> str:
+    """Contaminated if another exercise gave the active component this day lacks."""
+    if not others:
+        return "clean"
+    active = ACTIVE_COMPONENT[phase]
+    if active not in assigned.split("+") and any(active in o.condition.split("+") for o in others):
+        return "contaminated"
+    return "extra_exposure"
+
+
+def exposure_by_condition(outcomes: Sequence[DayOutcome], phase: int) -> dict[str, Any]:
+    """Exposure counts per assigned condition, to show whether it is one-sided."""
+    return {
+        c: {e: sum(o.assigned == c and o.exposure == e for o in outcomes) for e in EXPOSURES}
+        for c in PHASE_CONDITIONS[phase]
+    }
 
 
 def completion(session: Session | None) -> str:
@@ -348,6 +413,7 @@ def analyse(
             Counter("yes" if o.study_start_at else "no" for o in outcomes)
         ),
         "completion_by_condition": completion_by_condition(outcomes, phase),
+        "exposure_by_condition": exposure_by_condition(outcomes, phase),
         "deviations": [f"slot {o.slot}: {f}" for o in outcomes for f in o.flags],
         "warnings": warnings,
         # Primary: every begun session, as assigned (protocol §7).
@@ -360,6 +426,12 @@ def analyse(
         "sensitivity_completed_sessions_only": compare(
             [o for o in outcomes if o.status == "completed"], phase
         ),
+        "sensitivity_excluding_contaminated_days": compare(
+            [o for o in outcomes if o.exposure != "contaminated"], phase
+        ),
+        "sensitivity_excluding_any_extra_exposure": compare(
+            [o for o in outcomes if o.exposure == "clean"], phase
+        ),
     }
     return summary
 
@@ -369,7 +441,14 @@ def analyse(
 
 def write_days(path: Path, outcomes: Sequence[DayOutcome]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    rows = [{**asdict(o), "flags": "; ".join(o.flags)} for o in outcomes]
+    rows = [
+        {
+            **asdict(o),
+            "flags": "; ".join(o.flags),
+            "exposure_sessions": "; ".join(o.exposure_sessions),
+        }
+        for o in outcomes
+    ]
     with path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(rows[0]) if rows else ["slot"])
         writer.writeheader()
