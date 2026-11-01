@@ -3,7 +3,7 @@
 Everything runs on this computer only, in **two environments** (below). PostgreSQL listens on `localhost:5432`. The ports were chosen so that this project can run alongside other local projects on 4200 and 8000.
 
 **Layout:** the project root is `C:\Projects\new_project`.
-- `platform\`: **development**, branch `test-n552vx` (this runbook, `api`, `web`, `analysis`, `scripts`, `data`, `.env`)
+- `platform\`: **development**, branch `test` (this runbook, `api`, `web`, `analysis`, `scripts`, `data`, `.env`)
 - `platform-prod\`: **production**, a git worktree of `main` with its own `.env`
 - `study-log\`: the n-of-1 study log, a plain folder written only by production
 
@@ -14,7 +14,7 @@ The app connects as the `postgres` superuser (decided 2026-10-29). That's accept
 ## Environments
 | | Development | Production |
 |---|---|---|
-| Folder and branch | `platform\`, `test-n552vx` | `platform-prod\`, `main` |
+| Folder and branch | `platform\`, `test` | `platform-prod\`, `main` |
 | Purpose | Building and testing; **Test mode only** (phase 0) | **Your n-of-1 experiment** and everyday use |
 | Databases | `app_dev`, tests `app_test` | `app_prod`, tests `app_test_main` (release checks only) |
 | `.env` | `APP_ENV=development`, `N1_PHASE=0`, `ALLOWED_ORIGINS=http://localhost:4310` | `APP_ENV=production`, `N1_PHASE=1` (later 2), `ALLOWED_ORIGINS=http://localhost:4300` |
@@ -37,10 +37,10 @@ Development never affects the experiment: it has its own branch, folder, databas
 | uv + Python 3.13 | `uv --version; uv python list --only-installed` | `uv python install 3.13`. Checks run with `UV_PYTHON_DOWNLOADS=never` |
 | Node.js LTS | `node --version` | v24 is in use |
 
-## One-time setup: development (`platform\`, branch `test-n552vx`)
+## One-time setup: development (`platform\`, branch `test`)
 1. **Branch** (you do all git actions). In `C:\Projects\new_project\platform`, after committing your work on `main`:
    ```powershell
-   git switch -c test-n552vx
+   git switch -c test
    ```
 2. **Databases**, in `psql -U postgres -h localhost` (skip any that already exist):
    ```sql
@@ -103,14 +103,14 @@ Open http://localhost:4310. The dev server proxies `/api` to the API, so the bro
 - If a port is taken, check what owns it with `Get-NetTCPConnection -State Listen -LocalPort 4300,4310,8110`.
 
 ## Release to production
-Development's checks must be green on `test-n552vx` first (`powershell -File scripts/check.ps1`). Then:
+Development's checks must be green on `test` first (`powershell -File scripts/check.ps1`). Then:
 1. **Back up** production (from `platform-prod\`):
    ```powershell
    cd api; uv run python -m app.manage backup
    ```
 2. **Stop** production (Ctrl+C), then **merge** (you do all git actions), from `platform-prod\`:
    ```powershell
-   git merge test-n552vx
+   git merge test
    ```
 3. **Install, migrate, build** (from `platform-prod\`):
    ```powershell

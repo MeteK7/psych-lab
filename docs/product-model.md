@@ -49,7 +49,7 @@
 ## 3. Acceptance criteria and isolation tests
 
 **Every model:**
-- `scripts/check.ps1` is green on `test-n552vx`.
+- `scripts/check.ps1` is green on `test`.
 - Its isolation tests pass.
 - It's merged to `main` and passes the production smoke check (runbook).
 - It leaves Try it unchanged.

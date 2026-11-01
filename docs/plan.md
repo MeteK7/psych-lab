@@ -1,6 +1,6 @@
 # Research-led plan: a web platform of psychologically informed interactive experiences (revision 6.0)
 
-> **Status:** revision 5.1 approved 2026-10-29. Stage 1 is partly done (§2.3). The Stage 2 level-A prototype is built and checked (see `docs/runbook.md`). Revisions 5.2–5.7 record the decisions made during implementation (5.3: the study-log outcome, protocol and analysis scripts; 5.4: no content lock, slot reveal tool, the eligible-day-no-session outcome, an earlier phase-1 start; 5.5: folder restructure, study log without git; 5.6: all daily n-of-1 records in the app; protocol v1.3 approved 2026-10-31; 5.7: platform structure and plain on-screen wording; 6.0: three usage models released one at a time (`docs/product-model.md`), separate development and production environments, the exposure rule; protocol v1.4 approved 2026-11-01). The user performs all git actions. If a branch is needed, base it on `test-n552vx`, never `main`. No AI attribution anywhere in files, comments or docs.
+> **Status:** revision 5.1 approved 2026-10-29. Stage 1 is partly done (§2.3). The Stage 2 level-A prototype is built and checked (see `docs/runbook.md`). Revisions 5.2–5.7 record the decisions made during implementation (5.3: the study-log outcome, protocol and analysis scripts; 5.4: no content lock, slot reveal tool, the eligible-day-no-session outcome, an earlier phase-1 start; 5.5: folder restructure, study log without git; 5.6: all daily n-of-1 records in the app; protocol v1.3 approved 2026-10-31; 5.7: platform structure and plain on-screen wording; 6.0: three usage models released one at a time (`docs/product-model.md`), separate development and production environments, the exposure rule; protocol v1.4 approved 2026-11-01). The user performs all git actions. If a branch is needed, base it on `test`, never `main`. No AI attribution anywhere in files, comments or docs.
 >
 > **Terminology:** descriptive and provisional ("the platform", "experiences"). There is no product name.
 >
@@ -37,7 +37,7 @@
   - **Central principle:** a complete, meaningful experience needs no commitment to return.
   - Each model is **released on its own** once its acceptance criteria and isolation tests pass. Organisational use also needs supervised expert testing and a legal, regulatory, security and data-protection release gate.
   - A booth is a deployment profile of the same web app.
-- **Stack:** Angular + TypeScript, Python + FastAPI, PostgreSQL, built as a lean modular monolith. **This phase runs on your Windows computer only**, in two environments: development (`test-n552vx`) and production (`main`, which runs the n-of-1).
+- **Stack:** Angular + TypeScript, Python + FastAPI, PostgreSQL, built as a lean modular monolith. **This phase runs on your Windows computer only**, in two environments: development (`test`) and production (`main`, which runs the n-of-1).
 
 ## 2. Problem analysis and evidence review
 
@@ -119,7 +119,7 @@
 
 **Rules shared by both phases**
 - **All daily records are made in the app** (the **My experiment** page); nothing is edited by hand or run from a command line. Dates are **local (Europe/Istanbul)**.
-- **The experiment runs only in production:** the `main` build with its own database `app_prod`. Development (`test-n552vx`, `app_dev`) runs Test mode only, enforced by the server. Releases during a phase are logged and must not change the experiment.
+- **The experiment runs only in production:** the `main` build with its own database `app_prod`. Development (`test`, `app_dev`) runs Test mode only, enforced by the server. Releases during a phase are logged and must not change the experiment.
 - **Try it stays unrestricted during the experiment** (no practice lock).
   - **Recorded:** runs are stored in `try` mode and exported without free text.
   - **Classified:** each session day is clean, extra exposure or **contaminated** (the other condition's active component was used between local midnight and the end of the outcome window).
@@ -245,7 +245,7 @@ Each tester experiences **all conditions** in a fixed counterbalanced order (Lat
 | Exports | A: none (local database) · B: documented `psql \copy` commands · C: pseudonymised export tooling | No export code yet |
 | Analysis | B: n-of-1 randomisation-test script; usability summary · C: mixed models and analysis plans for trials | — |
 | Accounts and authentication | M2 / M3 (`product-model.md`) | Optional personal accounts (M2), then organisation roles and grants (M3). Not built yet. Each starts with its own plan |
-| **Environments** (`APP_ENV`) | A | Development on `test-n552vx` (`app_dev`, `app_test`, Test mode only) and production on `main` (`app_prod`, `app_test_main`, the n-of-1). The server refuses to start if one environment's settings point at the other's database, schedules or study log. Tests refuse `app_prod`; `reset-db` refuses production |
+| **Environments** (`APP_ENV`) | A | Development on `test` (`app_dev`, `app_test`, Test mode only) and production on `main` (`app_prod`, `app_test_main`, the n-of-1). The server refuses to start if one environment's settings point at the other's database, schedules or study log. Tests refuse `app_prod`; `reset-db` refuses production |
 | Production serves the built web app (FastAPI, falling back to `index.html`) | A | One process, no dev server or reload in the environment that runs the experiment; the tested build is what runs |
 | Session mode `try` for Try it, separate from `dev` (Test mode) | A | The exposure rule needs Try it runs to be identifiable; earlier Try it rows were migrated (`0004`) |
 | Separate test database `app_test` | A | Keeps tests away from your n-of-1 data. Costs nothing on a native install |
@@ -257,7 +257,7 @@ Each tester experiences **all conditions** in a fixed counterbalanced order (Lat
 C:\Projects\new_project\                 project root (git set up by the user)
   study-log\                             plain folder: daily notes YYYY-MM-DD.md only (no git); written by production only
   platform-prod\                         production: git worktree of main (own .env, app_prod)
-  platform\                              development: branch test-n552vx
+  platform\                              development: branch test
     api/  pyproject.toml (uv) · .python-version (3.13) · alembic.ini
           app/{main,config,db,models,schemas,security,manage,n1,clock}.py · app/routes/{health,sessions,n1}.py · participants (B)
           alembic/versions/{0001_create_sessions,0002_n1_daily_records,0003_session_last_saved_at,0004_session_mode_try}.py · tests/
@@ -335,7 +335,7 @@ cd web; npm ci
 
 **Two environments** (full steps, one-time setup and the release procedure in `docs/runbook.md`):
 - **Production** (`platform-prod`, `main`): `npm run build` once per release, then `cd api; uv run fastapi run app/main.py --host 127.0.0.1 --port 4300`. Open `http://localhost:4300`.
-- **Development** (`platform`, `test-n552vx`), two terminals:
+- **Development** (`platform`, `test`), two terminals:
 ```bash
 cd api; uv run fastapi dev app/main.py --host 127.0.0.1 --port 8110 --reload-dir app
 ```
@@ -546,7 +546,7 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | **Added** | `docs/product-model.md`: three usage models (Try it, Personal, Organisational) on one shared library and runtime; data tiers; per-model acceptance criteria and isolation tests; the booth as a Try it profile. It replaces `usage-models-assessment.md` | Product decisions 1–2 (user, 2026-11-01). Try it without restrictions is a core requirement, not a design flaw |
 | **Added** | Product track in §9 (E, M1, M2, M3, H): each model is built, integrated, tested and released on its own; public hosting is an extra gate for each model | Product decision 1; go-live means local production until there is a server |
 | **Added** | Organisational release gate: supervised in-person expert testing with clinics and qualified professionals (no real clients), plus legal and regulatory review of the intended use for each organisation type (including the medical-device question), security review and a data-protection impact assessment | Product decision 2 |
-| **Added** | **Environments:** development on `test-n552vx` (`app_dev`, `app_test`, Test mode only, ports 4310/8110) and production on `main` in `platform-prod` (`app_prod`, `app_test_main`, port 4300, the n-of-1). Server guards, `reset-db` refused in production, `backup` command, production serving the built web app, a Development badge, and the release procedure (§6.1, §6.2, §7, runbook) | Product decision 3: development must never affect the experiment |
+| **Added** | **Environments:** development on `test` (`app_dev`, `app_test`, Test mode only, ports 4310/8110) and production on `main` in `platform-prod` (`app_prod`, `app_test_main`, port 4300, the n-of-1). Server guards, `reset-db` refused in production, `backup` command, production serving the built web app, a Development badge, and the release procedure (§6.1, §6.2, §7, runbook) | Product decision 3: development must never affect the experiment |
 | **Added** | **Exposure rule:** `try` mode (migration `0004`), Try it runs in the phase export, day classification, two sensitivity analyses and counts by condition; the primary analysis is unchanged (§4.2, protocol §7) | Unrestricted Try it must be recorded and interpreted, not ignored and not blocked |
 | **Changed** | Phase-1 prerequisite: the production environment must exist (§9, protocol §9) | The n-of-1 runs only in production |
 | **Changed** | §1 product concept; §6.1 accounts row (now M2/M3); §8 isolation-test policy; §10 risks and deferred decisions; §11 three new departures | Follow from the product decisions |

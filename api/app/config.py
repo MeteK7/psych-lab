@@ -24,7 +24,7 @@ Environment = Literal["development", "production"]
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=ENV_FILE, env_file_encoding="utf-8", extra="ignore")
 
-    # development: branch test-n552vx, Test mode only. production: main, runs the n-of-1.
+    # development: branch test, Test mode only. production: main, runs the n-of-1.
     app_env: Environment = "development"
     # repr=False keeps passwords out of logs, tracebacks and test output.
     database_url: str = Field(repr=False)
