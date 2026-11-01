@@ -1,14 +1,21 @@
 import { Routes } from '@angular/router';
 
 import { SessionPage } from './flow/session-page';
-import { HistoryPage } from './pages/history/history-page';
-import { StartPage } from './pages/start/start-page';
-import { TodayPage } from './pages/today/today-page';
+import { AboutPage } from './pages/about/about-page';
+import { AreaPage } from './pages/area/area-page';
+import { ExperimentPage } from './pages/experiment/experiment-page';
+import { HomePage } from './pages/home/home-page';
+import { RecordsPage } from './pages/records/records-page';
 
 export const routes: Routes = [
-  { path: '', component: TodayPage, title: 'Today' },
-  { path: 'dev', component: StartPage, title: 'Development' },
-  { path: 'session', component: SessionPage, title: 'Session' },
-  { path: 'history', component: HistoryPage, title: 'History' },
+  { path: '', component: HomePage, title: 'Home' },
+  { path: 'areas/:id', component: AreaPage, title: 'Area' },
+  { path: 'experiment', component: ExperimentPage, title: 'My experiment' },
+  { path: 'records', component: RecordsPage, title: 'My records' },
+  { path: 'about', component: AboutPage, title: 'About' },
+  { path: 'session', component: SessionPage, title: 'Exercise' },
+  // Old addresses from before the platform structure.
+  { path: 'dev', redirectTo: 'areas/action-growth' },
+  { path: 'history', redirectTo: 'records' },
   { path: '**', redirectTo: '' },
 ];

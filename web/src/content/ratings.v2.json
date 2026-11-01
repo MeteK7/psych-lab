@@ -1,0 +1,22 @@
+{
+  "id": "ratings",
+  "version": "2",
+  "items": {
+    "unpleasant": {
+      "intro": "Think of what you want to start next.",
+      "label": "Right now, how unpleasant does starting it feel?",
+      "min_label": "not at all unpleasant",
+      "max_label": "extremely unpleasant"
+    },
+    "image_vividness": {
+      "label": "How vivid is your picture right now?",
+      "min_label": "not vivid at all",
+      "max_label": "extremely vivid"
+    },
+    "image_emotionality": {
+      "label": "How unpleasant does your picture feel right now?",
+      "min_label": "not at all",
+      "max_label": "extremely"
+    }
+  }
+}

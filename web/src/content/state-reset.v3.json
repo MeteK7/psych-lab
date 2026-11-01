@@ -1,0 +1,84 @@
+{
+  "id": "state-reset",
+  "version": "3",
+  "timing": {
+    "practice_seconds": 15,
+    "hold_seconds": 10,
+    "sets": 8,
+    "set_seconds": 24,
+    "rest_seconds": 10
+  },
+  "game": {
+    "speed": 1,
+    "reduced_motion_speed": 0.5,
+    "ring_radius": 28
+  },
+  "how_it_works": {
+    "heading": "How the game works",
+    "illustration_alt": "Illustration: a small filled dot with a ring around it, and a pointer inside the ring.",
+    "labels": {
+      "dot": "the dot moves slowly",
+      "ring": "the ring: keep your pointer inside it",
+      "pointer": "your pointer"
+    },
+    "text": "A dot moves slowly around the box, with a ring around it. Keep your pointer inside the ring as the dot moves. The ring changes colour while you're inside it.",
+    "mouse": "Mouse or touchpad: just move the pointer; no clicking needed.",
+    "keyboard": "Keyboard: press Tab to select the box, then move your marker (a small cross) with the arrow keys.",
+    "start_practice": "Start practice",
+    "practice_heading": "Practice round",
+    "practice_done": "Practice done.",
+    "practise_again": "Practise again",
+    "ready": "I'm ready"
+  },
+  "picture": {
+    "heading": "Choose a picture",
+    "invitation": "Bring to mind a picture of something you feel stuck on or reluctant to start. For example:",
+    "examples": [
+      "starting a task you've been putting off",
+      "a part of your learning that feels hard",
+      "sitting down and not knowing where to begin"
+    ],
+    "experiment_note": "For your experiment, choose something about what you plan to learn today.",
+    "safety": "Choose an everyday situation, not a painful personal memory. If something painful comes up, stop. You can stop at any time.",
+    "field_label": "Describe your picture in a few words",
+    "field_placeholder": "e.g. opening chapter 3 and feeling lost",
+    "field_hint": "Only you see this, as a reminder during the exercise. It isn't saved.",
+    "rating_heading": "Your picture: “{picture}”",
+    "rating_before": "Bring your picture to mind now.",
+    "rating_after": "Think of your picture once more: “{picture}”."
+  },
+  "image_variant": {
+    "title": "Picture it, then follow the dot",
+    "about_intro": "In this exercise you hold a picture in mind while following a moving dot on the screen. There are three parts:",
+    "about_parts": [
+      "Choose a picture.",
+      "Try the game for 15 seconds.",
+      "Play 8 rounds of 24 seconds, with short pauses, while keeping your picture in mind."
+    ],
+    "about_duration": "About 7 minutes. You can stop at any time with “Stop the exercise”.",
+    "practice": "Try it now for 15 seconds. This practice doesn't count, and you don't need your picture yet.",
+    "hold": "Bring your picture to mind: “{picture}”. Hold it for 10 seconds.",
+    "hold_countdown": "Round 1 starts in {seconds} s.",
+    "round_heading": "Round {round} of {sets} · {seconds} s",
+    "round": "Keep your pointer in the ring, and keep your picture in mind: “{picture}”.",
+    "rest": "Pause. Round {next} of {sets} starts in {seconds} s. Bring your picture back to mind: “{picture}”."
+  },
+  "game_only_variant": {
+    "title": "Follow the dot",
+    "about_intro": "In this exercise you follow a moving dot on the screen. There are two parts:",
+    "about_parts": [
+      "Try the game for 15 seconds.",
+      "Play 8 rounds of 24 seconds, with short pauses."
+    ],
+    "about_duration": "About 6 minutes. You can stop at any time with “Stop the exercise”.",
+    "practice": "Try it now for 15 seconds. This practice doesn't count.",
+    "hold": "Get ready.",
+    "hold_countdown": "Round 1 starts in {seconds} s.",
+    "round_heading": "Round {round} of {sets} · {seconds} s",
+    "round": "Keep your pointer in the ring.",
+    "rest": "Pause. Round {next} of {sets} starts in {seconds} s."
+  },
+  "next_label": "Next",
+  "continue_label": "Continue",
+  "stop_label": "Stop the exercise"
+}

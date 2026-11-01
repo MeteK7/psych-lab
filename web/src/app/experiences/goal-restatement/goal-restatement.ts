@@ -7,7 +7,6 @@ import { Experience, StepOutcome } from '../../flow/step-outcome';
 @Component({
   selector: 'app-goal-restatement',
   template: `
-    <h2>{{ content.title }}</h2>
     <p>{{ content.intro }}</p>
 
     @if (stage() === 'write') {
@@ -25,17 +24,18 @@ import { Experience, StepOutcome } from '../../flow/step-outcome';
         <button type="submit" [disabled]="!complete()">Continue</button>
       </form>
     } @else {
-      <p>{{ content.read_back.instruction }}</p>
+      <h3>{{ content.read_back.heading }}</h3>
       <blockquote class="plan">
-        Goal: {{ goal().trim() }}<br />
-        Today's topic: {{ topic().trim() }}
+        {{ content.read_back.goal_prefix }} {{ goal().trim() }}<br />
+        {{ content.read_back.topic_prefix }} {{ topic().trim() }}
       </blockquote>
+      <p>{{ content.read_back.instruction }}</p>
       <label class="inline">
         <input type="checkbox" [checked]="readBack()" (change)="readBack.set(!readBack())" />
         {{ content.read_back.confirm }}
       </label>
       <div class="actions">
-        <button type="button" (click)="stage.set('write')">Edit</button>
+        <button type="button" (click)="stage.set('write')">{{ content.read_back.change }}</button>
         <button type="button" [disabled]="!readBack()" (click)="finish()">Continue</button>
       </div>
     }

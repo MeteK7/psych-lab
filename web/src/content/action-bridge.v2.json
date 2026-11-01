@@ -1,0 +1,34 @@
+{
+  "id": "action-bridge",
+  "version": "2",
+  "title": "Plan your first step",
+  "intro": "You'll write a short plan: when you'll start, and the first small thing you'll do. Then you'll read it twice.",
+  "goal": {
+    "label": "What do you want to start?",
+    "placeholder": "e.g. chapter 3 on backpropagation"
+  },
+  "cue_question": "When will you start? Pick the kind of moment that suits you:",
+  "cue_types": [
+    { "value": "time", "label": "At a set time", "prefix": "When it is", "placeholder": "e.g. 19:00" },
+    { "value": "place", "label": "When I'm at a certain place", "prefix": "When I sit down at", "placeholder": "e.g. my desk" },
+    { "value": "after_event", "label": "Right after something I already do", "prefix": "After I", "placeholder": "e.g. finish dinner" }
+  ],
+  "first_step": {
+    "label": "Then I will… (one tiny first action, under two minutes)",
+    "placeholder": "e.g. open the notes and read the first example"
+  },
+  "obstacle": {
+    "label": "Optional: what might get in the way?",
+    "placeholder": "e.g. wanting to check my phone first"
+  },
+  "obstacle_response": {
+    "label": "If that happens, then I will…",
+    "placeholder": "e.g. put the phone in another room and start anyway"
+  },
+  "rehearsal": {
+    "heading": "Your plan",
+    "instruction": "Read your plan to yourself twice, slowly. Picture yourself at that moment, doing the first action.",
+    "confirm": "I've read my plan twice",
+    "change": "Change plan"
+  }
+}

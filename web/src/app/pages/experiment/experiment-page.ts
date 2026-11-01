@@ -1,98 +1,125 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 
 import { ApiService } from '../../api/api.service';
 import { N1Today } from '../../api/types';
-import { CONDITIONS } from '../../flow/conditions';
+import { conditionInfo } from '../../flow/conditions';
 
 /**
- * The n-of-1 home page: plan tomorrow, report a barrier, start today's session, and
- * record the study start. Identical in every condition (protocol §4).
+ * My experiment (the n-of-1 routine): plan tomorrow, mark a day off, start today's
+ * exercise, and record the start of learning. Identical in every condition (protocol §4).
  */
 @Component({
-  selector: 'app-today-page',
+  selector: 'app-experiment-page',
   imports: [DatePipe, RouterLink],
   template: `
-    <h1>Today</h1>
+    <h1>My experiment: getting started on learning</h1>
     @if (view(); as v) {
       @if (v.test_phase) {
-        <p class="test-banner" role="note">Test phase {{ v.phase }}: nothing here is part of the study.</p>
+        <p class="test-banner" role="note">Test mode: nothing you do here counts in your experiment.</p>
       }
 
-      @if (v.study_start_target; as target) {
+      @if (v.study_start_target) {
         <section class="card prominent" aria-labelledby="start-heading">
-          <h2 id="start-heading">Starting to study?</h2>
-          <p>When you begin, write one line about what you're starting.</p>
+          <h2 id="start-heading">Starting to learn?</h2>
+          <p>When you actually begin, write a few words about what you're starting and press the button.</p>
           <form (submit)="$event.preventDefault(); recordStudyStart()">
             <label class="field">
               <span>What are you starting?</span>
-              <input type="text" maxlength="300" [value]="startText()"
-                     (input)="startText.set(value($event))" />
+              <input type="text" maxlength="300" placeholder="e.g. chapter 3, first worked example"
+                     [value]="startText()" (input)="startText.set(value($event))" />
             </label>
-            <button type="submit" [disabled]="busy() || !startText().trim()">I'm starting now</button>
+            <button type="submit" class="primary" [disabled]="busy() || !startText().trim()">I'm starting now</button>
           </form>
         </section>
       } @else if (v.study_start; as recorded) {
-        <p class="card done" role="status">
-          Study start recorded at {{ recorded.recorded_at | date: 'HH:mm' }}.
-        </p>
+        <p class="card done" role="status">Start recorded at {{ recorded.recorded_at | date: 'HH:mm' }}.</p>
       }
+
+      <details class="how" [open]="v.progress.planned_days === 0">
+        <summary>How it works</summary>
+        <p>
+          This is a personal experiment, run by you, for you. It compares two short exercises to see
+          which one helps you start learning.
+        </p>
+        <ol>
+          <li>Plan a start time for the next day, the evening before or earlier.</li>
+          <li>
+            At that time, press <strong>Start today's exercise</strong>. The app picks one of the two
+            exercises at random, so the comparison is fair.
+          </li>
+          <li>When you actually start learning, come back here and press <strong>I'm starting now</strong>.</li>
+        </ol>
+        <p>
+          Part 1 compares “Plan your first step” with “Write down your goal”. Part 2, later, compares
+          the two dot exercises. It takes about 20 to 28 planned days per part.
+        </p>
+      </details>
+      <p class="muted">Experiment days so far: {{ v.progress.session_days }}. Aim: 20 to 28.</p>
 
       <section class="card" aria-labelledby="today-heading">
         <h2 id="today-heading">{{ v.today | date: 'EEEE d MMMM' }}</h2>
         @switch (v.status) {
           @case ('no_plan') {
-            <p>Today wasn't planned the evening before, so it isn't a study day. Plan tomorrow below.</p>
+            <p>
+              Today isn't an experiment day, because no start time was set for it in advance. Days are
+              planned at least a day ahead, so the plan doesn't depend on how you feel on the day. You
+              can still try any experience from <a routerLink="/">Home</a>, and you can plan tomorrow below.
+            </p>
           }
           @case ('pending') {
-            <p>Planned start: <strong>{{ v.plan?.planned_start }}</strong></p>
+            <p>Planned start today: <strong>{{ v.plan?.planned_start }}</strong>. At that time, press Start today's exercise.</p>
           }
           @case ('revealed') {
-            <p>Today's session was opened at {{ v.reveal?.revealed_at | date: 'HH:mm' }} but not finished.</p>
+            <p>
+              Today's exercise, {{ label(v.reveal?.condition) }}, was picked at
+              {{ v.reveal?.revealed_at | date: 'HH:mm' }}. It counts for today even if you don't do it.
+            </p>
           }
           @case ('session') {
-            <p>Today's session is {{ v.session?.status === 'in_progress' ? 'in progress' : 'done' }}.</p>
+            <p>Today's exercise is {{ v.session?.status === 'in_progress' ? 'in progress' : 'done' }}.</p>
           }
           @case ('ineligible') {
-            <p>Marked as a day you can't study: {{ v.plan?.barrier }}</p>
+            <p>You marked today as a day you can't learn ({{ v.plan?.barrier }}). It doesn't count in the experiment.</p>
           }
           @case ('late_barrier') {
             <p>
-              Barrier recorded after the planned start: {{ v.plan?.barrier }}.
-              This day counts as a study day without a session.
+              You marked today as a day you can't learn after your planned start ({{ v.plan?.barrier }}).
+              It counts as a planned day without an exercise.
             </p>
           }
         }
 
         @if (v.can_start_session && v.reveal === null) {
           <button type="button" class="primary" [disabled]="busy()" (click)="startSession()">
-            Start today's session
+            Start today's exercise
           </button>
-        } @else if (v.can_start_session && v.reveal; as reveal) {
+        } @else if (v.can_start_session && v.reveal) {
           <button type="button" class="primary" [disabled]="busy()" (click)="openSession()">
-            Continue today's session ({{ label(reveal.condition) }})
+            Continue today's exercise
           </button>
         }
 
         @if (v.can_report_barrier) {
           <details class="barrier">
-            <summary>I can't study today</summary>
+            <summary>I can't learn today</summary>
+            <p>Mark today as a day off, for example if you're ill or travelling.</p>
             @if (v.barrier_would_be_late) {
               <p class="warning" role="note">
-                Your planned start ({{ v.plan?.planned_start }}) has passed. A barrier reported now is
-                recorded as late, and the day counts as a study day without a session.
+                Your planned start ({{ v.plan?.planned_start }}) has passed. If you mark the day off now,
+                it still counts as a planned day, without an exercise.
               </p>
             }
             <form (submit)="$event.preventDefault(); reportBarrier()">
               <label class="field">
-                <span>Reason (e.g. ill, travelling)</span>
+                <span>Reason</span>
                 <input type="text" maxlength="300" [value]="barrierText()"
                        (input)="barrierText.set(value($event))" />
               </label>
-              <button type="submit" [disabled]="busy() || !barrierText().trim()">Record barrier</button>
+              <button type="submit" [disabled]="busy() || !barrierText().trim()">Mark today as a day off</button>
             </form>
           </details>
         }
@@ -102,12 +129,12 @@ import { CONDITIONS } from '../../flow/conditions';
         <h2 id="tomorrow-heading">Plan tomorrow ({{ v.tomorrow | date: 'EEEE d MMMM' }})</h2>
         <form class="inline-form" (submit)="$event.preventDefault(); planTomorrow()">
           <label class="field">
-            <span>Planned study start</span>
+            <span>When will you start learning?</span>
             <input type="time" required [value]="planTime() || v.tomorrow_plan?.planned_start || ''"
                    (input)="planTime.set(value($event))" />
           </label>
           <button type="submit" [disabled]="busy() || !(planTime() || v.tomorrow_plan)">
-            {{ v.tomorrow_plan ? 'Update plan' : 'Save plan' }}
+            {{ v.tomorrow_plan ? 'Change plan' : 'Save plan' }}
           </button>
         </form>
         @if (v.tomorrow_plan) {
@@ -115,7 +142,7 @@ import { CONDITIONS } from '../../flow/conditions';
         }
       </section>
 
-      <p><a routerLink="/history">Add the end-of-day follow-up in History</a></p>
+      <p>At the end of the day: add a short follow-up in <a routerLink="/records">My records</a> (2 questions).</p>
     } @else if (loadError()) {
       <p role="alert">{{ loadError() }}</p>
     } @else {
@@ -126,21 +153,20 @@ import { CONDITIONS } from '../../flow/conditions';
     }
   `,
   styles: `
-    .card { border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin: 0 0 1rem; }
-    .prominent { border: 2px solid var(--accent); }
-    .prominent h2 { margin-top: 0; }
-    .done, .muted { color: var(--muted); }
+    .done { color: var(--muted); }
     .test-banner { background: var(--accent); color: var(--bg); padding: 0.5rem 0.75rem; border-radius: 6px; }
     .field { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.75rem; }
     .field input { font: inherit; padding: 0.4rem; max-width: 28rem; }
     .inline-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1rem; }
     .primary { font-size: 1.05rem; padding: 0.5rem 1rem; margin-top: 0.5rem; }
     .barrier { margin-top: 1rem; }
+    .how { margin-bottom: 0.5rem; }
+    .how summary { cursor: pointer; font-weight: 600; }
     .warning { border-left: 4px solid var(--accent); padding-left: 0.75rem; }
     h2 { font-size: 1.2rem; }
   `,
 })
-export class TodayPage {
+export class ExperimentPage {
   private readonly api = inject(ApiService);
   private readonly router = inject(Router);
 
@@ -151,17 +177,16 @@ export class TodayPage {
   protected readonly startText = signal('');
   protected readonly barrierText = signal('');
   protected readonly planTime = signal('');
-  protected readonly labels = computed(() => new Map(CONDITIONS.map((c) => [c.value, c.label])));
 
   constructor() {
     this.api.n1Today().subscribe({
       next: (v) => this.view.set(v),
-      error: () => this.loadError.set('Today could not be loaded. Is the API running?'),
+      error: () => this.loadError.set('My experiment could not be loaded. Is the local server running?'),
     });
   }
 
-  protected label(condition: string): string {
-    return this.labels().get(condition as never) ?? condition;
+  protected label(condition: string | undefined): string {
+    return conditionInfo(condition)?.label ?? '';
   }
 
   protected value(event: Event): string {
@@ -187,7 +212,7 @@ export class TodayPage {
     this.act(this.api.n1Reveal(), () => this.openSession());
   }
 
-  /** Opens the session with the revealed condition; the session page cannot change it. */
+  /** Opens the exercise with the revealed condition; the exercise page cannot change it. */
   protected openSession(): void {
     const v = this.view();
     if (!v?.reveal) return;
@@ -207,7 +232,7 @@ export class TodayPage {
       },
       error: (err: HttpErrorResponse) => {
         this.busy.set(false);
-        this.actionError.set(err.error?.detail ?? 'That did not work. Is the API running?');
+        this.actionError.set(err.error?.detail ?? 'That did not work. Is the local server running?');
       },
     });
   }

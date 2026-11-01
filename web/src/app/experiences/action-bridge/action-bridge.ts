@@ -7,7 +7,6 @@ import { ActionBridgeInput, isPlanComplete, planText } from './plan-text';
 @Component({
   selector: 'app-action-bridge',
   template: `
-    <h2>{{ content.title }}</h2>
     <p>{{ content.intro }}</p>
 
     @if (stage() === 'write') {
@@ -19,7 +18,7 @@ import { ActionBridgeInput, isPlanComplete, planText } from './plan-text';
         </label>
 
         <fieldset class="field">
-          <legend>When will you start? Choose a cue.</legend>
+          <legend>{{ content.cue_question }}</legend>
           @for (cue of content.cue_types; track cue.value) {
             <label class="inline">
               <input type="radio" name="cue-type" [value]="cue.value"
@@ -54,14 +53,15 @@ import { ActionBridgeInput, isPlanComplete, planText } from './plan-text';
         <button type="submit" [disabled]="!complete()">Continue</button>
       </form>
     } @else {
-      <p>{{ content.rehearsal.instruction }}</p>
+      <h3>{{ content.rehearsal.heading }}</h3>
       <blockquote class="plan">{{ text() }}</blockquote>
+      <p>{{ content.rehearsal.instruction }}</p>
       <label class="inline">
         <input type="checkbox" [checked]="rehearsed()" (change)="rehearsed.set(!rehearsed())" />
         {{ content.rehearsal.confirm }}
       </label>
       <div class="actions">
-        <button type="button" (click)="stage.set('write')">Edit plan</button>
+        <button type="button" (click)="stage.set('write')">{{ content.rehearsal.change }}</button>
         <button type="button" [disabled]="!rehearsed()" (click)="finish()">Continue</button>
       </div>
     }

@@ -62,3 +62,49 @@ td {
     scroll-behavior: auto !important;
   }
 }
+
+/* Shared page building blocks (Home, area and experiment pages). */
+.card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0 0 1rem;
+}
+
+.card h2,
+.card h3 {
+  margin-top: 0;
+}
+
+.prominent {
+  border: 2px solid var(--accent);
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.badge.available {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.button-link {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 600;
+  text-decoration: none;
+}

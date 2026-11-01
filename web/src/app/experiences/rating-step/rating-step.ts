@@ -9,6 +9,9 @@ import { RatingScale } from '../../shared/rating-scale';
   selector: 'app-rating-step',
   imports: [RatingScale],
   template: `
+    @if (item.intro) {
+      <p>{{ item.intro }}</p>
+    }
     <app-rating-scale [item]="item" [(value)]="value" />
     <button type="button" [disabled]="value() === null" (click)="submit()">Continue</button>
   `,

@@ -7,11 +7,11 @@ const T2 = '2026-10-30T18:04:00.000Z';
 describe('session record', () => {
   it('records every content version a condition can show', () => {
     expect(contentVersionsFor('state_reset+action_bridge')).toEqual({
-      ratings: '1',
-      'state-reset': '2',
-      'action-bridge': '1',
+      ratings: '2',
+      'state-reset': '3',
+      'action-bridge': '2',
     });
-    expect(contentVersionsFor('goal_restatement')).toEqual({ ratings: '1', 'goal-restatement': '1' });
+    expect(contentVersionsFor('goal_restatement')).toEqual({ ratings: '2', 'goal-restatement': '2' });
   });
 
   it('adds step summaries with their content version and merges plan and ratings', () => {
@@ -26,8 +26,8 @@ describe('session record', () => {
     });
 
     expect(draft.steps.map((s) => [s.step, s.content_id, s.content_version])).toEqual([
-      ['pre_rating', 'ratings', '1'],
-      ['action_bridge', 'action-bridge', '1'],
+      ['pre_rating', 'ratings', '2'],
+      ['action_bridge', 'action-bridge', '2'],
     ]);
     expect(draft.ratings).toEqual({ unpleasant_pre: 6 });
     expect(draft.plan).toEqual({ type: 'action_bridge', cue: '19:00' });

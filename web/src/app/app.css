@@ -48,3 +48,22 @@ main {
   background: var(--bg);
   padding: 0.25rem 0.5rem;
 }
+
+.brand {
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+}
+
+footer {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+footer a {
+  color: var(--muted);
+}

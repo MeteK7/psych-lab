@@ -1,12 +1,16 @@
 <a class="skip-link" href="#main">Skip to content</a>
 <header>
+  <a routerLink="/" class="brand">Experiences (working title)</a>
   <nav aria-label="Main">
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page">Today</a>
-    <a routerLink="/history" routerLinkActive="active" ariaCurrentWhenActive="page">History</a>
-    <a routerLink="/dev" routerLinkActive="active" ariaCurrentWhenActive="page">Development</a>
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page">Home</a>
+    <a routerLink="/experiment" routerLinkActive="active" ariaCurrentWhenActive="page">My experiment</a>
+    <a routerLink="/records" routerLinkActive="active" ariaCurrentWhenActive="page">My records</a>
   </nav>
-  <p class="notice">Local prototype · data stays on this computer</p>
 </header>
 <main id="main" tabindex="-1">
   <router-outlet />
 </main>
+<footer>
+  Local prototype · your data stays on this computer ·
+  <a routerLink="/about" routerLinkActive="active" ariaCurrentWhenActive="page">About</a>
+</footer>

@@ -1,0 +1,22 @@
+{
+  "id": "goal-restatement",
+  "version": "2",
+  "title": "Write down your goal",
+  "intro": "You'll write down your goal and what you'll work on today. Then you'll read them twice.",
+  "goal": {
+    "label": "What is your goal?",
+    "placeholder": "e.g. understand how neural networks learn"
+  },
+  "topic": {
+    "label": "What will you work on today?",
+    "placeholder": "e.g. backpropagation"
+  },
+  "read_back": {
+    "heading": "Your goal",
+    "goal_prefix": "Goal:",
+    "topic_prefix": "Today:",
+    "instruction": "Read your goal and today's topic to yourself twice, slowly.",
+    "confirm": "I've read them twice",
+    "change": "Change"
+  }
+}

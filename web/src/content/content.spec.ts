@@ -31,3 +31,31 @@ describe('experience content', () => {
     expect(Object.keys(STATE_RESET.image_variant)).toEqual(Object.keys(STATE_RESET.game_only_variant));
   });
 });
+
+describe('on-screen wording', () => {
+  // "Study" was ambiguous (learning vs. the research study); "phase" and condition codes
+  // mean nothing to a user. Internal names live in code and docs only.
+  it('never uses "study", "phase", "session" or internal experience names', () => {
+    const forbidden = /\b(stud(y|ying|ies)|phase|session|action bridge|state reset|restatement)\b/i;
+    for (const c of ALL) {
+      // ids, versions and option values are internal, never shown.
+      const { id: _id, version: _version, ...shown } = c;
+      const texts = strings(shown).filter((t) => !/^[a-z_]+$/.test(t));
+      for (const text of texts) expect(text, `${c.id}: "${text}"`).not.toMatch(forbidden);
+    }
+  });
+
+  it('gives both dot variants the same practice round and the same keys', () => {
+    expect(STATE_RESET.timing.practice_seconds).toBeGreaterThan(0);
+    expect(STATE_RESET.image_variant.practice).toContain(`${STATE_RESET.timing.practice_seconds} seconds`);
+    expect(STATE_RESET.game_only_variant.practice).toContain(`${STATE_RESET.timing.practice_seconds} seconds`);
+  });
+
+  it('keeps the two phase-1 intros parallel, without efficacy claims', () => {
+    const claim = /\b(helps?|easier|better|it works|effective|proven)\b/i;
+    expect(ACTION_BRIDGE.intro).not.toMatch(claim);
+    expect(GOAL_RESTATEMENT.intro).not.toMatch(claim);
+    expect(ACTION_BRIDGE.intro).toMatch(/Then you'll read it twice\.$/);
+    expect(GOAL_RESTATEMENT.intro).toMatch(/Then you'll read them twice\.$/);
+  });
+});

@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 
 import { N1Today } from '../../api/types';
-import { TodayPage } from './today-page';
+import { ExperimentPage } from './experiment-page';
 
 const base: N1Today = {
   phase: 1,
@@ -23,6 +23,7 @@ const base: N1Today = {
   can_start_session: true,
   can_report_barrier: true,
   barrier_would_be_late: false,
+  progress: { session_days: 3, planned_days: 4 },
 };
 
 const revealed: N1Today = {
@@ -38,12 +39,12 @@ const revealed: N1Today = {
   can_report_barrier: false,
 };
 
-describe('TodayPage', () => {
+describe('ExperimentPage', () => {
   let backend: HttpTestingController;
-  let fixture: ComponentFixture<TodayPage>;
+  let fixture: ComponentFixture<ExperimentPage>;
 
   async function load(view: N1Today): Promise<HTMLElement> {
-    fixture = TestBed.createComponent(TodayPage);
+    fixture = TestBed.createComponent(ExperimentPage);
     backend.expectOne('/api/n1/today').flush(view);
     await fixture.whenStable();
     return fixture.nativeElement as HTMLElement;
@@ -64,7 +65,7 @@ describe('TodayPage', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [TodayPage],
+      imports: [ExperimentPage],
       providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     });
     backend = TestBed.inject(HttpTestingController);
@@ -72,12 +73,13 @@ describe('TodayPage', () => {
 
   afterEach(() => backend.verify());
 
-  it('reveals the slot and opens the session with the assigned condition', async () => {
+  it('picks the exercise and opens it with the assigned condition', async () => {
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     const root = await load(base);
-    expect(root.textContent).toContain('Planned start: 19:00');
+    expect(root.textContent).toContain('Planned start today: 19:00');
+    expect(root.textContent).toContain('Experiment days so far: 3. Aim: 20 to 28.');
 
-    button(root, "Start today's session").click();
+    button(root, "Start today's exercise").click();
     const req = backend.expectOne('/api/n1/reveal');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({}); // JSON body, as the API requires
@@ -89,15 +91,16 @@ describe('TodayPage', () => {
     });
   });
 
-  it('offers to continue an unfinished session without a new reveal', async () => {
+  it('names a picked exercise by its on-screen name and offers to continue it', async () => {
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     const root = await load(revealed);
-    button(root, "Continue today's session").click();
+    expect(root.textContent).toContain("Today's exercise, Write down your goal, was picked");
+    button(root, "Continue today's exercise").click();
     backend.expectNone('/api/n1/reveal');
     expect(navigate).toHaveBeenCalled();
   });
 
-  it('shows the study-start box first and prominently after a session', async () => {
+  it('shows the start box first and prominently once the exercise is picked', async () => {
     const root = await load({
       ...base,
       status: 'session',
@@ -109,7 +112,7 @@ describe('TodayPage', () => {
     });
     const first = root.querySelector('section');
     expect(first?.classList).toContain('prominent');
-    expect(first?.textContent).toContain('Starting to study?');
+    expect(first?.textContent).toContain('Starting to learn?');
 
     type(first!.querySelector('input')!, 'worked example 1');
     await fixture.whenStable();
@@ -125,16 +128,16 @@ describe('TodayPage', () => {
     });
     await fixture.whenStable();
     expect(root.querySelector('.prominent')).toBeNull();
-    expect(root.textContent).toContain('Study start recorded at');
+    expect(root.textContent).toContain('Start recorded at');
   });
 
-  it('warns that a barrier after the planned start is recorded as late', async () => {
+  it('warns that a day off after the planned start still counts as a planned day', async () => {
     const root = await load({ ...base, barrier_would_be_late: true });
-    expect(root.querySelector('.barrier .warning')?.textContent).toContain('recorded as late');
+    expect(root.querySelector('.barrier .warning')?.textContent).toContain('still counts as a planned day');
 
     type(root.querySelector<HTMLInputElement>('.barrier input')!, 'visitors');
     await fixture.whenStable();
-    button(root, 'Record barrier').click();
+    button(root, 'Mark today as a day off').click();
     const req = backend.expectOne('/api/n1/barrier');
     expect(req.request.body).toEqual({ reason: 'visitors' });
     req.flush({
@@ -145,8 +148,9 @@ describe('TodayPage', () => {
       can_report_barrier: false,
     });
     await fixture.whenStable();
-    expect(root.textContent).toContain('counts as a study day without a session');
-    expect(root.textContent).not.toContain("Start today's session");
+    expect(root.textContent).toContain('counts as a planned day without an exercise');
+    const buttons = Array.from(root.querySelectorAll('button')).map((b) => b.textContent?.trim());
+    expect(buttons).not.toContain("Start today's exercise");
   });
 
   it('plans tomorrow', async () => {
@@ -162,21 +166,34 @@ describe('TodayPage', () => {
     expect(root.textContent).toContain('Planned for 20:30.');
   });
 
+  it('explains an unplanned day and opens "How it works" before the first plan', async () => {
+    const root = await load({
+      ...base,
+      status: 'no_plan',
+      plan: null,
+      can_start_session: false,
+      can_report_barrier: false,
+      progress: { session_days: 0, planned_days: 0 },
+    });
+    expect(root.textContent).toContain("Today isn't an experiment day");
+    expect(root.querySelector<HTMLDetailsElement>('details.how')?.open).toBe(true);
+  });
+
   it('shows the API message when an action is refused', async () => {
     const root = await load(base);
-    button(root, "Start today's session").click();
+    button(root, "Start today's exercise").click();
     backend
       .expectOne('/api/n1/reveal')
-      .flush({ detail: 'Only days planned the evening before can have a session.' }, {
+      .flush({ detail: 'Only days planned in advance can have an exercise.' }, {
         status: 409,
         statusText: 'Conflict',
       });
     await fixture.whenStable();
-    expect(root.querySelector('.error')?.textContent).toContain('planned the evening before');
+    expect(root.querySelector('.error')?.textContent).toContain('planned in advance');
   });
 
-  it('marks the test phase clearly', async () => {
+  it('marks test mode clearly', async () => {
     const root = await load({ ...base, phase: 0, test_phase: true, session_mode: 'dev' });
-    expect(root.querySelector('.test-banner')?.textContent).toContain('Test phase 0');
+    expect(root.querySelector('.test-banner')?.textContent).toContain('Test mode');
   });
 });

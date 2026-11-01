@@ -60,7 +60,7 @@ async function flushSave(f: ComponentFixture<SessionPage>, backend: HttpTestingC
 async function begin(params: Record<string, string>) {
   const ctx = setup(params);
   await ctx.fixture.whenStable();
-  click(ctx.fixture, 'Begin session');
+  click(ctx.fixture, 'Begin');
   return ctx;
 }
 
@@ -70,20 +70,25 @@ describe('SessionPage', () => {
   it('rejects a link without a valid condition', async () => {
     const { fixture } = setup({ mode: 'self_use', condition: 'nonsense' });
     await fixture.whenStable();
-    expect(root(fixture).querySelector('[role="alert"]')?.textContent).toContain('valid condition');
+    expect(root(fixture).querySelector('[role="alert"]')?.textContent).toContain('link is incomplete');
   });
 
   it('records nothing until Begin is clicked, so a reload cannot create a session', async () => {
     const { fixture, backend } = setup({ mode: 'self_use', condition: 'action_bridge' });
     await settle(fixture);
     backend.expectNone(() => true);
-    expect(root(fixture).textContent).toContain('Condition: Action Bridge · My own use (n-of-1)');
+    const text = root(fixture).textContent!;
+    expect(text).toContain('Plan your first step');
+    expect(text).toContain('Practice: not part of your experiment.');
+    expect(text).toContain('Write a short when-then plan and read it twice.');
+    expect(text).toContain('About 3 minutes.');
   });
 
-  it('runs a goal-restatement session and saves after every step', async () => {
+  it('runs a goal-restatement exercise and saves after every step', async () => {
     const { fixture, backend } = await begin({ mode: 'dev', condition: 'goal_restatement' });
     expect((await flushSave(fixture, backend)).status).toBe('in_progress');
 
+    expect(root(fixture).textContent).toContain('Step 1 of 3: How starting feels');
     await rate(fixture, 6);
     expect((await flushSave(fixture, backend)).ratings).toEqual({ unpleasant_pre: 6 });
 
@@ -110,24 +115,27 @@ describe('SessionPage', () => {
     expect(final.ended_at).toBeTruthy();
     expect(final.ratings).toEqual({ unpleasant_pre: 6, unpleasant_post: 3 });
     expect(final.steps?.map((s) => s.step)).toEqual(['pre_rating', 'goal_restatement', 'post_rating']);
-    expect(final.content_versions).toEqual({ ratings: '1', 'goal-restatement': '1' });
-    expect(root(fixture).textContent).toContain('Session complete');
-    expect(root(fixture).textContent).toContain('120-minute window');
+    expect(final.content_versions).toEqual({ ratings: '2', 'goal-restatement': '2' });
+    expect(root(fixture).textContent).toContain('Exercise complete');
+    expect(root(fixture).textContent).toContain('Saved at');
+    // The outcome window is never mentioned during or after an exercise.
+    expect(root(fixture).textContent).not.toContain('window');
+    expect(root(fixture).textContent).toContain('Back to Action and growth');
   });
 
-  it('links an n-of-1 session to its reveal and leads back to Today', async () => {
+  it('links an experiment exercise to its reveal and leads back to My experiment', async () => {
     const reveal = '11111111-2222-4333-8444-555555555555';
     const { fixture, backend } = setup({ mode: 'self_use', condition: 'action_bridge', reveal });
     await fixture.whenStable();
-    expect(root(fixture).textContent).toContain('assigned for today');
-    click(fixture, 'Begin session');
+    expect(root(fixture).textContent).toContain('Assigned for today by your experiment.');
+    click(fixture, 'Begin');
     expect((await flushSave(fixture, backend)).n1_reveal_id).toBe(reveal);
 
     vi.spyOn(window, 'confirm').mockReturnValue(true);
-    click(fixture, 'Stop the session');
+    click(fixture, 'Stop the exercise');
     expect((await flushSave(fixture, backend)).n1_reveal_id).toBe(reveal);
     const back = root(fixture).querySelector<HTMLAnchorElement>('a.primary-link');
-    expect(back?.textContent?.trim()).toBe('Back to Today');
+    expect(back?.textContent?.trim()).toBe('Back to My experiment');
   });
 
   it('saves a stopped session as aborted', async () => {
@@ -135,26 +143,27 @@ describe('SessionPage', () => {
     await flushSave(fixture, backend);
     vi.spyOn(window, 'confirm').mockReturnValue(true);
 
-    click(fixture, 'Stop the session');
+    click(fixture, 'Stop the exercise');
     const body = await flushSave(fixture, backend);
     expect(body.status).toBe('aborted');
     expect(body.steps?.at(-1)).toMatchObject({ step: 'stopped', result: { during: 'pre_rating' } });
-    expect(root(fixture).textContent).toContain('Session stopped');
+    expect(root(fixture).textContent).toContain('Exercise stopped');
+    expect(root(fixture).textContent).toContain('What you did so far is saved.');
   });
 
   it('shows a retry option when the final save fails', async () => {
     const { fixture, backend } = await begin({ mode: 'dev', condition: 'action_bridge' });
     await flushSave(fixture, backend);
     vi.spyOn(window, 'confirm').mockReturnValue(true);
-    click(fixture, 'Stop the session');
+    click(fixture, 'Stop the exercise');
     await settle(fixture);
     backend
       .expectOne((r) => r.method === 'PUT')
       .flush(null, { status: 503, statusText: 'Unavailable' });
     await settle(fixture);
-    expect(root(fixture).querySelector('[role="alert"]')?.textContent).toContain('could not be saved');
+    expect(root(fixture).querySelector('[role="alert"]')?.textContent).toContain("couldn't be saved");
 
-    click(fixture, 'Retry saving');
+    click(fixture, 'Try again');
     expect((await flushSave(fixture, backend)).status).toBe('aborted');
   });
 });

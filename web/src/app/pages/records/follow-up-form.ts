@@ -4,30 +4,30 @@ import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../api/api.service';
 import { SessionOut } from '../../api/types';
 
-/** End-of-day self-report for one session (labelled as self-report in analysis, plan §4.2). */
+/** End-of-day self-report for one experiment exercise (labelled as self-report in analysis, plan §4.2). */
 @Component({
   selector: 'app-follow-up-form',
   template: `
     <form (submit)="$event.preventDefault(); submit()" class="follow-up">
       <label>
-        Minutes you studied after this session (your estimate)
+        About how many minutes did you spend learning after this exercise?
         <input type="number" min="0" max="1440" step="1" required [value]="minutes() ?? ''"
                (input)="minutes.set(toNumber($event))" />
       </label>
       <label>
-        How burdensome was the session? (0 = not at all, 10 = extremely)
+        Optional: how much of a burden was the exercise? (0 = none · 10 = very heavy)
         <select (change)="burden.set(toNumber($event))">
-          <option value="">Skip</option>
+          <option value="">No answer</option>
           @for (n of points; track n) {
             <option [value]="n">{{ n }}</option>
           }
         </select>
       </label>
       <label>
-        Note (optional)
+        Optional note (only you see this)
         <input type="text" maxlength="500" [value]="note()" (input)="note.set(text($event))" />
       </label>
-      <button type="submit" [disabled]="!valid() || saving()">Save follow-up</button>
+      <button type="submit" [disabled]="!valid() || saving()">Save</button>
       @if (error()) {
         <p role="alert">Could not save the follow-up.</p>
       }

@@ -91,4 +91,6 @@ export interface N1Today {
   can_start_session: boolean;
   can_report_barrier: boolean;
   barrier_would_be_late: boolean;
+  /** Session days (revealed slots) and planned days so far in the current phase. */
+  progress: { session_days: number; planned_days: number };
 }

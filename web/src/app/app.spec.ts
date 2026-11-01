@@ -18,7 +18,8 @@ describe('App', () => {
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
     const links = Array.from(root.querySelectorAll('nav a')).map((a) => a.textContent?.trim());
-    expect(links).toEqual(['Today', 'History', 'Development']);
+    expect(links).toEqual(['Home', 'My experiment', 'My records']);
+    expect(root.querySelector('footer')?.textContent).toContain('your data stays on this computer');
     expect(root.querySelector('main#main')).not.toBeNull();
   });
 });

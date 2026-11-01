@@ -1,4 +1,4 @@
-import { CONDITIONS, MODES, isCondition, isLevelAMode, stepsFor } from './conditions';
+import { CONDITIONS, MODES, STEP_NAMES, isCondition, isLevelAMode, stepsFor } from './conditions';
 
 describe('conditions', () => {
   it('runs the plan factor alone in phase 1', () => {
@@ -23,6 +23,14 @@ describe('conditions', () => {
   it('lists every condition once and validates input', () => {
     expect(CONDITIONS.map((c) => c.value).every(isCondition)).toBe(true);
     expect(isCondition('something_else')).toBe(false);
+  });
+
+  it('names every condition and step for the screen, without internal names', () => {
+    for (const c of CONDITIONS) {
+      expect(c.label).not.toMatch(/Action Bridge|State Reset|restatement|phase/i);
+      expect(c.summary.length).toBeGreaterThan(0);
+    }
+    expect(Object.values(STEP_NAMES)).not.toContain('');
   });
 
   it('offers only level-A modes', () => {
