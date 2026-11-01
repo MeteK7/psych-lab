@@ -84,11 +84,13 @@ def test_reveals_slots_in_order_and_only_once_per_day(client: TestClient, clock:
     again = client.post("/api/n1/reveal", json={}).json()
     assert again["reveal"]["id"] == first["reveal"]["id"]
 
+    assert again["progress"] == {"session_days": 1, "planned_days": 1}
+
     plan(client, clock, "2026-11-03", "19:00", "2026-11-02T22:00")
     at(clock, "2026-11-03T19:00")
-    assert (
-        client.post("/api/n1/reveal", json={}).json()["reveal"]["condition"] == "action_bridge"
-    )  # slot 2
+    second = client.post("/api/n1/reveal", json={}).json()
+    assert second["reveal"]["condition"] == "action_bridge"  # slot 2
+    assert second["progress"] == {"session_days": 2, "planned_days": 2}
 
 
 def test_a_start_more_than_15_minutes_late_is_flagged(client: TestClient, clock: Clock) -> None:

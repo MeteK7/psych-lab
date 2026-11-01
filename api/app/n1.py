@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.config import Settings
@@ -63,10 +63,10 @@ def load_schedule(settings: Settings, phase: int) -> list[Slot]:
     csv_path = Path(settings.n1_schedule_dir) / f"schedule-phase{phase}.csv"
     sha_path = csv_path.with_suffix(".sha256")
     if not csv_path.exists() or not sha_path.exists():
-        raise N1Error(409, f"No schedule for phase {phase}.")
+        raise N1Error(409, f"The experiment schedule is missing (part {phase}). See the runbook.")
     recorded = sha_path.read_text(encoding="utf-8").split()[0]
     if hashlib.sha256(csv_path.read_bytes()).hexdigest() != recorded:
-        raise N1Error(409, f"The phase-{phase} schedule does not match its recorded hash.")
+        raise N1Error(409, "The experiment schedule was changed (hash mismatch) and can't be used.")
     with csv_path.open(encoding="utf-8", newline="") as f:
         return [Slot(int(r["slot"]), int(r["pair"]), r["condition"]) for r in csv.DictReader(f)]
 
@@ -166,11 +166,11 @@ def report_barrier(db: Session, settings: Settings, now: datetime, reason: str) 
     phase, today = settings.n1_phase, local_today(now, settings)
     day = _day(db, phase, today)
     if day is None:
-        raise N1Error(409, "Today has no plan, so it isn't a study day.")
+        raise N1Error(409, "Today has no plan, so it isn't an experiment day.")
     if day.barrier is not None:
-        raise N1Error(409, "A barrier is already recorded for today.")
+        raise N1Error(409, "A day off is already recorded for today.")
     if _reveal_on(db, phase, today) is not None:
-        raise N1Error(409, "Today's session has already been started.")
+        raise N1Error(409, "Today's exercise has already been picked.")
     day.barrier, day.barrier_at = reason.strip(), now
     day.barrier_late = now > planned_start_at(day, settings)
     db.commit()
@@ -185,14 +185,14 @@ def reveal_today(db: Session, settings: Settings, now: datetime) -> N1Reveal:
         return existing
     day = _day(db, phase, today)
     if day is None or day.planned_at.astimezone(zone(settings)).date() >= today:
-        raise N1Error(409, "Only days planned the evening before can have a session.")
+        raise N1Error(409, "Only days planned in advance can have an exercise.")
     if day.barrier is not None:
-        raise N1Error(409, "A barrier is recorded for today.")
+        raise N1Error(409, "Today is marked as a day off.")
 
     used = set(db.scalars(select(N1Reveal.slot).where(N1Reveal.phase == phase)))
     slot = next((s for s in load_schedule(settings, phase) if s.slot not in used), None)
     if slot is None:
-        raise N1Error(409, f"All phase-{phase} slots have been used.")
+        raise N1Error(409, f"All exercises in part {phase} of the experiment have been used.")
     minutes = round((now - planned_start_at(day, settings)).total_seconds() / 60)
     reveal = N1Reveal(
         phase=phase,
@@ -210,7 +210,7 @@ def reveal_today(db: Session, settings: Settings, now: datetime) -> N1Reveal:
 def record_study_start(db: Session, settings: Settings, now: datetime, text: str) -> N1StudyStart:
     reveal = study_start_target(db, settings, now)
     if reveal is None:
-        raise N1Error(409, "There is no session waiting for a study start.")
+        raise N1Error(409, "There is no exercise waiting for a start to be recorded.")
     start = N1StudyStart(
         phase=reveal.phase, session_date=reveal.session_date, recorded_at=now, text=text.strip()
     )
@@ -285,6 +285,15 @@ def today_view(db: Session, settings: Settings, now: datetime) -> dict[str, Any]
         "can_start_session": status in ("pending", "revealed") and recorded is None,
         "can_report_barrier": status == "pending",
         "barrier_would_be_late": status == "pending" and not before_start,
+        # Every revealed slot is a session day (protocol §5), so reveals are the count.
+        "progress": {
+            "session_days": db.scalar(
+                select(func.count()).select_from(N1Reveal).where(N1Reveal.phase == phase)
+            ),
+            "planned_days": db.scalar(
+                select(func.count()).select_from(N1Day).where(N1Day.phase == phase)
+            ),
+        },
     }
 
 
