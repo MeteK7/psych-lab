@@ -4,7 +4,8 @@ from typing import Any, Literal, Self
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
-Mode = Literal["self_use", "usability", "dev"]
+# try: Try it (practice, never part of the experiment). dev: Test mode (phase 0).
+Mode = Literal["self_use", "usability", "try", "dev"]
 Condition = Literal[
     "action_bridge",
     "goal_restatement",
@@ -79,3 +80,4 @@ class SessionOut(BaseModel):
 class Health(BaseModel):
     status: Literal["ok"]
     database: Literal["ok"]
+    environment: Literal["development", "production"]

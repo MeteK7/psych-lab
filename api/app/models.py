@@ -21,7 +21,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
 
-MODES = ("self_use", "usability", "dev")
+# try: Try it (practice, never part of the experiment). dev: Test mode (phase 0).
+MODES = ("self_use", "usability", "try", "dev")
 CONDITIONS = (
     # n-of-1 phase 1: plan factor
     "action_bridge",

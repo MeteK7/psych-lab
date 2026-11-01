@@ -10,7 +10,7 @@ from sqlalchemy import Connection, Engine, create_engine, make_url
 from sqlalchemy.orm import Session
 
 from app.clock import get_now
-from app.config import Settings, get_settings
+from app.config import PRODUCTION_DATABASE, Settings, get_settings
 from app.db import get_db
 from app.main import create_app
 from app.manage import recreate_schema
@@ -33,6 +33,8 @@ def settings() -> Settings:
     test_db = make_url(settings.test_database_url).database
     if test_db == make_url(settings.database_url).database:
         pytest.exit("TEST_DATABASE_URL must point to a different database than DATABASE_URL.", 2)
+    if test_db == PRODUCTION_DATABASE:
+        pytest.exit(f"TEST_DATABASE_URL must never point to {PRODUCTION_DATABASE}.", 2)
     return settings
 
 

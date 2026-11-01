@@ -38,7 +38,7 @@ def completed_body(**overrides: Any) -> dict[str, Any]:
 def test_health(client: TestClient) -> None:
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "database": "ok"}
+    assert response.json() == {"status": "ok", "database": "ok", "environment": "development"}
 
 
 def test_put_creates_then_lists(client: TestClient) -> None:
