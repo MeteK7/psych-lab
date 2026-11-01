@@ -1,6 +1,6 @@
 # Research-led plan: a web platform of psychologically informed interactive experiences (revision 5.6)
 
-> **Status:** revision 5.1 approved 2026-10-29. Stage 1 is partly done (§2.3). The Stage 2 level-A prototype is built and checked (see `docs/runbook.md`). Revisions 5.2–5.6 record the decisions made during implementation (5.3: the study-log outcome, protocol and analysis scripts; 5.4: no content lock, slot reveal tool, the eligible-day-no-session outcome, an earlier phase-1 start; 5.5: folder restructure, study log without git; 5.6: all daily n-of-1 records in the app; protocol v1.3 approved 2026-10-31). The user performs all git actions. If a branch is needed, base it on `test-n552vx`, never `main`. No AI attribution anywhere in files, comments or docs.
+> **Status:** revision 5.1 approved 2026-10-29. Stage 1 is partly done (§2.3). The Stage 2 level-A prototype is built and checked (see `docs/runbook.md`). Revisions 5.2–5.7 record the decisions made during implementation (5.3: the study-log outcome, protocol and analysis scripts; 5.4: no content lock, slot reveal tool, the eligible-day-no-session outcome, an earlier phase-1 start; 5.5: folder restructure, study log without git; 5.6: all daily n-of-1 records in the app; protocol v1.3 approved 2026-10-31; 5.7: platform structure and plain on-screen wording, protocol v1.4 awaiting approval). The user performs all git actions. If a branch is needed, base it on `test-n552vx`, never `main`. No AI attribution anywhere in files, comments or docs.
 >
 > **Terminology:** descriptive and provisional ("the platform", "experiences"). There is no product name.
 >
@@ -109,7 +109,7 @@
 ### 4.2 n-of-1 design (your own use, level A/B)
 
 **Rules shared by both phases**
-- **All daily records are made in the app** (the **Today** page); nothing is edited by hand or run from a command line. Dates are **local (Europe/Istanbul)**.
+- **All daily records are made in the app** (the **My experiment** page); nothing is edited by hand or run from a command line. Dates are **local (Europe/Istanbul)**.
 - **Unit:** one session per *eligible day*. A day is eligible if it was **planned in advance** in the app (only future days can be planned) and no barrier was reported before its planned start. Ineligible days don't use up a schedule slot.
 - **Day statuses** (derived by the app): `session` · `ineligible` · `eligible_no_session`.
   - **"Eligible day, no session" is its own outcome category**: a feasibility measure that uses no slot, with its count reported per phase.
@@ -121,7 +121,7 @@
   - The analysis uses that link.
 - **Session timing:** the reveal time relative to the planned start is stored. **More than 15 minutes after the plan is recorded automatically as a late start** (deviation; sensitivity analysis excludes these days). The 120-minute window begins when the session ends; for an unfinished session, at its last saved step; for a slot not begun, at the reveal.
 - **Measurement rule** (identical in all conditions, and **not part of any experience**):
-  - After the session, the **"I'm starting to study now"** box appears at the top of Today. When studying begins, write one line about what you're starting and submit it.
+  - After the session, the **"Starting to learn?"** box appears at the top of My experiment. When studying begins, write one line about what you're starting and press **I'm starting now**.
   - The **server time** is the record.
   - The line is also appended to the topic-neutral study log `C:\Projects\new_project\study-log\<session date>.md` (plain folder, no git) as a readable mirror.
   - A start logged after midnight belongs to the evening session.
@@ -164,7 +164,7 @@
   - a null result can't distinguish "no effect" from "too small for 20–28 days"
 
 ### 4.3 Local usability testing: a documented procedure, not randomisation
-Each tester experiences **all conditions** in a fixed counterbalanced order (Latin square in the procedure document). The order is chosen through a developer condition selector in the app. Usability testing asks whether people *can use* the platform; it does not measure effects.
+Each tester experiences **all conditions** in a fixed counterbalanced order (Latin square in the procedure document). The order is followed with the **Try it** buttons on the area page (practice mode). Usability testing asks whether people *can use* the platform; it does not measure effects.
 
 ### 4.4 Stage boundaries
 | Stage | Answers | Never claims |
@@ -243,7 +243,7 @@ C:\Projects\new_project\                 project root (git set up by the user)
     api/  pyproject.toml (uv) · .python-version (3.13) · alembic.ini
           app/{main,config,db,models,schemas,security,manage,n1,clock}.py · app/routes/{health,sessions,n1}.py · participants (B)
           alembic/versions/{0001_create_sessions,0002_n1_daily_records,0003_session_last_saved_at}.py · tests/
-    web/  src/app/{api,flow,shared,pages/{today,start (Development),history}}
+    web/  src/app/{api,flow,shared,areas.ts,pages/{home,area,experiment,records,about}}
           src/app/experiences/{rating-step,action-bridge,goal-restatement,state-reset}
           src/content/{ratings.v1,action-bridge.v1,goal-restatement.v1,state-reset.v1,state-reset.v2}.json
           proxy.conf.json
@@ -260,9 +260,9 @@ All commands in §7 run from `C:\Projects\new_project\platform`.
 |---|---|---|
 | `GET /health` | A | Liveness and database connectivity |
 | `PUT /sessions/{id}` | A | Idempotent upsert of a session: mode, condition, content versions, step summaries, plan, ratings, status |
-| `GET /sessions` | A | History (filterable by participant) |
+| `GET /sessions` | A | My records (filterable by participant) |
 | `PATCH /sessions/{id}/follow-up` | A | End-of-day self-report |
-| `GET /n1/today` | A | Today page: plan, status, reveal, study-start box, tomorrow's plan (local dates) |
+| `GET /n1/today` | A | My experiment page: plan, status, reveal, study-start box, tomorrow's plan, progress (local dates) |
 | `PUT /n1/days/{date}` | A | Plan a future day's start time |
 | `POST /n1/barrier` | A | "I can't study today"; flagged late after the planned start |
 | `POST /n1/reveal` | A | Reveal today's slot (hash-checked, one per day, never twice); returns the same reveal if repeated |
@@ -372,7 +372,7 @@ The test database resets itself on each test run (migrate once; roll back a tran
 
 ## 10. Assumptions, risks, open questions, deferred decisions
 - **Assumptions:**
-  - Whatever you study, you remember to press "I'm starting to study now" on Today when you begin (§4.2).
+  - Whatever you study, you remember to press "I'm starting now" on My experiment when you begin (§4.2).
   - Testers attend in person.
   - Native PostgreSQL can be installed with admin rights.
 - **Risks:**
@@ -381,8 +381,8 @@ The test database resets itself on each test run (migrate once; roll back a tran
   - n-of-1 expectancy effects.
   - **A study-log note proves starting, not study quality or duration.**
   - The trace depends on following the rule. A missed note counts as a non-start unless the day log records an explaining deviation.
-  - **A forgotten study-start click counts as a non-start.** The box is shown at the top of Today after each session to reduce this.
-  - The study-start box sits in the same app as the sessions. It is identical in every condition, but returning to Today may act as a reminder for both conditions.
+  - **A forgotten study-start click counts as a non-start.** The box is shown at the top of My experiment after each session to reduce this.
+  - The study-start box sits in the same app as the sessions. It is identical in every condition, but returning to My experiment may act as a reminder for both conditions.
   - Accidental reset of n-of-1 data (mitigated by backup and confirmation).
   - The app connects as the `postgres` superuser, so a misconfigured URL could affect other databases on this server (mitigated: the test suite refuses identical dev and test databases).
   - Action Bridge's realistic effect (d ≈ .15 bias-adjusted) is too small for the n-of-1 to detect reliably.
@@ -483,6 +483,15 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | **Removed** | `analysis/next_slot.py`, `analysis/study_logs.py`, the day-log and reveal-log CSVs, and the note-creation-time outcome; the Development page no longer offers self-use mode | Superseded; prevents unlinked self-use sessions |
 | **Added** | Limitations: a forgotten study-start click counts as a non-start (box shown prominently after a session); the box sits in the same app as the sessions | User requirement |
 | **Security** | Database URLs are excluded from settings `repr`, so passwords can't appear in logs or test output | A test failure had printed the URL |
+
+### Revision 5.7 amendments (2026-10-31; protocol v1.4)
+| Type | Item | Why |
+|---|---|---|
+| **Added** | **Platform structure:** Home presents areas (Action and growth available; Cognitive shifts, Attention, Emotional regulation, Recovery after setbacks, Curiosity and exploration, Learning reinforcement planned) and an optional conversation guide as a planned cross-area band. The first feature is the topic "Getting started on learning" inside Action and growth. Areas are data (`web/src/app/areas.ts`), so research can reshape them | The first feature must not define the product's limits (user review) |
+| **Changed** | Navigation: Home · My experiment · My records, About in the footer. Development is replaced by **Try it** (practice) on the area page; old links redirect | The tabs were unclear to new users |
+| **Changed** | Plain on-screen wording: "exercise" for a session, "My experiment" for the n-of-1, no "study", no phase labels, on-screen names for the conditions. Content: `action-bridge` v2, `goal-restatement` v2 (parallel intros, no efficacy claims), `ratings` v2 | "Study" was ambiguous; internal names meant nothing to users |
+| **Changed** | State Reset v3: an intro listing the parts; the picture chosen and described in its own step and quoted back (never saved); a labelled preview and a 15 s practice round in both variants; dose unchanged. Picture invitation broadened, limited to today's learning in the experiment | Instructions must be understandable when they appear; no exercise starts unseen |
+| **Added** | `today_view.progress` (session days, planned days); the done screen no longer mentions the outcome window | Orientation for the user; the outcome stays unmentioned in exercises |
 
 ## References
 - ✔F: [Gollwitzer & Sheeran 2006 (open-access scan)](https://kops.uni-konstanz.de/entities/publication/2e749bfb-8533-437c-8203-7e788c910c5f) · [Sheeran, Listrom & Gollwitzer 2024 (author manuscript)](https://kops.uni-konstanz.de/handle/123456789/69905) · [Engelhard et al. 2011](https://www.ifemdr.fr/wp-content/uploads/2011/10/Engelhard-et-al-2011-Reducing-vividness-and-emotional-intensity-of-recurrent-flashforwards.pdf) · [Holmes et al. 2010, PLoS ONE](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0013706)

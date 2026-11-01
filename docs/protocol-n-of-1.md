@@ -1,6 +1,6 @@
 # n-of-1 protocol: phases 1 and 2
 
-Version 1.3 (2026-10-31), **approved 2026-10-31**. It supersedes v1.2, approved 2026-10-30. Implements plan §4.2. **Fixed before the first phase-1 day; later changes are recorded in §13 and never applied to days already run.**
+Version 1.4 (2026-10-31), **awaiting approval; must be approved before phase-1 day 1**. It supersedes v1.3, approved 2026-10-31. Implements plan §4.2. **Fixed before the first phase-1 day; later changes are recorded in §13 and never applied to days already run.**
 
 ## 1. Purpose and questions
 - **Phase 1 (plan factor):** does Action Bridge, compared with goal restatement, make it more likely that I start my planned study after the session, and sooner?
@@ -18,7 +18,7 @@ Version 1.3 (2026-10-31), **approved 2026-10-31**. It supersedes v1.2, approved 
 
 | Item | Where |
 |---|---|
-| The app, **Today** page (start the API and web app as in the runbook) | `http://localhost:4300` |
+| The app, **My experiment** page (start the API and web app as in the runbook) | `http://localhost:4300/experiment` |
 | Planned days, barriers, reveals, study starts | Database `app_dev`, tables `n1_days`, `n1_reveals`, `n1_study_starts`, written only by the app |
 | Sessions (linked to their reveal) | `app_dev`, table `sessions` |
 | Schedule (never opened directly) | `analysis/schedules/schedule-phase<N>.csv` (+ `.sha256`, `.meta.json`), read only by the server |
@@ -26,7 +26,18 @@ Version 1.3 (2026-10-31), **approved 2026-10-31**. It supersedes v1.2, approved 
 
 - **Dates are local**, Europe/Istanbul, never UTC, for every n-of-1 date and day boundary.
 - Paths are relative to `C:\Projects\new_project\platform` unless absolute.
-- **Phase 0 is a test phase** (walkthroughs and checks). Its sessions are development data and are never analysed.
+- **Phase 0 is a test phase** (walkthroughs and checks). Its sessions are development data and are never analysed. On screen it is called "Test mode".
+- **On-screen names** (internal names stay in code and these documents):
+
+  | Condition | On screen | Content versions |
+  |---|---|---|
+  | Action Bridge | Plan your first step | `action-bridge` v2, `ratings` v2 |
+  | Goal restatement | Write down your goal | `goal-restatement` v2, `ratings` v2 |
+  | State Reset + Action Bridge | Picture it, then follow the dot | `state-reset` v3, `action-bridge` v2, `ratings` v2 |
+  | Game only + Action Bridge | Follow the dot, then plan | `state-reset` v3, `action-bridge` v2, `ratings` v2 |
+
+  A session is called an "exercise" on screen; the self-experiment is "My experiment"; the word "study" isn't used on screen. The two phase-1 intros are parallel and make no efficacy claims.
+- **State Reset v3** (both variants alike): an intro listing the parts, a labelled still preview of the game, and a **15 s practice round** before the 10 s hold. Repeats of the practice round are allowed and recorded (`practice_runs`). The 8 × 24 s dose is unchanged. Image variant only: the picture is chosen and described in its own step (§9), then quoted back in every later step; the description is never saved.
 
 **Day status** (derived by the app; not entered by hand):
 
@@ -36,30 +47,30 @@ Version 1.3 (2026-10-31), **approved 2026-10-31**. It supersedes v1.2, approved 
 | `ineligible` | a barrier was reported **before** the planned start | no |
 | `eligible_no_session` | **its own outcome category, a feasibility measure.** A planned day that passed without a reveal, including late barriers. A revealed day is never in this category | no |
 
-## 4. Daily procedure (all on the Today page)
+## 4. Daily procedure (all on the My experiment page)
 1. **Plan tomorrow** (the evening before, or earlier): enter tomorrow's planned start time.
    - Only future days can be planned. A day not planned in advance isn't a study day.
-2. **If you can't study** (illness, travel, no time): use **"I can't study today"** with a reason.
+2. **If you can't study** (illness, travel, no time): open **"I can't learn today"**, enter a reason and press **"Mark today as a day off"**.
    - **Before the planned start**, this makes the day `ineligible`.
    - **After the planned start**, the barrier is recorded but flagged **late**. The page warns before you submit. The day then counts as `eligible_no_session`, not `ineligible`.
    - Not available once today's slot has been revealed.
-3. **At the planned start: "Start today's session."**
+3. **At the planned start: "Start today's exercise."**
    - The server checks the schedule hash and reveals the next unused slot.
    - The session opens with that condition **assigned and locked**.
-   - One slot per day, and never a slot twice. "Continue today's session" reopens the same slot without revealing a new one.
+   - One slot per day, and never a slot twice. "Continue today's exercise" reopens the same slot without revealing a new one.
    - The reveal time relative to the planned start is stored. **More than 15 minutes after the planned start is recorded automatically as a late start** (a deviation).
    - **From the reveal on, the day is a session day** and is analysed as assigned, even if the session is stopped, left unfinished or never begun (§5).
-4. **Run the session** (Begin session → complete it). The session is saved with a link to its reveal.
-5. **When you begin studying:** the **"I'm starting to study now"** box appears **at the top of Today** once the slot is revealed: after the session, or when it was stopped, left unfinished or never begun. Write one line about what you're starting and submit it.
+4. **Run the session** (on screen: the exercise; **Begin** → complete it). The session is saved with a link to its reveal.
+5. **When you begin studying:** the **"Starting to learn?"** box with the **"I'm starting now"** button appears **at the top of My experiment** once the slot is revealed: after the session, or when it was stopped, left unfinished or never begun. Write one line about what you're starting and submit it.
    - Once the study start is recorded, the session can no longer be begun.
    - The **server's time** is the record of the start.
    - The line is also appended to `study-log\<session date>.md`.
    - A start logged after midnight still belongs to the evening session it follows.
-6. **End of day:** add the follow-up in the app (History → Add follow-up).
+6. **End of day:** add the follow-up in the app (My records → Add follow-up). It is offered for experiment exercises only.
 7. **Rules:**
    - one session per day
    - **records only through the app**: never edit the database, study-log files or schedule files by hand
-   - the experiences never mention the study-start box, by design. The Today page is identical in every condition.
+   - the experiences never mention the study-start box or the outcome window, by design (the exercise's done screen no longer shows the window either). The My experiment page is identical in every condition.
 
 ## 5. Schedule and allocation
 - **Blocked pairs:** each consecutive pair of slots contains both conditions in random order. 28 slots per phase.
@@ -125,7 +136,7 @@ Flagged automatically where possible; otherwise noted in the follow-up note:
   - the rank-1 and rank-2 papers are ✔F (plan §2.3)
   - phase 2's schedule has been generated and its hash recorded in §11
   - the server's current phase is set to 2 (`N1_PHASE=2` in `.env`)
-- State Reset images are limited to today's study, **never** other memories; stop any time.
+- **State Reset picture:** a general invitation to bring to mind something the person feels stuck on or reluctant to start, with examples. **In the experiment, it must be about what is planned to learn today** (the screen says so). Everyday situations only, **never painful personal memories**; stop any time.
 
 ## 10. Data and export
 - All data stays on this computer, in `app_dev` and `C:\Projects\new_project\study-log`.
@@ -147,8 +158,8 @@ Flagged automatically where possible; otherwise noted in the follow-up note:
 ## 12. Limitations
 - **A recorded study start proves starting, not study quality or duration.**
 - For an unfinished session, the last saved step only approximates when the session was left. For a slot not begun, the window runs from the reveal, so its latency includes no session time.
-- **A forgotten study-start click counts as a non-start.** The box is shown at the top of Today after each session to reduce this, but the outcome depends on remembering to use it.
-- **The study-start box is in the same app as the sessions.** It is identical in every condition, but returning to Today after a session may act as a reminder to start, for both conditions alike.
+- **A forgotten study-start click counts as a non-start.** The box is shown at the top of My experiment after each session to reduce this, but the outcome depends on remembering to use it.
+- **The study-start box is in the same app as the sessions.** It is identical in every condition, but returning to My experiment after a session may act as a reminder to start, for both conditions alike.
 - The study start is self-reported in the sense that I choose when to click. The server records only the time of the click, not whether study actually began.
 - Unblinded: the session shows its condition, so expectancy effects can't be excluded. In phase 2, I also know whether I held the image.
 - n = 1, so results don't generalise. Possible carryover between days, time trends and practice effects; the slot plot checks for these.
@@ -163,3 +174,4 @@ Flagged automatically where possible; otherwise noted in the follow-up note:
 | 1.1 | 2026-10-30 | Slots are revealed only through `analysis/next_slot.py` (hash check, next slot only, reveal log, no repeat reveals, one per day); the analysis maps days to slots through the reveal log. `eligible_no_session` added as its own day status and feasibility outcome (uses no slot; count reported per phase). Phase 1 may start once the study log exists and this version is approved, without waiting for the rest of Stage 3 (deliberate deviation, §9). Phase 2 prerequisites are unchanged. No change to slot count or allocation. **Approved 2026-10-30** |
 | 1.2 | 2026-10-30 | **Folder layout:** the project root is `C:\Projects\new_project`; the platform moved to `platform\`, and the study log is the plain folder `C:\Projects\new_project\study-log` (no git). **Outcome:** the creation time of that day's note, within 120 min after session end; the commit source and the save-vs-commit sensitivity analysis are removed. **New rule and limitation:** notes are created only with `Add-Content` and only appended to (never edited, renamed, deleted or recreated). Note status per day is reported. The phase-1 schedule was not regenerated; its SHA-256 still matches §11. No change to slot count or allocation. **Approved 2026-10-30** |
 | 1.3 | 2026-10-31 | **All daily records move into the app** (Today page): planning, barriers, the slot reveal and the study start. No hand-edited CSVs, no `next_slot.py`, no `Add-Content`. **Outcome:** the server-recorded study start, within 120 min after session end; the study-log note is a server-written mirror. **Local time** (Europe/Istanbul) for all dates; a start after midnight belongs to the evening session. **Late start** (> 15 min after the planned start) recorded automatically. **Barrier** counts as `ineligible` only before the planned start; later it is flagged late and counts as `eligible_no_session`. Condition locked to the reveal. **Phase 0** test phase. New limitations: forgotten click = non-start; the box sits in the same app. **Completion status** (amended before approval): every session begun after a reveal is analysed as assigned, whether completed, aborted or unfinished; an unfinished session is timed from its last saved step; completion status is reported per day and by condition; excluding incomplete sessions is a sensitivity analysis only. This resolves the conflict between §5 and §8 in the first v1.3 draft. **As-assigned from the reveal** (final amendment before approval): every revealed slot is analysed as assigned, including one never begun (completion status "not begun", window from the reveal time); a revealed day is never `eligible_no_session`. The phase-1 schedule was not regenerated; its SHA-256 still matches §11. No change to slot count or allocation. **Approved 2026-10-31** |
+| 1.4 | 2026-10-31 | **Platform structure and plain on-screen wording** (no allocation change): pages Home, an area page, My experiment (was Today), My records (was History) and About; the Development page is replaced by "Try it" (practice) on the area page. On-screen names for the conditions; the word "study" and phase labels are no longer shown. New content versions: `action-bridge` v2, `goal-restatement` v2 (parallel intros without efficacy claims), `ratings` v2 ("Think of what you want to start next"), `state-reset` v3 (own picture step quoted back, never saved; labelled preview and a 15 s practice round in both variants; dose unchanged). §9 picture wording broadened, but limited to today's learning in the experiment. The done screen no longer mentions the outcome window. Follow-up offered for experiment exercises only. Phase 1 had not started (no planned days or reveals). The phase-1 schedule was not regenerated; its SHA-256 still matches §11 |

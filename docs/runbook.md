@@ -49,24 +49,30 @@ Open http://localhost:4300. The dev server proxies `/api` to the API, so the bro
 - `--reload-dir app` matters. Without it, the reloader also watches `api/.venv` and keeps restarting the API.
 - If a port is taken, check what owns it with `Get-NetTCPConnection -State Listen -LocalPort 4300,8100`.
 
-## Daily use (n-of-1): everything on the Today page
-Start the API and the web app (above), open http://localhost:4300, and use **Today**:
+## Pages
+- **Home** (`/`): the areas. Only **Action and growth** is available; the others are shown as planned.
+- **Area page** (`/areas/action-growth`): the experiences, each with **Try it** (practice, saved in `dev` mode and never part of the experiment).
+- **My experiment** (`/experiment`), **My records** (`/records`), **About** (`/about`, includes the local server status).
+- Old links `/dev` and `/history` redirect.
+
+## Daily use (n-of-1): everything on My experiment
+Start the API and the web app (above), open http://localhost:4300/experiment:
 1. **Plan tomorrow:** set the planned start time. Only future days can be planned.
-2. **I can't study today:** a reason is required. Before the planned start the day becomes `ineligible`; after it, the barrier is flagged late (the page warns).
-3. **Start today's session:** the server reveals today's slot and opens the session with that condition locked. **Begin session**, then complete it. **Continue today's session** reopens the same slot. From the reveal on, the day counts as assigned, even if the session is never begun.
-4. **I'm starting to study now:** shown at the top of Today once today's slot is revealed, also after a session that was stopped, left unfinished or never begun. One line about what you're starting. The server records the time and appends the line to `C:\Projects\new_project\study-log\<session date>.md`.
-5. **End of day:** **History** → **Add follow-up**.
+2. **I can't learn today → Mark today as a day off:** a reason is required. Before the planned start the day becomes `ineligible`; after it, the barrier is flagged late (the page warns).
+3. **Start today's exercise:** the server reveals today's slot and opens the exercise with that condition locked. **Begin**, then complete it. **Continue today's exercise** reopens the same slot. From the reveal on, the day counts as assigned, even if the session is never begun.
+4. **Starting to learn? → I'm starting now:** shown at the top of My experiment once today's slot is revealed, also after a session that was stopped, left unfinished or never begun. One line about what you're starting. The server records the time and appends the line to `C:\Projects\new_project\study-log\<session date>.md`.
+5. **End of day:** **My records** → **Add follow-up**.
 
 - Dates follow local time (Europe/Istanbul).
 - The current phase comes from `N1_PHASE` in `.env` (default 1).
 - No files are edited by hand.
 
-**Development page** (`/dev`): try any condition. Sessions are saved in `dev` mode and are never part of the study. Nothing is recorded until **Begin session**, so reloading never creates a session.
+**Practice:** **Try it** on the area page runs any experience in `dev` mode, never part of the experiment. Nothing is recorded until **Begin**, so reloading never creates a session.
 
-| Condition | Steps |
+| Condition (on screen) | Steps |
 |---|---|
-| Action Bridge / Goal restatement (phase 1) | unpleasantness rating → plan or goal → rating |
-| State Reset / Game only, then Action Bridge (phase 2) | rating → about 4.5 min game (8 × 24 s, with a 10 s hold first and 10 s pauses between sets; content v2) → Action Bridge → rating |
+| Action Bridge ("Plan your first step") / Goal restatement ("Write down your goal"), phase 1 | unpleasantness rating → plan or goal → rating |
+| State Reset ("Picture it, then follow the dot") / Game only ("Follow the dot, then plan"), phase 2 | rating → intro → (image variant: picture step and picture ratings) → labelled preview and 15 s practice round → 10 s hold → 8 × 24 s rounds with 10 s pauses (content v3) → Action Bridge → rating |
 
 - The game accepts pointer or arrow keys.
 - With reduced motion turned on in Windows, the dot moves at half speed.
@@ -120,9 +126,9 @@ Run this on an empty schema (for example, straight after a reset).
 |---|---|---|
 | GET | `/api/health` | Liveness and database check |
 | PUT | `/api/sessions/{id}` | Idempotent upsert. The client generates the UUID. Finished sessions accept only identical retries (409 otherwise) |
-| GET | `/api/sessions?mode=&limit=` | History, newest first |
+| GET | `/api/sessions?mode=&limit=` | My records, newest first |
 | PATCH | `/api/sessions/{id}/follow-up` | End-of-day self-report |
-| GET | `/api/n1/today` | Today page state (local dates) |
+| GET | `/api/n1/today` | My experiment page state, with progress (local dates) |
 | PUT | `/api/n1/days/{date}` | Plan a future day |
 | POST | `/api/n1/barrier` | Report a barrier (flagged late after the planned start) |
 | POST | `/api/n1/reveal` | Reveal today's slot (same reveal if repeated) |
