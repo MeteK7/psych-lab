@@ -34,7 +34,7 @@ describe('conditions', () => {
   });
 
   it('offers only level-A modes', () => {
-    expect(MODES.map((m) => m.value)).toEqual(['self_use', 'dev']);
+    expect(MODES.map((m) => m.value)).toEqual(['self_use', 'try', 'dev']);
     expect(isLevelAMode('usability')).toBe(false);
   });
 });

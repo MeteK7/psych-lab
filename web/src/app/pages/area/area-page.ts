@@ -74,8 +74,8 @@ export class AreaPage {
     effect(() => title.setTitle(this.area()?.title ?? 'Area not found'));
   }
 
-  /** Practice exercises run in dev mode and never touch the experiment. */
+  /** Practice exercises run in try mode and never touch the experiment. */
   protected tryIt(condition: Condition): void {
-    void this.router.navigate(['/session'], { queryParams: { mode: 'dev', condition } });
+    void this.router.navigate(['/session'], { queryParams: { mode: 'try', condition } });
   }
 }

@@ -40,7 +40,7 @@ describe('RecordsPage', () => {
     const fixture = TestBed.createComponent(RecordsPage);
     backend.expectOne('/api/sessions').flush([
       { ...session, followup: { self_reported_minutes: 40, recorded_at: '2026-10-29T21:00:00Z' } },
-      { ...session, id: 'p', mode: 'dev', condition: 'game_only+action_bridge', status: 'aborted', n1_reveal_id: null },
+      { ...session, id: 'p', mode: 'try', condition: 'game_only+action_bridge', status: 'aborted', n1_reveal_id: null },
       { ...session, id: 't', mode: 'dev', status: 'in_progress' },
     ]);
     await fixture.whenStable();
@@ -58,7 +58,7 @@ describe('RecordsPage', () => {
 
   it('offers a follow-up only for experiment exercises', async () => {
     const fixture = TestBed.createComponent(RecordsPage);
-    backend.expectOne('/api/sessions').flush([{ ...session, mode: 'dev', n1_reveal_id: null }]);
+    backend.expectOne('/api/sessions').flush([{ ...session, mode: 'try', n1_reveal_id: null }]);
     await fixture.whenStable();
     expect((fixture.nativeElement as HTMLElement).querySelector('button[aria-expanded]')).toBeNull();
   });

@@ -101,7 +101,8 @@ export const STEP_NAMES: Record<StepId, string> = {
 // Usability mode belongs to level B and is not offered yet.
 export const MODES: { value: Mode; label: string }[] = [
   { value: 'self_use', label: 'Experiment' },
-  { value: 'dev', label: 'Practice' },
+  { value: 'try', label: 'Practice' },
+  { value: 'dev', label: 'Test' },
 ];
 
 export function conditionInfo(value: Condition | string | null | undefined): ConditionInfo | undefined {

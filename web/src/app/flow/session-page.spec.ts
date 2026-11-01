@@ -85,7 +85,7 @@ describe('SessionPage', () => {
   });
 
   it('runs a goal-restatement exercise and saves after every step', async () => {
-    const { fixture, backend } = await begin({ mode: 'dev', condition: 'goal_restatement' });
+    const { fixture, backend } = await begin({ mode: 'try', condition: 'goal_restatement' });
     expect((await flushSave(fixture, backend)).status).toBe('in_progress');
 
     expect(root(fixture).textContent).toContain('Step 1 of 3: How starting feels');
@@ -139,7 +139,7 @@ describe('SessionPage', () => {
   });
 
   it('saves a stopped session as aborted', async () => {
-    const { fixture, backend } = await begin({ mode: 'dev', condition: 'action_bridge' });
+    const { fixture, backend } = await begin({ mode: 'try', condition: 'action_bridge' });
     await flushSave(fixture, backend);
     vi.spyOn(window, 'confirm').mockReturnValue(true);
 
@@ -152,7 +152,7 @@ describe('SessionPage', () => {
   });
 
   it('shows a retry option when the final save fails', async () => {
-    const { fixture, backend } = await begin({ mode: 'dev', condition: 'action_bridge' });
+    const { fixture, backend } = await begin({ mode: 'try', condition: 'action_bridge' });
     await flushSave(fixture, backend);
     vi.spyOn(window, 'confirm').mockReturnValue(true);
     click(fixture, 'Stop the exercise');

@@ -99,7 +99,7 @@ export class RecordsPage {
     return conditionInfo(session.condition)?.label ?? session.condition;
   }
 
-  /** Experiment rows link to a reveal; a linked dev session is a test-mode run (phase 0). */
+  /** Experiment rows link to a reveal; a linked dev session is a Test mode run (phase 0). */
   protected type(session: SessionOut): string {
     if (session.mode === 'self_use') return 'Experiment';
     return session.n1_reveal_id ? 'Test' : 'Practice';

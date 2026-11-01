@@ -1,6 +1,7 @@
 // Mirrors api/app/schemas.py by hand (generated types are deferred, plan §6.1).
 
-export type Mode = 'self_use' | 'usability' | 'dev';
+// try: Try it (practice, never part of the experiment). dev: Test mode (phase 0).
+export type Mode = 'self_use' | 'usability' | 'try' | 'dev';
 export type Condition =
   | 'action_bridge'
   | 'goal_restatement'
@@ -56,6 +57,7 @@ export interface SessionOut {
 export interface Health {
   status: 'ok';
   database: 'ok';
+  environment: 'development' | 'production';
 }
 
 // Mirrors api/app/n1.py today_view().

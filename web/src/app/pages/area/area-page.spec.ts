@@ -38,7 +38,7 @@ describe('AreaPage', () => {
     await fixture.whenStable();
     (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.experiences button')!.click();
     expect(navigate).toHaveBeenCalledWith(['/session'], {
-      queryParams: { mode: 'dev', condition: 'action_bridge' },
+      queryParams: { mode: 'try', condition: 'action_bridge' },
     });
   });
 
