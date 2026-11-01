@@ -85,3 +85,24 @@ Rank-1 claims from plan §2.3. These block Stage 2.
 - **Engelhard et al. (2010)**, DOI 10.1016/j.brat.2010.01.003. Subscription; use a library account or request it from the authors.
 
 Put the files in a local folder outside the repository and tell me where they are; I will read them and update this log.
+
+## Memory reconsolidation (future candidate, plan §3.2): sources to verify
+**Status:** nothing here has been checked; every entry is **◐** until it is read. Titles and details come from memory. Each is confirmed (exact title, DOI, sample, outcome) when obtained, and anything that can't be found is removed, not cited.
+
+| Source | Why it matters | Status |
+|---|---|---|
+| Nader, Schafe & LeDoux (2000), *Nature*: fear memories and protein synthesis after retrieval (rats) | Animal foundation of reconsolidation | ◐, to obtain |
+| Kindt, Soeter & Vervliet (2009), *Nature Neuroscience*: propranolol after reactivation in humans | Background only; drug paradigms are out of scope | ◐, to obtain |
+| Schiller et al. (2010), *Nature*: extinction within the reconsolidation window in humans | Main behavioural "reactivation, then extinction" result | ◐, to obtain |
+| Elsey, Van Ast & Kindt (2018), *Psychological Bulletin*: a framework and critical review of human reconsolidation | Boundary conditions and the state of the evidence | ◐, to obtain |
+| James et al. (2015), *Psychological Science*: reminder followed by Tetris after an analogue trauma film | Visuospatial-interference paradigm described as reconsolidation-based | ◐, to obtain |
+| Chalkia et al. (2020), *Cortex*: registered replication of the reactivation-extinction effect | Reported no lasting attenuation; tests robustness | ◐, to obtain |
+
+**Questions the review must answer** (plan §3.2, gate 1):
+- Which behavioural, non-clinical paradigm, if any, has replicated effects?
+- Do the effects apply to everyday autobiographical memories, not just lab-conditioned fear or film analogues?
+- What are the boundary conditions: prediction error at recall, timing, memory age and strength?
+- What harms or worsening have been reported?
+- Which effects can be attributed to reconsolidation rather than other processes, e.g. general visuospatial interference with imagery, attention or mood?
+
+**Note:** Tetris-after-reminder and reactivation-extinction are **research paradigms**. A paradigm described as reconsolidation-based is not, on that basis alone, a proven reconsolidation intervention, and none of these studies tested anything like a web exercise.

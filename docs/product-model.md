@@ -1,6 +1,6 @@
 # Product model: three usage models, released one at a time
 
-> **Status:** decisions made 2026-11-01 (plan revision 6.0). This file replaces `usage-models-assessment.md`. The analysis behind it is in that file's git history.
+> **Status:** decisions made 2026-11-01 (plan revision 6.0; science explanations and the memory-update candidate added in 6.1). This file replaces `usage-models-assessment.md`. The analysis behind it is in that file's git history.
 >
 > Not legal advice: legal and regulatory points are questions for a qualified adviser in the relevant jurisdiction.
 
@@ -27,6 +27,9 @@
 - Try it is never locked, including during an experiment (§4).
 - An account is offered at most once, at the end of a visit, and is never required.
 - "Therapy memory" is called **My history**. It is a personal history the user controls, not a clinical record.
+- **Every experience has a science explanation** (plan §3.1).
+  - It is a short, plain-language "Why this exercise?" section, available in every model, including Try it, without restriction.
+  - It separates evidence for the **method** from evidence for **our exercise**, and never implies that a cited study validated the exercise itself.
 
 **Research participation** (the n-of-1 now, consented studies later) is governed by its protocol, not by a usage model, and never changes what Try it offers.
 
@@ -43,8 +46,15 @@
 | **M2: Personal** | Optional accounts (sign-in method decided in the M2 plan); owned records; My history (view, export, delete); saving a finished guest visit to an account; rule-based suggestions; the operator's n-of-1 data assigned to an owner | M1 live | §3, M2 criteria pass |
 | **M3: Organisational** | Organisations and roles; grants (scope, purpose, expiry, revocation); an append-only access log; professional configuration of existing experiences within declared ranges | M2 live | §3, M3 criteria pass, **and** the expert-testing stage and release gate (§5) are complete |
 | **H: Public hosting** (per model) | Server, domain, TLS, production authentication, privacy notice, data-protection review | That model is live locally | Its own gate, decided when hosting exists |
+| **S: Science explanations** | "Why this exercise?" for the four current experiences, plus the content test (plan §3.1) | E; your content review; State Reset cites only full-text-checked sources until Houben 2020 is checked | Plan §3.1 checks pass; experiment exercises unchanged; Try it unrestricted. **Built on `test`, awaiting your content review** |
 
 **Research track:** Stages 1–5 and the n-of-1 are unchanged (plan §9).
+
+**Future research candidate, not an approved feature:** **Memory update**, based on memory reconsolidation (plan §3.2).
+- It passes five gates before any build: evidence review, design feasibility, safety and ethics review, usability, and a feasibility study.
+- It needs return visits, so it depends on M2.
+- Its area is **provisionally Emotional regulation**, re-decided after the evidence review.
+- It is not State Reset, which uses working-memory taxation.
 
 ## 3. Acceptance criteria and isolation tests
 
@@ -53,6 +63,7 @@
 - Its isolation tests pass.
 - It's merged to `main` and passes the production smoke check (runbook).
 - It leaves Try it unchanged.
+- Every experience it offers has a reviewed science explanation that meets plan §3.1: ✔F or ✔A sources only, and the method kept separate from our exercise.
 
 ### M1: Try it
 - **No account needed:** every experience can be completed with no account and no history. There is no sign-up prompt during a visit.
@@ -156,3 +167,4 @@ Decided later, in the plan for the relevant phase:
 - booth economics
 - AI companion and recommendation algorithms (still deferred, plan §11)
 - everything in M3 beyond the gate above
+- the area for the memory-update candidate (provisionally Emotional regulation), and whether a separate Memory area is ever justified: after its evidence review (plan §3.2)

@@ -1,6 +1,6 @@
-# Research-led plan: a web platform of psychologically informed interactive experiences (revision 6.0)
+# Research-led plan: a web platform of psychologically informed interactive experiences (revision 6.1)
 
-> **Status:** revision 5.1 approved 2026-10-29. Stage 1 is partly done (§2.3). The Stage 2 level-A prototype is built and checked (see `docs/runbook.md`). Revisions 5.2–5.7 record the decisions made during implementation (5.3: the study-log outcome, protocol and analysis scripts; 5.4: no content lock, slot reveal tool, the eligible-day-no-session outcome, an earlier phase-1 start; 5.5: folder restructure, study log without git; 5.6: all daily n-of-1 records in the app; protocol v1.3 approved 2026-10-31; 5.7: platform structure and plain on-screen wording; 6.0: three usage models released one at a time (`docs/product-model.md`), separate development and production environments, the exposure rule; protocol v1.4 approved 2026-11-01). The user performs all git actions. If a branch is needed, base it on `test`, never `main`. No AI attribution anywhere in files, comments or docs.
+> **Status:** revision 5.1 approved 2026-10-29. Stage 1 is partly done (§2.3). The Stage 2 level-A prototype is built and checked (see `docs/runbook.md`). Revisions 5.2–5.7 record the decisions made during implementation (5.3: the study-log outcome, protocol and analysis scripts; 5.4: no content lock, slot reveal tool, the eligible-day-no-session outcome, an earlier phase-1 start; 5.5: folder restructure, study log without git; 5.6: all daily n-of-1 records in the app; protocol v1.3 approved 2026-10-31; 5.7: platform structure and plain on-screen wording; 6.0: three usage models released one at a time (`docs/product-model.md`), separate development and production environments, the exposure rule; protocol v1.4 approved 2026-11-01; 6.1: a science explanation for every experience, and memory reconsolidation as a future research candidate). The user performs all git actions. If a branch is needed, base it on `test`, never `main`. No AI attribution anywhere in files, comments or docs.
 >
 > **Terminology:** descriptive and provisional ("the platform", "experiences"). There is no product name.
 >
@@ -37,6 +37,9 @@
   - **Central principle:** a complete, meaningful experience needs no commitment to return.
   - Each model is **released on its own** once its acceptance criteria and isolation tests pass. Organisational use also needs supervised expert testing and a legal, regulatory, security and data-protection release gate.
   - A booth is a deployment profile of the same web app.
+- **Scientific transparency** (revision 6.1): every experience includes a short, plain-language explanation of the method it uses, why, and what research supports it (§3.1).
+  - It separates **evidence for the method** from **evidence for our exercise**. No cited study is presented as validating our exercise itself.
+  - It is always available in Try it, and never interrupts a running step.
 - **Stack:** Angular + TypeScript, Python + FastAPI, PostgreSQL, built as a lean modular monolith. **This phase runs on your Windows computer only**, in two environments: development (`test`) and production (`main`, which runs the n-of-1).
 
 ## 2. Problem analysis and evidence review
@@ -70,6 +73,7 @@
 | Generic visual search / attention-bias modification | Lab only | Weak (◐) | None for concentration; far transfer ≈ 0 (✔A) | — | Not justified as an active intervention |
 | Distraction (as an emotion-regulation strategy) | — | d+ = .27 (Webb 2012 ✔A) | — | — | Any game may help through **distraction alone**. A control must separate this |
 | Reappraisal | — | d+ = .36 (✔A) | — | — | Can backfire when the problem is controllable (Troy 2013 ◐ press release) |
+| **Memory reconsolidation** (future candidate, §3.2; **not** State Reset) | Animal work: a recalled memory can become changeable again for a limited time (Nader 2000 ◐). Human behavioural findings (reactivation followed by extinction) are mixed. A registered replication found no lasting effect (◐), and boundary conditions are debated: prediction error at recall, memory age and strength (◐) | Lab paradigms: reminder followed by a visuospatial task (Tetris) after an analogue trauma film (◐). **These are research paradigms.** Whether their effects come from reconsolidation, rather than other interference or attention processes, is not established | Not shown for everyday memories outside the lab (◐) | Outcomes are measured days later; durability is unknown (◐) | **Not applicable now.** It is not about starting learning; it is a candidate for a future area (§3.2). All marks ◐ until the evidence review |
 
 **Specificity warning:** in one of two lab experiments, a verbal quiz game *increased* trauma-film flashbacks (d = .62 vs no task); in the other it did not differ from no task. Tetris reduced flashbacks in both (Holmes 2010 ✔F, text only). Task type matters, and some tasks may make things worse.
 
@@ -83,6 +87,8 @@
 | 2 | Webb 2012 (distraction d+ = .27) | Why the game-only control is needed | Before n-of-1 phase 2 starts | Open |
 | 3 | 2025 self-report vs logs | Outcome design (the trace is primary, self-report secondary) | Before Stage 4 | Open |
 | 3 | Fodor 2020 | Interpretation Shift, which is conditional | Before any Interpretation Shift build | Open |
+| 3 | Houben 2020 (also rank 1 above) | The published science explanation for State Reset (§3.1) | Before that explanation is published | Open; until then the explanation cites Engelhard 2011 only, as "one lab study" |
+| 3 | Reconsolidation sources (`evidence-verification.md`, "Memory reconsolidation") | Whether the memory-update candidate (§3.2) goes any further | Before any design work on it | Open (all ◐) |
 | 4 | Lally 2010 · Troy 2013 · Milkman 2021 · Avery 2017 · Sinha & Kapur 2021 · attributional retraining | Background only; no decision rests on them | During Stages 2–4 | Open |
 
 **Deviation:** Stage 2 went ahead with two rank-1 papers still unread (Houben 2020, Engelhard 2010), on the user's go-ahead. State Reset's mechanism currently rests on Engelhard 2011 (✔F) plus the Houben abstract (✔A). Both papers must be ✔F before n-of-1 phase 2 starts.
@@ -98,6 +104,99 @@
 | **Interpretation Shift** | CBM-I (lab and anxiety) | Learning-setback scenarios change interpretation and lead to starting | **Defer the software (B, conditional).** Draft the scenarios and have them reviewed in Stage 1; build only if the review passes. Content-heavy, and has a risk of invalidating people |
 | **Small Achievable Challenge** | Domain-specific mastery | In-domain success leads to attempting the harder task | **Defer (C).** Needs domain content |
 | **Neutral visual search** | — | — | **Remove.** It overlaps with State Reset |
+| **Memory update** (working title; reconsolidation-based) | Memory reconsolidation (animal evidence; human behavioural evidence mixed, ◐) | A guided reminder, a wait, then an updating or interference task might make an everyday unpleasant memory less upsetting days later | **Future research candidate (C), not an approved feature.** Not adopted, not designed. Gated (§3.2). **Never for traumatic memories**; no drugs; not a therapy |
+
+### 3.1 Science explanation standard (every experience)
+Every experience carries a **science explanation** in its own versioned content file, e.g. `content/science/<experience>.v1.json`, separate from the experience content so that experiment `content_versions` don't change. It's built in product phase **S** (§9).
+
+**Five short parts** (about 120–200 words in total):
+1. **What you do:** one sentence.
+2. **The method:** named and explained in plain words, e.g. "planning *when* and *how* you'll start (implementation intentions)".
+3. **What research says about the method:** the wording is fixed by the evidence mark.
+   - ✔F (full text checked): "Research found…" or "A lab experiment found…", naming who took part and how, e.g. "in lab experiments with volunteers". The word "study" isn't used on screen, so explanations say "research" or "experiment".
+   - ✔A (abstract checked): "Research suggests…".
+   - ◐: **can't be used**.
+4. **About this exercise:** a required statement separating the method from our implementation.
+   - For example: "This exercise follows that method, but this version hasn't been tested itself. The studies above tested the method in their own form, not this app."
+   - It also states what differs from the studied form (setting, dose, population).
+5. **Limits and sources:**
+   - effect size in plain words ("small", "measured only right afterwards"), and what is unknown
+   - author, year, title and link, for ✔F and ✔A sources only
+
+**Honesty rules:**
+- **Citations attach to the method, never to the exercise.**
+  - Never: "proven", "based on studies showing it works", "clinically tested", or any phrasing that implies a cited study validated this exercise.
+  - The plan's claim levels apply: no *demonstrated product outcome* exists yet.
+- **Experimental experiences say so,** e.g. State Reset: "The idea has some lab support, but it hasn't been shown to help people start."
+- **Comparison exercises say what they are:** goal restatement is the comparison used to test whether the extra planning step adds anything; game only is the same game without the picture.
+- **The section is named "Why this exercise?"**, not "Why this works". The exercises haven't been shown to work.
+
+**Presentation:**
+- **Preview screen** (before Begin): a native expandable section (`<details>`), closed by default, accessible by keyboard and screen reader.
+- **Done screen:** the same section.
+- **Area page card:** a link to the preview screen.
+- **Never inside a running step,** and no pop-ups.
+- **Always available in Try it,** with no restriction.
+
+**The experiment:** explanations aren't shown inside My experiment exercises during an active phase.
+- The approved protocol fixes what the assigned exercises show, and a rationale on one condition only would add an expectancy confound (§4.2).
+- This changes nothing in the protocol and nothing in Try it.
+
+**Checks** (added in phase S):
+- every experience has an explanation
+- every "research found" sentence cites at least one ✔F or ✔A source, and none cites a ◐ source
+- the wording matches the mark
+- part 4 is present
+- no forbidden claim words
+- Stage 3 content review: accuracy against each cited source, and readability
+
+### 3.2 Memory reconsolidation: future research candidate
+**Status:** a research-backed **candidate**, not an approved feature and not a validated product intervention. Nothing is designed or built.
+
+**State Reset is not reconsolidation.** State Reset uses **working-memory taxation**:
+- **What it does:** an image held **during** a demanding task.
+- **What it measures:** vividness and emotionality **straight after**.
+
+Its description, the n-of-1 protocol and its data stay as they are. The two approaches never share a label, a description or a data field.
+
+**What reconsolidation proposes:**
+- Recalling a consolidated memory may, under certain conditions, make it changeable again for a limited time, and new information or interference in that window may update it.
+- Human behavioural paradigms include reactivation followed by extinction, and a reminder followed by a visuospatial task (Tetris) after an analogue trauma film.
+- **These are research paradigms, not proven reconsolidation interventions:**
+  - Lasting effects of reactivation followed by extinction haven't replicated reliably.
+  - In Tetris-after-reminder studies, other explanations are open, such as general visuospatial interference with intrusive imagery, or attention and mood effects.
+  - Most results come from lab-conditioned fear or film analogues, not everyday autobiographical memories.
+  - Outcomes are intrusion counts or fear responses measured days later.
+- **Drug paradigms** (e.g. propranolol) are background only: they are medical and out of scope.
+
+**Gates** (in order; any "no" stops it):
+1. **Evidence review.** The sources in `evidence-verification.md` reach ✔F, and a written review answers:
+   - Is there a behavioural, non-clinical paradigm with replicated effects?
+   - Does it apply to everyday autobiographical memories?
+   - What are the boundary conditions: prediction error, timing, memory age?
+   - What harms have been reported?
+   - Which effects are attributable to reconsolidation rather than other processes?
+2. **Design feasibility.**
+   - It needs a reminder that creates a prediction error, a timed wait, and a task, without supervision.
+   - Outcomes come days later, so it needs return visits. **It depends on the Personal model (M2)** and can't work as a single Try it visit.
+3. **Safety and ethics review:**
+   - exclusion of trauma and crisis
+   - distress handling, stop and signposting
+   - independent review before any testing with people
+4. **Usability:** comprehension and tolerability.
+5. **Feasibility study** under its own protocol (n-of-1 or pilot).
+
+It becomes an offered experience only after gate 5. Until then the Home page shows it as "planned" at most, with no claims.
+
+**Area (provisional until gate 1 is complete): Emotional regulation**, with a topic such as "Memories that still bother you".
+- **Why not the other areas:**
+  - **Action and growth:** about moving from intention to action.
+  - **Learning reinforcement:** this candidate targets a memory's emotional charge. A learning-oriented "retrieve and update" idea would be a separate candidate there.
+  - **Recovery after setbacks:** too narrow, and focused on returning to chosen goals.
+  - **Cognitive shifts:** reinterpretation is a different mechanism, and mixing them would blur the distinction.
+- **Caveat:** classic emotion-regulation strategies act on emotions in the moment, while this candidate acts on a stored memory. The topic text will say so.
+- **A separate Memory area isn't justified now:** there is one unvalidated candidate. Revisit if two or more memory-focused experiences pass their gates.
+- **The placement is re-decided after the evidence review.**
 
 ## 4. Experimental design (provisional until Stage 3 review)
 
@@ -373,6 +472,13 @@ The test database resets itself on each test run (migrate once; roll back a tran
 - **Organisational:** no cross-organisation reads, no reads without a grant, revocation takes effect straight away, and every professional read is logged.
 - **Route coverage:** a test fails if a new API route has no isolation classification.
 
+**Science explanation checks** (revision 6.1; level B, built in phase S): a content test checks every experience against the §3.1 standard:
+- an explanation exists
+- only ✔F and ✔A sources are cited
+- the strength wording matches the mark
+- the "About this exercise" statement is present
+- no claim words imply that a cited study validated the exercise itself
+
 **Ethics and data-protection baselines.** These are *design baselines, not legal advice*.
 - **Research ethics:** the principles shared by the Belmont Report and the Declaration of Helsinki:
   - respect for persons and informed consent
@@ -410,6 +516,9 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | **M2: Personal** | Optional accounts, owned records, My history, saving a guest visit, rule-based suggestions | M1 live | M2 criteria, including the cross-account isolation tests, pass |
 | **M3: Organisational** | Organisations, roles, grants, access log, professional configuration | M2 live | Cross-organisation isolation tests pass; supervised expert testing (in person, ≥ 3 organisations, ≥ 5 qualified professionals, no real clients) is complete; release gate passed (legal and regulatory review of the intended use for each organisation type, including the medical-device question; security review; data-protection impact assessment) |
 | **H: Public hosting** (per model) | Server, domain, TLS, production authentication, privacy notice, data-protection review | That model is live locally | Its own gate |
+| **S: Science explanations** (revision 6.1) | A "Why this exercise?" explanation for the four current experiences (§3.1), plus its content test. From then on, every new experience ships with one | E; your content review. Until Houben 2020 is ✔F, State Reset's explanation cites only ✔F sources (Engelhard 2011, Holmes 2010) | The §3.1 checks pass; the content review finds every explanation accurate against its sources; experiment exercises unchanged; Try it unrestricted. **Status (2026-11-01):** built on `test` (`content/science/*.v1.json`, `app-science-section`, content test); awaiting your content review before release |
+
+**Future research candidates** (not in any phase): **Memory update** (memory reconsolidation, §3.2). It passes gates 1–5 in §3.2 before any build, and it depends on M2 for return visits. Its area (provisionally Emotional regulation) is re-decided after the evidence review.
 
 ## 10. Assumptions, risks, open questions, deferred decisions
 - **Assumptions:**
@@ -431,10 +540,14 @@ The test database resets itself on each test run (migrate once; roll back a tran
   - **A release to production during a phase** could change the experiment. Releases are logged, and changes that affect the experiment need a protocol amendment.
   - **Organisational use may change the product's intended use** (the medical-device question). Its release gate covers this; nothing is offered to clinics before it.
   - The 8 × 24 s State Reset (about 4.5 min plus ratings) may feel long. Usability testing checks tolerability before phase 2.
+  - **Science explanations could overclaim,** or read as if a cited study validated our exercise (mitigated by the §3.1 standard, its content test and the content review). They could also raise expectations, which is why they aren't shown inside experiment exercises.
+  - **Memory reconsolidation** carries several risks: popular accounts overstate it, and human replications have failed. Reactivating unpleasant memories may cause distress. These are mitigated by the §3.2 gates: no design before the evidence review, never trauma, and no drugs.
 - **Open questions:**
   - Does vividness of anticipatory imagery predict avoidance for you?
   - Is 8 × 24 s tolerable in daily use, or does it need shortening (which would mean a new content version)?
   - Should the image-only control be built in Stage 3 or wait until the effect study?
+  - Does any behavioural reconsolidation paradigm hold up for everyday memories, outside the lab (§3.2, gate 1)?
+  - Is a separate Memory area ever justified? Revisit if two or more memory-focused experiences pass their gates.
 - **Deferred decisions:** product name · hosting, sign-in method and anonymous-count consent mode (decided in the M2 and H plans) · formal studies · Interpretation Shift build (conditional) · Small Achievable Challenge · new experience families · recommendation algorithms · generative AI · the 2 × 2 factorial.
 
 ## 11. Departures from the original vision (confirm or overrule each)
@@ -453,6 +566,7 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | "Therapy memory" | **"My history"**: a personal history the user controls (M2) | It isn't a clinical record. The name sets expectations and may affect how the data is classified |
 | Clinical deployment | **Organisational model (M3)** only after supervised expert testing and a legal, regulatory, security and data-protection gate | Professional use for clients may make the software a regulated medical device |
 | Experience booths | **A Try it deployment profile**; a staffed pop-up before any hardware | Demand and operating costs are unknown |
+| Memory reconsolidation experience | **Future research candidate** (§3.2), gated by an evidence review; provisionally in Emotional regulation; never trauma; no drugs; **not** a reinterpretation of State Reset | Human evidence is mixed, and the lab paradigms aren't proven reconsolidation interventions |
 
 ## 12. Change log (from revision 4)
 | Type | Item | Why |
@@ -552,7 +666,18 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | **Changed** | §1 product concept; §6.1 accounts row (now M2/M3); §8 isolation-test policy; §10 risks and deferred decisions; §11 three new departures | Follow from the product decisions |
 | **Retained** | **Research track unchanged:** Stages 1–5, both n-of-1 phases, allocation and the phase-1 schedule (SHA-256 unchanged), primary analysis, evidence marks, safety boundaries | Product decision 4 |
 
+### Revision 6.1 amendments (2026-11-01)
+| Type | Item | Why |
+|---|---|---|
+| **Added** | **Science explanation for every experience** (§1, §3.1): five parts, wording tied to evidence marks, a required "About this exercise" statement separating evidence for the method from evidence for our exercise, a "Why this exercise?" section on the preview and done screens, content checks (§8), product phase **S** (§9) | User requirement: users should understand what they do, why, and what supports it |
+| **Added** | **Memory reconsolidation as a future research candidate** ("Memory update", §2.2, §3, §3.2): five gates (evidence review, design feasibility, safety and ethics review, usability, feasibility study); depends on M2; area provisionally Emotional regulation, re-decided after the evidence review; sources to verify (§2.3, `evidence-verification.md`) | User requirement. Treated as a candidate, not a validated intervention; reminder-plus-Tetris and similar designs are research paradigms |
+| **Clarified** | State Reset is working-memory taxation, **not** reconsolidation (§3.2) | Keeps the two mechanisms scientifically distinct |
+| **Added** | Risks and open questions (§10); a departure row (§11) | Follow from the above |
+| **Retained** | The n-of-1 protocol (v1.4, approved) and State Reset's description are unchanged. Explanations aren't added to experiment exercises; Try it access is unchanged and unrestricted | User instruction |
+| **Built** | Phase S: four explanations (`web/src/content/science/*.v1.json`, sources with evidence marks in `sources.v1.json`); the "Why this exercise?" section on the practice preview and done screens, opened from a link on each area-page card; a content test enforcing §3.1; not shown in experiment or Test mode exercises | User go-ahead, 2026-11-01. Release waits for your content review |
+| **Corrected** | §3.1 wording rule: "Research found…" (✔F) and "Research suggests…" (✔A), because "study" isn't used on screen. The Webb 2012 reference link pointed to the authors' 2013 reply; it now points to the 2012 meta-analysis (PMID 22582737) | Accuracy |
+
 ## References
 - ✔F: [Gollwitzer & Sheeran 2006 (open-access scan)](https://kops.uni-konstanz.de/entities/publication/2e749bfb-8533-437c-8203-7e788c910c5f) · [Sheeran, Listrom & Gollwitzer 2024 (author manuscript)](https://kops.uni-konstanz.de/handle/123456789/69905) · [Engelhard et al. 2011](https://www.ifemdr.fr/wp-content/uploads/2011/10/Engelhard-et-al-2011-Reducing-vividness-and-emotional-intensity-of-recurrent-flashforwards.pdf) · [Holmes et al. 2010, PLoS ONE](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0013706)
-- ✔A: [Steel 2007](https://prism.ucalgary.ca/handle/1880/47914) · [Sirois & Pychyl 2013](https://eprints.whiterose.ac.uk/91793/) · [Fodor 2020](https://pubmed.ncbi.nlm.nih.gov/32445689/) · [Sicouri 2024](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10933640/) · [Lazowski & Hulleman 2016](https://www.scinapse.io/papers/2273590095) · [Houben et al. 2020 (abstract)](https://cris.maastrichtuniversity.nl/en/publications/the-effects-of-eye-movements-and-alternative-dual-tasks-on-the-vi) · [Iyadurai 2018](https://ora.ox.ac.uk/objects/uuid:111fe953-8e08-465a-b490-a596b9f0e7e0) · [Webb 2012](https://pubmed.ncbi.nlm.nih.gov/23607434/) · [Sala & Gobet](https://livrepository.liverpool.ac.uk/3043493/) · [Albulescu 2022](https://doaj.org/article/c6f37b6ba159469296b2cb968b65505f) · [Hagger 2016](https://research.tilburguniversity.edu/en/publications/a-multi-lab-pre-registered-replication-of-the-ego-depletion-effec/) · [Self-report vs logs 2025](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12445496/) · [Credibility/expectancy questionnaire](https://pubmed.ncbi.nlm.nih.gov/11132119/) · [Bridges 2020 timing](https://peerj.com/articles/9414.pdf) · [MIT/OpenAI chatbot RCT](https://arxiv.org/pdf/2503.17473)
+- ✔A: [Steel 2007](https://prism.ucalgary.ca/handle/1880/47914) · [Sirois & Pychyl 2013](https://eprints.whiterose.ac.uk/91793/) · [Fodor 2020](https://pubmed.ncbi.nlm.nih.gov/32445689/) · [Sicouri 2024](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10933640/) · [Lazowski & Hulleman 2016](https://www.scinapse.io/papers/2273590095) · [Houben et al. 2020 (abstract)](https://cris.maastrichtuniversity.nl/en/publications/the-effects-of-eye-movements-and-alternative-dual-tasks-on-the-vi) · [Iyadurai 2018](https://ora.ox.ac.uk/objects/uuid:111fe953-8e08-465a-b490-a596b9f0e7e0) · [Webb, Miles & Sheeran 2012](https://pubmed.ncbi.nlm.nih.gov/22582737/) · [Sala & Gobet](https://livrepository.liverpool.ac.uk/3043493/) · [Albulescu 2022](https://doaj.org/article/c6f37b6ba159469296b2cb968b65505f) · [Hagger 2016](https://research.tilburguniversity.edu/en/publications/a-multi-lab-pre-registered-replication-of-the-ego-depletion-effec/) · [Self-report vs logs 2025](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12445496/) · [Credibility/expectancy questionnaire](https://pubmed.ncbi.nlm.nih.gov/11132119/) · [Bridges 2020 timing](https://peerj.com/articles/9414.pdf) · [MIT/OpenAI chatbot RCT](https://arxiv.org/pdf/2503.17473)
 - ◐: [Sinha & Kapur 2021, primary DOI (not yet checked; the publisher page was inaccessible)](https://doi.org/10.3102/00346543211019105) · [Houben 2020 full text, DOI (not yet accessed)](https://doi.org/10.1177/2043808720907744) · [Engelhard et al. 2010, DOI (subscription; not yet accessed)](https://doi.org/10.1016/j.brat.2010.01.003) · [WM-taxation null result](https://www.frontiersin.org/journals/psychiatry/articles/10.3389/fpsyt.2015.00016/pdf) · [Skorka-Brown Tetris cravings](https://pearl.plymouth.ac.uk/handle/10026.1/2925) · [Skorka-Brown thesis](https://pearl.plymouth.ac.uk/psy-theses/124) · [Lally 2010 summary](https://www.thebehavioralscientist.com/articles/how-long-to-form-a-habit) · [Milkman 2021 summary](https://www.scimex.org/newsfeed/which-programs-give-gym-goers-the-biggest-boost) · [Troy 2013 press](https://www.psychologicalscience.org/news/releases/keeping-emotions-in-check-may-not-always-benefit-psychological-health.html) · [Randomisation tests for single-case designs](https://rd.springer.com/content/pdf/10.3758/s13428-017-0885-7.pdf) · [Pilot sample-size rules](https://arxiv.org/pdf/2105.05483) · [Avery 2017](https://eprints.whiterose.ac.uk/113663/)
