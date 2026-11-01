@@ -1,6 +1,6 @@
 # n-of-1 protocol: phases 1 and 2
 
-Version 1.4 (2026-10-31), **awaiting approval; must be approved before phase-1 day 1**. It supersedes v1.3, approved 2026-10-31. Implements plan §4.2. **Fixed before the first phase-1 day; later changes are recorded in §13 and never applied to days already run.**
+Version 1.4 (2026-10-31, amended 2026-11-01), **approved 2026-11-01**. It supersedes v1.3, approved 2026-10-31. Implements plan §4.2. **Fixed before the first phase-1 day; later changes are recorded in §13 and never applied to days already run.**
 
 ## 1. Purpose and questions
 - **Phase 1 (plan factor):** does Action Bridge, compared with goal restatement, make it more likely that I start my planned study after the session, and sooner?
@@ -16,17 +16,20 @@ Version 1.4 (2026-10-31), **awaiting approval; must be approved before phase-1 d
 ## 3. Materials and records
 **All daily records are made in the app.** No files are edited by hand and no commands are run.
 
+**The experiment runs only in production:** the `main` build in `C:\Projects\new_project\platform-prod`, with its own database `app_prod` (runbook, Environments). Development (`test-n552vx`, `app_dev`) runs Test mode only, and the server refuses settings that would let it touch production's database, schedules or study log.
+
 | Item | Where |
 |---|---|
-| The app, **My experiment** page (start the API and web app as in the runbook) | `http://localhost:4300/experiment` |
-| Planned days, barriers, reveals, study starts | Database `app_dev`, tables `n1_days`, `n1_reveals`, `n1_study_starts`, written only by the app |
-| Sessions (linked to their reveal) | `app_dev`, table `sessions` |
+| The app, **My experiment** page (start production as in the runbook) | `http://localhost:4300/experiment` |
+| Planned days, barriers, reveals, study starts | Database `app_prod`, tables `n1_days`, `n1_reveals`, `n1_study_starts`, written only by the app |
+| Sessions (linked to their reveal), and Try it runs (`try` mode) | `app_prod`, table `sessions` |
 | Schedule (never opened directly) | `analysis/schedules/schedule-phase<N>.csv` (+ `.sha256`, `.meta.json`), read only by the server |
 | Study log: readable mirror of each study start | `C:\Projects\new_project\study-log\YYYY-MM-DD.md`, appended to by the server only |
 
 - **Dates are local**, Europe/Istanbul, never UTC, for every n-of-1 date and day boundary.
-- Paths are relative to `C:\Projects\new_project\platform` unless absolute.
-- **Phase 0 is a test phase** (walkthroughs and checks). Its sessions are development data and are never analysed. On screen it is called "Test mode".
+- Paths are relative to the production folder `C:\Projects\new_project\platform-prod` unless absolute.
+- **Phase 0 is a test phase** (walkthroughs and checks). It runs only in development, and its sessions (`dev` mode) are never analysed. On screen it is called "Test mode".
+- **Try it stays fully available during the experiment** (no lock). Try it runs are stored in `try` mode and handled by the exposure rule (§7).
 - **On-screen names** (internal names stay in code and these documents):
 
   | Condition | On screen | Content versions |
@@ -109,6 +112,22 @@ Version 1.4 (2026-10-31), **awaiting approval; must be approved before phase-1 d
   - excluding late starts (> 15 min)
   - excluding all flagged days (deviations, §8)
   - completed sessions only (excluding aborted, unfinished and not begun). Excluding incomplete sessions is allowed **only** here, never in the primary analysis.
+  - excluding **contaminated** days, and excluding days with **any additional exposure** (below)
+- **Additional exposure (Try it during the experiment).**
+  - **What counts:** any exercise without a reveal (Try it) that starts in a session day's **exposure window**. The window runs from local midnight of the session date until the outcome window closes (window start + 120 min). It counts whatever the exercise's status, aborted included.
+  - **Each session day is classified:**
+    - **contaminated**: such an exercise contains the active component that the assigned condition lacks. Phase 1: any exercise with Action Bridge ("Plan your first step", "Picture it, then follow the dot", "Follow the dot, then plan") on a Goal restatement day. Phase 2: "Picture it, then follow the dot" on a Game-only day.
+    - **extra exposure**: any other additional exercise
+    - **clean**: none
+  - **Primary analysis unchanged:** every day stays in it, as assigned.
+  - **Reporting:**
+    - exposure counts **by condition**, to show whether exposure is one-sided
+    - the two sensitivity analyses above; a day left out takes its pair with it (complete pairs only)
+  - **Interpretation:**
+    - If contaminated days are few and spread evenly, the primary result stands, with the counts reported.
+    - If they cluster in one condition, the comparison is biased towards no difference, and the result is reported as such.
+    - Contamination never makes a "no difference" result stronger evidence.
+  - There is no participant instruction and no software restriction; Try it is part of everyday use.
 - **Reporting:** report the estimate and its p-value together, and interpret both against the expectation in §1. Phases are analysed separately and **never compared with each other**.
 
 ## 8. Deviations
@@ -121,12 +140,15 @@ Flagged automatically where possible; otherwise noted in the follow-up note:
 - opening the schedule file or otherwise looking ahead
 - any hand edit of records
 - technical failure
+- **a production release during a phase:** logged with its date. A release must not change any experiment exercise, a content version in use, the n-of-1 logic or the analysis. A change that would is a protocol amendment (§13) and applies only to later days
+- *Not a deviation:* Try it runs. They are recorded and classified by the exposure rule (§7)
 
 ## 9. Stopping and pausing
 - **Pause:** for illness, travel, or anything that makes study inappropriate, simply don't plan the day, or report a barrier. No slot is used.
 - **Stop the phase** if sessions repeatedly feel distressing, or burden is ≥ 8 on three consecutive session days. Record the reason.
 - **Phase 1 may start** as soon as both of these hold:
   - the folder `C:\Projects\new_project\study-log` exists (no git)
+  - the production environment is set up (`platform-prod` on `main`, database `app_prod`; runbook)
   - this protocol version is approved
 
   It does **not** wait for the rest of Stage 3 (usability documents, Playwright/axe, the non-visual variant). This is a **deliberate deviation** from the plan's roadmap, where Stage 4 followed Stage 3. The phase-1 conditions are already built and checked, and Stage 3 items don't affect them.
@@ -135,19 +157,20 @@ Flagged automatically where possible; otherwise noted in the follow-up note:
   - usability testing found the 8 × 24 s State Reset tolerable
   - the rank-1 and rank-2 papers are ✔F (plan §2.3)
   - phase 2's schedule has been generated and its hash recorded in §11
-  - the server's current phase is set to 2 (`N1_PHASE=2` in `.env`)
+  - production's current phase is set to 2 (`N1_PHASE=2` in `platform-prod\.env`)
 - **State Reset picture:** a general invitation to bring to mind something the person feels stuck on or reluctant to start, with examples. **In the experiment, it must be about what is planned to learn today** (the screen says so). Everyday situations only, **never painful personal memories**; stop any time.
 
 ## 10. Data and export
-- All data stays on this computer, in `app_dev` and `C:\Projects\new_project\study-log`.
-- **Export and analysis** are done on request by the operator's assistant. For reference (run from `platform\`):
+- All experiment data stays on this computer, in `app_prod` and `C:\Projects\new_project\study-log`.
+- **Backups:** production is backed up before every release (`app.manage backup`, runbook).
+- **Export and analysis** are done on request by the operator's assistant. For reference (run from `platform-prod\`):
   ```powershell
   cd api; uv run python -m app.manage export-n1 --phase 1 --out ../data/exports/phase1.json
   ```
   ```powershell
   cd analysis; uv run python n_of_1.py --phase 1 --export ../data/exports/phase1.json --out ../data/exports/phase1-days.csv
   ```
-- The export holds no free text: no study-start lines and no barrier reasons.
+- The export holds no free text: no study-start lines, barrier reasons, goals or plans. It includes the other exercises (Try it) started during the phase's days: id, mode, condition, status and times only (§7).
 
 ## 11. Schedule record
 | Phase | Generated (UTC) | SHA-256 of `schedule-phase<N>.csv` |
@@ -165,6 +188,7 @@ Flagged automatically where possible; otherwise noted in the follow-up note:
 - n = 1, so results don't generalise. Possible carryover between days, time trends and practice effects; the slot plot checks for these.
 - 20–28 days cannot detect small effects. A null result doesn't mean "no effect".
 - Observation itself may change behaviour.
+- **Residual contamination:** Try it stays available, and only exercises in the app are recorded. Exposure outside the window (e.g. a plan made the evening before) and plans made outside the app aren't captured; they are part of the possible carryover above.
 
 ## 13. Changes to this protocol
 | Version | Date | Change |
@@ -174,4 +198,4 @@ Flagged automatically where possible; otherwise noted in the follow-up note:
 | 1.1 | 2026-10-30 | Slots are revealed only through `analysis/next_slot.py` (hash check, next slot only, reveal log, no repeat reveals, one per day); the analysis maps days to slots through the reveal log. `eligible_no_session` added as its own day status and feasibility outcome (uses no slot; count reported per phase). Phase 1 may start once the study log exists and this version is approved, without waiting for the rest of Stage 3 (deliberate deviation, §9). Phase 2 prerequisites are unchanged. No change to slot count or allocation. **Approved 2026-10-30** |
 | 1.2 | 2026-10-30 | **Folder layout:** the project root is `C:\Projects\new_project`; the platform moved to `platform\`, and the study log is the plain folder `C:\Projects\new_project\study-log` (no git). **Outcome:** the creation time of that day's note, within 120 min after session end; the commit source and the save-vs-commit sensitivity analysis are removed. **New rule and limitation:** notes are created only with `Add-Content` and only appended to (never edited, renamed, deleted or recreated). Note status per day is reported. The phase-1 schedule was not regenerated; its SHA-256 still matches §11. No change to slot count or allocation. **Approved 2026-10-30** |
 | 1.3 | 2026-10-31 | **All daily records move into the app** (Today page): planning, barriers, the slot reveal and the study start. No hand-edited CSVs, no `next_slot.py`, no `Add-Content`. **Outcome:** the server-recorded study start, within 120 min after session end; the study-log note is a server-written mirror. **Local time** (Europe/Istanbul) for all dates; a start after midnight belongs to the evening session. **Late start** (> 15 min after the planned start) recorded automatically. **Barrier** counts as `ineligible` only before the planned start; later it is flagged late and counts as `eligible_no_session`. Condition locked to the reveal. **Phase 0** test phase. New limitations: forgotten click = non-start; the box sits in the same app. **Completion status** (amended before approval): every session begun after a reveal is analysed as assigned, whether completed, aborted or unfinished; an unfinished session is timed from its last saved step; completion status is reported per day and by condition; excluding incomplete sessions is a sensitivity analysis only. This resolves the conflict between §5 and §8 in the first v1.3 draft. **As-assigned from the reveal** (final amendment before approval): every revealed slot is analysed as assigned, including one never begun (completion status "not begun", window from the reveal time); a revealed day is never `eligible_no_session`. The phase-1 schedule was not regenerated; its SHA-256 still matches §11. No change to slot count or allocation. **Approved 2026-10-31** |
-| 1.4 | 2026-10-31 | **Platform structure and plain on-screen wording** (no allocation change): pages Home, an area page, My experiment (was Today), My records (was History) and About; the Development page is replaced by "Try it" (practice) on the area page. On-screen names for the conditions; the word "study" and phase labels are no longer shown. New content versions: `action-bridge` v2, `goal-restatement` v2 (parallel intros without efficacy claims), `ratings` v2 ("Think of what you want to start next"), `state-reset` v3 (own picture step quoted back, never saved; labelled preview and a 15 s practice round in both variants; dose unchanged). §9 picture wording broadened, but limited to today's learning in the experiment. The done screen no longer mentions the outcome window. Follow-up offered for experiment exercises only. Phase 1 had not started (no planned days or reveals). The phase-1 schedule was not regenerated; its SHA-256 still matches §11 |
+| 1.4 | 2026-10-31 | **Platform structure and plain on-screen wording** (no allocation change): pages Home, an area page, My experiment (was Today), My records (was History) and About; the Development page is replaced by "Try it" (practice) on the area page. On-screen names for the conditions; the word "study" and phase labels are no longer shown. New content versions: `action-bridge` v2, `goal-restatement` v2 (parallel intros without efficacy claims), `ratings` v2 ("Think of what you want to start next"), `state-reset` v3 (own picture step quoted back, never saved; labelled preview and a 15 s practice round in both variants; dose unchanged). §9 picture wording broadened, but limited to today's learning in the experiment. The done screen no longer mentions the outcome window. Follow-up offered for experiment exercises only. **Amended 2026-11-01, before approval:** (a) **production environment**: the experiment runs only on the `main` build with its own database `app_prod`; development (`test-n552vx`, `app_dev`) runs Test mode only, enforced by the server; releases during a phase are logged and must not change the experiment (§3, §8, §9, §10). (b) **Additional exposure**: Try it stays unrestricted; its runs are stored in a separate `try` mode, exported without free text, and each session day is classified clean, extra exposure or contaminated; two sensitivity analyses and counts by condition are added; the primary analysis is unchanged (§3, §7, §8, §10, §12). Phase 1 had not started (no planned days or reveals). The phase-1 schedule was not regenerated; its SHA-256 still matches §11. **Approved 2026-11-01** |

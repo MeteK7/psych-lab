@@ -1,6 +1,6 @@
-# Research-led plan: a web platform of psychologically informed interactive experiences (revision 5.6)
+# Research-led plan: a web platform of psychologically informed interactive experiences (revision 6.0)
 
-> **Status:** revision 5.1 approved 2026-10-29. Stage 1 is partly done (§2.3). The Stage 2 level-A prototype is built and checked (see `docs/runbook.md`). Revisions 5.2–5.7 record the decisions made during implementation (5.3: the study-log outcome, protocol and analysis scripts; 5.4: no content lock, slot reveal tool, the eligible-day-no-session outcome, an earlier phase-1 start; 5.5: folder restructure, study log without git; 5.6: all daily n-of-1 records in the app; protocol v1.3 approved 2026-10-31; 5.7: platform structure and plain on-screen wording, protocol v1.4 awaiting approval). The user performs all git actions. If a branch is needed, base it on `test-n552vx`, never `main`. No AI attribution anywhere in files, comments or docs.
+> **Status:** revision 5.1 approved 2026-10-29. Stage 1 is partly done (§2.3). The Stage 2 level-A prototype is built and checked (see `docs/runbook.md`). Revisions 5.2–5.7 record the decisions made during implementation (5.3: the study-log outcome, protocol and analysis scripts; 5.4: no content lock, slot reveal tool, the eligible-day-no-session outcome, an earlier phase-1 start; 5.5: folder restructure, study log without git; 5.6: all daily n-of-1 records in the app; protocol v1.3 approved 2026-10-31; 5.7: platform structure and plain on-screen wording; 6.0: three usage models released one at a time (`docs/product-model.md`), separate development and production environments, the exposure rule; protocol v1.4 approved 2026-11-01). The user performs all git actions. If a branch is needed, base it on `test-n552vx`, never `main`. No AI attribution anywhere in files, comments or docs.
 >
 > **Terminology:** descriptive and provisional ("the platform", "experiences"). There is no product name.
 >
@@ -28,7 +28,16 @@
 
   Each experience targets a named process. The vision stays ambitious; the first build stays small.
 - **First area to investigate:** difficulty starting self-chosen learning, beginning with your own study. The topic varies (AI/ML is one of them), so nothing in the design is tied to one subject. It was chosen because it is observable and personally relevant. It does not define the product, and one person's experience is not evidence about others.
-- **Stack:** Angular + TypeScript, Python + FastAPI, PostgreSQL, built as a lean modular monolith. **This phase runs on your Windows computer only.**
+- **Product model** (revision 6.0, details in `docs/product-model.md`):
+  - An adaptive psychological experience platform; **not a therapy service**.
+  - Three usage models share one experience library and runtime:
+    - **Try it** (independent, no account; first-class)
+    - **Personal** (optional account and My history)
+    - **Organisational** (professionals, with consent, permissions and an access log)
+  - **Central principle:** a complete, meaningful experience needs no commitment to return.
+  - Each model is **released on its own** once its acceptance criteria and isolation tests pass. Organisational use also needs supervised expert testing and a legal, regulatory, security and data-protection release gate.
+  - A booth is a deployment profile of the same web app.
+- **Stack:** Angular + TypeScript, Python + FastAPI, PostgreSQL, built as a lean modular monolith. **This phase runs on your Windows computer only**, in two environments: development (`test-n552vx`) and production (`main`, which runs the n-of-1).
 
 ## 2. Problem analysis and evidence review
 
@@ -110,6 +119,11 @@
 
 **Rules shared by both phases**
 - **All daily records are made in the app** (the **My experiment** page); nothing is edited by hand or run from a command line. Dates are **local (Europe/Istanbul)**.
+- **The experiment runs only in production:** the `main` build with its own database `app_prod`. Development (`test-n552vx`, `app_dev`) runs Test mode only, enforced by the server. Releases during a phase are logged and must not change the experiment.
+- **Try it stays unrestricted during the experiment** (no practice lock).
+  - **Recorded:** runs are stored in `try` mode and exported without free text.
+  - **Classified:** each session day is clean, extra exposure or **contaminated** (the other condition's active component was used between local midnight and the end of the outcome window).
+  - **Analysed:** the primary analysis is unchanged. It adds two sensitivity analyses and exposure counts by condition (protocol §7).
 - **Unit:** one session per *eligible day*. A day is eligible if it was **planned in advance** in the app (only future days can be planned) and no barrier was reported before its planned start. Ineligible days don't use up a schedule slot.
 - **Day statuses** (derived by the app): `session` · `ineligible` · `eligible_no_session`.
   - **"Eligible day, no session" is its own outcome category**: a feasibility measure that uses no slot, with its count reported per phase.
@@ -230,26 +244,31 @@ Each tester experiences **all conditions** in a fixed counterbalanced order (Lat
 | Allocation | A: a `condition` field set by the selector or schedule · B: a hashed n-of-1 schedule file · C: a concealed allocation engine | Randomisation in the local phase happens **offline** |
 | Exports | A: none (local database) · B: documented `psql \copy` commands · C: pseudonymised export tooling | No export code yet |
 | Analysis | B: n-of-1 randomisation-test script; usability summary · C: mixed models and analysis plans for trials | — |
-| Accounts and authentication | C | Local single machine. To be designed only if deployment is decided |
+| Accounts and authentication | M2 / M3 (`product-model.md`) | Optional personal accounts (M2), then organisation roles and grants (M3). Not built yet. Each starts with its own plan |
+| **Environments** (`APP_ENV`) | A | Development on `test-n552vx` (`app_dev`, `app_test`, Test mode only) and production on `main` (`app_prod`, `app_test_main`, the n-of-1). The server refuses to start if one environment's settings point at the other's database, schedules or study log. Tests refuse `app_prod`; `reset-db` refuses production |
+| Production serves the built web app (FastAPI, falling back to `index.html`) | A | One process, no dev server or reload in the environment that runs the experiment; the tested build is what runs |
+| Session mode `try` for Try it, separate from `dev` (Test mode) | A | The exposure rule needs Try it runs to be identifiable; earlier Try it rows were migrated (`0004`) |
 | Separate test database `app_test` | A | Keeps tests away from your n-of-1 data. Costs nothing on a native install |
 | Database user: the `postgres` superuser (user decision, 2026-10-29) | A | Simplest local setup. **Trade-off:** the app and tests can reach every database on this server. Tests refuse to run when both URLs point to the same database. Revisit (dedicated role) before any deployment |
-| Ports: web **4300**, API **8100** | A | 4200 and 8000 are used by other local projects on this machine |
+| Ports: production **4300** (web and API in one process); development web **4310**, API **8110** | A | 4200 and 8000 are used by other local projects on this machine. My experiment's address stays http://localhost:4300 |
 
 ### 6.2 Repository layout
 ```
 C:\Projects\new_project\                 project root (git set up by the user)
-  study-log\                             plain folder: daily notes YYYY-MM-DD.md only (no git)
-  platform\
+  study-log\                             plain folder: daily notes YYYY-MM-DD.md only (no git); written by production only
+  platform-prod\                         production: git worktree of main (own .env, app_prod)
+  platform\                              development: branch test-n552vx
     api/  pyproject.toml (uv) · .python-version (3.13) · alembic.ini
           app/{main,config,db,models,schemas,security,manage,n1,clock}.py · app/routes/{health,sessions,n1}.py · participants (B)
-          alembic/versions/{0001_create_sessions,0002_n1_daily_records,0003_session_last_saved_at}.py · tests/
+          alembic/versions/{0001_create_sessions,0002_n1_daily_records,0003_session_last_saved_at,0004_session_mode_try}.py · tests/
     web/  src/app/{api,flow,shared,areas.ts,pages/{home,area,experiment,records,about}}
           src/app/experiences/{rating-step,action-bridge,goal-restatement,state-reset}
           src/content/{ratings.v1,action-bridge.v1,goal-restatement.v1,state-reset.v1,state-reset.v2}.json
           proxy.conf.json
     analysis/  pyproject.toml (uv) · make_schedule.py · n_of_1.py (reads the export-n1 JSON) · tests/ · schedules/schedule-phase<N>.{csv,sha256,meta.json}
     data/exports/  phase<N>.json, per-day tables   (git-ignored)
-    docs/  plan.md · evidence-verification.md · runbook.md · protocol-n-of-1.md · usability-procedure.md (B) · consent-usability.md (B)
+    data/schedules-dev/, data/study-log-dev/   development's Test mode only (git-ignored)
+    docs/  plan.md · product-model.md · evidence-verification.md · runbook.md · protocol-n-of-1.md · usability-procedure.md (B) · consent-usability.md (B)
     scripts/  check.ps1
     .env · .env.example · .gitignore (.env, data/) · .gitattributes
 ```
@@ -258,7 +277,7 @@ All commands in §7 run from `C:\Projects\new_project\platform`.
 ### 6.3 API (`/api`)
 | Endpoint | Level | Purpose |
 |---|---|---|
-| `GET /health` | A | Liveness and database connectivity |
+| `GET /health` | A | Liveness, database connectivity and environment (shown as a Development badge in the development build) |
 | `PUT /sessions/{id}` | A | Idempotent upsert of a session: mode, condition, content versions, step summaries, plan, ratings, status |
 | `GET /sessions` | A | My records (filterable by participant) |
 | `PATCH /sessions/{id}/follow-up` | A | End-of-day self-report |
@@ -274,7 +293,7 @@ All commands in §7 run from `C:\Projects\new_project\platform`.
 ### 6.4 Data model
 | Table / column | Level | Key fields |
 |---|---|---|
-| `sessions` | A | `id` uuid (client-generated) · `mode` (self_use, usability, dev) · `condition` · `content_versions` jsonb · `steps` jsonb (step, content id/version, started/ended, result) · `plan` jsonb · `ratings` jsonb · `followup` jsonb · `status` · timestamps |
+| `sessions` | A | `id` uuid (client-generated) · `mode` (self_use, usability, try = Try it, dev = Test mode) · `condition` · `content_versions` jsonb · `steps` jsonb (step, content id/version, started/ended, result) · `plan` jsonb · `ratings` jsonb · `followup` jsonb · `status` · timestamps |
 | `sessions.n1_reveal_id` (FK, unique, nullable) | A | Links an n-of-1 session to its reveal; condition and mode must match |
 | `sessions.last_saved_at` | A | Server time of the last save while the session ran; starts the outcome window for an unfinished session |
 | `n1_days` | A | (`phase`, `date`) · `planned_start` · `planned_at` · `barrier` · `barrier_at` · `barrier_late` |
@@ -298,9 +317,11 @@ All commands in §7 run from `C:\Projects\new_project\platform`.
 ```sql
 CREATE DATABASE app_dev;
 CREATE DATABASE app_test;
+CREATE DATABASE app_prod;
+CREATE DATABASE app_test_main;
 ```
 - Set `listen_addresses = 'localhost'` and keep `scram-sha-256` authentication in `pg_hba.conf`.
-- Copy `.env.example` to `.env` and set `DATABASE_URL` and `TEST_DATABASE_URL` (`postgresql+psycopg://postgres:…@localhost:5432/app_dev` and `…/app_test`). Percent-encode special characters in the password.
+- Each environment folder has its own `.env`, copied from the matching block of `.env.example`: development uses `app_dev` and `app_test`, production uses `app_prod` and `app_test_main`. Percent-encode special characters in the password.
 - `.env` is git-ignored. `.env.example` contains placeholders only.
 - To check that the *saved* file works, use the one-line command in `docs/runbook.md`.
 
@@ -312,21 +333,23 @@ cd api; uv sync; uv run alembic upgrade head
 cd web; npm ci
 ```
 
-**Start (two terminals; PostgreSQL already runs as a service):**
+**Two environments** (full steps, one-time setup and the release procedure in `docs/runbook.md`):
+- **Production** (`platform-prod`, `main`): `npm run build` once per release, then `cd api; uv run fastapi run app/main.py --host 127.0.0.1 --port 4300`. Open `http://localhost:4300`.
+- **Development** (`platform`, `test-n552vx`), two terminals:
 ```bash
-cd api; uv run fastapi dev app/main.py --host 127.0.0.1 --port 8100 --reload-dir app
+cd api; uv run fastapi dev app/main.py --host 127.0.0.1 --port 8110 --reload-dir app
 ```
 ```bash
 cd web; npm start
 ```
-Then open `http://localhost:4300`. The Angular proxy forwards `/api`, so everything is on one origin and no CORS setup is needed. `--reload-dir app` stops the reloader from watching `api/.venv`, which otherwise restarts the API constantly.
+Then open `http://localhost:4310`. The Angular proxy forwards `/api`, so everything is on one origin and no CORS setup is needed. `--reload-dir app` stops the reloader from watching `api/.venv`, which otherwise restarts the API constantly.
 
 **Test:** runs ruff, pytest against `app_test`, `ng test`, `ng build`, and (B) Playwright with axe.
 ```bash
 powershell -File scripts/check.ps1
 ```
 
-**Reset the dev database:** drops and recreates the `public` schema, then runs `alembic upgrade head`. **This destroys n-of-1 data**, so it asks for confirmation and first writes a `pg_dump` backup to `data/backups/`.
+**Reset the development database:** drops and recreates the `public` schema, then runs `alembic upgrade head`. It asks for confirmation and first writes a `pg_dump` backup to `data/backups/`. **Refused in production**, which holds the n-of-1 data (back it up with `app.manage backup`).
 ```bash
 cd api; uv run python -m app.manage reset-db
 ```
@@ -343,6 +366,12 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | Local security | API bound to `127.0.0.1`; `TrustedHostMiddleware` (localhost only, against DNS rebinding); writes require `Content-Type: application/json` + an `X-Client` header + an allowed `Origin` (blocks drive-by writes from websites) | — | Production authentication, CSRF tokens, TLS |
 | Privacy | Self-use data stays local; goal text is optional | Testers: pseudonymous code, hypothetical goals, no health questions beyond "made it worse", free text deleted after the report, all tester data deleted within 30 days | Lawful basis, DPIA and retention policy before formal research |
 | Accessibility | Keyboard path for every interaction; `prefers-reduced-motion` | WCAG 2.2 AA check; NVDA screen-reader pass; a **non-visual State Reset variant** (an auditory or counting dual task, which also taxes working memory, ◐) | Full audit |
+
+**Isolation tests** (revision 6.0):
+- **Before release:** every model passes its own isolation tests before it goes live (`product-model.md` §5).
+- **Personal:** no cross-account reads or writes (404 for other accounts' ids; list routes filtered).
+- **Organisational:** no cross-organisation reads, no reads without a grant, revocation takes effect straight away, and every professional read is logged.
+- **Route coverage:** a test fails if a new API route has no isolation classification.
 
 **Ethics and data-protection baselines.** These are *design baselines, not legal advice*.
 - **Research ethics:** the principles shared by the Belmont Report and the Declaration of Helsinki:
@@ -367,8 +396,20 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | **1. Research and problem definition** (weeks 1–3, overlaps Stage 2) | `problem-and-evidence.md` with the **rank-1** §2.3 claims at ✔F; n-of-1 protocol (both phases) + phase-1 hashed schedule; study log (`C:\Projects\new_project\study-log`, plain folder) created; usability procedure + consent; State Reset image prompts and game spec; Interpretation Shift scenario draft reviewed by ≥ 3 people | — | Formal research protocol; ethics submission | Every claim marked ✔F, ✔A or ◐; no decision rests on ◐ | Supports the design choices · Doesn't show any effects | Proceed if State Reset and Action Bridge remain defensible after ✔F. Revise the candidates if a key claim fails |
 | **2. Minimal local prototype** (**working level-A build by end of week 3**) | Level-A API, data model, migrations; Action Bridge, goal restatement, State Reset, game-only control; condition selector; history; follow-up; `check.ps1` | Native PostgreSQL; protocol drafts; rank-1 claims at ✔F (must be done before the end of week 3) | Level B and C items | Clean setup from the runbook; all level-A tests pass; each condition runs end to end | Shows the software runs · Says nothing about people | — |
 | **3. Technical and content validation** (weeks 4–5) | Level-B items: keyboard/axe tests, reduced-motion and non-visual variants; walkthrough of all conditions; content review; Interpretation Shift build **only if** its review passed | Stage 2 | Testers | No serious axe violations; scripted runs record correct step summaries; reviewers find no invalidating content | Readiness for usability testing · Not usability itself | Proceed; or fix and re-run |
-| **4. Local usability and feasibility** (usability weeks 6–8; phase 1 may begin earlier, see prerequisites; overall to ~week 15 at the minimum day count, up to week 19 at the target) | Usability sessions in weeks 6–8; n-of-1 phase 1 (20 session days at ~4 per week, about 5 weeks; up to 7 weeks for 28); 2-day gap; n-of-1 phase 2 (about 5–7 weeks); feasibility report including the `eligible_no_session` count per phase | **Usability:** Stage 3; signed consents. **Phase 1 (deliberate deviation):** only the study log + the approved protocol version; it doesn't wait for Stage 3. **Phase 2:** unchanged: usability showed State Reset is tolerable, the rank-1/rank-2 claims are ✔F, and its own hashed schedule exists | Remote recruitment; efficacy claims | §5 go/amend criteria; **each phase** has ≥ 20 session days with ≥ 90% usable trace data | Usability, product feel, measurability, your personal signal · **Not efficacy** | — |
+| **4. Local usability and feasibility** (usability weeks 6–8; phase 1 may begin earlier, see prerequisites; overall to ~week 15 at the minimum day count, up to week 19 at the target) | Usability sessions in weeks 6–8; n-of-1 phase 1 (20 session days at ~4 per week, about 5 weeks; up to 7 weeks for 28); 2-day gap; n-of-1 phase 2 (about 5–7 weeks); feasibility report including the `eligible_no_session` count per phase | **Usability:** Stage 3; signed consents. **Phase 1 (deliberate deviation):** only the study log, the production environment and the approved protocol version; it doesn't wait for Stage 3. **Phase 2:** unchanged: usability showed State Reset is tolerable, the rank-1/rank-2 claims are ✔F, and its own hashed schedule exists | Remote recruitment; efficacy claims | §5 go/amend criteria; **each phase** has ≥ 20 session days with ≥ 90% usable trace data | Usability, product feel, measurability, your personal signal · **Not efficacy** | — |
 | **5. Decision gate** (week ~16 at the minimum day count; ~20 at the target) | A recorded decision | Stage 4 report | — | Decision justified by the data | — | **Refine** (amend criteria) · **Expand** (feasibility pilot design, then ethics review and a deployment decision) · **Redesign** (e.g., State Reset intolerable, or trace outcome unworkable) · **Stop** (no signal, and the redesign reasons are exhausted) |
+
+**The research track above is unchanged.** A **product track** runs alongside it (details, acceptance criteria and isolation tests in `docs/product-model.md`).
+- **Go-live** means merged to `main` and running in local production. Public hosting is a later, extra gate for each model (hosting, TLS, production authentication, privacy notice).
+- Each model starts with its own plan for approval.
+
+| Phase | Covers | Depends on | Goes live when |
+|---|---|---|---|
+| **E: Environments** | Development/production split and guards; production served by the API; release procedure; `try` mode; exposure rule | — | Before phase-1 day 1 |
+| **M1: Try it** | Result-sink boundary, end-of-visit choices, storage sentence, safe-unsupervised flag, booth profile | E | M1 acceptance criteria and isolation tests pass |
+| **M2: Personal** | Optional accounts, owned records, My history, saving a guest visit, rule-based suggestions | M1 live | M2 criteria, including the cross-account isolation tests, pass |
+| **M3: Organisational** | Organisations, roles, grants, access log, professional configuration | M2 live | Cross-organisation isolation tests pass; supervised expert testing (in person, ≥ 3 organisations, ≥ 5 qualified professionals, no real clients) is complete; release gate passed (legal and regulatory review of the intended use for each organisation type, including the medical-device question; security review; data-protection impact assessment) |
+| **H: Public hosting** (per model) | Server, domain, TLS, production authentication, privacy notice, data-protection review | That model is live locally | Its own gate |
 
 ## 10. Assumptions, risks, open questions, deferred decisions
 - **Assumptions:**
@@ -386,12 +427,15 @@ The test database resets itself on each test run (migrate once; roll back a tran
   - Accidental reset of n-of-1 data (mitigated by backup and confirmation).
   - The app connects as the `postgres` superuser, so a misconfigured URL could affect other databases on this server (mitigated: the test suite refuses identical dev and test databases).
   - Action Bridge's realistic effect (d ≈ .15 bias-adjusted) is too small for the n-of-1 to detect reliably.
+  - **Try it during the experiment** may contaminate control days, and possibly more often on one condition (unblinded). This is recorded and analysed, not blocked (§4.2).
+  - **A release to production during a phase** could change the experiment. Releases are logged, and changes that affect the experiment need a protocol amendment.
+  - **Organisational use may change the product's intended use** (the medical-device question). Its release gate covers this; nothing is offered to clinics before it.
   - The 8 × 24 s State Reset (about 4.5 min plus ratings) may feel long. Usability testing checks tolerability before phase 2.
 - **Open questions:**
   - Does vividness of anticipatory imagery predict avoidance for you?
   - Is 8 × 24 s tolerable in daily use, or does it need shortening (which would mean a new content version)?
   - Should the image-only control be built in Stage 3 or wait until the effect study?
-- **Deferred decisions:** product name · deployment and authentication · formal studies · Interpretation Shift build (conditional) · Small Achievable Challenge · new experience families · recommendation algorithms · generative AI · the 2 × 2 factorial.
+- **Deferred decisions:** product name · hosting, sign-in method and anonymous-count consent mode (decided in the M2 and H plans) · formal studies · Interpretation Shift build (conditional) · Small Achievable Challenge · new experience families · recommendation algorithms · generative AI · the 2 × 2 factorial.
 
 ## 11. Departures from the original vision (confirm or overrule each)
 | Your concept | This plan | One-line reason |
@@ -406,6 +450,9 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | AI companion | **Deferred** | No current requirement; dependence risks (✔A) |
 | Personalised matching | **Deferred** | No evidence that matching beats a good default |
 | Every barrier gets an exercise | **Practical and clinical routes get no exercise** | Wrong intervention for the problem |
+| "Therapy memory" | **"My history"**: a personal history the user controls (M2) | It isn't a clinical record. The name sets expectations and may affect how the data is classified |
+| Clinical deployment | **Organisational model (M3)** only after supervised expert testing and a legal, regulatory, security and data-protection gate | Professional use for clients may make the software a regulated medical device |
+| Experience booths | **A Try it deployment profile**; a staffed pop-up before any hardware | Demand and operating costs are unknown |
 
 ## 12. Change log (from revision 4)
 | Type | Item | Why |
@@ -492,6 +539,18 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | **Changed** | Plain on-screen wording: "exercise" for a session, "My experiment" for the n-of-1, no "study", no phase labels, on-screen names for the conditions. Content: `action-bridge` v2, `goal-restatement` v2 (parallel intros, no efficacy claims), `ratings` v2 | "Study" was ambiguous; internal names meant nothing to users |
 | **Changed** | State Reset v3: an intro listing the parts; the picture chosen and described in its own step and quoted back (never saved); a labelled preview and a 15 s practice round in both variants; dose unchanged. Picture invitation broadened, limited to today's learning in the experiment | Instructions must be understandable when they appear; no exercise starts unseen |
 | **Added** | `today_view.progress` (session days, planned days); the done screen no longer mentions the outcome window | Orientation for the user; the outcome stays unmentioned in exercises |
+
+### Revision 6.0 amendments (2026-11-01; protocol v1.4 amended, then approved 2026-11-01)
+| Type | Item | Why |
+|---|---|---|
+| **Added** | `docs/product-model.md`: three usage models (Try it, Personal, Organisational) on one shared library and runtime; data tiers; per-model acceptance criteria and isolation tests; the booth as a Try it profile. It replaces `usage-models-assessment.md` | Product decisions 1–2 (user, 2026-11-01). Try it without restrictions is a core requirement, not a design flaw |
+| **Added** | Product track in §9 (E, M1, M2, M3, H): each model is built, integrated, tested and released on its own; public hosting is an extra gate for each model | Product decision 1; go-live means local production until there is a server |
+| **Added** | Organisational release gate: supervised in-person expert testing with clinics and qualified professionals (no real clients), plus legal and regulatory review of the intended use for each organisation type (including the medical-device question), security review and a data-protection impact assessment | Product decision 2 |
+| **Added** | **Environments:** development on `test-n552vx` (`app_dev`, `app_test`, Test mode only, ports 4310/8110) and production on `main` in `platform-prod` (`app_prod`, `app_test_main`, port 4300, the n-of-1). Server guards, `reset-db` refused in production, `backup` command, production serving the built web app, a Development badge, and the release procedure (§6.1, §6.2, §7, runbook) | Product decision 3: development must never affect the experiment |
+| **Added** | **Exposure rule:** `try` mode (migration `0004`), Try it runs in the phase export, day classification, two sensitivity analyses and counts by condition; the primary analysis is unchanged (§4.2, protocol §7) | Unrestricted Try it must be recorded and interpreted, not ignored and not blocked |
+| **Changed** | Phase-1 prerequisite: the production environment must exist (§9, protocol §9) | The n-of-1 runs only in production |
+| **Changed** | §1 product concept; §6.1 accounts row (now M2/M3); §8 isolation-test policy; §10 risks and deferred decisions; §11 three new departures | Follow from the product decisions |
+| **Retained** | **Research track unchanged:** Stages 1–5, both n-of-1 phases, allocation and the phase-1 schedule (SHA-256 unchanged), primary analysis, evidence marks, safety boundaries | Product decision 4 |
 
 ## References
 - ✔F: [Gollwitzer & Sheeran 2006 (open-access scan)](https://kops.uni-konstanz.de/entities/publication/2e749bfb-8533-437c-8203-7e788c910c5f) · [Sheeran, Listrom & Gollwitzer 2024 (author manuscript)](https://kops.uni-konstanz.de/handle/123456789/69905) · [Engelhard et al. 2011](https://www.ifemdr.fr/wp-content/uploads/2011/10/Engelhard-et-al-2011-Reducing-vividness-and-emotional-intensity-of-recurrent-flashforwards.pdf) · [Holmes et al. 2010, PLoS ONE](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0013706)
