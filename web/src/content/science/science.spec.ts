@@ -28,10 +28,10 @@ describe('science explanations', () => {
     for (const s of SCIENCE) expect(s.version).toMatch(/^\d+$/);
   });
 
-  it('stay short: about 120–200 words each', () => {
+  it('stay short: about 120–280 words each', () => {
     for (const s of SCIENCE) {
       expect(words(s), s.id).toBeGreaterThanOrEqual(100);
-      expect(words(s), s.id).toBeLessThanOrEqual(210);
+      expect(words(s), s.id).toBeLessThanOrEqual(280);
     }
   });
 

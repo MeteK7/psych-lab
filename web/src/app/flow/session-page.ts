@@ -40,7 +40,7 @@ type SaveState = 'idle' | 'saving' | 'error';
       </ol>
       <p>About {{ info()?.minutes }} minutes. Your answers are saved after each step. You can stop at any time.</p>
       @if (science(); as s) {
-        <app-science-section [science]="s" [open]="openWhy" />
+        <app-science-section [science]="s" [method]="info()?.method?.name" [open]="openWhy" />
       }
       <div class="actions">
         <button type="button" class="primary" (click)="begin()">Begin</button>
@@ -69,7 +69,7 @@ type SaveState = 'idle' | 'saving' | 'error';
             }
           }
           @if (science(); as s) {
-            <app-science-section [science]="s" />
+            <app-science-section [science]="s" [method]="info()?.method?.name" />
           }
         </section>
       } @else {

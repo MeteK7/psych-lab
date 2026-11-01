@@ -144,7 +144,9 @@ describe('SessionPage', () => {
     const { fixture, backend } = setup({ mode: 'try', condition: 'action_bridge' });
     await fixture.whenStable();
     const before = root(fixture).querySelector<HTMLDetailsElement>('app-science-section details');
-    expect(before?.querySelector('summary')?.textContent).toBe('Why this exercise?');
+    const summary = before?.querySelector('summary')?.textContent;
+    expect(summary).toContain('Why this exercise?');
+    expect(summary).toContain('The science behind it: Implementation intentions');
     expect(before?.open).toBe(false);
     expect(before?.textContent).toContain('If-then planning (implementation intentions)');
 

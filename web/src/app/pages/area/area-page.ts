@@ -7,12 +7,12 @@ import { map } from 'rxjs';
 import { Condition } from '../../api/types';
 import { areaById } from '../../areas';
 import { conditionInfo } from '../../flow/conditions';
-import { MethodIcon } from '../../shared/method-icon';
+import { Icon } from '../../shared/icon';
 
 /** One area: its topics and their experiences, each with "Try it" (practice mode). */
 @Component({
   selector: 'app-area-page',
-  imports: [MethodIcon, RouterLink],
+  imports: [Icon, RouterLink],
   template: `
     @if (area(); as a) {
       <h1>{{ a.title }}</h1>
@@ -30,7 +30,7 @@ import { MethodIcon } from '../../shared/method-icon';
                   <p>{{ e.description }} About {{ e.minutes }} minutes.</p>
                   <!-- The method opens the exercise's science explanation ("Why this exercise?"). -->
                   <a class="method" routerLink="/session" [queryParams]="{ mode: 'try', condition: e.value, why: 1 }">
-                    <app-method-icon [name]="e.method.icon" />
+                    <app-icon [name]="e.method.icon" />
                     {{ e.method.name }}<span class="sr-only">: the science behind {{ e.label }}</span>
                   </a>
                   @if (e.experimental) {

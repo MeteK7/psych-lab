@@ -109,7 +109,7 @@
 ### 3.1 Science explanation standard (every experience)
 Every experience carries a **science explanation** in its own versioned content file, e.g. `content/science/<experience>.v1.json`, separate from the experience content so that experiment `content_versions` don't change. It's built in product phase **S** (§9).
 
-**Five short parts** (about 120–200 words in total):
+**Five short parts** (about 120–280 words in total; a part may hold several paragraphs):
 1. **What you do:** one sentence.
 2. **The method:** named and explained in plain words, e.g. "planning *when* and *how* you'll start (implementation intentions)".
 3. **What research says about the method:** the wording is fixed by the evidence mark.
@@ -132,7 +132,7 @@ Every experience carries a **science explanation** in its own versioned content 
 - **The section is named "Why this exercise?"**, not "Why this works". The exercises haven't been shown to work.
 
 **Presentation:**
-- **Preview screen** (before Begin): a native expandable section (`<details>`), closed by default, accessible by keyboard and screen reader.
+- **Preview screen** (before Begin): an expandable section in the page (native `<details>`), closed by default, accessible by keyboard and screen reader. Its bar shows a flask icon, "Why this exercise?" and "The science behind it: <method>". Opened, each part has its own icon heading; each research finding is a shaded block with its sources and evidence level ("Full text checked" or "Summary checked; full text not yet"); "About this exercise" is a highlighted callout; sources are numbered and open in a new tab. No pop-ups or overlays.
 - **Done screen:** the same section.
 - **Area page card:** the method the exercise rests on, as an icon and its name under the description (Implementation intentions, Goal intentions, Working-memory taxation, Distraction). It links to the preview screen with the section open. There is no separate "Why this exercise?" link on the cards.
 - **Never inside a running step,** and no pop-ups.
@@ -675,6 +675,7 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | **Added** | Risks and open questions (§10); a departure row (§11) | Follow from the above |
 | **Retained** | The n-of-1 protocol (v1.4, approved) and State Reset's description are unchanged. Explanations aren't added to experiment exercises; Try it access is unchanged and unrestricted | User instruction |
 | **Built** | Phase S: four explanations (`web/src/content/science/*.v1.json`, sources with evidence marks in `sources.v1.json`); the "Why this exercise?" section on the practice preview and done screens, opened from a link on each area-page card; a content test enforcing §3.1; not shown in experiment or Test mode exercises | User go-ahead, 2026-11-01. Release waits for your content review |
+| **Changed** | The "Why this exercise?" section is redesigned (design A, chosen from three previews): a panel bar with icon and method name, icon headings per part, findings as blocks with their evidence level, a highlighted "About this exercise" callout, numbered sources. Still in the page and collapsed by default; content unchanged. The length guideline is widened to about 120–280 words, to fit the expanded State Reset principle | User request; the expanded principle text is the user's own edit |
 | **Changed** | Area-page cards name their method (icon and name, under the description) instead of repeating a "Why this exercise?" link; the method links to the explanation as before. The two baseline exercises are named by the research concepts they use (Goal intentions, Distraction), not "comparison" | User feedback: the repeated links cluttered the cards, and "comparison" means nothing to a Try it visitor |
 | **Corrected** | §3.1 wording rule: "Research found…" (✔F) and "Research suggests…" (✔A), because "study" isn't used on screen. The Webb 2012 reference link pointed to the authors' 2013 reply; it now points to the 2012 meta-analysis (PMID 22582737) | Accuracy |
 

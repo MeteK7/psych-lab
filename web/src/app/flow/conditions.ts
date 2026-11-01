@@ -1,5 +1,5 @@
 import { Condition, Mode } from '../api/types';
-import { MethodIconName } from '../shared/method-icon';
+import { IconName } from '../shared/icon';
 
 export type StepId =
   | 'pre_rating'
@@ -29,7 +29,7 @@ export interface ConditionInfo {
   minutes: number;
   experimental: boolean;
   /** The scientific method the exercise rests on, shown on its card (plan §3.1). */
-  method: { name: string; icon: MethodIconName };
+  method: { name: string; icon: IconName };
   /** Internal: the n-of-1 phase that compares this condition. Never shown on screen. */
   phase: 1 | 2;
 }
