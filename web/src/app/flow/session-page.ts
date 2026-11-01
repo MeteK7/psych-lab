@@ -3,12 +3,14 @@ import { Component, ElementRef, computed, inject, signal, viewChild } from '@ang
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
+import { scienceFor } from '../../content';
 import { ApiService } from '../api/api.service';
 import { Condition, Mode, Status } from '../api/types';
 import { ActionBridge } from '../experiences/action-bridge/action-bridge';
 import { GoalRestatement } from '../experiences/goal-restatement/goal-restatement';
 import { RatingStep } from '../experiences/rating-step/rating-step';
 import { StateReset } from '../experiences/state-reset/state-reset';
+import { ScienceSection } from '../shared/science-section';
 import { STEP_NAMES, StepId, conditionInfo, isCondition, isLevelAMode, stepsFor } from './conditions';
 import { SessionDraft, addStep, addStop, newDraft, toUpsert } from './session-record';
 import { StepOutcome } from './step-outcome';
@@ -18,7 +20,7 @@ type SaveState = 'idle' | 'saving' | 'error';
 /** The exercise runner, opened from an area page (practice) or from My experiment. */
 @Component({
   selector: 'app-session-page',
-  imports: [ActionBridge, GoalRestatement, RatingStep, StateReset, DatePipe, RouterLink],
+  imports: [ActionBridge, GoalRestatement, RatingStep, StateReset, ScienceSection, DatePipe, RouterLink],
   template: `
     @if (!setup()) {
       <h1>Exercise</h1>
@@ -37,6 +39,9 @@ type SaveState = 'idle' | 'saving' | 'error';
         }
       </ol>
       <p>About {{ info()?.minutes }} minutes. Your answers are saved after each step. You can stop at any time.</p>
+      @if (science(); as s) {
+        <app-science-section [science]="s" [open]="openWhy" />
+      }
       <div class="actions">
         <button type="button" class="primary" (click)="begin()">Begin</button>
         <a [routerLink]="homeLink()">Back</a>
@@ -62,6 +67,9 @@ type SaveState = 'idle' | 'saving' | 'error';
             } @else {
               <p><a routerLink="/areas/action-growth">Back to Action and growth</a> · <a routerLink="/records">My records</a></p>
             }
+          }
+          @if (science(); as s) {
+            <app-science-section [science]="s" />
           }
         </section>
       } @else {
@@ -136,6 +144,15 @@ export class SessionPage {
   protected readonly step = computed(() => this.steps()[this.index()]);
   protected readonly stepName = computed(() => STEP_NAMES[this.step()]);
   protected readonly info = computed(() => conditionInfo(this.setup()?.condition));
+  /**
+   * "Why this exercise?" for practice only. Experiment exercises show exactly what the
+   * approved protocol fixes, and a rationale could add an expectancy confound (plan §3.1).
+   */
+  protected readonly science = computed(() =>
+    this.assigned() ? undefined : scienceFor(this.setup()?.condition),
+  );
+  /** Opened straight away when the area page's "Why this exercise?" link was used. */
+  protected readonly openWhy: boolean;
 
   private stepStartedAt = new Date().toISOString();
   private saveQueue: Promise<void> = Promise.resolve();
@@ -146,6 +163,7 @@ export class SessionPage {
     const mode = params.get('mode');
     // n-of-1 sessions carry the reveal that assigned their condition (from My experiment).
     const revealId = params.get('reveal');
+    this.openWhy = params.get('why') === '1';
     if (isCondition(condition) && isLevelAMode(mode)) this.setup.set({ mode, condition, revealId });
   }
 

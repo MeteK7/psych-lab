@@ -136,6 +136,40 @@ describe('SessionPage', () => {
     expect((await flushSave(fixture, backend)).n1_reveal_id).toBe(reveal);
     const back = root(fixture).querySelector<HTMLAnchorElement>('a.primary-link');
     expect(back?.textContent?.trim()).toBe('Back to My experiment');
+    // The approved protocol fixes what experiment exercises show: no explanation.
+    expect(root(fixture).querySelector('app-science-section')).toBeNull();
+  });
+
+  it('offers "Why this exercise?" before and after a practice exercise, closed unless asked for', async () => {
+    const { fixture, backend } = setup({ mode: 'try', condition: 'action_bridge' });
+    await fixture.whenStable();
+    const before = root(fixture).querySelector<HTMLDetailsElement>('app-science-section details');
+    expect(before?.querySelector('summary')?.textContent).toBe('Why this exercise?');
+    expect(before?.open).toBe(false);
+    expect(before?.textContent).toContain('If-then planning (implementation intentions)');
+
+    click(fixture, 'Begin');
+    await flushSave(fixture, backend);
+    expect(root(fixture).querySelector('app-science-section')).toBeNull(); // never during a step
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    click(fixture, 'Stop the exercise');
+    await flushSave(fixture, backend);
+    expect(root(fixture).querySelector('app-science-section details')).not.toBeNull();
+  });
+
+  it('opens the explanation when the area page link asks for it', async () => {
+    const { fixture } = setup({ mode: 'try', condition: 'game_only+action_bridge', why: '1' });
+    await fixture.whenStable();
+    const details = root(fixture).querySelector<HTMLDetailsElement>('app-science-section details');
+    expect(details?.open).toBe(true);
+    expect(details?.textContent).toContain('the comparison exercise');
+  });
+
+  it('shows no explanation in Test mode, which runs as an experiment exercise', async () => {
+    const reveal = '11111111-2222-4333-8444-555555555555';
+    const { fixture } = setup({ mode: 'dev', condition: 'goal_restatement', reveal });
+    await fixture.whenStable();
+    expect(root(fixture).querySelector('app-science-section')).toBeNull();
   });
 
   it('saves a stopped session as aborted', async () => {

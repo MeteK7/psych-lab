@@ -1,0 +1,21 @@
+{
+  "id": "science-game-only",
+  "version": "1",
+  "experience": "game_only+action_bridge",
+  "what_you_do": "You follow a moving dot for 8 short rounds without holding any picture in mind. Afterwards you plan your first step.",
+  "method": {
+    "name": "A short, focused game (the comparison exercise)",
+    "text": "This is the same game as “Picture it, then follow the dot”, with the same rounds and pauses, but without the picture. Comparing the two shows whether holding the picture adds anything beyond a short break or a distraction."
+  },
+  "research": [
+    {
+      "text": "Research suggests that turning your attention to something else can ease difficult feelings for a while: a review of emotion-regulation experiments reported a small benefit of distraction.",
+      "sources": ["webb-2012"]
+    }
+  ],
+  "about_this_exercise": "This exercise hasn't been tested itself. The game and its timing match the picture exercise exactly, so the two can be compared fairly. The planning step at the end uses the same method as “Plan your first step”.",
+  "limits": [
+    "How long any effect of a break or distraction lasts is unknown.",
+    "A game on its own isn't expected to make starting easier."
+  ]
+}

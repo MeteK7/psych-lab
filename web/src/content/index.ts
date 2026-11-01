@@ -10,6 +10,13 @@ import ratingsJson from './ratings.v2.json';
 // preview and a 15 s practice round, identical in both variants, come before the timed
 // rounds. The 8 x 24 s dose is unchanged from v2 (Engelhard et al. 2011).
 import stateResetJson from './state-reset.v3.json';
+// Science explanations ("Why this exercise?", plan §3.1): versioned apart from the
+// experience content, so the experiment's content versions don't change.
+import scienceActionBridgeJson from './science/action-bridge.v1.json';
+import scienceGameOnlyJson from './science/game-only.v1.json';
+import scienceGoalRestatementJson from './science/goal-restatement.v1.json';
+import scienceSourcesJson from './science/sources.v1.json';
+import scienceStateResetJson from './science/state-reset.v1.json';
 
 export interface Versioned {
   id: string;
@@ -123,6 +130,44 @@ export const RATINGS: RatingsContent = ratingsJson;
 export const ACTION_BRIDGE: ActionBridgeContent = actionBridgeJson as ActionBridgeContent;
 export const GOAL_RESTATEMENT: GoalRestatementContent = goalRestatementJson;
 export const STATE_RESET: StateResetContent = stateResetJson;
+
+/** full_text = ✔F (full text checked), abstract = ✔A. Unverified (◐) sources are never cited. */
+export type Evidence = 'full_text' | 'abstract';
+
+export interface ScienceSource {
+  citation: string;
+  title: string;
+  url: string;
+  evidence: Evidence;
+}
+
+export interface ScienceContent extends Versioned {
+  /** The experience (condition value) this explains. */
+  experience: string;
+  what_you_do: string;
+  method: { name: string; text: string };
+  /** Evidence for the method, never for this exercise; each finding names its sources. */
+  research: { text: string; sources: string[] }[];
+  /** Required: separates the method's evidence from this untested version. */
+  about_this_exercise: string;
+  limits: string[];
+}
+
+export interface ScienceSources extends Versioned {
+  sources: Record<string, ScienceSource>;
+}
+
+export const SCIENCE_SOURCES = scienceSourcesJson as ScienceSources;
+export const SCIENCE: ScienceContent[] = [
+  scienceActionBridgeJson,
+  scienceGoalRestatementJson,
+  scienceStateResetJson,
+  scienceGameOnlyJson,
+];
+
+export function scienceFor(experience: string | null | undefined): ScienceContent | undefined {
+  return SCIENCE.find((s) => s.experience === experience);
+}
 
 /** Fills {name} placeholders in a content string. */
 export function fill(text: string, values: Record<string, string | number>): string {

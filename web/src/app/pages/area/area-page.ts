@@ -30,7 +30,12 @@ import { conditionInfo } from '../../flow/conditions';
                   @if (e.experimental) {
                     <p><span class="badge">Experimental</span> This idea is still being tested.</p>
                   }
-                  <button type="button" (click)="tryIt(e.value)">Try it</button>
+                  <div class="card-actions">
+                    <button type="button" (click)="tryIt(e.value)">Try it</button>
+                    <a routerLink="/session" [queryParams]="{ mode: 'try', condition: e.value, why: 1 }">
+                      Why this exercise?<span class="sr-only"> ({{ e.label }})</span>
+                    </a>
+                  </div>
                 </li>
               }
             }
@@ -57,7 +62,8 @@ import { conditionInfo } from '../../flow/conditions';
                    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
     .experiences .card { margin: 0; display: flex; flex-direction: column; align-items: flex-start; }
     .experiences p { margin: 0 0 0.75rem; }
-    .experiences button { margin-top: auto; }
+    .card-actions { margin-top: auto; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
     h2 { font-size: 1.25rem; }
     h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
   `,

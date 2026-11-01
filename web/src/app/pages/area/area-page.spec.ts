@@ -42,6 +42,24 @@ describe('AreaPage', () => {
     });
   });
 
+  it('links each card to its "Why this exercise?" explanation in practice mode', async () => {
+    const fixture = create('action-growth');
+    await fixture.whenStable();
+    const links = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('.card-actions a'),
+    );
+    expect(links).toHaveLength(4);
+    expect(links[2].textContent).toContain('Why this exercise?');
+    expect(links[2].textContent).toContain('(Picture it, then follow the dot)'); // for screen readers
+    const url = new URL(links[2].href);
+    expect(url.pathname).toBe('/session');
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      mode: 'try',
+      condition: 'state_reset+action_bridge',
+      why: '1',
+    });
+  });
+
   it('says so when the area does not exist', async () => {
     const fixture = create('cognitive-shifts'); // planned, so there is no page
     await fixture.whenStable();
