@@ -127,6 +127,9 @@ Development's checks must be green on `test` first (`powershell -File scripts/ch
 - A release must not change any experiment exercise, a content version in use, the n-of-1 logic or the analysis.
 - A change that would is a protocol amendment and applies only to later days.
 
+## Development-only areas
+**Cognitive shifts** (three exercises) appears only in the development build, at http://localhost:4310/areas/cognitive-shifts. In production its Home card shows as planned, and the API refuses its saves. It's released by changing its status in `web/src/app/areas.ts` and its exercises' `release` in `web/src/app/experiences/registry.ts`, and by removing the API's development-only list. That happens only after the content review and the full-text gates (`docs/cognitive-shifts-design.md` §9).
+
 ## Pages
 - **Home** (`/`): the areas. Only **Action and growth** is available; the others are shown as planned.
 - **Area page** (`/areas/action-growth`): the experiences, each with **Try it**. Try it is saved in `try` mode and is never part of the experiment.

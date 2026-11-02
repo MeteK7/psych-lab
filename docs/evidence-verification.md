@@ -86,6 +86,24 @@ Rank-1 claims from plan §2.3. These block Stage 2.
 
 Put the files in a local folder outside the repository and tell me where they are; I will read them and update this log.
 
+## Cognitive shifts (docs/cognitive-shifts-design.md): sources
+All **✔A**: the PubMed record (citation and abstract) was checked on 2026-11-02. Each must be read in full (✔F) before the exercise that cites it is released, or its line is removed (design §9).
+
+| Source | PMID | Used in | Status |
+|---|---|---|---|
+| Webb, Miles & Sheeran 2012, *Psychol Bull* 138(4):775–808 | 22582737 | CS1 | ✔A |
+| Troy, Shallcross & Mauss 2013, *Psychol Sci* 24(12):2505–14 | 24145331 | CS1 | ✔A (was ◐ in the plan) |
+| Kross et al. 2014, *JPSP* 106(2):304–24 | 24467424 | CS1 | ✔A |
+| Bruehlman-Senecal & Ayduk 2015, *JPSP* 108(2):356–375 | 25603380 | CS1 (lens 3) | ✔A; population and setting to confirm |
+| Brunwasser, Gillham & Kim 2009, *J Consult Clin Psychol* 77(6):1042–54 | 19968381 | CS2 | ✔A |
+| Eyal, Steffel & Epley 2018, *JPSP* 114(4):547–571 | 29620401 | CS3 | ✔A; population and setting to confirm |
+| Hallion & Ruscio 2011, *Psychol Bull* 137(6):940–58 | 21728399 | CS3 | ✔A |
+| Cristea, Kok & Cuijpers 2015, *Br J Psychiatry* 206(1):7–16 | 25561486 | CS3 | ✔A |
+| Wang et al. 2021, *Nat Hum Behav* 5(8):1089–1110 | 34341554 | CS1 (pending; not shown) | record found, abstract not read |
+| Lazowski & Hulleman 2016, *Rev Educ Res* | — | CS2 (pending; not shown) | ◐ |
+
+Also checked for the proposal (not cited on screen): Menne-Lothmann 2014 (PMID 24968234), Sisk 2018 (29505339), Macnamara & Burgoyne 2023 (36326645), Burnette 2023 (36227318), Schleider & Weisz 2017 (28117056), Powers & LaBar 2019 (30502352), Fodor 2020 (32445689).
+
 ## Memory reconsolidation (future candidate, plan §3.2): sources to verify
 **Status:** nothing here has been checked; every entry is **◐** until it is read. Titles and details come from memory. Each is confirmed (exact title, DOI, sample, outcome) when obtained, and anything that can't be found is removed, not cited.
 

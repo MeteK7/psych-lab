@@ -27,7 +27,7 @@ Please also flag anything that touches on clinical topics, trauma, health or cri
 ## A. Shared texts
 | Text | Plausible / clear (1–5) | Invalidating? (why) | Rewrite |
 |---|---|---|---|
-| Safety line: "These exercises are for everyday situations, like studying, work or friends. They aren't for painful experiences such as loss, abuse or health worries, or for times of crisis. If that's where you are, talk to someone you trust or a support line. You can stop at any time." | | | |
+| Safety line: "These exercises are for everyday situations, like learning, work or friends. They aren't for painful experiences such as loss, abuse or health worries, or for times of crisis. If that's where you are, talk to someone you trust or a support line. You can stop at any time." | | | |
 
 ## B. CS1 · Other ways to read it
 | Card | Plausibility (1–5) | Invalidating? (why) | Rewrite |
@@ -50,6 +50,7 @@ Please also flag anything that touches on clinical topics, trauma, health or cri
 | Lens 3: "Whether I tried again." | | | |
 | Lens 3: "It may still matter, and that's real." | | | |
 | Close for **self-judgement** first readings and own readings placed in "Fits": "It still feels like it fits. You can keep it alongside the other readings that fit." **Please check:** does it acknowledge the feeling without agreeing that the self-judgement is true? | | | |
+| Close when **nothing** was placed in "Fits": "None of the readings fit right now. That's an honest answer too." | | | |
 | Close for **situation** first readings placed in "Fits": "Your first reading still fits. That's a real outcome: sometimes the first reading is right." **Please check:** could this ever read as confirming a harsh judgement of oneself? | | | |
 | Close: "You said you can do something about this. Changing how you see it isn't the goal then; planning a step might help more." | | | |
 

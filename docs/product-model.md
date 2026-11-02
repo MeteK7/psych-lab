@@ -50,6 +50,11 @@
 
 **Research track:** Stages 1–5 and the n-of-1 are unchanged (plan §9).
 
+**Cognitive shifts** (plan 6.3–6.4; `cognitive-shifts-design.md`): a second Area with three Try it-only exercises.
+- Built and **development only:** shown in the development build, refused by the API in production.
+- Released once its gates pass: a content review by at least 3 reviewers, and full texts of every cited source.
+- It is part of Try it (M1), never part of the experiment.
+
 **Future research candidate, not an approved feature:** **Memory update**, based on memory reconsolidation (plan §3.2).
 - It passes five gates before any build: evidence review, design feasibility, safety and ethics review, usability, and a feasibility study.
 - It needs return visits, so it depends on M2.

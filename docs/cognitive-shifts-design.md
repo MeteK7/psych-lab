@@ -18,6 +18,16 @@
 
 ---
 
+## Built (Stage 4, 2026-11-02)
+Implemented as designed, in the development build only. Changes made while building:
+- **Safety line:** "like learning, work or friends" instead of "like studying…", because "study" isn't used on screen (content wording test).
+- **CS1:** an extra close for when nothing was placed in "Fits": "None of the readings fit right now. That's an honest answer too." It's in the review form.
+- **CS3:** readings are shown in a fixed mixed order rather than shuffled (§5.1).
+- **"Plan your first step"** is offered on the done screen, after Finish, rather than inside the last step, so leaving for it never leaves an exercise unfinished.
+- **The fit board** uses three buttons per card; there's no drag and drop. Radio targets are 24 px, the WCAG 2.2 minimum the browser tests found missing at first.
+- **The CS2 "heavy map" step** adds a cause in place, rather than going back a step.
+- **Population lines:** where the abstract didn't say who took part or where, the line says "to be confirmed from the full text" instead of guessing.
+
 ## 1. The experience registry refactor, and how the experiment is protected
 
 ### 1.1 What changes
@@ -69,7 +79,7 @@ These are written **before** the refactor, run green on the current code, then m
 - **Every choice offers a way out:** "None of these fit" and "My first reading still seems right" (CS1, CS3); "Nothing to change right now" (CS2).
 - **The safety line** appears on each exercise's first step, word for word:
 
-  > These exercises are for everyday situations, like studying, work or friends. They aren't for painful experiences such as loss, abuse or health worries, or for times of crisis. If that's where you are, talk to someone you trust or a support line. You can stop at any time.
+  > These exercises are for everyday situations, like learning, work or friends. They aren't for painful experiences such as loss, abuse or health worries, or for times of crisis. If that's where you are, talk to someone you trust or a support line. You can stop at any time.
 
 - **Controllable situations lead to action.** In CS1 and CS2, a "yes" or "partly" to "Can you do something about it?" ends with a link to "Plan your first step". There's no other cross-Area link.
 - **Same building blocks as today:**
@@ -143,7 +153,7 @@ These are written **before** the refactor, run green on the current code, then m
 | 5 · How sure now | **Step 5 of 5: How sure are you now?** · "Your first reading: “{reading}”" · the certainty scale from step 2 · Finish · Close text: "Holding more than one reading open isn't indecision. It's an accurate picture of what you know." | One scale | Certainty |
 
 ### 5.1 Scenarios (each needs reviewer approval, §9)
-Each scenario has six reading cards: two that lean negative, two neutral, two that lean positive. The person sees them in a shuffled order.
+Each scenario has six reading cards: two that lean negative, two neutral, two that lean positive. They are shown in a fixed mixed order (neutral, negative, positive, repeated), so no lean comes first every time and the order is the same for every reviewer.
 
 1. **"Your teacher writes ‘Come and see me after class’ on your assignment."**
    - Negative: "I've done something wrong." · "It's bad news about my grade."
