@@ -31,6 +31,8 @@ Invoke-Check 'analysis: ruff format' "$root\analysis" { uv run ruff format --che
 Invoke-Check 'analysis: pytest'      "$root\analysis" { uv run pytest }
 Invoke-Check 'web: unit tests'  "$root\web" { npx ng test --watch=false }
 Invoke-Check 'web: build'       "$root\web" { npx ng build }
+# Keyboard-only paths, axe scans, reduced motion; installed Edge, test database (~3 min).
+Invoke-Check 'web: browser tests' "$root\web" { npx playwright test }
 
 Write-Host ''
 $results | Format-Table -AutoSize

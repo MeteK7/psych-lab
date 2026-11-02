@@ -123,3 +123,23 @@ def test_reset_db_is_refused_in_production(tmp_path: Path, monkeypatch: pytest.M
     monkeypatch.setattr(manage, "backup", lambda url: pytest.fail("must not back up or reset"))
     with pytest.raises(SystemExit, match="refused in production"):
         manage.reset_db(assume_yes=True)
+
+
+def test_browser_tests_always_run_on_the_test_database(tmp_path: Path) -> None:
+    from app.e2e_server import e2e_environment
+
+    settings = make("development", "app_dev", tmp_path)
+    env = e2e_environment(settings, tmp_path, "http://localhost:4320")
+    assert env["DATABASE_URL"].endswith("/app_test")
+    assert (env["APP_ENV"], env["N1_PHASE"]) == ("development", "0")
+    assert env["N1_STUDY_LOG_DIR"].startswith(str(tmp_path))
+    assert env["ALLOWED_ORIGINS"] == "http://localhost:4320"
+
+
+@pytest.mark.parametrize("test_database", ["app_dev", "app_prod"])
+def test_browser_tests_refuse_a_real_database(tmp_path: Path, test_database: str) -> None:
+    from app.e2e_server import e2e_environment
+
+    settings = make("development", "app_dev", tmp_path, test_database=test_database)
+    with pytest.raises(SystemExit, match="separate test database"):
+        e2e_environment(settings, tmp_path, "http://localhost:4320")
