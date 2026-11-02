@@ -170,3 +170,17 @@ def test_a_try_it_exercise_never_has_a_reveal(client: TestClient) -> None:
 def test_unknown_exercises_are_refused(client: TestClient) -> None:
     body = session_body(mode="try", condition="something_else")
     assert client.put(f"/api/sessions/{uuid.uuid4()}", json=body).status_code == 422
+
+
+def test_development_only_exercises_are_refused_in_production(
+    client: TestClient, n1_settings: Any
+) -> None:
+    body = session_body(mode="try", condition="cs_other_readings", content_versions={})
+    n1_settings.app_env = "production"
+    try:
+        response = client.put(f"/api/sessions/{uuid.uuid4()}", json=body)
+        assert response.status_code == 403
+        released = session_body(mode="try", condition="action_bridge")
+        assert client.put(f"/api/sessions/{uuid.uuid4()}", json=released).status_code == 201
+    finally:
+        n1_settings.app_env = "development"

@@ -1,0 +1,62 @@
+{
+  "id": "cs-why-it-happened",
+  "version": "1",
+  "safety": "These exercises are for everyday situations, like learning, work or friends. They aren't for painful experiences such as loss, abuse or health worries, or for times of crisis. If that's where you are, talk to someone you trust or a support line. You can stop at any time.",
+  "setback": {
+    "intro": "Think of a recent everyday mistake or setback, like a test that went badly or a deadline you missed.",
+    "label": "In a few words (only you see this; it isn't saved)"
+  },
+  "first": {
+    "ask": "Write your first explanation, or pick one that's close:",
+    "cards": [
+      { "id": "not_good", "text": "I'm just not good at this." },
+      { "id": "effort", "text": "I didn't try hard enough." },
+      { "id": "too_difficult", "text": "It was too difficult." },
+      { "id": "bad_luck", "text": "Bad luck." }
+    ],
+    "own_label": "Or write your own"
+  },
+  "more": {
+    "intro": "Most things have more than one cause. Add at least two more; pick from these or write your own:",
+    "cards": [
+      { "id": "preparation", "text": "How I prepared (my method, not just the time)" },
+      { "id": "time", "text": "How much time I had" },
+      { "id": "difficulty", "text": "How hard the task was" },
+      { "id": "instructions", "text": "Instructions that weren't clear" },
+      { "id": "tired", "text": "Being tired or unwell" },
+      { "id": "new", "text": "Something new to me" },
+      { "id": "others", "text": "Other people involved" },
+      { "id": "chance", "text": "Chance" }
+    ],
+    "own_label": "Write a cause",
+    "add": "Add",
+    "count": "{n} causes so far. You can have 3 to 6.",
+    "your_causes": "Your causes:"
+  },
+  "map": {
+    "counter": "Cause {n} of {total}: {cause}",
+    "axes": [
+      { "id": "who", "low": "About me", "high": "About the situation" },
+      { "id": "time", "low": "Lasting", "high": "Just this time" },
+      { "id": "scope", "low": "Affects everything", "high": "Just this kind of task" }
+    ],
+    "next_cause": "Next cause",
+    "chart_label": "Map of your causes: about me or the situation, lasting or just this time.",
+    "list_heading": "Your causes on the map"
+  },
+  "reflect": {
+    "changeable": "Some of these causes can change, or depend on the situation, not only on you.",
+    "about_you": "Some causes may really be about you. That's information, not a verdict on what you can do.",
+    "heavy": "That's a heavy way to see it. Is there any cause that's about this time only? You can add one below, or keep the map as it is.",
+    "effort": "Effort is one possible cause among many. It isn't the answer by default.",
+    "add_heading": "Add a cause"
+  },
+  "change": {
+    "ask": "Is there one cause you could do something about next time?",
+    "none": "Nothing to change right now",
+    "plan_prompt": "Want to plan a first step for it?",
+    "plan_link": "Plan your first step"
+  },
+  "next_label": "Next",
+  "finish_label": "Finish"
+}

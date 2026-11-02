@@ -26,6 +26,9 @@ ExerciseId = Literal[
 ]
 EXPERIMENT_CONDITIONS: tuple[str, ...] = get_args(Condition)
 NON_EXPERIMENT_MODES = ("try", "usability")
+# Saved in the development build only, until their release gates pass
+# (docs/cognitive-shifts-design.md section 9).
+DEVELOPMENT_ONLY_EXERCISES = ("cs_other_readings", "cs_why_it_happened", "cs_not_enough_to_go_on")
 Status = Literal["in_progress", "completed", "aborted"]
 
 

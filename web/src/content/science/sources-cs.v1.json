@@ -1,0 +1,48 @@
+{
+  "id": "science-sources-cs",
+  "version": "1",
+  "sources": {
+    "troy-2013": {
+      "citation": "Troy, Shallcross & Mauss, 2013",
+      "title": "A person-by-situation approach to emotion regulation: Cognitive reappraisal can either help or hurt, depending on the context. Psychological Science, 24(12), 2505–2514",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/24145331/",
+      "evidence": "abstract"
+    },
+    "kross-2014": {
+      "citation": "Kross et al., 2014",
+      "title": "Self-talk as a regulatory mechanism: How you do it matters. Journal of Personality and Social Psychology, 106(2), 304–324",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/24467424/",
+      "evidence": "abstract"
+    },
+    "bruehlman-senecal-2015": {
+      "citation": "Bruehlman-Senecal & Ayduk, 2015",
+      "title": "This too shall pass: Temporal distance and the regulation of emotional distress. Journal of Personality and Social Psychology, 108(2), 356–375",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25603380/",
+      "evidence": "abstract"
+    },
+    "brunwasser-2009": {
+      "citation": "Brunwasser, Gillham & Kim, 2009",
+      "title": "A meta-analytic review of the Penn Resiliency Program's effect on depressive symptoms. Journal of Consulting and Clinical Psychology, 77(6), 1042–1054",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19968381/",
+      "evidence": "abstract"
+    },
+    "eyal-2018": {
+      "citation": "Eyal, Steffel & Epley, 2018",
+      "title": "Perspective mistaking: Accurately understanding the mind of another requires getting perspective, not taking perspective. Journal of Personality and Social Psychology, 114(4), 547–571",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29620401/",
+      "evidence": "abstract"
+    },
+    "hallion-2011": {
+      "citation": "Hallion & Ruscio, 2011",
+      "title": "A meta-analysis of the effect of cognitive bias modification on anxiety and depression. Psychological Bulletin, 137(6), 940–958",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21728399/",
+      "evidence": "abstract"
+    },
+    "cristea-2015": {
+      "citation": "Cristea, Kok & Cuijpers, 2015",
+      "title": "Efficacy of cognitive bias modification interventions in anxiety and depression: Meta-analysis. British Journal of Psychiatry, 206(1), 7–16",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25561486/",
+      "evidence": "abstract"
+    }
+  }
+}

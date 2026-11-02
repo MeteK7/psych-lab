@@ -20,6 +20,17 @@ import scienceGameOnlyJson from './science/game-only.v1.json';
 import scienceGoalRestatementJson from './science/goal-restatement.v1.json';
 import scienceSourcesJson from './science/sources.v1.json';
 import scienceStateResetJson from './science/state-reset.v1.json';
+// Cognitive shifts (docs/cognitive-shifts-design.md): Try it only, development only until the
+// content review and full-text gates pass. Their science explanations add an evidence layer
+// and a population line to every finding; their sources are kept apart from sources.v1.json,
+// which the experiment exercises' explanations use and which doesn't change.
+import csNotEnoughJson from './cs-not-enough.v1.json';
+import csOtherReadingsJson from './cs-other-readings.v1.json';
+import csWhyItHappenedJson from './cs-why-it-happened.v1.json';
+import scienceCsNotEnoughJson from './science/cs-not-enough.v1.json';
+import scienceCsOtherReadingsJson from './science/cs-other-readings.v1.json';
+import scienceCsWhyItHappenedJson from './science/cs-why-it-happened.v1.json';
+import scienceSourcesCsJson from './science/sources-cs.v1.json';
 
 export interface Versioned {
   id: string;
@@ -180,7 +191,16 @@ export interface ScienceContent extends Versioned {
   what_you_do: string;
   method: { name: string; text: string };
   /** Evidence for the method, never for this exercise; each finding names its sources. */
-  research: { text: string; sources: string[] }[];
+  research: {
+    text: string;
+    sources: string[];
+    /** Cognitive shifts only: research on the method, or on similar exercises. */
+    layer?: 'method' | 'similar';
+    /** Cognitive shifts only: who took part and in what setting. */
+    who?: string;
+  }[];
+  /** Cognitive shifts only: shown under "Research on similar exercises" without a citation. */
+  similar_note?: string;
   /** Required: separates the method's evidence from this untested version. */
   about_this_exercise: string;
   limits: string[];
@@ -190,12 +210,19 @@ export interface ScienceSources extends Versioned {
   sources: Record<string, ScienceSource>;
 }
 
-export const SCIENCE_SOURCES = scienceSourcesJson as ScienceSources;
+const SOURCES_V1 = scienceSourcesJson as ScienceSources;
+export const SCIENCE_SOURCES: ScienceSources = {
+  ...SOURCES_V1,
+  sources: { ...SOURCES_V1.sources, ...(scienceSourcesCsJson as ScienceSources).sources },
+};
 export const SCIENCE: ScienceContent[] = [
   scienceActionBridgeJson,
   scienceGoalRestatementJson,
   scienceStateResetJson,
   scienceGameOnlyJson,
+  scienceCsOtherReadingsJson as ScienceContent,
+  scienceCsWhyItHappenedJson as ScienceContent,
+  scienceCsNotEnoughJson as ScienceContent,
 ];
 
 export function scienceFor(experience: string | null | undefined): ScienceContent | undefined {
@@ -208,3 +235,99 @@ export function fill(text: string, values: Record<string, string | number>): str
     name in values ? String(values[name]) : match,
   );
 }
+
+// ---------- Cognitive shifts ----------
+
+export interface CsCard {
+  id: string;
+  text: string;
+}
+
+export interface CsOtherReadingsContent extends Versioned {
+  safety: string;
+  first: { intro: string; ask: string; cards: (CsCard & { kind: 'self' | 'situation' })[]; own_label: string };
+  feel: {
+    reading: string;
+    belief: RatingItem;
+    upset: RatingItem;
+    control: { question: string; options: { id: 'yes' | 'partly' | 'no'; label: string }[] };
+  };
+  lenses: {
+    counter: string;
+    own_label: string;
+    nothing: string;
+    next_lens: string;
+    items: { id: string; title: string; prompt: string; support?: string; cards: CsCard[] }[];
+  };
+  sort: {
+    intro: string;
+    first_tag: string;
+    place_label: string;
+    columns: { id: 'fits' | 'partly' | 'not'; label: string }[];
+    unplaced: string;
+    none_fit: string;
+  };
+  close: {
+    kept: string;
+    none_kept: string;
+    first_self: string;
+    first_situation: string;
+    control: string;
+    plan_link: string;
+  };
+  next_label: string;
+  finish_label: string;
+}
+
+export interface CsWhyItHappenedContent extends Versioned {
+  safety: string;
+  setback: { intro: string; label: string };
+  first: { ask: string; cards: CsCard[]; own_label: string };
+  more: { intro: string; cards: CsCard[]; own_label: string; add: string; count: string; your_causes: string };
+  map: {
+    counter: string;
+    axes: { id: 'who' | 'time' | 'scope'; low: string; high: string }[];
+    next_cause: string;
+    chart_label: string;
+    list_heading: string;
+  };
+  reflect: { changeable: string; about_you: string; heavy: string; effort: string; add_heading: string };
+  change: { ask: string; none: string; plan_prompt: string; plan_link: string };
+  next_label: string;
+  finish_label: string;
+}
+
+export interface CsReading extends CsCard {
+  lean: 'negative' | 'neutral' | 'positive';
+}
+
+export interface CsNotEnoughContent extends Versioned {
+  safety: string;
+  situation: {
+    ask: string;
+    own_choice: string;
+    own_label: string;
+    scenarios: { id: string; text: string; readings: CsReading[] }[];
+  };
+  first: { ask: string; own_label: string; certainty: RatingItem };
+  share: {
+    intro: string;
+    choose: string;
+    own_label: string;
+    add: string;
+    something_else: string;
+    first_tag: string;
+    left: string;
+    more: string;
+    fewer: string;
+    none_fit: string;
+  };
+  find: { intro: string; options: { id: string; label: string }[] };
+  after: { reading: string; close: string };
+  next_label: string;
+  finish_label: string;
+}
+
+export const CS_OTHER_READINGS = csOtherReadingsJson as CsOtherReadingsContent;
+export const CS_WHY_IT_HAPPENED = csWhyItHappenedJson as CsWhyItHappenedContent;
+export const CS_NOT_ENOUGH = csNotEnoughJson as CsNotEnoughContent;

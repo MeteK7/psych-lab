@@ -89,3 +89,33 @@ describe('science explanations', () => {
     expect(say('game_only+action_bridge').method.name).toMatch(/comparison/);
   });
 });
+
+describe('Cognitive shifts science explanations (cognitive-shifts-design.md §7)', () => {
+  const cs = SCIENCE.filter((s) => s.experience.startsWith('cs_'));
+  const experiment = SCIENCE.filter((s) => !s.experience.startsWith('cs_'));
+
+  it('exist for all three exercises', () => {
+    expect(cs.map((s) => s.experience).sort()).toEqual([
+      'cs_not_enough_to_go_on',
+      'cs_other_readings',
+      'cs_why_it_happened',
+    ]);
+  });
+
+  it('give every finding its evidence layer and who took part, in what setting', () => {
+    for (const s of cs) {
+      for (const r of s.research) {
+        expect(r.layer, `${s.id}: ${r.text}`).toMatch(/^(method|similar)$/);
+        expect(r.who?.trim(), `${s.id}: ${r.text}`).toBeTruthy();
+      }
+      expect(s.similar_note?.trim(), s.id).toBeTruthy();
+    }
+  });
+
+  it('leave the four experiment explanations unchanged in form', () => {
+    for (const s of experiment) {
+      expect(s.research.some((r) => r.layer || r.who), s.id).toBe(false);
+      expect(s.similar_note, s.id).toBeUndefined();
+    }
+  });
+});

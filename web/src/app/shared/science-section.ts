@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
 
 import { Evidence, SCIENCE_SOURCES, ScienceContent } from '../../content';
@@ -17,7 +18,7 @@ const EVIDENCE_LABELS: Record<Evidence, string> = {
  */
 @Component({
   selector: 'app-science-section',
-  imports: [Icon],
+  imports: [Icon, NgTemplateOutlet],
   template: `
     <details class="science" [open]="open()">
       <summary>
@@ -46,24 +47,48 @@ const EVIDENCE_LABELS: Record<Evidence, string> = {
           }
         </section>
 
-        <section class="part">
-          <h3><app-icon name="search" /> What research says about this method</h3>
-          <ul class="findings">
-            @for (finding of findings(); track finding.text) {
-              <li class="finding">
-                <p>{{ finding.text }}</p>
-                <ul class="refs" aria-label="Sources for this finding">
-                  @for (source of finding.sources; track source.citation) {
-                    <li>
-                      {{ source.citation }}
-                      <span class="level" [class.partial]="source.evidence === 'abstract'">{{ source.level }}</span>
-                    </li>
-                  }
-                </ul>
-              </li>
+        @if (layered()) {
+          <!-- Explanations with evidence layers: method research, then similar exercises. -->
+          <section class="part">
+            <h3><app-icon name="search" /> Research on the method</h3>
+            <ng-container *ngTemplateOutlet="findingList; context: { $implicit: layer('method') }" />
+          </section>
+          <section class="part">
+            <h3><app-icon name="search" /> Research on similar exercises</h3>
+            <ng-container *ngTemplateOutlet="findingList; context: { $implicit: layer('similar') }" />
+            @if (science().similar_note; as note) {
+              <p>{{ note }}</p>
             }
-          </ul>
-        </section>
+          </section>
+        } @else {
+          <section class="part">
+            <h3><app-icon name="search" /> What research says about this method</h3>
+            <ng-container *ngTemplateOutlet="findingList; context: { $implicit: findings() }" />
+          </section>
+        }
+
+        <ng-template #findingList let-list>
+          @if (list.length) {
+            <ul class="findings">
+              @for (finding of list; track finding.text) {
+                <li class="finding">
+                  <p>{{ finding.text }}</p>
+                  @if (finding.who) {
+                    <p class="who">{{ finding.who }}</p>
+                  }
+                  <ul class="refs" aria-label="Sources for this finding">
+                    @for (source of finding.sources; track source.citation) {
+                      <li>
+                        {{ source.citation }}
+                        <span class="level" [class.partial]="source.evidence === 'abstract'">{{ source.level }}</span>
+                      </li>
+                    }
+                  </ul>
+                </li>
+              }
+            </ul>
+          }
+        </ng-template>
 
         <section class="callout">
           <h3><app-icon name="info" /> About this exercise</h3>
@@ -129,6 +154,7 @@ const EVIDENCE_LABELS: Record<Evidence, string> = {
 
     .findings { display: grid; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
     .finding { padding: 0.625rem 0.75rem; border-radius: 8px; background: color-mix(in srgb, var(--text) 5%, transparent); }
+    .who { font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; }
     .refs { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0.375rem 0 0; padding: 0; list-style: none;
             font-size: 0.85rem; color: var(--muted); }
     .refs li { display: inline-flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
@@ -157,9 +183,18 @@ export class ScienceSection {
   protected readonly findings = computed(() =>
     this.science().research.map((r) => ({
       text: r.text,
+      who: r.who,
+      layer: r.layer,
       sources: r.sources.map((key) => this.describe(key)),
     })),
   );
+
+  /** Cognitive shifts explanations separate research on the method from similar exercises. */
+  protected readonly layered = computed(() => this.science().research.some((r) => r.layer));
+
+  protected layer(layer: 'method' | 'similar') {
+    return this.findings().filter((f) => f.layer === layer);
+  }
 
   /** Every cited source once, in order of first citation. */
   protected readonly sources = computed(() => {
