@@ -1,17 +1,31 @@
 import uuid
 from datetime import datetime
-from typing import Any, Literal, Self
+from typing import Any, Literal, Self, get_args
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
 # try: Try it (practice, never part of the experiment). dev: Test mode (phase 0).
 Mode = Literal["self_use", "usability", "try", "dev"]
+# The experiment's conditions (protocol-n-of-1.md); unchanged by the exercise registry.
 Condition = Literal[
     "action_bridge",
     "goal_restatement",
     "state_reset+action_bridge",
     "game_only+action_bridge",
 ]
+# Every exercise a session can run. Exercises that aren't experiment conditions run only in
+# Try it (or usability sessions), never with a reveal.
+ExerciseId = Literal[
+    "action_bridge",
+    "goal_restatement",
+    "state_reset+action_bridge",
+    "game_only+action_bridge",
+    "cs_other_readings",
+    "cs_why_it_happened",
+    "cs_not_enough_to_go_on",
+]
+EXPERIMENT_CONDITIONS: tuple[str, ...] = get_args(Condition)
+NON_EXPERIMENT_MODES = ("try", "usability")
 Status = Literal["in_progress", "completed", "aborted"]
 
 
@@ -30,7 +44,7 @@ class SessionUpsert(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     mode: Mode
-    condition: Condition
+    condition: ExerciseId
     status: Status
     content_versions: dict[str, str] = Field(default_factory=dict)
     steps: list[StepSummary] = Field(default_factory=list, max_length=20)
@@ -42,11 +56,15 @@ class SessionUpsert(BaseModel):
     n1_reveal_id: uuid.UUID | None = None
 
     @model_validator(mode="after")
-    def _check_times(self) -> Self:
+    def _check(self) -> Self:
         if self.ended_at is not None and self.ended_at < self.started_at:
             raise ValueError("ended_at must not be before started_at")
         if self.status != "in_progress" and self.ended_at is None:
             raise ValueError("a finished session needs ended_at")
+        if self.condition not in EXPERIMENT_CONDITIONS and (
+            self.mode not in NON_EXPERIMENT_MODES or self.n1_reveal_id is not None
+        ):
+            raise ValueError("this exercise runs only in Try it, never in the experiment")
         return self
 
 

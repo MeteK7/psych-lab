@@ -31,6 +31,13 @@ CONDITIONS = (
     "state_reset+action_bridge",
     "game_only+action_bridge",
 )
+# Every exercise a session can run: the experiment's conditions plus Try it-only exercises.
+# Cognitive shifts (docs/cognitive-shifts-design.md): never part of the experiment.
+EXERCISES = CONDITIONS + (
+    "cs_other_readings",
+    "cs_why_it_happened",
+    "cs_not_enough_to_go_on",
+)
 STATUSES = ("in_progress", "completed", "aborted")
 
 
@@ -42,7 +49,7 @@ class SessionRecord(Base):
     __tablename__ = "sessions"
     __table_args__ = (
         CheckConstraint(_in("mode", MODES), name="ck_sessions_mode"),
-        CheckConstraint(_in("condition", CONDITIONS), name="ck_sessions_condition"),
+        CheckConstraint(_in("condition", EXERCISES), name="ck_sessions_condition"),
         CheckConstraint(_in("status", STATUSES), name="ck_sessions_status"),
         CheckConstraint("ended_at IS NULL OR ended_at >= started_at", name="ck_sessions_times"),
     )
