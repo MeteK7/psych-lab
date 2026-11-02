@@ -308,6 +308,7 @@ def export(db: Session, phase: int, settings: Settings) -> dict[str, Any]:
     )
     days = list(db.scalars(select(N1Day).where(N1Day.phase == phase)))
     starts = list(db.scalars(select(N1StudyStart).where(N1StudyStart.phase == phase)))
+    others = other_sessions(db, reveals, settings)
     return {
         "phase": phase,
         "timezone": settings.study_timezone,
@@ -331,6 +332,8 @@ def export(db: Session, phase: int, settings: Settings) -> dict[str, Any]:
                 "session_date": r.session_date.isoformat(),
                 "revealed_at": r.revealed_at.isoformat(),
                 "minutes_after_planned": r.minutes_after_planned,
+                # Local midnight: the exposure window opens here (protocol §7).
+                "day_start": local_midnight(r.session_date, settings).isoformat(),
             }
             for r in sorted(reveals, key=lambda r: r.revealed_at)
         ],
@@ -350,4 +353,40 @@ def export(db: Session, phase: int, settings: Settings) -> dict[str, Any]:
             {"session_date": s.session_date.isoformat(), "recorded_at": s.recorded_at.isoformat()}
             for s in sorted(starts, key=lambda s: s.session_date)
         ],
+        # Exercises without a reveal (Try it) during the phase's days: no answers, no text.
+        "other_sessions": [
+            {
+                "id": str(s.id),
+                "mode": s.mode,
+                "condition": s.condition,
+                "status": s.status,
+                "started_at": s.started_at.isoformat(),
+                "ended_at": s.ended_at.isoformat() if s.ended_at else None,
+            }
+            for s in others
+        ],
     }
+
+
+def local_midnight(on: date, settings: Settings) -> datetime:
+    return datetime.combine(on, time(0, 0), tzinfo=zone(settings))
+
+
+def other_sessions(db: Session, reveals: list[N1Reveal], settings: Settings) -> list[SessionRecord]:
+    """Sessions without a reveal from the first session day's midnight on.
+
+    The range ends two days after the last session day, because an outcome window can
+    run past midnight; the analysis applies each day's exact window.
+    """
+    if not reveals:
+        return []
+    first = min(r.session_date for r in reveals)
+    last = max(r.session_date for r in reveals)
+    query = (
+        select(SessionRecord)
+        .where(SessionRecord.n1_reveal_id.is_(None))
+        .where(SessionRecord.started_at >= local_midnight(first, settings))
+        .where(SessionRecord.started_at < local_midnight(last + timedelta(days=2), settings))
+        .order_by(SessionRecord.started_at)
+    )
+    return list(db.scalars(query))

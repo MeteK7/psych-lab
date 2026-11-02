@@ -328,3 +328,40 @@ def test_export_contains_one_phase_without_free_text(
     assert saved == datetime.fromisoformat("2026-11-02T19:00:00+03:00")  # server time of the save
     assert data["study_starts"][0]["session_date"] == "2026-11-02"
     assert "private words" not in str(data)
+
+
+def test_export_lists_try_it_runs_on_session_days_without_their_answers(
+    client: TestClient, clock: Clock, n1_settings: Settings, connection: Connection
+) -> None:
+    def try_it(start: str, condition: str = "action_bridge") -> str:
+        session_id = str(uuid.uuid4())
+        body = {
+            "mode": "try",
+            "condition": condition,
+            "status": "completed",
+            "started_at": start + "+03:00",
+            "ended_at": start + "+03:00",
+            "plan": {"goal": "private plan"},
+        }
+        assert client.put(f"/api/sessions/{session_id}", json=body).status_code == 201
+        return session_id
+
+    before = try_it("2026-11-01T23:59")  # the evening before the first session day
+    plan(client, clock, "2026-11-02", "19:00", "2026-11-01T21:00")
+    at(clock, "2026-11-02T19:00")
+    reveal = client.post("/api/n1/reveal", json={}).json()["reveal"]
+    run_session(client, reveal, "2026-11-02T19:01", "2026-11-02T19:06")
+    morning = try_it("2026-11-02T00:00")
+    after_midnight = try_it("2026-11-03T00:30", "goal_restatement")
+    too_late = try_it("2026-11-04T00:00")
+
+    with Session(bind=connection, join_transaction_mode="create_savepoint") as db:
+        data = n1.export(db, 1, n1_settings)
+
+    assert data["reveals"][0]["day_start"] == "2026-11-02T00:00:00+03:00"
+    others = data["other_sessions"]
+    assert [o["id"] for o in others] == [morning, after_midnight]
+    assert {before, too_late}.isdisjoint(o["id"] for o in others)
+    assert set(others[0]) == {"id", "mode", "condition", "status", "started_at", "ended_at"}
+    assert others[1]["mode"] == "try"
+    assert "private plan" not in str(data)

@@ -49,6 +49,19 @@ describe('session record', () => {
     });
   });
 
+  it('adds the sound game content version only when the sound version was used', () => {
+    const base = newDraft('id', 'try', 'game_only+action_bridge', T0);
+    const dot = addStep(base, 'game_only', T0, T1, { result: { task: 'dot' } });
+    const sound = addStep(base, 'game_only', T0, T1, { result: { task: 'sound' } });
+    expect(toUpsert(dot, 'in_progress', null).content_versions).not.toHaveProperty('state-reset-sound');
+    expect(toUpsert(sound, 'in_progress', null).content_versions).toEqual({
+      ratings: '2',
+      'state-reset': '3',
+      'action-bridge': '2',
+      'state-reset-sound': '1',
+    });
+  });
+
   it('sends null ratings when none were given', () => {
     expect(toUpsert(newDraft('id', 'dev', 'action_bridge', T0), 'in_progress', null).ratings).toBeNull();
   });

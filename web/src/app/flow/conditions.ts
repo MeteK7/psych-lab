@@ -1,4 +1,5 @@
 import { Condition, Mode } from '../api/types';
+import { EXERCISES, ExerciseInfo, exerciseInfo } from '../experiences/registry';
 
 export type StepId =
   | 'pre_rating'
@@ -6,88 +7,31 @@ export type StepId =
   | 'game_only'
   | 'action_bridge'
   | 'goal_restatement'
-  | 'post_rating';
+  | 'post_rating'
+  // Cognitive shifts: one step per screen; the exercise keeps its state in CsStore.
+  | 'cs1_first'
+  | 'cs1_feel_before'
+  | 'cs1_lenses'
+  | 'cs1_sort'
+  | 'cs1_feel_after'
+  | 'cs1_close'
+  | 'cs2_setback'
+  | 'cs2_first'
+  | 'cs2_more'
+  | 'cs2_map'
+  | 'cs2_reflect'
+  | 'cs2_change'
+  | 'cs3_situation'
+  | 'cs3_first'
+  | 'cs3_share'
+  | 'cs3_find'
+  | 'cs3_after';
 
-const STEPS: Record<Condition, StepId[]> = {
-  // n-of-1 phase 1: plan factor
-  action_bridge: ['pre_rating', 'action_bridge', 'post_rating'],
-  goal_restatement: ['pre_rating', 'goal_restatement', 'post_rating'],
-  // n-of-1 phase 2: pre-task factor, Action Bridge held constant
-  'state_reset+action_bridge': ['pre_rating', 'state_reset', 'action_bridge', 'post_rating'],
-  'game_only+action_bridge': ['pre_rating', 'game_only', 'action_bridge', 'post_rating'],
-};
+/** An experiment exercise: one of the n-of-1 conditions (protocol-n-of-1.md). */
+export type ConditionInfo = ExerciseInfo & { value: Condition; experiment: 1 | 2 };
 
-export interface ConditionInfo {
-  value: Condition;
-  /** On-screen name of the experience; internal names stay in code and docs. */
-  label: string;
-  /** One line for the area page. */
-  description: string;
-  /** "What happens" steps shown before Begin. */
-  summary: string[];
-  minutes: number;
-  experimental: boolean;
-  /** Internal: the n-of-1 phase that compares this condition. Never shown on screen. */
-  phase: 1 | 2;
-}
-
-export const CONDITIONS: ConditionInfo[] = [
-  {
-    value: 'action_bridge',
-    label: 'Plan your first step',
-    description: "Write when you'll start and the first small thing you'll do.",
-    summary: [
-      'Rate how starting feels.',
-      'Write a short when-then plan and read it twice.',
-      'Rate again.',
-    ],
-    minutes: 3,
-    experimental: false,
-    phase: 1,
-  },
-  {
-    value: 'goal_restatement',
-    label: 'Write down your goal',
-    description: "Write your goal and what you'll work on today.",
-    summary: [
-      'Rate how starting feels.',
-      "Write your goal and today's topic and read them twice.",
-      'Rate again.',
-    ],
-    minutes: 3,
-    experimental: false,
-    phase: 1,
-  },
-  {
-    value: 'state_reset+action_bridge',
-    label: 'Picture it, then follow the dot',
-    description:
-      "Hold a picture of something you're reluctant to start while following a moving dot, then plan your first step.",
-    summary: [
-      'Rate how starting feels.',
-      'Choose a picture, try the game, then play 8 short rounds while holding the picture.',
-      'Plan your first step.',
-      'Rate again.',
-    ],
-    minutes: 10,
-    experimental: true,
-    phase: 2,
-  },
-  {
-    value: 'game_only+action_bridge',
-    label: 'Follow the dot, then plan',
-    description: 'A short dot-following game, then plan your first step.',
-    summary: [
-      'Rate how starting feels.',
-      'Try the game, then play 8 short rounds.',
-      'Plan your first step.',
-      'Rate again.',
-    ],
-    minutes: 9,
-    experimental: false,
-    phase: 2,
-  },
-];
+/** The experiment's four conditions, read from the exercise registry. */
+export const CONDITIONS = EXERCISES.filter((e): e is ConditionInfo => e.experiment !== null);
 
 export const STEP_NAMES: Record<StepId, string> = {
   pre_rating: 'How starting feels',
@@ -96,24 +40,40 @@ export const STEP_NAMES: Record<StepId, string> = {
   goal_restatement: 'Write down your goal',
   state_reset: 'Picture it, then follow the dot',
   game_only: 'Follow the dot',
+  cs1_first: 'Your first reading',
+  cs1_feel_before: 'How it feels now',
+  cs1_lenses: 'Other ways to see it',
+  cs1_sort: 'Which readings fit?',
+  cs1_feel_after: 'How it feels now',
+  cs1_close: "What you're keeping",
+  cs2_setback: 'The setback',
+  cs2_first: 'Why do you think it happened?',
+  cs2_more: 'Other possible causes',
+  cs2_map: 'Place each cause',
+  cs2_reflect: 'What the map shows',
+  cs2_change: 'Anything to change?',
+  cs3_situation: 'An unclear situation',
+  cs3_first: 'Your first reading',
+  cs3_share: 'How likely is each?',
+  cs3_find: 'Is there a way to find out?',
+  cs3_after: 'How sure are you now?',
 };
 
 // Usability mode belongs to level B and is not offered yet.
 export const MODES: { value: Mode; label: string }[] = [
   { value: 'self_use', label: 'Experiment' },
-  { value: 'dev', label: 'Practice' },
+  { value: 'try', label: 'Practice' },
+  { value: 'dev', label: 'Test' },
 ];
 
+/** Experiment exercises only; for any exercise, use exerciseInfo from the registry. */
 export function conditionInfo(value: Condition | string | null | undefined): ConditionInfo | undefined {
-  return CONDITIONS.find((c) => c.value === value);
-}
-
-export function stepsFor(condition: Condition): StepId[] {
-  return [...STEPS[condition]];
+  const info = exerciseInfo(value);
+  return info?.experiment ? (info as ConditionInfo) : undefined;
 }
 
 export function isCondition(value: unknown): value is Condition {
-  return typeof value === 'string' && value in STEPS;
+  return CONDITIONS.some((c) => c.value === value);
 }
 
 export function isLevelAMode(value: unknown): value is Mode {

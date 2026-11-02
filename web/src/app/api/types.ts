@@ -1,11 +1,18 @@
 // Mirrors api/app/schemas.py by hand (generated types are deferred, plan §6.1).
 
-export type Mode = 'self_use' | 'usability' | 'dev';
+// try: Try it (practice, never part of the experiment). dev: Test mode (phase 0).
+export type Mode = 'self_use' | 'usability' | 'try' | 'dev';
 export type Condition =
   | 'action_bridge'
   | 'goal_restatement'
   | 'state_reset+action_bridge'
   | 'game_only+action_bridge';
+/** Every exercise; those that aren't experiment conditions run in Try it only. */
+export type ExerciseId =
+  | Condition
+  | 'cs_other_readings'
+  | 'cs_why_it_happened'
+  | 'cs_not_enough_to_go_on';
 export type Status = 'in_progress' | 'completed' | 'aborted';
 
 export interface StepSummary {
@@ -19,7 +26,7 @@ export interface StepSummary {
 
 export interface SessionUpsert {
   mode: Mode;
-  condition: Condition;
+  condition: ExerciseId;
   status: Status;
   content_versions?: Record<string, string>;
   steps?: StepSummary[];
@@ -39,7 +46,7 @@ export interface FollowUp {
 export interface SessionOut {
   id: string;
   mode: Mode;
-  condition: Condition;
+  condition: ExerciseId;
   status: Status;
   content_versions: Record<string, string>;
   steps: StepSummary[];
@@ -56,6 +63,7 @@ export interface SessionOut {
 export interface Health {
   status: 'ok';
   database: 'ok';
+  environment: 'development' | 'production';
 }
 
 // Mirrors api/app/n1.py today_view().

@@ -1,0 +1,20 @@
+{
+  "id": "science-goal-restatement",
+  "version": "1",
+  "experience": "goal_restatement",
+  "what_you_do": "You write down what you want to start and what you'll work on today, then read both twice.",
+  "method": {
+    "name": "Stating your goal (the comparison exercise)",
+    "text": "Research on if-then planning compares people who make a plan with people who only state their goal. This exercise is that plain version: no “when”, no if-then plan and no plan for obstacles. You can try it next to “Plan your first step” and compare."
+  },
+  "research": [
+    {
+      "text": "Research found that adding an if-then plan led to more goal progress than stating the goal alone. Stating the goal was the point of comparison in that research, not a method tested on its own.",
+      "sources": ["gollwitzer-sheeran-2006", "sheeran-2025"]
+    }
+  ],
+  "about_this_exercise": "This exercise hasn't been tested itself. It is offered so that you can try the plain version and compare it with the planning one.",
+  "limits": [
+    "Don't expect this exercise to change much by itself: it is the comparison version."
+  ]
+}

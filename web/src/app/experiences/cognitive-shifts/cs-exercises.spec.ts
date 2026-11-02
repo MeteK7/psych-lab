@@ -1,0 +1,314 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
+
+import { SessionUpsert } from '../../api/types';
+import { SessionPage } from '../../flow/session-page';
+
+// The three Cognitive shifts exercises, run through the session page as a person would.
+// Everything a person writes is marked PRIVATE and must never appear in a saved record.
+
+interface Run {
+  fixture: ComponentFixture<SessionPage>;
+  backend: HttpTestingController;
+  bodies: SessionUpsert[];
+}
+
+function start(condition: string, mode = 'try', reveal?: string): Run {
+  TestBed.configureTestingModule({
+    imports: [SessionPage],
+    providers: [
+      provideRouter([]),
+      provideHttpClient(),
+      provideHttpClientTesting(),
+      {
+        provide: ActivatedRoute,
+        useValue: { snapshot: { queryParamMap: convertToParamMap({ mode, condition, ...(reveal ? { reveal } : {}) }) } },
+      },
+    ],
+  });
+  const fixture = TestBed.createComponent(SessionPage);
+  return { fixture, backend: TestBed.inject(HttpTestingController), bodies: [] };
+}
+
+const root = (run: Run) => run.fixture.nativeElement as HTMLElement;
+
+async function settle(run: Run): Promise<void> {
+  for (let i = 0; i < 4; i++) {
+    await new Promise((resolve) => setTimeout(resolve));
+    await run.fixture.whenStable();
+    for (const req of run.backend.match((r) => r.method === 'PUT')) {
+      run.bodies.push(req.request.body as SessionUpsert);
+      req.flush({});
+    }
+  }
+}
+
+function button(run: Run, text: string): HTMLButtonElement {
+  const found = Array.from(root(run).querySelectorAll('button')).find((b) => b.textContent?.trim() === text);
+  if (!found) throw new Error(`No button "${text}"`);
+  return found;
+}
+
+async function press(run: Run, text: string): Promise<void> {
+  expect(button(run, text).disabled, `"${text}" is enabled`).toBe(false);
+  button(run, text).click();
+  await settle(run);
+}
+
+async function type(run: Run, input: HTMLInputElement, value: string): Promise<void> {
+  input.value = value;
+  input.dispatchEvent(new Event('input'));
+  await run.fixture.whenStable();
+}
+
+async function check(run: Run, input: HTMLInputElement | null): Promise<void> {
+  if (!input) throw new Error('No such option');
+  input.click();
+  await run.fixture.whenStable();
+}
+
+async function rate(run: Run, value: number): Promise<void> {
+  for (const scale of Array.from(root(run).querySelectorAll('app-rating-scale fieldset'))) {
+    scale.querySelector<HTMLInputElement>(`input[value="${value}"]`)!.click();
+  }
+  await run.fixture.whenStable();
+}
+
+async function slide(run: Run, input: HTMLInputElement, value: number): Promise<void> {
+  input.value = String(value);
+  input.dispatchEvent(new Event('input'));
+  await run.fixture.whenStable();
+}
+
+const heading = (run: Run) => root(run).querySelector('h2.progress')?.textContent?.trim();
+const last = (run: Run) => run.bodies[run.bodies.length - 1];
+
+describe('Cognitive shifts exercises', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('CS1 runs through its six screens, keeps own text private, and suggests a plan when it can be acted on', async () => {
+    const run = start('cs_other_readings');
+    await run.fixture.whenStable();
+    expect(root(run).textContent).toContain('About 5 minutes.');
+    await press(run, 'Begin');
+
+    expect(heading(run)).toBe('Step 1 of 6: Your first reading');
+    expect(root(run).textContent).toContain("They aren't for painful experiences");
+    await type(run, root(run).querySelector<HTMLInputElement>('.own input')!, 'PRIVATE first reading');
+    await press(run, 'Next');
+
+    expect(heading(run)).toBe('Step 2 of 6: How it feels now');
+    expect(root(run).textContent).toContain('Your first reading: “PRIVATE first reading”');
+    await rate(run, 7);
+    await check(run, root(run).querySelector('input[name="cs1-control"][value="yes"]'));
+    await press(run, 'Next');
+
+    expect(heading(run)).toBe('Step 3 of 6: Other ways to see it');
+    expect(root(run).textContent).toContain('Lens 1 of 3: Other explanations');
+    await check(run, root(run).querySelector('app-card-pick input[type="radio"]'));
+    await press(run, 'Next lens');
+    expect(root(run).textContent).toContain("Lens 2 of 3: A friend's view");
+    expect(root(run).textContent).toContain('It makes sense that this bothers you.'); // a line, not a card
+    expect(root(run).querySelectorAll('app-card-pick input[type="radio"]')).toHaveLength(4);
+    await press(run, 'Nothing comes to mind');
+    await type(run, root(run).querySelector<HTMLInputElement>('.own input')!, 'PRIVATE lens reading');
+    await press(run, 'Next');
+
+    expect(heading(run)).toBe('Step 4 of 6: Which readings fit?');
+    expect(button(run, 'Next').disabled).toBe(true); // every reading placed first
+    await check(run, root(run).querySelector('#place-first-fits'));
+    await check(run, root(run).querySelector('#place-explain-partly'));
+    await check(run, root(run).querySelector('#place-later-fits'));
+    await press(run, 'Next');
+
+    await rate(run, 4);
+    await press(run, 'Next');
+    expect(heading(run)).toBe("Step 6 of 6: What you're keeping");
+    const close = root(run).textContent!;
+    expect(close).toContain('It still feels like it fits.'); // own reading: acknowledged, not endorsed
+    expect(close).not.toContain('sometimes the first reading is right');
+    expect(close).toContain('planning a step might help more');
+    await press(run, 'Finish');
+
+    expect(root(run).textContent).toContain('Exercise complete');
+    const plan = Array.from(root(run).querySelectorAll('a')).find((a) => a.textContent?.trim() === 'Plan your first step');
+    expect(plan?.getAttribute('href')).toBe('/session?mode=try&condition=action_bridge');
+    const back = Array.from(root(run).querySelectorAll('a')).find((a) => a.textContent?.includes('Back to'));
+    expect(back?.textContent?.trim()).toBe('Back to Cognitive shifts');
+    expect(back?.getAttribute('href')).toBe('/areas/cognitive-shifts');
+
+    const saved = last(run);
+    expect(saved.status).toBe('completed');
+    expect(saved.mode).toBe('try');
+    expect(saved.content_versions).toEqual({ 'cs-other-readings': '1' });
+    expect(saved.steps?.map((s) => s.step)).toEqual([
+      'cs1_first', 'cs1_feel_before', 'cs1_lenses', 'cs1_sort', 'cs1_feel_after', 'cs1_close',
+    ]);
+    expect(saved.ratings).toEqual({ cs1_belief_pre: 7, cs1_upset_pre: 7, cs1_belief_post: 4, cs1_upset_post: 4 });
+    expect(saved.steps?.[2].result).toEqual({
+      lenses: [
+        { lens: 'explain', reading: 'harder' },
+        { lens: 'friend', reading: null },
+        { lens: 'later', reading: 'own' },
+      ],
+    });
+    expect(JSON.stringify(run.bodies)).not.toContain('PRIVATE');
+  });
+
+  it('CS1 keeps "sometimes the first reading is right" for a reading of the situation', async () => {
+    const run = start('cs_other_readings');
+    await run.fixture.whenStable();
+    await press(run, 'Begin');
+    await check(run, root(run).querySelector('app-card-pick input[value="always"]'));
+    await press(run, 'Next');
+    await rate(run, 5);
+    await check(run, root(run).querySelector('input[name="cs1-control"][value="no"]'));
+    await press(run, 'Next');
+    for (let i = 0; i < 3; i++) await press(run, 'Nothing comes to mind');
+    await check(run, root(run).querySelector('#place-first-fits'));
+    await press(run, 'Next');
+    await rate(run, 5);
+    await press(run, 'Next');
+    const close = root(run).textContent!;
+    expect(close).toContain('sometimes the first reading is right');
+    expect(close).not.toContain('planning a step');
+    await press(run, 'Finish');
+    expect(Array.from(root(run).querySelectorAll('a')).map((a) => a.textContent?.trim())).not.toContain('Plan your first step');
+  });
+
+  it('CS2 maps causes, notes a heavy map, and never saves the setback or causes', async () => {
+    const run = start('cs_why_it_happened');
+    await run.fixture.whenStable();
+    expect(root(run).textContent).toContain('About 5 minutes.');
+    await press(run, 'Begin');
+
+    expect(heading(run)).toBe('Step 1 of 6: The setback');
+    await type(run, root(run).querySelector<HTMLInputElement>('input[type="text"]')!, 'PRIVATE setback');
+    await press(run, 'Next');
+    await check(run, root(run).querySelector('app-card-pick input[value="not_good"]'));
+    await press(run, 'Next');
+
+    expect(heading(run)).toBe('Step 3 of 6: Other possible causes');
+    const boxes = root(run).querySelectorAll<HTMLInputElement>('input[type="checkbox"]');
+    await check(run, boxes[0]);
+    expect(button(run, 'Next').disabled).toBe(true); // at least three causes
+    await type(run, root(run).querySelector<HTMLInputElement>('form.own input')!, 'PRIVATE cause');
+    await press(run, 'Add');
+    expect(root(run).textContent).toContain('3 causes so far.');
+    await press(run, 'Next');
+
+    expect(heading(run)).toBe('Step 4 of 6: Place each cause');
+    for (let i = 0; i < 3; i++) {
+      for (const slider of Array.from(root(run).querySelectorAll<HTMLInputElement>('input[type="range"]'))) {
+        await slide(run, slider, 1);
+      }
+      await press(run, i < 2 ? 'Next cause' : 'Next');
+    }
+
+    expect(heading(run)).toBe('Step 5 of 6: What the map shows');
+    const map = root(run).textContent!;
+    expect(map).toContain("That's a heavy way to see it.");
+    expect(map).toContain("Effort is one possible cause among many. It isn't the answer by default.");
+    expect(root(run).querySelector('figure svg[role="img"]')).not.toBeNull();
+    expect(root(run).querySelectorAll('.map-list li')).toHaveLength(3);
+    await check(run, root(run).querySelector('.add app-card-pick input[value="chance"]'));
+    for (const slider of Array.from(root(run).querySelectorAll<HTMLInputElement>('.add input[type="range"]'))) {
+      await slide(run, slider, 5);
+    }
+    await press(run, 'Add');
+    expect(root(run).querySelectorAll('.map-list li')).toHaveLength(4);
+    await press(run, 'Next');
+
+    expect(heading(run)).toBe('Step 6 of 6: Anything to change?');
+    const options = Array.from(root(run).querySelectorAll('input[name="cs2-change"]'));
+    expect(options[0].parentElement?.textContent?.trim()).toBe('Chance'); // changeable causes first
+    await check(run, options[0] as HTMLInputElement);
+    await press(run, 'Finish');
+
+    const saved = last(run);
+    expect(saved.status).toBe('completed');
+    expect(saved.content_versions).toEqual({ 'cs-why-it-happened': '1' });
+    expect(saved.steps?.[3].result).toEqual({
+      positions: [
+        { cause: 'not_good', who: 1, time: 1, scope: 1 },
+        { cause: 'preparation', who: 1, time: 1, scope: 1 },
+        { cause: 'own', who: 1, time: 1, scope: 1 },
+      ],
+    });
+    expect(saved.steps?.[5].result).toEqual({ chosen: { cause: 'chance', who: 5, time: 5, scope: 5 } });
+    expect(Array.from(root(run).querySelectorAll('a')).map((a) => a.textContent?.trim())).toContain('Plan your first step');
+    expect(JSON.stringify(run.bodies)).not.toContain('PRIVATE');
+  });
+
+  it('CS3 shares exactly 10 points, asks how to find out, and keeps own readings private', async () => {
+    const run = start('cs_not_enough_to_go_on');
+    await run.fixture.whenStable();
+    expect(root(run).textContent).toContain('About 4 minutes.');
+    await press(run, 'Begin');
+
+    expect(heading(run)).toBe('Step 1 of 5: An unclear situation');
+    await check(run, root(run).querySelectorAll<HTMLInputElement>('input[name="cs3-situation"]')[1]);
+    await press(run, 'Next');
+
+    expect(heading(run)).toBe('Step 2 of 5: Your first reading');
+    await check(run, root(run).querySelector('app-card-pick input[value="annoyed"]'));
+    await rate(run, 8);
+    await press(run, 'Next');
+
+    expect(heading(run)).toBe('Step 3 of 5: How likely is each?');
+    const boxes = root(run).querySelectorAll<HTMLInputElement>('input[type="checkbox"]');
+    expect(boxes).toHaveLength(5); // the other readings of the scenario
+    await check(run, boxes[0]);
+    await type(run, root(run).querySelector<HTMLInputElement>('form.own input')!, 'PRIVATE other reading');
+    await press(run, 'Add');
+    const more = (reading: string) =>
+      root(run).querySelector<HTMLButtonElement>(`button[aria-label="More points for: ${reading}"]`)!;
+    for (const [reading, n] of [
+      ["They're annoyed with me.", 2],
+      ["They're busy and haven't seen it.", 5],
+      ['PRIVATE other reading', 2],
+      ["Something I haven't thought of", 1],
+    ] as const) {
+      for (let i = 0; i < n; i++) {
+        more(reading).click();
+        await run.fixture.whenStable();
+      }
+    }
+    expect(root(run).textContent).toContain('Points left: 0');
+    expect(more("They're annoyed with me.").disabled).toBe(true);
+    await press(run, 'Next');
+
+    expect(heading(run)).toBe('Step 4 of 5: Is there a way to find out?');
+    await check(run, root(run).querySelector('input[name="cs3-find"]'));
+    await press(run, 'Next');
+    await rate(run, 4);
+    expect(root(run).textContent).toContain("Holding more than one reading open isn't indecision.");
+    await press(run, 'Finish');
+
+    const saved = last(run);
+    expect(saved.status).toBe('completed');
+    expect(saved.ratings).toEqual({ cs3_certainty_pre: 8, cs3_certainty_post: 4 });
+    expect(saved.steps?.[2].result).toEqual({
+      readings: [
+        { reading: 'first', card: 'annoyed', points: 2 },
+        { reading: 'other-0', card: 'busy', points: 5 },
+        { reading: 'other-1', card: 'own', points: 2 },
+        { reading: 'something_else', card: 'something_else', points: 1 },
+      ],
+      none_fit: false,
+    });
+    expect(saved.steps?.[3].result).toEqual({ choice: 'ask' });
+    expect(JSON.stringify(run.bodies)).not.toContain('PRIVATE');
+  });
+
+  it('never opens outside Try it', async () => {
+    for (const [mode, reveal] of [['self_use', 'x'], ['dev', 'x'], ['try', 'x']] as const) {
+      const run = start('cs_other_readings', mode, reveal);
+      await run.fixture.whenStable();
+      expect(root(run).textContent).toContain('This exercise link is incomplete.');
+      TestBed.resetTestingModule();
+    }
+  });
+});

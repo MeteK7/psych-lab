@@ -1,0 +1,36 @@
+{
+  "id": "science-sources",
+  "version": "1",
+  "sources": {
+    "gollwitzer-sheeran-2006": {
+      "citation": "Gollwitzer & Sheeran, 2006",
+      "title": "Implementation intentions and goal achievement: A meta-analysis of effects and processes. Advances in Experimental Social Psychology, 38, 69–119",
+      "url": "https://kops.uni-konstanz.de/entities/publication/2e749bfb-8533-437c-8203-7e788c910c5f",
+      "evidence": "full_text"
+    },
+    "sheeran-2025": {
+      "citation": "Sheeran, Listrom & Gollwitzer, 2025",
+      "title": "The when and how of planning: Meta-analysis of the scope and components of implementation intentions in 642 tests. European Review of Social Psychology, 36(1), 162–194",
+      "url": "https://kops.uni-konstanz.de/handle/123456789/69905",
+      "evidence": "full_text"
+    },
+    "engelhard-2011": {
+      "citation": "Engelhard et al., 2011",
+      "title": "Reducing vividness and emotional intensity of recurrent “flashforwards” by taxing working memory: An analogue study. Journal of Anxiety Disorders, 25, 599–603",
+      "url": "https://www.ifemdr.fr/wp-content/uploads/2011/10/Engelhard-et-al-2011-Reducing-vividness-and-emotional-intensity-of-recurrent-flashforwards.pdf",
+      "evidence": "full_text"
+    },
+    "holmes-2010": {
+      "citation": "Holmes, James, Kilford & Deeprose, 2010",
+      "title": "Key steps in developing a cognitive vaccine against traumatic flashbacks: Visuospatial Tetris versus verbal Pub Quiz. PLoS ONE, 5(11), e13706",
+      "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0013706",
+      "evidence": "full_text"
+    },
+    "webb-2012": {
+      "citation": "Webb, Miles & Sheeran, 2012",
+      "title": "Dealing with feeling: A meta-analysis of the effectiveness of strategies derived from the process model of emotion regulation. Psychological Bulletin, 138(4), 775–808",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/22582737/",
+      "evidence": "abstract"
+    }
+  }
+}

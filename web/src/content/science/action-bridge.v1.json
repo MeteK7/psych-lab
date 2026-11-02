@@ -1,0 +1,25 @@
+{
+  "id": "science-action-bridge",
+  "version": "1",
+  "experience": "action_bridge",
+  "what_you_do": "You write down what you want to start, when you'll start, a tiny first step, and what you'll do if something gets in the way. Then you read your plan twice.",
+  "method": {
+    "name": "If-then planning (implementation intentions)",
+    "text": "Instead of only deciding what you want to do, you link a specific moment to a specific action: “When it's 7 pm and I'm at my desk, I'll open chapter 3.” The idea is that the moment itself then prompts you, so starting needs less deciding on the spot."
+  },
+  "research": [
+    {
+      "text": "Research found that people who made if-then plans reached their goals more often than people who only set the goal, across 94 experiments.",
+      "sources": ["gollwitzer-sheeran-2006"]
+    },
+    {
+      "text": "A larger review of 642 experiments found that, after allowing for experiments that were never published, the benefit is small. It was larger when people strongly wanted the goal, and close to zero when they didn't.",
+      "sources": ["sheeran-2025"]
+    }
+  ],
+  "about_this_exercise": "This exercise follows the if-then planning method, but this version hasn't been tested itself. The research above tested if-then plans in its own forms and settings, not in this app.",
+  "limits": [
+    "Expect a small effect at most, and only for goals you genuinely want.",
+    "Effects were smaller online and in everyday settings than in the lab."
+  ]
+}

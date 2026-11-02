@@ -1,0 +1,25 @@
+{
+  "id": "science-cs-why-it-happened",
+  "version": "1",
+  "experience": "cs_why_it_happened",
+  "what_you_do": "You collect possible causes of a setback and place each one on a map: about you or the situation, lasting or just this time, everything or just this kind of task.",
+  "method": {
+    "name": "Attributional reframing",
+    "text": "The explanations we give for setbacks matter. “I'm just bad at this” is about you, lasting and general. Other causes are about the situation, this time only, or this kind of task. Looking at the full range of causes can give a more accurate picture. Some causes may really be about you; that's information, not a verdict."
+  },
+  "research": [
+    {
+      "layer": "method",
+      "text": "A review of 17 evaluations of a cognitive-behavioural group programme for young people, which teaches them to check pessimistic explanations for things that go wrong and consider other ones, found slightly fewer low-mood symptoms than with no programme, up to a year later, but not fewer than with other active programmes.",
+      "who": "2,498 young people aged 8–18 · mostly school groups (in one trial, 12 weekly meetings of 90 minutes)",
+      "sources": ["brunwasser-2009", "gillham-2007"]
+    }
+  ],
+  "similar_note": "No research has tested a short, self-guided cause map like this one.",
+  "about_this_exercise": "This exercise uses attributional reframing, but this version hasn't been tested itself. The programme above was a longer group programme, mostly with young people in schools.",
+  "limits": [
+    "Effects in programmes were small.",
+    "Looking for outside causes can turn into excuses, and looking for inside causes into blame. The map is meant to show both honestly.",
+    "There's no evidence yet on whether a single short exercise changes anything."
+  ]
+}

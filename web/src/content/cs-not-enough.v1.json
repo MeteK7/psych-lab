@@ -1,0 +1,120 @@
+{
+  "id": "cs-not-enough",
+  "version": "1",
+  "safety": "These exercises are for everyday situations, like learning, work or friends. They aren't for painful experiences such as loss, abuse or health worries, or for times of crisis. If that's where you are, talk to someone you trust or a support line. You can stop at any time.",
+  "situation": {
+    "ask": "Pick a situation, or describe your own:",
+    "own_choice": "My own situation",
+    "own_label": "Describe it in a few words (only you see this; it isn't saved)",
+    "scenarios": [
+      {
+        "id": "teacher_note",
+        "text": "Your teacher writes ‘Come and see me after class’ on your assignment.",
+        "readings": [
+          { "id": "explain", "text": "They want to explain something.", "lean": "neutral" },
+          { "id": "wrong", "text": "I've done something wrong.", "lean": "negative" },
+          { "id": "feedback", "text": "They want to give me feedback in person.", "lean": "positive" },
+          { "id": "several", "text": "They're checking in with several people.", "lean": "neutral" },
+          { "id": "bad_grade", "text": "It's bad news about my grade.", "lean": "negative" },
+          { "id": "liked", "text": "They liked something in it.", "lean": "positive" }
+        ]
+      },
+      {
+        "id": "no_reply",
+        "text": "A friend hasn't replied to your message for a day.",
+        "readings": [
+          { "id": "busy", "text": "They're busy and haven't seen it.", "lean": "neutral" },
+          { "id": "annoyed", "text": "They're annoyed with me.", "lean": "negative" },
+          { "id": "thinking", "text": "They're thinking about what to reply.", "lean": "positive" },
+          { "id": "forgot", "text": "They saw it and forgot to answer.", "lean": "neutral" },
+          { "id": "dont_want", "text": "They don't want to talk to me.", "lean": "negative" },
+          { "id": "properly", "text": "They're saving it to answer properly.", "lean": "positive" }
+        ]
+      },
+      {
+        "id": "meeting_moved",
+        "text": "Your manager moves your weekly meeting without saying why.",
+        "readings": [
+          { "id": "calendar", "text": "Their calendar changed.", "lean": "neutral" },
+          { "id": "unhappy", "text": "They're unhappy with my work.", "lean": "negative" },
+          { "id": "more_time", "text": "They want more time for my topic.", "lean": "positive" },
+          { "id": "rearranging", "text": "They're rearranging lots of meetings.", "lean": "neutral" },
+          { "id": "bad_coming", "text": "Something bad is coming.", "lean": "negative" },
+          { "id": "useful", "text": "They're making room for something useful.", "lean": "positive" }
+        ]
+      },
+      {
+        "id": "no_reactions",
+        "text": "In a group chat, your suggestion gets no reactions.",
+        "readings": [
+          { "id": "not_read", "text": "People haven't read it yet.", "lean": "neutral" },
+          { "id": "bad_idea", "text": "They think it's a bad idea.", "lean": "negative" },
+          { "id": "thinking_over", "text": "They're thinking it over.", "lean": "positive" },
+          { "id": "waiting", "text": "Everyone's waiting for someone else to answer.", "lean": "neutral" },
+          { "id": "ignoring", "text": "They're ignoring me.", "lean": "negative" },
+          { "id": "meeting", "text": "They'll pick it up in the meeting.", "lean": "positive" }
+        ]
+      },
+      {
+        "id": "essay_comment",
+        "text": "Your essay comes back with: ‘Interesting, but is this the right question?’",
+        "readings": [
+          { "id": "sharpen", "text": "They want me to sharpen the question.", "lean": "neutral" },
+          { "id": "all_wrong", "text": "The whole essay is wrong.", "lean": "negative" },
+          { "id": "push", "text": "They found it interesting enough to push me.", "lean": "positive" },
+          { "id": "standard", "text": "It's a standard prompt to think further.", "lean": "neutral" },
+          { "id": "missed_point", "text": "They think I missed the point.", "lean": "negative" },
+          { "id": "potential", "text": "They see potential in it.", "lean": "positive" }
+        ]
+      },
+      {
+        "id": "no_hello",
+        "text": "A classmate walks past you without saying hello.",
+        "readings": [
+          { "id": "didnt_see", "text": "They didn't see me.", "lean": "neutral" },
+          { "id": "dont_like", "text": "They don't like me.", "lean": "negative" },
+          { "id": "hurry", "text": "They were in a hurry to get somewhere.", "lean": "positive" },
+          { "id": "lost_thought", "text": "They were lost in thought.", "lean": "neutral" },
+          { "id": "upset", "text": "They're upset with me.", "lean": "negative" },
+          { "id": "later", "text": "They meant to say hi later.", "lean": "positive" }
+        ]
+      }
+    ]
+  },
+  "first": {
+    "ask": "What's your first thought about what it means?",
+    "own_label": "Or write your own",
+    "certainty": {
+      "label": "How sure are you of this reading?",
+      "min_label": "not at all",
+      "max_label": "completely"
+    }
+  },
+  "share": {
+    "intro": "You have 10 points. Share them out by how likely each reading seems. Your first reading is already on the list.",
+    "choose": "Add at least two other readings:",
+    "own_label": "Write another reading",
+    "add": "Add",
+    "something_else": "Something I haven't thought of",
+    "first_tag": "your first reading",
+    "left": "Points left: {n}",
+    "more": "More points for: {reading}",
+    "fewer": "Fewer points for: {reading}",
+    "none_fit": "None of these fit"
+  },
+  "find": {
+    "intro": "Guessing what someone meant is often less reliable than finding out.",
+    "options": [
+      { "id": "ask", "label": "Ask them (for example: ‘I wasn't sure what you meant, could you tell me?’)" },
+      { "id": "wait", "label": "Wait for more information" },
+      { "id": "check", "label": "Check something myself" },
+      { "id": "not_worth", "label": "It's not worth finding out" }
+    ]
+  },
+  "after": {
+    "reading": "Your first reading: “{reading}”",
+    "close": "Holding more than one reading open isn't indecision. It's an accurate picture of what you know."
+  },
+  "next_label": "Next",
+  "finish_label": "Finish"
+}

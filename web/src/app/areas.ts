@@ -1,4 +1,4 @@
-import { Condition } from './api/types';
+import { ExerciseId } from './api/types';
 
 /**
  * The platform's areas, shown on Home. Planned areas are directions, not commitments;
@@ -8,7 +8,7 @@ import { Condition } from './api/types';
 export interface Topic {
   title: string;
   text: string;
-  experiences: Condition[];
+  experiences: ExerciseId[];
   /** Whether My experiment runs on this topic. */
   hasExperiment: boolean;
 }
@@ -17,8 +17,11 @@ export interface Area {
   id: string;
   title: string;
   text: string;
-  status: 'available' | 'planned';
+  /** development: shown as available in the development build only, planned elsewhere. */
+  status: 'available' | 'planned' | 'development';
   intro?: string;
+  /** The note under the exercises; defaults to the Action and growth wording. */
+  practiceNote?: string;
   topics?: Topic[];
 }
 
@@ -47,7 +50,33 @@ export const AREAS: Area[] = [
     id: 'cognitive-shifts',
     title: 'Cognitive shifts',
     text: 'Find other ways to see difficulties, mistakes, setbacks and unclear situations.',
-    status: 'planned',
+    // Development only until the content review and full-text gates pass
+    // (docs/cognitive-shifts-design.md §9).
+    status: 'development',
+    intro:
+      "Exercises for looking at a situation from more than one side, and keeping the reading that fits best, even if it's the first one.",
+    practiceNote:
+      "Practice exercises are saved in My records, without anything you write. They're never part of your experiment.",
+    topics: [
+      {
+        title: "When you're stuck on one reading",
+        text: 'For situations you keep seeing one way.',
+        experiences: ['cs_other_readings'],
+        hasExperiment: false,
+      },
+      {
+        title: 'After a mistake or setback',
+        text: 'For when something went wrong and it feels like proof.',
+        experiences: ['cs_why_it_happened'],
+        hasExperiment: false,
+      },
+      {
+        title: 'When things are unclear',
+        text: "For when you don't know what someone meant.",
+        experiences: ['cs_not_enough_to_go_on'],
+        hasExperiment: false,
+      },
+    ],
   },
   {
     id: 'attention',
@@ -88,6 +117,11 @@ export const PLANNED_GUIDE = {
 };
 
 /** Only available areas have a page; planned ones are shown on Home as cards. */
-export function areaById(id: string | null): Area | undefined {
-  return AREAS.find((a) => a.id === id && a.status === 'available');
+export function areaById(id: string | null, showDevelopment = false): Area | undefined {
+  return AREAS.find((a) => a.id === id && isOpen(a, showDevelopment));
+}
+
+/** Whether an area has a page in this build. */
+export function isOpen(area: Area, showDevelopment: boolean): boolean {
+  return area.status === 'available' || (area.status === 'development' && showDevelopment);
 }

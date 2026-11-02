@@ -1,0 +1,30 @@
+{
+  "id": "science-state-reset",
+  "version": "1",
+  "experience": "state_reset+action_bridge",
+  "what_you_do": "You hold a picture of something you feel stuck on in mind while following a moving dot for 8 short rounds, then plan your first step.",
+  "method": {
+    "name": "Holding a picture in mind during a demanding task (working-memory taxation)",
+    "text": "Working-memory taxation involves deliberately placing demands on working memory, the limited mental resources we use to hold and process information in the moment. Researchers use this approach in different ways to investigate cognitive processes such as working-memory performance, attention and mental imagery.\n\nIn this exercise, the technique is used for a specific purpose: you hold a negative mental image in mind while tracking a moving target. Because both tasks compete for limited cognitive resources, the image may become less vivid and its associated emotional intensity may decrease temporarily.\n\nThis is one application of the broader approach, not the only purpose of working-memory taxation."
+  },
+  "research": [
+    {
+      "text": "A lab experiment with 37 students found that recalling a recurring, unpleasant image of a feared future event during an eye-movement task made it less vivid straight afterwards than recall alone. The drop in how upsetting it felt was smaller and unclear.",
+      "sources": [
+        "engelhard-2011"
+      ]
+    },
+    {
+      "text": "The kind of task matters: in two lab experiments, a visual game played after a distressing film reduced later intrusive images; a word quiz did not, and once increased them.",
+      "sources": [
+        "holmes-2010"
+      ]
+    }
+  ],
+  "about_this_exercise": "This is an experimental exercise, and this version hasn't been tested itself. The lab experiment used eye movements, not a moving dot. The planning step uses the method of “Plan your first step”.",
+  "limits": [
+    "Effects were modest and immediate; how long they last is unknown.",
+    "It hasn't been shown that a less vivid picture helps anyone start.",
+    "Choose an everyday situation, never a painful personal memory."
+  ]
+}

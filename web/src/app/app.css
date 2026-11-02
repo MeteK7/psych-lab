@@ -13,6 +13,15 @@ nav {
   gap: 1rem;
 }
 
+.env-badge {
+  margin-right: auto;
+  padding: 0.1rem 0.5rem;
+  border: 2px solid var(--accent);
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 nav a {
   color: var(--text);
   text-decoration: none;

@@ -21,7 +21,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
 
-MODES = ("self_use", "usability", "dev")
+# try: Try it (practice, never part of the experiment). dev: Test mode (phase 0).
+MODES = ("self_use", "usability", "try", "dev")
 CONDITIONS = (
     # n-of-1 phase 1: plan factor
     "action_bridge",
@@ -29,6 +30,13 @@ CONDITIONS = (
     # n-of-1 phase 2: pre-task factor, Action Bridge held constant
     "state_reset+action_bridge",
     "game_only+action_bridge",
+)
+# Every exercise a session can run: the experiment's conditions plus Try it-only exercises.
+# Cognitive shifts (docs/cognitive-shifts-design.md): never part of the experiment.
+EXERCISES = CONDITIONS + (
+    "cs_other_readings",
+    "cs_why_it_happened",
+    "cs_not_enough_to_go_on",
 )
 STATUSES = ("in_progress", "completed", "aborted")
 
@@ -41,7 +49,7 @@ class SessionRecord(Base):
     __tablename__ = "sessions"
     __table_args__ = (
         CheckConstraint(_in("mode", MODES), name="ck_sessions_mode"),
-        CheckConstraint(_in("condition", CONDITIONS), name="ck_sessions_condition"),
+        CheckConstraint(_in("condition", EXERCISES), name="ck_sessions_condition"),
         CheckConstraint(_in("status", STATUSES), name="ck_sessions_status"),
         CheckConstraint("ended_at IS NULL OR ended_at >= started_at", name="ck_sessions_times"),
     )

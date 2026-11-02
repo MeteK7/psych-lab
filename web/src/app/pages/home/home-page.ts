@@ -3,7 +3,8 @@ import { RouterLink } from '@angular/router';
 
 import { ApiService } from '../../api/api.service';
 import { N1Today } from '../../api/types';
-import { AREAS, PLANNED_GUIDE } from '../../areas';
+import { AREAS, Area, PLANNED_GUIDE, isOpen } from '../../areas';
+import { AppEnvironment } from '../../shared/app-environment';
 import { experimentTodayLine } from '../experiment/experiment-texts';
 
 /** The platform as a space of areas; the first feature is one topic inside one area. */
@@ -29,16 +30,16 @@ import { experimentTodayLine } from '../experiment/experiment-texts';
     <h2>Areas</h2>
     <ul class="areas">
       @for (area of areas; track area.id) {
-        <li class="card" [class.planned]="area.status === 'planned'">
+        <li class="card" [class.planned]="!open(area)">
           <h3>
-            @if (area.status === 'available') {
+            @if (open(area)) {
               <a [routerLink]="['/areas', area.id]">{{ area.title }}</a>
             } @else {
               {{ area.title }}
             }
           </h3>
           <p>{{ area.text }}</p>
-          @if (area.status === 'available') {
+          @if (open(area)) {
             <span class="badge available">Available</span>
             <a [routerLink]="['/areas', area.id]" class="button-link open">Open</a>
           } @else {
@@ -72,6 +73,12 @@ import { experimentTodayLine } from '../experiment/experiment-texts';
 })
 export class HomePage {
   protected readonly areas = AREAS;
+  private readonly environment = inject(AppEnvironment);
+
+  /** Development-only areas open in the development build only; elsewhere they show as planned. */
+  protected open(area: Area): boolean {
+    return isOpen(area, this.environment.showsDevelopment());
+  }
   protected readonly guide = PLANNED_GUIDE;
   protected readonly today = signal<N1Today | null>(null);
   protected readonly todayLine = computed(() => {

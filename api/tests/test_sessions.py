@@ -1,6 +1,7 @@
 import uuid
 from typing import Any
 
+import pytest
 from fastapi.testclient import TestClient
 
 
@@ -38,7 +39,7 @@ def completed_body(**overrides: Any) -> dict[str, Any]:
 def test_health(client: TestClient) -> None:
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "database": "ok"}
+    assert response.json() == {"status": "ok", "database": "ok", "environment": "development"}
 
 
 def test_put_creates_then_lists(client: TestClient) -> None:
@@ -130,3 +131,56 @@ def test_follow_up_validates_ranges(client: TestClient) -> None:
     client.put(f"/api/sessions/{session_id}", json=completed_body())
     response = client.patch(f"/api/sessions/{session_id}/follow-up", json={"burden": 11})
     assert response.status_code == 422
+
+
+# ---------- exercises outside the experiment (Cognitive shifts) ----------
+
+
+@pytest.mark.parametrize("condition", ["action_bridge", "game_only+action_bridge"])
+@pytest.mark.parametrize("mode", ["self_use", "try", "dev"])
+def test_experiment_conditions_are_accepted_as_before(
+    client: TestClient, condition: str, mode: str
+) -> None:
+    body = session_body(mode=mode, condition=condition)
+    assert client.put(f"/api/sessions/{uuid.uuid4()}", json=body).status_code == 201
+
+
+def test_a_try_it_exercise_is_accepted_in_try_mode(client: TestClient) -> None:
+    body = session_body(mode="try", condition="cs_other_readings", content_versions={})
+    response = client.put(f"/api/sessions/{uuid.uuid4()}", json=body)
+    assert response.status_code == 201
+    assert response.json()["condition"] == "cs_other_readings"
+
+
+@pytest.mark.parametrize("mode", ["self_use", "dev"])
+def test_a_try_it_exercise_never_runs_in_the_experiment(client: TestClient, mode: str) -> None:
+    body = session_body(mode=mode, condition="cs_why_it_happened")
+    response = client.put(f"/api/sessions/{uuid.uuid4()}", json=body)
+    assert response.status_code == 422
+    assert "only in Try it" in response.text
+
+
+def test_a_try_it_exercise_never_has_a_reveal(client: TestClient) -> None:
+    body = session_body(
+        mode="try", condition="cs_not_enough_to_go_on", n1_reveal_id=str(uuid.uuid4())
+    )
+    assert client.put(f"/api/sessions/{uuid.uuid4()}", json=body).status_code == 422
+
+
+def test_unknown_exercises_are_refused(client: TestClient) -> None:
+    body = session_body(mode="try", condition="something_else")
+    assert client.put(f"/api/sessions/{uuid.uuid4()}", json=body).status_code == 422
+
+
+def test_development_only_exercises_are_refused_in_production(
+    client: TestClient, n1_settings: Any
+) -> None:
+    body = session_body(mode="try", condition="cs_other_readings", content_versions={})
+    n1_settings.app_env = "production"
+    try:
+        response = client.put(f"/api/sessions/{uuid.uuid4()}", json=body)
+        assert response.status_code == 403
+        released = session_body(mode="try", condition="action_bridge")
+        assert client.put(f"/api/sessions/{uuid.uuid4()}", json=released).status_code == 201
+    finally:
+        n1_settings.app_env = "development"

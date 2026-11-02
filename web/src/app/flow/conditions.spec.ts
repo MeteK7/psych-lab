@@ -1,4 +1,5 @@
-import { CONDITIONS, MODES, STEP_NAMES, isCondition, isLevelAMode, stepsFor } from './conditions';
+import { stepsFor } from '../experiences/registry';
+import { CONDITIONS, MODES, STEP_NAMES, isCondition, isLevelAMode } from './conditions';
 
 describe('conditions', () => {
   it('runs the plan factor alone in phase 1', () => {
@@ -34,7 +35,7 @@ describe('conditions', () => {
   });
 
   it('offers only level-A modes', () => {
-    expect(MODES.map((m) => m.value)).toEqual(['self_use', 'dev']);
+    expect(MODES.map((m) => m.value)).toEqual(['self_use', 'try', 'dev']);
     expect(isLevelAMode('usability')).toBe(false);
   });
 });

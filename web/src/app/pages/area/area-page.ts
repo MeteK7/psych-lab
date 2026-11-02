@@ -4,38 +4,45 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
-import { Condition } from '../../api/types';
-import { areaById } from '../../areas';
-import { conditionInfo } from '../../flow/conditions';
+import { ExerciseId } from '../../api/types';
+import { AREAS, areaById } from '../../areas';
+import { exerciseInfo } from '../../experiences/registry';
+import { AppEnvironment } from '../../shared/app-environment';
+import { Icon } from '../../shared/icon';
 
 /** One area: its topics and their experiences, each with "Try it" (practice mode). */
 @Component({
   selector: 'app-area-page',
-  imports: [RouterLink],
+  imports: [Icon, RouterLink],
   template: `
     @if (area(); as a) {
       <h1>{{ a.title }}</h1>
       <p class="lead">{{ a.intro }}</p>
 
-      @for (topic of a.topics; track topic.title) {
-        <section aria-labelledby="topic-heading">
-          <h2 id="topic-heading">{{ topic.title }}</h2>
+      @for (topic of a.topics; track topic.title; let t = $index) {
+        <section [attr.aria-labelledby]="'topic-heading-' + t">
+          <h2 [id]="'topic-heading-' + t">{{ topic.title }}</h2>
           <p>{{ topic.text }}</p>
           <ul class="experiences">
             @for (value of topic.experiences; track value) {
-              @if (info(value); as e) {
+              @if (visible(value); as e) {
                 <li class="card">
                   <h3>{{ e.label }}</h3>
                   <p>{{ e.description }} About {{ e.minutes }} minutes.</p>
+                  <!-- The method opens the exercise's science explanation ("Why this exercise?"). -->
+                  <a class="method" routerLink="/session" [queryParams]="{ mode: 'try', condition: e.value, why: 1 }">
+                    <app-icon [name]="e.method.icon" />
+                    {{ e.method.name }}<span class="sr-only">: the science behind {{ e.label }}</span>
+                  </a>
                   @if (e.experimental) {
                     <p><span class="badge">Experimental</span> This idea is still being tested.</p>
                   }
-                  <button type="button" (click)="tryIt(e.value)">Try it</button>
+                  <button type="button" class="try" (click)="tryIt(e.value)">Try it</button>
                 </li>
               }
             }
           </ul>
-          <p class="muted">Practice exercises are saved in My records but are never part of your experiment.</p>
+          <p class="muted">{{ a.practiceNote ?? defaultNote }}</p>
 
           @if (topic.hasExperiment) {
             <section class="card prominent" aria-labelledby="experiment-heading">
@@ -46,7 +53,7 @@ import { conditionInfo } from '../../flow/conditions';
           }
         </section>
       }
-    } @else {
+    } @else if (!waiting()) {
       <h1>Area not found</h1>
       <p><a routerLink="/">Back to Home</a></p>
     }
@@ -57,7 +64,13 @@ import { conditionInfo } from '../../flow/conditions';
                    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
     .experiences .card { margin: 0; display: flex; flex-direction: column; align-items: flex-start; }
     .experiences p { margin: 0 0 0.75rem; }
-    .experiences button { margin-top: auto; }
+    .method {
+      display: inline-flex; align-items: center; gap: 0.4rem; margin: 0 0 0.75rem;
+      font-size: 0.9rem; color: var(--accent); text-decoration: none;
+    }
+    .method:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .try { margin-top: auto; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
     h2 { font-size: 1.25rem; }
     h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
   `,
@@ -65,8 +78,19 @@ import { conditionInfo } from '../../flow/conditions';
 export class AreaPage {
   private readonly router = inject(Router);
   private readonly id = toSignal(inject(ActivatedRoute).paramMap.pipe(map((p) => p.get('id'))));
-  protected readonly area = computed(() => areaById(this.id() ?? null));
-  protected readonly info = conditionInfo;
+  private readonly environment = inject(AppEnvironment);
+  protected readonly area = computed(() => areaById(this.id() ?? null, this.environment.showsDevelopment()));
+  /** A development-only area is unknown until the build is known; show nothing meanwhile. */
+  protected readonly waiting = computed(
+    () => this.environment.value() === null && AREAS.some((a) => a.id === this.id() && a.status === 'development'),
+  );
+  protected readonly defaultNote = 'Practice exercises are saved in My records but are never part of your experiment.';
+
+  /** Released exercises everywhere; development-only ones in the development build only. */
+  protected visible(value: ExerciseId) {
+    const e = exerciseInfo(value);
+    return e && (e.release === 'released' || this.environment.showsDevelopment()) ? e : undefined;
+  }
 
   constructor() {
     // The route title is generic; the tab shows the area's own name.
@@ -74,8 +98,8 @@ export class AreaPage {
     effect(() => title.setTitle(this.area()?.title ?? 'Area not found'));
   }
 
-  /** Practice exercises run in dev mode and never touch the experiment. */
-  protected tryIt(condition: Condition): void {
-    void this.router.navigate(['/session'], { queryParams: { mode: 'dev', condition } });
+  /** Practice exercises run in try mode and never touch the experiment. */
+  protected tryIt(condition: ExerciseId): void {
+    void this.router.navigate(['/session'], { queryParams: { mode: 'try', condition } });
   }
 }

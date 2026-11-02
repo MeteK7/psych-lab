@@ -1,6 +1,7 @@
 """Local maintenance commands.
 
-uv run python -m app.manage reset-db [--yes]
+uv run python -m app.manage reset-db [--yes]      (refused in production)
+uv run python -m app.manage backup
 uv run python -m app.manage export-n1 --phase 1 --out ../data/exports/phase1.json
 """
 
@@ -71,7 +72,10 @@ def backup(database_url: str) -> Path:
 
 
 def reset_db(assume_yes: bool) -> None:
-    database_url = get_settings().database_url
+    settings = get_settings()
+    if settings.app_env == "production":
+        raise SystemExit("reset-db is refused in production: it would delete the experiment.")
+    database_url = settings.database_url
     name = make_url(database_url).database
     if not assume_yes:
         answer = input(f"This deletes ALL data in '{name}' (including n-of-1 data). Type RESET: ")
@@ -91,12 +95,15 @@ def main(argv: list[str] | None = None) -> None:
         "reset-db", help="Back up, then drop and recreate the dev database schema."
     )
     reset.add_argument("--yes", action="store_true", help="Skip the confirmation prompt.")
+    sub.add_parser("backup", help="Write a pg_dump backup of the database to data/backups/.")
     exp = sub.add_parser("export-n1", help="Write one phase's n-of-1 records as JSON.")
     exp.add_argument("--phase", type=int, required=True)
     exp.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
     if args.command == "reset-db":
         reset_db(args.yes)
+    elif args.command == "backup":
+        print(f"Backup written to {backup(get_settings().database_url)}")
     elif args.command == "export-n1":
         export_n1(args.phase, args.out)
 

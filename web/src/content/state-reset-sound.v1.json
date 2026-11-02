@@ -1,0 +1,34 @@
+{
+  "id": "state-reset-sound",
+  "version": "1",
+  "tones": {
+    "low_hz": 440,
+    "high_hz": 880,
+    "tone_ms": 150,
+    "high_share": 0.3,
+    "min_gap_ms": 1200,
+    "max_gap_ms": 1800,
+    "response_window_ms": 1500
+  },
+  "offer": {
+    "question": "Can't follow a moving dot?",
+    "use_sound": "Use the sound version",
+    "use_dot": "Use the dot version instead",
+    "note": "The sound version is an alternative for people who can't follow a moving dot. Like the dot version, it hasn't been tested itself; the lab research used eye movements."
+  },
+  "how_it_works": {
+    "heading": "How the sound game works",
+    "text": "You'll hear a short tone every second or two. Most tones are low. When you hear a high tone, respond as quickly as you can.",
+    "keyboard": "Keyboard: press Space. The game area takes focus by itself.",
+    "pointer": "Mouse, touch or screen reader: use the “High tone” button.",
+    "sound_check": "Turn your sound on first; headphones help. Listen to both tones:",
+    "low": "Play the low tone",
+    "high": "Play the high tone",
+    "respond": "High tone",
+    "game_label": "Sound game: press Space, or the High tone button, each time you hear a high tone. {seconds} seconds left."
+  },
+  "round": {
+    "image": "Listen for the high tones, and keep your picture in mind: “{picture}”.",
+    "game_only": "Listen for the high tones."
+  }
+}

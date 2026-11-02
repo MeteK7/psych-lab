@@ -1,22 +1,28 @@
 import { Component, OnDestroy, computed, input, output, signal } from '@angular/core';
 
-import { RATINGS, STATE_RESET, fill } from '../../../content';
+import { RATINGS, STATE_RESET, STATE_RESET_SOUND, fill } from '../../../content';
 import { Experience, StepOutcome } from '../../flow/step-outcome';
 import { RatingScale } from '../../shared/rating-scale';
 import { GamePreview } from './game-preview';
 import { Phase, Variant, buildSchedule } from './schedule';
+import { playTone, unlockAudio } from './tone-audio';
+import { ToneGame } from './tone-game';
+import { Pitch } from './tones';
 import { SetResult, TrackingGame } from './tracking-game';
 
 type PracticeStage = 'preview' | 'running' | 'done';
+/** dot: the tracking game. sound: the non-visual alternative (Try it only). */
+export type Task = 'dot' | 'sound';
 
 /**
  * State Reset (variant "image": hold a chosen picture in mind while playing) and its
  * game-only control (same game, same timing and practice, no picture). Plan §3 and §4.2
  * phase 2. The picture description is shown back during the exercise and never saved.
+ * In Try it, a sound version of the game can replace the dot game (plan §8, level B).
  */
 @Component({
   selector: 'app-state-reset',
-  imports: [GamePreview, RatingScale, TrackingGame],
+  imports: [GamePreview, RatingScale, ToneGame, TrackingGame],
   template: `
     @switch (phase().kind) {
       @case ('intro') {
@@ -66,25 +72,56 @@ type PracticeStage = 'preview' | 'running' | 'done';
         </button>
       }
       @case ('practice') {
-        <h3>{{ content.how_it_works.heading }}</h3>
+        <h3>{{ task() === 'sound' ? sound.how_it_works.heading : content.how_it_works.heading }}</h3>
         @if (practice() === 'running') {
           <p class="cue">{{ content.how_it_works.practice_heading }}</p>
-          <app-tracking-game
-            [seconds]="content.timing.practice_seconds"
-            [speed]="speed"
-            [ringRadius]="content.game.ring_radius"
-            (finished)="onPracticeFinished($event)"
-          />
+          @if (task() === 'sound') {
+            <app-tone-game [seconds]="content.timing.practice_seconds" (finished)="onPracticeFinished($event)" />
+          } @else {
+            <app-tracking-game
+              [seconds]="content.timing.practice_seconds"
+              [speed]="speed"
+              [ringRadius]="content.game.ring_radius"
+              (finished)="onPracticeFinished($event)"
+            />
+          }
         } @else {
-          <app-game-preview [ringRadius]="content.game.ring_radius" />
-          <p>{{ content.how_it_works.text }}</p>
-          <ul>
-            <li>{{ content.how_it_works.mouse }}</li>
-            <li>{{ content.how_it_works.keyboard }}</li>
-          </ul>
+          @if (task() === 'sound') {
+            <p>{{ sound.how_it_works.text }}</p>
+            <ul>
+              <li>{{ sound.how_it_works.keyboard }}</li>
+              <li>{{ sound.how_it_works.pointer }}</li>
+            </ul>
+            <p>{{ sound.how_it_works.sound_check }}</p>
+            <div class="actions">
+              <button type="button" (click)="playSample('low')">{{ sound.how_it_works.low }}</button>
+              <button type="button" (click)="playSample('high')">{{ sound.how_it_works.high }}</button>
+            </div>
+          } @else {
+            <app-game-preview [ringRadius]="content.game.ring_radius" />
+            <p>{{ content.how_it_works.text }}</p>
+            <ul>
+              <li>{{ content.how_it_works.mouse }}</li>
+              <li>{{ content.how_it_works.keyboard }}</li>
+            </ul>
+          }
           <p>{{ texts().practice }}</p>
           @if (practice() === 'preview') {
             <button type="button" (click)="startPractice()">{{ content.how_it_works.start_practice }}</button>
+            <!-- Offered in Try it only: an experiment exercise keeps the dot game (protocol). -->
+            @if (!assigned()) {
+              <section class="alternative" aria-label="Sound version">
+                @if (task() === 'dot') {
+                  <p>
+                    {{ sound.offer.question }}
+                    <button type="button" (click)="task.set('sound')">{{ sound.offer.use_sound }}</button>
+                  </p>
+                  <p class="hint">{{ sound.offer.note }}</p>
+                } @else {
+                  <button type="button" (click)="task.set('dot')">{{ sound.offer.use_dot }}</button>
+                }
+              </section>
+            }
           } @else {
             <p role="status">{{ content.how_it_works.practice_done }}</p>
             <div class="actions">
@@ -105,14 +142,18 @@ type PracticeStage = 'preview' | 'running' | 'done';
       }
       @case ('play') {
         <h3>{{ say(texts().round_heading, { round: setNumber(), seconds: content.timing.set_seconds }) }}</h3>
-        <p class="cue" role="status">{{ say(texts().round) }}</p>
+        <p class="cue" role="status">{{ say(roundText()) }}</p>
         <!-- Rest phases sit between sets, so each set gets a fresh game instance. -->
-        <app-tracking-game
-          [seconds]="playSeconds()"
-          [speed]="speed"
-          [ringRadius]="content.game.ring_radius"
-          (finished)="onSetFinished($event)"
-        />
+        @if (task() === 'sound') {
+          <app-tone-game [seconds]="playSeconds()" (finished)="onSetFinished($event)" />
+        } @else {
+          <app-tracking-game
+            [seconds]="playSeconds()"
+            [speed]="speed"
+            [ringRadius]="content.game.ring_radius"
+            (finished)="onSetFinished($event)"
+          />
+        }
       }
     }
     <button type="button" class="stop" (click)="stopped.emit()">{{ content.stop_label }}</button>
@@ -137,6 +178,7 @@ export class StateReset implements Experience, OnDestroy {
   readonly stopped = output<void>();
 
   protected readonly content = STATE_RESET;
+  protected readonly sound = STATE_RESET_SOUND;
   protected readonly ratingItems = RATINGS.items;
   protected readonly speed = prefersReducedMotion()
     ? STATE_RESET.game.reduced_motion_speed
@@ -148,6 +190,8 @@ export class StateReset implements Experience, OnDestroy {
   protected readonly emotionality = signal<number | null>(null);
   protected readonly remaining = signal(0);
   protected readonly practice = signal<PracticeStage>('preview');
+  /** Chosen before the practice round; experiment exercises always use the dot game. */
+  protected readonly task = signal<Task>('dot');
 
   private readonly phases = computed(() => buildSchedule(this.content.timing, this.variant()));
   private readonly index = signal(0);
@@ -167,6 +211,9 @@ export class StateReset implements Experience, OnDestroy {
     const p = this.phase();
     return p.kind === 'rest' ? p.afterSet + 1 : 0;
   });
+  protected readonly roundText = computed(() =>
+    this.task() === 'sound' ? this.sound.round[this.variant()] : this.texts().round,
+  );
   protected readonly playSeconds = computed(() => {
     const p = this.phase();
     return p.kind === 'play' ? p.seconds : 0;
@@ -219,7 +266,13 @@ export class StateReset implements Experience, OnDestroy {
   }
 
   protected startPractice(): void {
+    if (this.task() === 'sound') unlockAudio(); // sound needs a click or key press first
     this.practice.set('running');
+  }
+
+  protected playSample(pitch: Pitch): void {
+    unlockAudio();
+    playTone(pitch, this.sound.tones);
   }
 
   protected onPracticeFinished(result: SetResult): void {
@@ -255,6 +308,7 @@ export class StateReset implements Experience, OnDestroy {
     this.completed.emit({
       result: {
         variant: this.variant(),
+        task: this.task(),
         timing: this.content.timing,
         speed: this.speed,
         practice_runs: this.practiceRuns.length,

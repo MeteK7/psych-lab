@@ -7,15 +7,17 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.clock import get_now
+from app.config import Settings, get_settings
 from app.db import get_db
 from app.models import N1Reveal, SessionRecord
 from app.n1 import session_mode
-from app.schemas import FollowUp, Mode, SessionOut, SessionUpsert
+from app.schemas import DEVELOPMENT_ONLY_EXERCISES, FollowUp, Mode, SessionOut, SessionUpsert
 
 router = APIRouter(tags=["sessions"])
 
 DbSession = Annotated[Session, Depends(get_db)]
 Now = Annotated[datetime, Depends(get_now)]
+AppSettings = Annotated[Settings, Depends(get_settings)]
 
 
 def _fields(body: SessionUpsert) -> dict[str, Any]:
@@ -62,8 +64,16 @@ def _check_reveal(body: SessionUpsert, session_id: uuid.UUID, db: Session) -> No
     responses={201: {"model": SessionOut}, 409: {"description": "Session already finished"}},
 )
 def upsert_session(
-    session_id: uuid.UUID, body: SessionUpsert, response: Response, db: DbSession, now: Now
+    session_id: uuid.UUID,
+    body: SessionUpsert,
+    response: Response,
+    db: DbSession,
+    now: Now,
+    settings: AppSettings,
 ) -> SessionRecord:
+    if settings.app_env == "production" and body.condition in DEVELOPMENT_ONLY_EXERCISES:
+        # Released only once its content review and full-text gates pass.
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "This exercise isn't released yet.")
     fields = _fields(body)
     _check_reveal(body, session_id, db)
     record = db.get(SessionRecord, session_id)

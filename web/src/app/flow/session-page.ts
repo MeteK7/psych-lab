@@ -3,13 +3,21 @@ import { Component, ElementRef, computed, inject, signal, viewChild } from '@ang
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
+import { scienceFor } from '../../content';
 import { ApiService } from '../api/api.service';
-import { Condition, Mode, Status } from '../api/types';
+import { ExerciseId, Mode, Status } from '../api/types';
+import { AREAS } from '../areas';
 import { ActionBridge } from '../experiences/action-bridge/action-bridge';
+import { CsNotEnough } from '../experiences/cognitive-shifts/cs-not-enough';
+import { CsOtherReadings } from '../experiences/cognitive-shifts/cs-other-readings';
+import { CsStore } from '../experiences/cognitive-shifts/cs-store';
+import { CsWhyItHappened } from '../experiences/cognitive-shifts/cs-why-it-happened';
 import { GoalRestatement } from '../experiences/goal-restatement/goal-restatement';
 import { RatingStep } from '../experiences/rating-step/rating-step';
+import { exerciseInfo, isExerciseId, stepsFor } from '../experiences/registry';
 import { StateReset } from '../experiences/state-reset/state-reset';
-import { STEP_NAMES, StepId, conditionInfo, isCondition, isLevelAMode, stepsFor } from './conditions';
+import { ScienceSection } from '../shared/science-section';
+import { STEP_NAMES, StepId, isLevelAMode } from './conditions';
 import { SessionDraft, addStep, addStop, newDraft, toUpsert } from './session-record';
 import { StepOutcome } from './step-outcome';
 
@@ -18,7 +26,20 @@ type SaveState = 'idle' | 'saving' | 'error';
 /** The exercise runner, opened from an area page (practice) or from My experiment. */
 @Component({
   selector: 'app-session-page',
-  imports: [ActionBridge, GoalRestatement, RatingStep, StateReset, DatePipe, RouterLink],
+  imports: [
+    ActionBridge,
+    CsNotEnough,
+    CsOtherReadings,
+    CsWhyItHappened,
+    GoalRestatement,
+    RatingStep,
+    StateReset,
+    ScienceSection,
+    DatePipe,
+    RouterLink,
+  ],
+  // Cognitive shifts exercises keep their state across steps here, for one exercise only.
+  providers: [CsStore],
   template: `
     @if (!setup()) {
       <h1>Exercise</h1>
@@ -37,6 +58,9 @@ type SaveState = 'idle' | 'saving' | 'error';
         }
       </ol>
       <p>About {{ info()?.minutes }} minutes. Your answers are saved after each step. You can stop at any time.</p>
+      @if (science(); as s) {
+        <app-science-section [science]="s" [method]="info()?.method?.name" [open]="openWhy" />
+      }
       <div class="actions">
         <button type="button" class="primary" (click)="begin()">Begin</button>
         <a [routerLink]="homeLink()">Back</a>
@@ -57,11 +81,18 @@ type SaveState = 'idle' | 'saving' | 'error';
             <p role="status">
               {{ end.status === 'completed' ? 'Saved at ' + (end.at | date: 'HH:mm') + '.' : 'What you did so far is saved.' }}
             </p>
+            @if (next(); as n) {
+              <!-- A full page load starts the suggested exercise fresh. -->
+              <p><a class="primary-link" [href]="'/session?mode=try&condition=' + n.exercise">{{ n.label }}</a></p>
+            }
             @if (assigned()) {
               <p><a routerLink="/experiment" class="primary-link">Back to My experiment</a></p>
             } @else {
-              <p><a routerLink="/areas/action-growth">Back to Action and growth</a> · <a routerLink="/records">My records</a></p>
+              <p><a [routerLink]="homeLink()">Back to {{ areaTitle() }}</a> · <a routerLink="/records">My records</a></p>
             }
+          }
+          @if (science(); as s) {
+            <app-science-section [science]="s" [method]="info()?.method?.name" />
           }
         </section>
       } @else {
@@ -74,6 +105,22 @@ type SaveState = 'idle' | 'saving' | 'error';
             Your answers couldn't be saved. Is the local server running? You can continue; they'll
             be saved again after the next step.
           </p>
+        }
+        <!-- Cognitive shifts: one component per exercise, recreated for each step. -->
+        @if (csGroup(); as group) {
+          @for (s of [step()]; track s) {
+            @switch (group) {
+              @case ('cs1') {
+                <app-cs-other-readings [stage]="s" (completed)="onCompleted($event)" />
+              }
+              @case ('cs2') {
+                <app-cs-why-it-happened [stage]="s" (completed)="onCompleted($event)" />
+              }
+              @case ('cs3') {
+                <app-cs-not-enough [stage]="s" (completed)="onCompleted($event)" />
+              }
+            }
+          }
         }
         @switch (step()) {
           @case ('pre_rating') {
@@ -118,12 +165,19 @@ export class SessionPage {
 
   protected readonly setup = signal<{
     mode: Mode;
-    condition: Condition;
+    condition: ExerciseId;
     revealId: string | null;
   } | null>(null);
   /** Experiment exercises carry the reveal that assigned their condition. */
   protected readonly assigned = computed(() => !!this.setup()?.revealId);
-  protected readonly homeLink = computed(() => (this.assigned() ? '/experiment' : '/areas/action-growth'));
+  protected readonly homeLink = computed(() =>
+    this.assigned() ? '/experiment' : `/areas/${this.info()?.area ?? 'action-growth'}`,
+  );
+  protected readonly areaTitle = computed(
+    () => AREAS.find((a) => a.id === (this.info()?.area ?? 'action-growth'))?.title ?? '',
+  );
+  /** Offered on the done screen when an exercise suggests one (Cognitive shifts). */
+  protected readonly next = signal<StepOutcome['next'] | null>(null);
   protected readonly draft = signal<SessionDraft | null>(null);
   protected readonly index = signal(0);
   protected readonly saveState = signal<SaveState>('idle');
@@ -135,7 +189,20 @@ export class SessionPage {
   });
   protected readonly step = computed(() => this.steps()[this.index()]);
   protected readonly stepName = computed(() => STEP_NAMES[this.step()]);
-  protected readonly info = computed(() => conditionInfo(this.setup()?.condition));
+  protected readonly csGroup = computed(() => {
+    const prefix = this.step()?.slice(0, 4);
+    return prefix === 'cs1_' || prefix === 'cs2_' || prefix === 'cs3_' ? prefix.slice(0, 3) : null;
+  });
+  protected readonly info = computed(() => exerciseInfo(this.setup()?.condition));
+  /**
+   * "Why this exercise?" for practice only. Experiment exercises show exactly what the
+   * approved protocol fixes, and a rationale could add an expectancy confound (plan §3.1).
+   */
+  protected readonly science = computed(() =>
+    this.assigned() ? undefined : scienceFor(this.setup()?.condition),
+  );
+  /** Opened straight away when the area page's "Why this exercise?" link was used. */
+  protected readonly openWhy: boolean;
 
   private stepStartedAt = new Date().toISOString();
   private saveQueue: Promise<void> = Promise.resolve();
@@ -146,7 +213,10 @@ export class SessionPage {
     const mode = params.get('mode');
     // n-of-1 sessions carry the reveal that assigned their condition (from My experiment).
     const revealId = params.get('reveal');
-    if (isCondition(condition) && isLevelAMode(mode)) this.setup.set({ mode, condition, revealId });
+    this.openWhy = params.get('why') === '1';
+    if (isExerciseId(condition) && isLevelAMode(mode) && allowed(condition, mode, revealId)) {
+      this.setup.set({ mode, condition, revealId });
+    }
   }
 
   protected begin(): void {
@@ -166,6 +236,7 @@ export class SessionPage {
     if (!draft) return;
     const now = new Date().toISOString();
     this.draft.set(addStep(draft, this.step(), this.stepStartedAt, now, outcome));
+    if (outcome.next) this.next.set(outcome.next);
     this.stepStartedAt = now;
 
     if (this.index() + 1 >= this.steps().length) {
@@ -208,4 +279,9 @@ export class SessionPage {
   private focusSoon(): void {
     setTimeout(() => this.focusTarget()?.nativeElement.focus());
   }
+}
+
+/** Exercises outside the experiment run only in Try it, never with a reveal (API rule too). */
+function allowed(exercise: ExerciseId, mode: Mode, revealId: string | null): boolean {
+  return exerciseInfo(exercise)?.experiment !== null || (mode === 'try' && revealId === null);
 }
