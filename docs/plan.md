@@ -1,6 +1,6 @@
-# Research-led plan: a web platform of psychologically informed interactive experiences (revision 6.2)
+# Research-led plan: a web platform of psychologically informed interactive experiences (revision 6.3)
 
-> **Status:** revision 5.1 approved 2026-10-29. Stage 1 is partly done (§2.3). The Stage 2 level-A prototype is built and checked (see `docs/runbook.md`). Revisions 5.2–5.7 record the decisions made during implementation (5.3: the study-log outcome, protocol and analysis scripts; 5.4: no content lock, slot reveal tool, the eligible-day-no-session outcome, an earlier phase-1 start; 5.5: folder restructure, study log without git; 5.6: all daily n-of-1 records in the app; protocol v1.3 approved 2026-10-31; 5.7: platform structure and plain on-screen wording; 6.0: three usage models released one at a time (`docs/product-model.md`), separate development and production environments, the exposure rule; protocol v1.4 approved 2026-11-01; 6.1: a science explanation for every experience, and memory reconsolidation as a future research candidate; 6.2: Stage 3 built: browser tests, the sound version of the dot game, usability procedure, consent and content review). The user performs all git actions. If a branch is needed, base it on `test`, never `main`. No AI attribution anywhere in files, comments or docs.
+> **Status:** revision 5.1 approved 2026-10-29. Stage 1 is partly done (§2.3). The Stage 2 level-A prototype is built and checked (see `docs/runbook.md`). Revisions 5.2–5.7 record the decisions made during implementation (5.3: the study-log outcome, protocol and analysis scripts; 5.4: no content lock, slot reveal tool, the eligible-day-no-session outcome, an earlier phase-1 start; 5.5: folder restructure, study log without git; 5.6: all daily n-of-1 records in the app; protocol v1.3 approved 2026-10-31; 5.7: platform structure and plain on-screen wording; 6.0: three usage models released one at a time (`docs/product-model.md`), separate development and production environments, the exposure rule; protocol v1.4 approved 2026-11-01; 6.1: a science explanation for every experience, and memory reconsolidation as a future research candidate; 6.2: Stage 3 built: browser tests, the sound version of the dot game, usability procedure, consent and content review; 6.3: Cognitive shifts Area approved (Stages 2–3) and the experience registry built, with golden tests for the experiment exercises). The user performs all git actions. If a branch is needed, base it on `test`, never `main`. No AI attribution anywhere in files, comments or docs.
 >
 > **Terminology:** descriptive and provisional ("the platform", "experiences"). There is no product name.
 >
@@ -101,7 +101,7 @@
 | **Goal restatement**: write your goal and today's topic; no cue and no if-then | The standard active control in implementation-intention research | — | **Adopt (A)** as the comparison condition |
 | **State Reset**: hold the anticipated "starting/struggling" image for 10 s, then play a dot-following tracking game in **8 sets of 24 s with 10 s pauses** (about 4.5 min, content v2) while keeping the image in mind; rate vividness and emotionality before and after | Working-memory taxation of imagery (Engelhard 2011 ✔F; Houben 2020 ✔A). The dose follows Engelhard 2011's 8 × 24 s sets | It dulls aversive anticipatory images and so lowers avoidance | **Adopt (A) as an experimental candidate**, not as an evidence-based component. Limited to study-related images. **Never for trauma memories.** A stop option is always available. Built |
 | **Game-only control**: the same game, the same 8 × 24 s timing and a duration-matched "get ready" phase, without holding the image | Isolates distraction or break effects | — | **Adopt (A).** **Replaces neutral visual search,** which overlapped with State Reset. Built |
-| **Interpretation Shift** | CBM-I (lab and anxiety) | Learning-setback scenarios change interpretation and lead to starting | **Defer the software (B, conditional).** Draft the scenarios and have them reviewed in Stage 1; build only if the review passes. Content-heavy, and has a risk of invalidating people |
+| **Interpretation Shift** | CBM-I (lab and anxiety) | Learning-setback scenarios change interpretation and lead to starting | **Replaced (6.3)** by the Cognitive shifts Area (`docs/cognitive-shifts-proposal.md`, `docs/cognitive-shifts-design.md`): CS3 "Not enough to go on" now; repeated ambiguity practice (CS5) later, with the Personal model and its own review |
 | **Small Achievable Challenge** | Domain-specific mastery | In-domain success leads to attempting the harder task | **Defer (C).** Needs domain content |
 | **Neutral visual search** | — | — | **Remove.** It overlaps with State Reset |
 | **Memory update** (working title; reconsolidation-based) | Memory reconsolidation (animal evidence; human behavioural evidence mixed, ◐) | A guided reminder, a wait, then an updating or interference task might make an everyday unpleasant memory less upsetting days later | **Future research candidate (C), not an approved feature.** Not adopted, not designed. Gated (§3.2). **Never for traumatic memories**; no drugs; not a therapy |
@@ -359,15 +359,15 @@ C:\Projects\new_project\                 project root (git set up by the user)
   platform\                              development: branch test
     api/  pyproject.toml (uv) · .python-version (3.13) · alembic.ini
           app/{main,config,db,models,schemas,security,manage,n1,clock,e2e_server}.py · app/routes/{health,sessions,n1}.py · participants (B)
-          alembic/versions/{0001_create_sessions,0002_n1_daily_records,0003_session_last_saved_at,0004_session_mode_try}.py · tests/
-    web/  src/app/{api,flow,shared,areas.ts,pages/{home,area,experiment,records,about}}
+          alembic/versions/{0001_create_sessions,0002_n1_daily_records,0003_session_last_saved_at,0004_session_mode_try,0005_exercise_ids}.py · tests/
+    web/  src/app/{api,flow,shared,areas.ts,pages/{home,area,experiment,records,about}} · src/app/experiences/registry.ts · src/app/flow/__golden__/
           src/app/experiences/{rating-step,action-bridge,goal-restatement,state-reset}
           src/content/{ratings,action-bridge,goal-restatement,state-reset,state-reset-sound}.v<N>.json · src/content/science/
           e2e/ (Playwright browser tests) · playwright.config.ts · proxy.conf.json · proxy.e2e.conf.json
     analysis/  pyproject.toml (uv) · make_schedule.py · n_of_1.py (reads the export-n1 JSON) · tests/ · schedules/schedule-phase<N>.{csv,sha256,meta.json}
     data/exports/  phase<N>.json, per-day tables   (git-ignored)
     data/schedules-dev/, data/study-log-dev/   development's Test mode only (git-ignored)
-    docs/  plan.md · product-model.md · evidence-verification.md · runbook.md · protocol-n-of-1.md · usability-procedure.md (B) · consent-usability.md (B) · content-review.md (B)
+    docs/  plan.md · product-model.md · evidence-verification.md · runbook.md · protocol-n-of-1.md · usability-procedure.md (B) · consent-usability.md (B) · content-review.md (B) · cognitive-shifts-{proposal,design,review-form}.md
     scripts/  check.ps1
     .env · .env.example · .gitignore (.env, data/) · .gitattributes
 ```
@@ -688,6 +688,16 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | **Added** | `docs/content-review.md`: a checklist for on-screen texts and science explanations, the files to review, and a review record | Stage 3 criterion: reviewers find no invalidating content |
 | **Not done** | Participant codes and consent records in the app (level B software) are left for later; paper consent covers 5–8 testers. Interpretation Shift stays conditional | Not needed for the first usability sessions |
 | **Retained** | The protocol, the experiment's exercises and content versions, and Try it access are unchanged | — |
+
+### Revision 6.3 amendments (2026-11-02; Cognitive shifts, Stage 4 begun)
+| Type | Item | Why |
+|---|---|---|
+| **Approved** | **Cognitive shifts Area**, Stage 2 (`cognitive-shifts-proposal.md`: scope, boundary rule, catalogue; first release CS1 "Other ways to read it", CS2 "Why did it happen?", CS3 "Not enough to go on"; no standalone growth-mindset exercise; CS3 replaces Interpretation Shift, CS5 later) and Stage 3 with four changes (`cognitive-shifts-design.md`, `cognitive-shifts-review-form.md`) | User review, 2026-11-02 |
+| **Added** | **Golden tests for the experiment exercises** (`web/src/app/flow/golden.spec.ts`, `__golden__/experiment-exercises.json`): ten scripted runs of the four exercises (Try it, experiment, Test mode, stopped) pin every saved request body and every screen's text, including the "Why this exercise?" texts. Generated from the code before the refactor; never regenerated | Proof that the refactor leaves the experiment unchanged |
+| **Changed** | **Experience registry** (`web/src/app/experiences/registry.ts`): exercises now come from one registry (steps, names, minutes, method, experiment phase or none). The four experiment entries were moved unchanged; `flow/conditions.ts` keeps the experiment's view of them. The session runner refuses exercises outside the experiment unless in Try it without a reveal | Plan §6.1: a registry once there are more than about five exercises |
+| **Changed** | **API and database:** `ExerciseId` adds the three Cognitive shifts ids; any exercise that isn't an experiment condition is refused in `self_use`/`dev` mode or with a reveal. Migration `0005` only widens `ck_sessions_condition`; a test shows the n-of-1 export is byte-identical before and after it | Stage 4 groundwork |
+| **Retained** | The four experiment exercises' behaviour, saved records, texts, science texts and content versions; the n-of-1 code, schedule (SHA-256 unchanged), analysis and protocol. **No protocol change:** this release should precede phase-1 day 1; if it lands later, it is logged as a release during a phase (protocol §8) | Golden tests, export test and browser tests all unchanged and green |
+| **Pending** | The three Cognitive shifts exercises (Try it, development only until the content review and the full-text gates pass) | Next Stage 4 step |
 
 ## References
 - ✔F: [Gollwitzer & Sheeran 2006 (open-access scan)](https://kops.uni-konstanz.de/entities/publication/2e749bfb-8533-437c-8203-7e788c910c5f) · [Sheeran, Listrom & Gollwitzer 2024 (author manuscript)](https://kops.uni-konstanz.de/handle/123456789/69905) · [Engelhard et al. 2011](https://www.ifemdr.fr/wp-content/uploads/2011/10/Engelhard-et-al-2011-Reducing-vividness-and-emotional-intensity-of-recurrent-flashforwards.pdf) · [Holmes et al. 2010, PLoS ONE](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0013706)
