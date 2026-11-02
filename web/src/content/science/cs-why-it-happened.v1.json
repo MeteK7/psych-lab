@@ -10,9 +10,9 @@
   "research": [
     {
       "layer": "method",
-      "text": "A review of 17 evaluations of a cognitive-behavioural group programme for young people found slightly fewer low-mood symptoms than with no programme, up to a year later, but not fewer than with other active programmes.",
-      "who": "2,498 young people aged 8–18 · mostly school groups",
-      "sources": ["brunwasser-2009"]
+      "text": "A review of 17 evaluations of a cognitive-behavioural group programme for young people, which teaches them to check pessimistic explanations for things that go wrong and consider other ones, found slightly fewer low-mood symptoms than with no programme, up to a year later, but not fewer than with other active programmes.",
+      "who": "2,498 young people aged 8–18 · mostly school groups (in one trial, 12 weekly meetings of 90 minutes)",
+      "sources": ["brunwasser-2009", "gillham-2007"]
     }
   ],
   "similar_note": "No research has tested a short, self-guided cause map like this one.",

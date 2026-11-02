@@ -97,6 +97,7 @@ The PubMed record (citation and abstract) of each was checked on 2026-11-02 (✔
 | Bruehlman-Senecal & Ayduk 2015, *JPSP* 108(2):356–375 | 25603380 | CS1 (lens 3) | **✔F** | Published version, hosted by the Ayduk lab. Read: abstract, participants of every study, Studies 1a–1b method and mediation results, design of Studies 2–6 |
 | Brunwasser, Gillham & Kim 2009, *J Consult Clin Psychol* 77(6):1042–54 | 19968381 | CS2 | **✔F** | PMC author manuscript (PMC4667774). Read: abstract, introduction, method, all results, sensitivity analyses |
 | Eyal, Steffel & Epley 2018, *JPSP* 114(4):547–571 | 29620401 | CS3 | **✔F** | Published version, hosted on an author site. Read: abstract, samples for Experiments 1–24, confidence measures, Experiment 25 (method and accuracy results) |
+| Gillham et al. 2007, *J Consult Clin Psychol* 75(1):9–19 | 17295559 | CS2 (programme content, with Brunwasser) | **✔F** | PMC author manuscript (PMC4469032), added 2026-11-03. Read: abstract, participants, intervention description |
 | Hallion & Ruscio 2011, *Psychol Bull* 137(6):940–58 | 21728399 | CS3 | ✔A | **To obtain (you):** library |
 | Cristea, Kok & Cuijpers 2015, *Br J Psychiatry* 206(1):7–16 | 25561486 | CS3 | **✔F** | Free from the publisher (Cambridge). Read: abstract, introduction, method, all main and clinical-sample results, publication bias, discussion |
 | Wang et al. 2021, *Nat Hum Behav* 5(8):1089–1110 | 34341554 | CS1 (pending; not shown) | **✔F** | PMC (PMC8742248). Read: abstract, introduction, main and exploratory results, limitations, method summary |
@@ -115,6 +116,9 @@ Each entry compares the full text with what the exercise's explanation said befo
   - There was no advantage over active control programmes, in the 4 studies that had one.
 - **Precision 1:** the programme is a cognitive-behavioural group programme, "typically" in schools but also run in primary care and juvenile detention. "School groups" should be "mostly school groups".
 - **Precision 2:** the paper doesn't describe the programme's content (it refers elsewhere). "Teaches young people to examine their explanations for setbacks" therefore needs a source that describes it, or a more general wording.
+  - **Resolved 2026-11-03 with Gillham et al. 2007** (one of the 17 trials, cited by Brunwasser). Its description of the programme covers how beliefs, feelings and behaviour link; cognitive styles, including pessimistic explanatory style; and challenging negative thinking by checking whether beliefs are accurate and generating alternative interpretations. Other skills include assertiveness, negotiation, decision making, relaxation and problem solving.
+  - **That trial:** 697 children in grades 6–8 at three US suburban middle schools; twelve weekly 90-minute groups after school.
+  - **Applied:** the finding now says the programme "teaches them to check pessimistic explanations for things that go wrong and consider other ones", citing both sources. The who line adds "in one trial, 12 weekly meetings of 90 minutes".
 - **Also worth knowing:** the effect straight after the programme lost significance after a publication-bias adjustment. The 6- and 12-month effects held up.
 - **Proposed:** "A review of 17 evaluations of a cognitive-behavioural group programme for young people, mostly run in schools over several sessions, found slightly fewer low-mood symptoms than with no programme, up to a year later, but not fewer than with other active programmes." Who: "2,498 young people aged 8–18 · mostly school groups".
 
