@@ -154,6 +154,7 @@ Start production, then open http://localhost:4300/experiment:
 
 - The game accepts pointer or arrow keys.
 - With reduced motion turned on in Windows, the dot moves at half speed.
+- **Sound version** (Try it only): at the practice step, "Use the sound version" replaces the dot game with tones. You press Space, or the "High tone" button, at each high tone, with the same timing. Experiment exercises always use the dot game.
 
 ## n-of-1 export and analysis (developer task, production data)
 - The procedure is in `docs/protocol-n-of-1.md`. Schedules are in `analysis/schedules/` and are generated once per phase. **Never open them directly.** The server reads them, hash-checked.
@@ -178,7 +179,30 @@ cd analysis; uv run python make_schedule.py --phase 0 --out ../data/schedules-de
 ```powershell
 powershell -File scripts/check.ps1
 ```
-This runs ruff (lint and format), pytest against the environment's test database, the Angular unit tests (Vitest), and the production build.
+This runs:
+- ruff (lint and format)
+- pytest against the environment's test database
+- the Angular unit tests (Vitest)
+- the production build
+- **the browser tests** (about 4 minutes): every exercise completed keyboard-only, accessibility scans (axe, WCAG 2.2 AA), reduced motion and the sound version
+
+**About the browser tests:**
+- They use the Microsoft Edge already installed and start their own API and web app on ports **8120** and **4320**. Those ports must be free; your development app on 4310/8110 can keep running.
+- Their API always uses the **test database** (`TEST_DATABASE_URL`), which it resets. It refuses to run if that points at `app_dev` or `app_prod`.
+- To run only the browser tests, from `web`:
+  ```powershell
+  npm run e2e
+  ```
+- If a test fails, its page snapshot is in `web/test-results/` (git-ignored).
+
+## Usability sessions
+Follow `docs/usability-procedure.md`. Tester data goes into its own database, `app_usability`, so it never mixes with yours and is deleted in one step within 30 days:
+```sql
+CREATE DATABASE app_usability;
+```
+- **For test days:** set `DATABASE_URL` in `platform\.env` to `…/app_usability`, then run `uv run alembic upgrade head` in `api` and start development as usual.
+- **Afterwards:** switch back to `app_dev`.
+- **Deletion:** when the report is done, and within 30 days, run `DROP DATABASE app_usability;`.
 
 ## Backups
 ```powershell

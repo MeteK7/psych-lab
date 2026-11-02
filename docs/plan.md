@@ -1,6 +1,6 @@
-# Research-led plan: a web platform of psychologically informed interactive experiences (revision 6.1)
+# Research-led plan: a web platform of psychologically informed interactive experiences (revision 6.2)
 
-> **Status:** revision 5.1 approved 2026-10-29. Stage 1 is partly done (§2.3). The Stage 2 level-A prototype is built and checked (see `docs/runbook.md`). Revisions 5.2–5.7 record the decisions made during implementation (5.3: the study-log outcome, protocol and analysis scripts; 5.4: no content lock, slot reveal tool, the eligible-day-no-session outcome, an earlier phase-1 start; 5.5: folder restructure, study log without git; 5.6: all daily n-of-1 records in the app; protocol v1.3 approved 2026-10-31; 5.7: platform structure and plain on-screen wording; 6.0: three usage models released one at a time (`docs/product-model.md`), separate development and production environments, the exposure rule; protocol v1.4 approved 2026-11-01; 6.1: a science explanation for every experience, and memory reconsolidation as a future research candidate). The user performs all git actions. If a branch is needed, base it on `test`, never `main`. No AI attribution anywhere in files, comments or docs.
+> **Status:** revision 5.1 approved 2026-10-29. Stage 1 is partly done (§2.3). The Stage 2 level-A prototype is built and checked (see `docs/runbook.md`). Revisions 5.2–5.7 record the decisions made during implementation (5.3: the study-log outcome, protocol and analysis scripts; 5.4: no content lock, slot reveal tool, the eligible-day-no-session outcome, an earlier phase-1 start; 5.5: folder restructure, study log without git; 5.6: all daily n-of-1 records in the app; protocol v1.3 approved 2026-10-31; 5.7: platform structure and plain on-screen wording; 6.0: three usage models released one at a time (`docs/product-model.md`), separate development and production environments, the exposure rule; protocol v1.4 approved 2026-11-01; 6.1: a science explanation for every experience, and memory reconsolidation as a future research candidate; 6.2: Stage 3 built: browser tests, the sound version of the dot game, usability procedure, consent and content review). The user performs all git actions. If a branch is needed, base it on `test`, never `main`. No AI attribution anywhere in files, comments or docs.
 >
 > **Terminology:** descriptive and provisional ("the platform", "experiences"). There is no product name.
 >
@@ -358,16 +358,16 @@ C:\Projects\new_project\                 project root (git set up by the user)
   platform-prod\                         production: git worktree of main (own .env, app_prod)
   platform\                              development: branch test
     api/  pyproject.toml (uv) · .python-version (3.13) · alembic.ini
-          app/{main,config,db,models,schemas,security,manage,n1,clock}.py · app/routes/{health,sessions,n1}.py · participants (B)
+          app/{main,config,db,models,schemas,security,manage,n1,clock,e2e_server}.py · app/routes/{health,sessions,n1}.py · participants (B)
           alembic/versions/{0001_create_sessions,0002_n1_daily_records,0003_session_last_saved_at,0004_session_mode_try}.py · tests/
     web/  src/app/{api,flow,shared,areas.ts,pages/{home,area,experiment,records,about}}
           src/app/experiences/{rating-step,action-bridge,goal-restatement,state-reset}
-          src/content/{ratings.v1,action-bridge.v1,goal-restatement.v1,state-reset.v1,state-reset.v2}.json
-          proxy.conf.json
+          src/content/{ratings,action-bridge,goal-restatement,state-reset,state-reset-sound}.v<N>.json · src/content/science/
+          e2e/ (Playwright browser tests) · playwright.config.ts · proxy.conf.json · proxy.e2e.conf.json
     analysis/  pyproject.toml (uv) · make_schedule.py · n_of_1.py (reads the export-n1 JSON) · tests/ · schedules/schedule-phase<N>.{csv,sha256,meta.json}
     data/exports/  phase<N>.json, per-day tables   (git-ignored)
     data/schedules-dev/, data/study-log-dev/   development's Test mode only (git-ignored)
-    docs/  plan.md · product-model.md · evidence-verification.md · runbook.md · protocol-n-of-1.md · usability-procedure.md (B) · consent-usability.md (B)
+    docs/  plan.md · product-model.md · evidence-verification.md · runbook.md · protocol-n-of-1.md · usability-procedure.md (B) · consent-usability.md (B) · content-review.md (B)
     scripts/  check.ps1
     .env · .env.example · .gitignore (.env, data/) · .gitattributes
 ```
@@ -443,7 +443,7 @@ cd web; npm start
 ```
 Then open `http://localhost:4310`. The Angular proxy forwards `/api`, so everything is on one origin and no CORS setup is needed. `--reload-dir app` stops the reloader from watching `api/.venv`, which otherwise restarts the API constantly.
 
-**Test:** runs ruff, pytest against `app_test`, `ng test`, `ng build`, and (B) Playwright with axe.
+**Test:** runs ruff, pytest against `app_test`, `ng test`, `ng build`, and (B) the browser tests: Playwright with axe, in the installed Microsoft Edge, against their own API on the test database (ports 4320/8120), about 4 minutes.
 ```bash
 powershell -File scripts/check.ps1
 ```
@@ -461,10 +461,10 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | Area | A (prototype) | B (usability) | C |
 |---|---|---|---|
 | Backend tests | pytest: idempotent session upsert; condition validation; health check; migrations upgrade on an empty `app_test` | Consent and delete cascade | Allocation engine; exports |
-| Frontend tests | Vitest: flow order per condition; Action Bridge validation; State Reset timing and completion logic | Playwright keyboard-only path + axe scan; reduced-motion path | Broad end-to-end tests; CI |
+| Frontend tests | Vitest: flow order per condition; Action Bridge validation; State Reset timing and completion logic | **Built (6.2):** Playwright keyboard-only path through every exercise, including the sound version; axe scans (WCAG 2.2 AA, no serious or critical violations) on every page, step and the dark scheme; reduced-motion path; saved step summaries checked; a test that the scan catches a planted problem | Broad end-to-end tests; CI |
 | Local security | API bound to `127.0.0.1`; `TrustedHostMiddleware` (localhost only, against DNS rebinding); writes require `Content-Type: application/json` + an `X-Client` header + an allowed `Origin` (blocks drive-by writes from websites) | — | Production authentication, CSRF tokens, TLS |
 | Privacy | Self-use data stays local; goal text is optional | Testers: pseudonymous code, hypothetical goals, no health questions beyond "made it worse", free text deleted after the report, all tester data deleted within 30 days | Lawful basis, DPIA and retention policy before formal research |
-| Accessibility | Keyboard path for every interaction; `prefers-reduced-motion` | WCAG 2.2 AA check; NVDA screen-reader pass; a **non-visual State Reset variant** (an auditory or counting dual task, which also taxes working memory, ◐) | Full audit |
+| Accessibility | Keyboard path for every interaction; `prefers-reduced-motion` | WCAG 2.2 AA check; NVDA screen-reader pass; a **non-visual State Reset variant**: **built (6.2)** as a tone task (respond to high tones; same timing and practice), offered in Try it only, never in experiment exercises; its evidence as a taxing task is ◐ until Houben 2020 is read. The NVDA screen-reader pass is a manual step in the usability preparation | Full audit |
 
 **Isolation tests** (revision 6.0):
 - **Before release:** every model passes its own isolation tests before it goes live (`product-model.md` §5).
@@ -501,7 +501,7 @@ The test database resets itself on each test run (migrate once; roll back a tran
 |---|---|---|---|---|---|---|
 | **1. Research and problem definition** (weeks 1–3, overlaps Stage 2) | `problem-and-evidence.md` with the **rank-1** §2.3 claims at ✔F; n-of-1 protocol (both phases) + phase-1 hashed schedule; study log (`C:\Projects\new_project\study-log`, plain folder) created; usability procedure + consent; State Reset image prompts and game spec; Interpretation Shift scenario draft reviewed by ≥ 3 people | — | Formal research protocol; ethics submission | Every claim marked ✔F, ✔A or ◐; no decision rests on ◐ | Supports the design choices · Doesn't show any effects | Proceed if State Reset and Action Bridge remain defensible after ✔F. Revise the candidates if a key claim fails |
 | **2. Minimal local prototype** (**working level-A build by end of week 3**) | Level-A API, data model, migrations; Action Bridge, goal restatement, State Reset, game-only control; condition selector; history; follow-up; `check.ps1` | Native PostgreSQL; protocol drafts; rank-1 claims at ✔F (must be done before the end of week 3) | Level B and C items | Clean setup from the runbook; all level-A tests pass; each condition runs end to end | Shows the software runs · Says nothing about people | — |
-| **3. Technical and content validation** (weeks 4–5) | Level-B items: keyboard/axe tests, reduced-motion and non-visual variants; walkthrough of all conditions; content review; Interpretation Shift build **only if** its review passed | Stage 2 | Testers | No serious axe violations; scripted runs record correct step summaries; reviewers find no invalidating content | Readiness for usability testing · Not usability itself | Proceed; or fix and re-run |
+| **3. Technical and content validation** (weeks 4–5) | Level-B items: keyboard/axe tests, reduced-motion and non-visual variants; walkthrough of all conditions; content review; Interpretation Shift build **only if** its review passed | Stage 2 | Testers | No serious axe violations; scripted runs record correct step summaries; reviewers find no invalidating content. **Status (6.2):** tests and the sound variant built and passing; the content review (`content-review.md`) and the NVDA pass are yours to do | Readiness for usability testing · Not usability itself | Proceed; or fix and re-run |
 | **4. Local usability and feasibility** (usability weeks 6–8; phase 1 may begin earlier, see prerequisites; overall to ~week 15 at the minimum day count, up to week 19 at the target) | Usability sessions in weeks 6–8; n-of-1 phase 1 (20 session days at ~4 per week, about 5 weeks; up to 7 weeks for 28); 2-day gap; n-of-1 phase 2 (about 5–7 weeks); feasibility report including the `eligible_no_session` count per phase | **Usability:** Stage 3; signed consents. **Phase 1 (deliberate deviation):** only the study log, the production environment and the approved protocol version; it doesn't wait for Stage 3. **Phase 2:** unchanged: usability showed State Reset is tolerable, the rank-1/rank-2 claims are ✔F, and its own hashed schedule exists | Remote recruitment; efficacy claims | §5 go/amend criteria; **each phase** has ≥ 20 session days with ≥ 90% usable trace data | Usability, product feel, measurability, your personal signal · **Not efficacy** | — |
 | **5. Decision gate** (week ~16 at the minimum day count; ~20 at the target) | A recorded decision | Stage 4 report | — | Decision justified by the data | — | **Refine** (amend criteria) · **Expand** (feasibility pilot design, then ethics review and a deployment decision) · **Redesign** (e.g., State Reset intolerable, or trace outcome unworkable) · **Stop** (no signal, and the redesign reasons are exhausted) |
 
@@ -678,6 +678,16 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | **Changed** | The "Why this exercise?" section is redesigned (design A, chosen from three previews): a panel bar with icon and method name, icon headings per part, findings as blocks with their evidence level, a highlighted "About this exercise" callout, numbered sources. Still in the page and collapsed by default; content unchanged. The length guideline is widened to about 120–280 words, to fit the expanded State Reset principle | User request; the expanded principle text is the user's own edit |
 | **Changed** | Area-page cards name their method (icon and name, under the description) instead of repeating a "Why this exercise?" link; the method links to the explanation as before. The two baseline exercises are named by the research concepts they use (Goal intentions, Distraction), not "comparison" | User feedback: the repeated links cluttered the cards, and "comparison" means nothing to a Try it visitor |
 | **Corrected** | §3.1 wording rule: "Research found…" (✔F) and "Research suggests…" (✔A), because "study" isn't used on screen. The Webb 2012 reference link pointed to the authors' 2013 reply; it now points to the 2012 meta-analysis (PMID 22582737) | Accuracy |
+
+### Revision 6.2 amendments (2026-11-01; Stage 3)
+| Type | Item | Why |
+|---|---|---|
+| **Added** | **Browser tests** (`web/e2e/`, Playwright with axe), run by `check.ps1`: every exercise completed keyboard-only with its saved step summary checked; axe scans for WCAG 2.2 AA on every page, every exercise step, every opened explanation and the dark scheme (no serious or critical violations); reduced motion halves the dot speed; a test proving the scan catches a planted problem. They use the installed Edge and their own API on the test database (`api/app/e2e_server.py`, ports 4320/8120), never `app_dev` or `app_prod`. The first run found no accessibility problems to fix | Stage 3 criteria: no serious axe violations; scripted runs record correct step summaries |
+| **Added** | **Sound version of the dot game** (`state-reset-sound` v1, a tone game): respond to high tones with Space or a button, same timing, practice and hold. Offered in Try it only; experiment exercises keep the dot game. Recorded as `task: sound` with hits, misses and false alarms; its content version is recorded only when used | Plan §8: a non-visual State Reset variant for people who can't follow a moving dot. Evidence for tone tasks as working-memory taxation is ◐ (Houben 2020 not yet read); the offer says it hasn't been tested |
+| **Added** | `docs/usability-procedure.md` (rotated order, questions including SUS and the "made it worse" item, distress handling, a separate `app_usability` database, deletion within 30 days, go/amend/redesign criteria) and `docs/consent-usability.md` (plain-language consent) | Stage 1 and Stage 4 deliverables; plan §5 and §8 |
+| **Added** | `docs/content-review.md`: a checklist for on-screen texts and science explanations, the files to review, and a review record | Stage 3 criterion: reviewers find no invalidating content |
+| **Not done** | Participant codes and consent records in the app (level B software) are left for later; paper consent covers 5–8 testers. Interpretation Shift stays conditional | Not needed for the first usability sessions |
+| **Retained** | The protocol, the experiment's exercises and content versions, and Try it access are unchanged | — |
 
 ## References
 - ✔F: [Gollwitzer & Sheeran 2006 (open-access scan)](https://kops.uni-konstanz.de/entities/publication/2e749bfb-8533-437c-8203-7e788c910c5f) · [Sheeran, Listrom & Gollwitzer 2024 (author manuscript)](https://kops.uni-konstanz.de/handle/123456789/69905) · [Engelhard et al. 2011](https://www.ifemdr.fr/wp-content/uploads/2011/10/Engelhard-et-al-2011-Reducing-vividness-and-emotional-intensity-of-recurrent-flashforwards.pdf) · [Holmes et al. 2010, PLoS ONE](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0013706)
