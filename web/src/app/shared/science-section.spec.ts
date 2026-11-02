@@ -39,6 +39,17 @@ describe('ScienceSection', () => {
     expect(details.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
   });
 
+  it('opens with why the exercise is worth doing, when the explanation says so', async () => {
+    const details = await render('cs_not_enough_to_go_on', 'Perspective-getting', true);
+    const headings = Array.from(details.querySelectorAll('h3')).map((h) => h.textContent!.trim());
+    expect(headings.slice(0, 3)).toEqual([
+      "Why it's worth doing",
+      'What you do',
+      'The method: Weighing several readings, and finding out',
+    ]);
+    expect(details.querySelectorAll('section.part')[0].querySelectorAll('p')).toHaveLength(2);
+  });
+
   it('keeps each evidence qualification next to its finding and source', async () => {
     const details = await render('game_only+action_bridge', 'Distraction', true);
     const ref = details.querySelector('.finding .refs li')!;

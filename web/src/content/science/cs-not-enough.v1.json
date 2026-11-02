@@ -2,15 +2,16 @@
   "id": "science-cs-not-enough",
   "version": "1",
   "experience": "cs_not_enough_to_go_on",
-  "what_you_do": "For an unclear situation, you share 10 points of likelihood between several readings, then decide whether and how to find out what was meant.",
+  "why": "Unclear moments happen every day: a message with no reply, a short email. The reading you settle on shapes what you feel and do next, like worrying for hours or replying coldly.\n\nThis is practice at noticing your first guess, holding it more loosely, and finding out when guessing isn't enough.",
+  "what_you_do": "You share 10 points between possible readings of an unclear situation, then decide whether and how to find out.",
   "method": {
-    "name": "Perspective-getting, and other readings of ambiguity",
-    "text": "When information is missing, we often fill the gap with one reading, sometimes the most negative. Two things can help: considering several readings, and getting real information instead of guessing what someone else thinks."
+    "name": "Weighing several readings, and finding out",
+    "text": "When information is missing, we tend to fill the gap with one reading, sometimes the one that worries us most, and it can start to feel like a fact. Seeing several readings together shows what's still unknown. To know what someone meant, asking tends to work better than imagining.\n\nThis isn't about picking the nicest reading: sometimes the worrying one is right."
   },
   "research": [
     {
       "layer": "method",
-      "text": "A series of 25 experiments found that imagining how someone else sees things didn't make people more accurate about what they think, and sometimes made them more confident without being more accurate. In a final experiment with couples, asking the other person directly helped.",
+      "text": "25 experiments found that imagining yourself in someone's place didn't make people more accurate about their thoughts, and sometimes made them more confident. In a final experiment with couples, asking directly helped.",
       "who": "25 experiments · students, online and community volunteers, including couples and strangers",
       "sources": ["eyal-2018"]
     },
@@ -22,7 +23,7 @@
     },
     {
       "layer": "method",
-      "text": "A later review of 49 trials of these trainings in adults, including ones that train attention, suggests the effects are smaller than they first looked: in people diagnosed with anxiety or depression they were mostly not reliable, and after allowing for results that likely went unpublished, several shrank to near zero.",
+      "text": "A later review of 49 trials in adults, including attention training, suggests the effects are smaller than they first looked: mostly unreliable for people diagnosed with anxiety or depression, and near zero for some once likely unpublished results are allowed for.",
       "who": "49 randomised trials in adults · students, volunteers, and 16 trials with people diagnosed with anxiety or depression",
       "sources": ["cristea-2015"]
     }

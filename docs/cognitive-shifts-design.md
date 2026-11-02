@@ -27,6 +27,11 @@ Implemented as designed, in the development build only. Changes made while build
 - **The fit board** uses three buttons per card; there's no drag and drop. Radio targets are 24 px, the WCAG 2.2 minimum the browser tests found missing at first.
 - **The CS2 "heavy map" step** adds a cause in place, rather than going back a step.
 - **Population lines:** where the abstract didn't say who took part or where, the line says "to be confirmed from the full text" instead of guessing.
+- **Full-text corrections (2026-11-03):** the science texts in §7 are the approved drafts. The live wording, corrected after the full-text check, is in `web/src/content/science/cs-*.v1.json` (see `evidence-verification.md`).
+- **"Why it's worth doing" (2026-11-03, CS3 first):**
+  - **The part:** an explanation may open with a short part saying, in everyday terms, why the exercise is worth doing: what goes on when we read an unclear situation, and what the practice is for. It's shown before "What you do", counts towards the word limit, and follows the same wording rules (no promises that the exercise works).
+  - **CS3 changes:** CS3's method is renamed "Weighing several readings, and finding out", and its text now explains what happens in your mind. It also says this isn't about picking the nicest reading.
+  - **Scope:** the four experiment explanations don't get this part.
 
 ## 1. The experience registry refactor, and how the experiment is protected
 

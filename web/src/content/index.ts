@@ -188,6 +188,8 @@ export interface ScienceSource {
 export interface ScienceContent extends Versioned {
   /** The experience (condition value) this explains. */
   experience: string;
+  /** Cognitive shifts: why it's worth doing, in everyday terms; shown first. */
+  why?: string;
   what_you_do: string;
   method: { name: string; text: string };
   /** Evidence for the method, never for this exercise; each finding names its sources. */

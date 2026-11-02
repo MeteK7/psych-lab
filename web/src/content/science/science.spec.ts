@@ -6,6 +6,7 @@ import { CONDITIONS } from '../../app/flow/conditions';
 
 function texts(s: ScienceContent): string[] {
   return [
+    ...(s.why ? [s.why] : []),
     s.what_you_do,
     s.method.name,
     s.method.text,
@@ -125,6 +126,7 @@ describe('Cognitive shifts science explanations (cognitive-shifts-design.md §7)
     for (const s of experiment) {
       expect(s.research.some((r) => r.layer || r.who), s.id).toBe(false);
       expect(s.similar_note, s.id).toBeUndefined();
+      expect(s.why, s.id).toBeUndefined();
     }
   });
 });
