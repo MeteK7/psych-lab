@@ -10,6 +10,9 @@ import ratingsJson from './ratings.v2.json';
 // preview and a 15 s practice round, identical in both variants, come before the timed
 // rounds. The 8 x 24 s dose is unchanged from v2 (Engelhard et al. 2011).
 import stateResetJson from './state-reset.v3.json';
+// Sound version of the dot game (plan §8, level B): an accessible alternative offered in
+// Try it only, never in experiment exercises. Recorded only when it was used.
+import stateResetSoundJson from './state-reset-sound.v1.json';
 // Science explanations ("Why this exercise?", plan §3.1): versioned apart from the
 // experience content, so the experiment's content versions don't change.
 import scienceActionBridgeJson from './science/action-bridge.v1.json';
@@ -130,6 +133,36 @@ export const RATINGS: RatingsContent = ratingsJson;
 export const ACTION_BRIDGE: ActionBridgeContent = actionBridgeJson as ActionBridgeContent;
 export const GOAL_RESTATEMENT: GoalRestatementContent = goalRestatementJson;
 export const STATE_RESET: StateResetContent = stateResetJson;
+
+export interface ToneSettings {
+  low_hz: number;
+  high_hz: number;
+  tone_ms: number;
+  /** Share of tones that are high (the ones to respond to). */
+  high_share: number;
+  min_gap_ms: number;
+  max_gap_ms: number;
+  response_window_ms: number;
+}
+
+export interface StateResetSoundContent extends Versioned {
+  tones: ToneSettings;
+  offer: { question: string; use_sound: string; use_dot: string; note: string };
+  how_it_works: {
+    heading: string;
+    text: string;
+    keyboard: string;
+    pointer: string;
+    sound_check: string;
+    low: string;
+    high: string;
+    respond: string;
+    game_label: string;
+  };
+  round: { image: string; game_only: string };
+}
+
+export const STATE_RESET_SOUND: StateResetSoundContent = stateResetSoundJson;
 
 /** full_text = ✔F (full text checked), abstract = ✔A. Unverified (◐) sources are never cited. */
 export type Evidence = 'full_text' | 'abstract';

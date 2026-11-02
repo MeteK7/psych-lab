@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { STATE_RESET } from '../../../content';
+import { STATE_RESET, STATE_RESET_SOUND } from '../../../content';
 import { StepOutcome } from '../../flow/step-outcome';
 import { StateReset } from './state-reset';
 
@@ -118,6 +118,61 @@ describe('StateReset', () => {
     expect(root(fixture).textContent).toContain(STATE_RESET.how_it_works.heading);
     expect(root(fixture).textContent).toContain(STATE_RESET.game_only_variant.practice);
     expect(root(fixture).textContent).not.toContain('picture');
+    fixture.destroy();
+  });
+
+  it('offers the sound version before practice, and switches the game to tones', async () => {
+    const fixture = create('game_only');
+    let outcome: StepOutcome | null = null;
+    fixture.componentInstance.completed.subscribe((o) => (outcome = o));
+    await fixture.whenStable();
+    click(fixture, STATE_RESET.next_label);
+    await fixture.whenStable();
+    expect(root(fixture).textContent).toContain(STATE_RESET_SOUND.offer.note);
+
+    click(fixture, STATE_RESET_SOUND.offer.use_sound);
+    await fixture.whenStable();
+    expect(root(fixture).textContent).toContain(STATE_RESET_SOUND.how_it_works.heading);
+    expect(root(fixture).querySelector('app-game-preview')).toBeNull();
+    click(fixture, STATE_RESET.how_it_works.start_practice);
+    await fixture.whenStable();
+    expect(root(fixture).querySelector('app-tone-game')).not.toBeNull();
+    expect(root(fixture).querySelector('canvas')).toBeNull();
+
+    (fixture.componentInstance as unknown as { finish(): void }).finish();
+    expect(outcome!.result['task']).toBe('sound');
+    fixture.destroy();
+  });
+
+  it('can switch back to the dot game before practice', async () => {
+    const fixture = create('game_only');
+    await fixture.whenStable();
+    click(fixture, STATE_RESET.next_label);
+    await fixture.whenStable();
+    click(fixture, STATE_RESET_SOUND.offer.use_sound);
+    await fixture.whenStable();
+    click(fixture, STATE_RESET_SOUND.offer.use_dot);
+    await fixture.whenStable();
+    expect(root(fixture).querySelector('app-game-preview')).not.toBeNull();
+    fixture.destroy();
+  });
+
+  it('never offers the sound version in an experiment exercise', async () => {
+    const fixture = create('game_only', true);
+    await fixture.whenStable();
+    click(fixture, STATE_RESET.next_label);
+    await fixture.whenStable();
+    expect(root(fixture).textContent).not.toContain(STATE_RESET_SOUND.offer.use_sound);
+    fixture.destroy();
+  });
+
+  it('records the dot game as the task by default', async () => {
+    const fixture = create('game_only');
+    let outcome: StepOutcome | null = null;
+    fixture.componentInstance.completed.subscribe((o) => (outcome = o));
+    await fixture.whenStable();
+    (fixture.componentInstance as unknown as { finish(): void }).finish();
+    expect(outcome!.result['task']).toBe('dot');
     fixture.destroy();
   });
 

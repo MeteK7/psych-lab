@@ -1,4 +1,4 @@
-import { ACTION_BRIDGE, GOAL_RESTATEMENT, RATINGS, STATE_RESET, Versioned } from '../../content';
+import { ACTION_BRIDGE, GOAL_RESTATEMENT, RATINGS, STATE_RESET, STATE_RESET_SOUND, Versioned } from '../../content';
 import { Condition, Mode, SessionUpsert, Status, StepSummary } from '../api/types';
 import { StepId, stepsFor } from './conditions';
 import { StepOutcome } from './step-outcome';
@@ -77,12 +77,21 @@ export function addStop(draft: SessionDraft, during: StepId, at: string): Sessio
   };
 }
 
+/** The condition's content, plus the sound version of the game if this session used it. */
+function shownVersions(draft: SessionDraft): Record<string, string> {
+  const versions = contentVersionsFor(draft.condition);
+  if (draft.steps.some((s) => s.result?.['task'] === 'sound')) {
+    versions[STATE_RESET_SOUND.id] = STATE_RESET_SOUND.version;
+  }
+  return versions;
+}
+
 export function toUpsert(draft: SessionDraft, status: Status, endedAt: string | null): SessionUpsert {
   return {
     mode: draft.mode,
     condition: draft.condition,
     status,
-    content_versions: contentVersionsFor(draft.condition),
+    content_versions: shownVersions(draft),
     steps: draft.steps,
     plan: draft.plan,
     ratings: Object.keys(draft.ratings).length ? draft.ratings : null,

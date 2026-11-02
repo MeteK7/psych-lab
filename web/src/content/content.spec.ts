@@ -1,6 +1,6 @@
-import { ACTION_BRIDGE, GOAL_RESTATEMENT, RATINGS, STATE_RESET } from '.';
+import { ACTION_BRIDGE, GOAL_RESTATEMENT, RATINGS, STATE_RESET, STATE_RESET_SOUND } from '.';
 
-const ALL = [ACTION_BRIDGE, GOAL_RESTATEMENT, RATINGS, STATE_RESET];
+const ALL = [ACTION_BRIDGE, GOAL_RESTATEMENT, RATINGS, STATE_RESET, STATE_RESET_SOUND];
 
 function strings(value: unknown): string[] {
   if (typeof value === 'string') return [value];
