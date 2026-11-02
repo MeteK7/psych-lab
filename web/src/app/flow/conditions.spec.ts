@@ -1,4 +1,5 @@
-import { CONDITIONS, MODES, STEP_NAMES, isCondition, isLevelAMode, stepsFor } from './conditions';
+import { stepsFor } from '../experiences/registry';
+import { CONDITIONS, MODES, STEP_NAMES, isCondition, isLevelAMode } from './conditions';
 
 describe('conditions', () => {
   it('runs the plan factor alone in phase 1', () => {

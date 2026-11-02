@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 
 import { ApiService } from '../../api/api.service';
 import { SessionOut, Status } from '../../api/types';
-import { conditionInfo } from '../../flow/conditions';
+import { exerciseInfo } from '../../experiences/registry';
 import { FollowUpForm } from './follow-up-form';
 
 type LoadState = 'loading' | 'error' | 'loaded';
@@ -96,7 +96,7 @@ export class RecordsPage {
   }
 
   protected name(session: SessionOut): string {
-    return conditionInfo(session.condition)?.label ?? session.condition;
+    return exerciseInfo(session.condition)?.label ?? session.condition;
   }
 
   /** Experiment rows link to a reveal; a linked dev session is a Test mode run (phase 0). */

@@ -5,13 +5,14 @@ import { firstValueFrom } from 'rxjs';
 
 import { scienceFor } from '../../content';
 import { ApiService } from '../api/api.service';
-import { Condition, Mode, Status } from '../api/types';
+import { ExerciseId, Mode, Status } from '../api/types';
 import { ActionBridge } from '../experiences/action-bridge/action-bridge';
 import { GoalRestatement } from '../experiences/goal-restatement/goal-restatement';
 import { RatingStep } from '../experiences/rating-step/rating-step';
 import { StateReset } from '../experiences/state-reset/state-reset';
 import { ScienceSection } from '../shared/science-section';
-import { STEP_NAMES, StepId, conditionInfo, isCondition, isLevelAMode, stepsFor } from './conditions';
+import { exerciseInfo, isExerciseId, stepsFor } from '../experiences/registry';
+import { STEP_NAMES, StepId, isLevelAMode } from './conditions';
 import { SessionDraft, addStep, addStop, newDraft, toUpsert } from './session-record';
 import { StepOutcome } from './step-outcome';
 
@@ -126,7 +127,7 @@ export class SessionPage {
 
   protected readonly setup = signal<{
     mode: Mode;
-    condition: Condition;
+    condition: ExerciseId;
     revealId: string | null;
   } | null>(null);
   /** Experiment exercises carry the reveal that assigned their condition. */
@@ -143,7 +144,7 @@ export class SessionPage {
   });
   protected readonly step = computed(() => this.steps()[this.index()]);
   protected readonly stepName = computed(() => STEP_NAMES[this.step()]);
-  protected readonly info = computed(() => conditionInfo(this.setup()?.condition));
+  protected readonly info = computed(() => exerciseInfo(this.setup()?.condition));
   /**
    * "Why this exercise?" for practice only. Experiment exercises show exactly what the
    * approved protocol fixes, and a rationale could add an expectancy confound (plan §3.1).
@@ -164,7 +165,9 @@ export class SessionPage {
     // n-of-1 sessions carry the reveal that assigned their condition (from My experiment).
     const revealId = params.get('reveal');
     this.openWhy = params.get('why') === '1';
-    if (isCondition(condition) && isLevelAMode(mode)) this.setup.set({ mode, condition, revealId });
+    if (isExerciseId(condition) && isLevelAMode(mode) && allowed(condition, mode, revealId)) {
+      this.setup.set({ mode, condition, revealId });
+    }
   }
 
   protected begin(): void {
@@ -226,4 +229,9 @@ export class SessionPage {
   private focusSoon(): void {
     setTimeout(() => this.focusTarget()?.nativeElement.focus());
   }
+}
+
+/** Exercises outside the experiment run only in Try it, never with a reveal (API rule too). */
+function allowed(exercise: ExerciseId, mode: Mode, revealId: string | null): boolean {
+  return exerciseInfo(exercise)?.experiment !== null || (mode === 'try' && revealId === null);
 }

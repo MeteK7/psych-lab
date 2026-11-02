@@ -1,6 +1,17 @@
-import { ACTION_BRIDGE, GOAL_RESTATEMENT, RATINGS, STATE_RESET, STATE_RESET_SOUND, Versioned } from '../../content';
-import { Condition, Mode, SessionUpsert, Status, StepSummary } from '../api/types';
-import { StepId, stepsFor } from './conditions';
+import {
+  ACTION_BRIDGE,
+  CS_NOT_ENOUGH,
+  CS_OTHER_READINGS,
+  CS_WHY_IT_HAPPENED,
+  GOAL_RESTATEMENT,
+  RATINGS,
+  STATE_RESET,
+  STATE_RESET_SOUND,
+  Versioned,
+} from '../../content';
+import { ExerciseId, Mode, SessionUpsert, Status, StepSummary } from '../api/types';
+import { stepsFor } from '../experiences/registry';
+import { StepId } from './conditions';
 import { StepOutcome } from './step-outcome';
 
 const CONTENT: Record<StepId, Versioned> = {
@@ -10,12 +21,29 @@ const CONTENT: Record<StepId, Versioned> = {
   game_only: STATE_RESET,
   action_bridge: ACTION_BRIDGE,
   goal_restatement: GOAL_RESTATEMENT,
+  cs1_first: CS_OTHER_READINGS,
+  cs1_feel_before: CS_OTHER_READINGS,
+  cs1_lenses: CS_OTHER_READINGS,
+  cs1_sort: CS_OTHER_READINGS,
+  cs1_feel_after: CS_OTHER_READINGS,
+  cs1_close: CS_OTHER_READINGS,
+  cs2_setback: CS_WHY_IT_HAPPENED,
+  cs2_first: CS_WHY_IT_HAPPENED,
+  cs2_more: CS_WHY_IT_HAPPENED,
+  cs2_map: CS_WHY_IT_HAPPENED,
+  cs2_reflect: CS_WHY_IT_HAPPENED,
+  cs2_change: CS_WHY_IT_HAPPENED,
+  cs3_situation: CS_NOT_ENOUGH,
+  cs3_first: CS_NOT_ENOUGH,
+  cs3_share: CS_NOT_ENOUGH,
+  cs3_find: CS_NOT_ENOUGH,
+  cs3_after: CS_NOT_ENOUGH,
 };
 
 export interface SessionDraft {
   id: string;
   mode: Mode;
-  condition: Condition;
+  condition: ExerciseId;
   startedAt: string;
   steps: StepSummary[];
   plan: Record<string, unknown> | null;
@@ -28,15 +56,15 @@ export function contentFor(step: StepId): Versioned {
   return CONTENT[step];
 }
 
-/** Every content file and version the condition can show, recorded up front. */
-export function contentVersionsFor(condition: Condition): Record<string, string> {
+/** Every content file and version the exercise can show, recorded up front. */
+export function contentVersionsFor(condition: ExerciseId): Record<string, string> {
   return Object.fromEntries(stepsFor(condition).map((s) => [CONTENT[s].id, CONTENT[s].version]));
 }
 
 export function newDraft(
   id: string,
   mode: Mode,
-  condition: Condition,
+  condition: ExerciseId,
   startedAt: string,
   n1RevealId: string | null = null,
 ): SessionDraft {

@@ -1,4 +1,4 @@
-import { Condition } from './api/types';
+import { ExerciseId } from './api/types';
 
 /**
  * The platform's areas, shown on Home. Planned areas are directions, not commitments;
@@ -8,7 +8,7 @@ import { Condition } from './api/types';
 export interface Topic {
   title: string;
   text: string;
-  experiences: Condition[];
+  experiences: ExerciseId[];
   /** Whether My experiment runs on this topic. */
   hasExperiment: boolean;
 }

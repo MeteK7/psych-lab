@@ -4,9 +4,9 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
-import { Condition } from '../../api/types';
+import { ExerciseId } from '../../api/types';
 import { areaById } from '../../areas';
-import { conditionInfo } from '../../flow/conditions';
+import { exerciseInfo } from '../../experiences/registry';
 import { Icon } from '../../shared/icon';
 
 /** One area: its topics and their experiences, each with "Try it" (practice mode). */
@@ -78,7 +78,7 @@ export class AreaPage {
   private readonly router = inject(Router);
   private readonly id = toSignal(inject(ActivatedRoute).paramMap.pipe(map((p) => p.get('id'))));
   protected readonly area = computed(() => areaById(this.id() ?? null));
-  protected readonly info = conditionInfo;
+  protected readonly info = exerciseInfo;
 
   constructor() {
     // The route title is generic; the tab shows the area's own name.
@@ -87,7 +87,7 @@ export class AreaPage {
   }
 
   /** Practice exercises run in try mode and never touch the experiment. */
-  protected tryIt(condition: Condition): void {
+  protected tryIt(condition: ExerciseId): void {
     void this.router.navigate(['/session'], { queryParams: { mode: 'try', condition } });
   }
 }
