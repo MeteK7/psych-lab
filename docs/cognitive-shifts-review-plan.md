@@ -115,5 +115,6 @@ These are the only changes needed. I'd do them as one release on `test`, then yo
    - **I read the openly available ones:** Wang 2021, Cristea 2015, and the author manuscripts I can find (Troy 2013, Kross 2014, Bruehlman-Senecal & Ayduk 2015, Brunwasser 2009, Eyal 2018).
    - **You obtain the library-only ones:** Webb 2012, Hallion & Ruscio 2011, Lazowski & Hulleman 2016.
    - Any of the "author manuscript" ones I can't find goes on your list.
+   - **Status 2026-11-02:** six read in full (Brunwasser, Kross, Bruehlman-Senecal, Eyal, Cristea, Wang), with findings in `evidence-verification.md`. The corrected science wording was **applied on 2026-11-03, before the review**, so reviewers see it in the walkthrough. It needs no separate round-2 read unless the remaining four full texts change it again. **Troy 2013 has no open copy and moves to your list,** which is now Webb 2012, Troy 2013, Hallion & Ruscio 2011 and Lazowski & Hulleman 2016.
 4. **Remote options:** the walkthrough by screen-share video call, and the consolidation by message or video call (§3–4).
 5. **Safety veto** for the psychology-trained reviewer (§5).

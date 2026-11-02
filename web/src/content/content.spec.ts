@@ -36,7 +36,7 @@ describe('on-screen wording', () => {
   // "Study" was ambiguous (learning vs. the research study); "phase" and condition codes
   // mean nothing to a user. Internal names live in code and docs only.
   it('never uses "study", "phase", "session" or internal experience names', () => {
-    const forbidden = /\b(stud(y|ying|ies)|phase|session|action bridge|state reset|restatement)\b/i;
+    const forbidden = /\b(stud(y|ying|ies)|phases?|sessions?|action bridge|state reset|restatement)\b/i;
     for (const c of ALL) {
       // ids, versions and option values are internal, never shown.
       const { id: _id, version: _version, ...shown } = c;

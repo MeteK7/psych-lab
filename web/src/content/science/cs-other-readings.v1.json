@@ -22,18 +22,24 @@
     },
     {
       "layer": "method",
-      "text": "Experiments suggest that talking about yourself from a distance, using your own name instead of “I”, can lower distress in stressful tasks.",
-      "who": "585 people · 7 lab experiments",
+      "text": "Experiments found that talking to yourself from a distance, using your own name or “you” instead of “I”, lowered distress in stressful social tasks.",
+      "who": "585 people, mostly US students · 6 experiments, 2 of them online; distress measured in 2 lab experiments (first impressions, a speech)",
       "sources": ["kross-2014"]
     },
     {
       "layer": "method",
-      "text": "Experiments suggest that picturing how a recent stressful event will look from the distant future can lower distress, partly because it draws attention to how temporary the event is.",
-      "who": "7 experiments from one research group · who took part to be confirmed from the full text",
+      "text": "Experiments found that picturing a recent stressful event from the distant future lowered distress, partly by highlighting that it's temporary.",
+      "who": "University students thinking about their own recent stressors · 5 experiments, plus 2 that only measured",
       "sources": ["bruehlman-senecal-2015"]
+    },
+    {
+      "layer": "similar",
+      "text": "A large trial found that brief written reappraisal instructions, used once online, reduced negative feelings about the pandemic straight afterwards, compared with control.",
+      "who": "21,644 adults, 87 countries · used once online, measured straight afterwards",
+      "sources": ["wang-2021"]
     }
   ],
-  "similar_note": "No research has tested a short, self-guided exercise like this one with three lenses and a fit board.",
+  "similar_note": "The trial above gave one kind of reappraisal instruction for one topic. No research has tested an exercise with three lenses and a fit board like this one.",
   "about_this_exercise": "This exercise uses reappraisal, but this version hasn't been tested itself. The research above used other instructions and measured feelings right afterwards.",
   "limits": [
     "Effects measured were short-term.",

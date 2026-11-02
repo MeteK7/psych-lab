@@ -76,7 +76,7 @@ describe('science explanations', () => {
 
   it('follow the on-screen wording rules', () => {
     // As for experience content: no "study", "phase", "session" or internal names.
-    const forbidden = /\b(stud(y|ying|ies)|phase|session|action bridge|state reset|restatement)\b/i;
+    const forbidden = /\b(stud(y|ying|ies)|phases?|sessions?|action bridge|state reset|restatement)\b/i;
     for (const s of SCIENCE) {
       for (const text of texts(s)) expect(text, `${s.id}: "${text}"`).not.toMatch(forbidden);
     }
@@ -109,6 +109,15 @@ describe('Cognitive shifts science explanations (cognitive-shifts-design.md §7)
         expect(r.who?.trim(), `${s.id}: ${r.text}`).toBeTruthy();
       }
       expect(s.similar_note?.trim(), s.id).toBeTruthy();
+    }
+  });
+
+  it('follow the on-screen wording rules in the population lines and notes too', () => {
+    const forbidden = /\b(stud(y|ying|ies)|phases?|sessions?)\b/i;
+    for (const s of cs) {
+      for (const text of [...s.research.map((r) => r.who ?? ''), s.similar_note ?? '']) {
+        expect(text, `${s.id}: "${text}"`).not.toMatch(forbidden);
+      }
     }
   });
 

@@ -87,20 +87,96 @@ Rank-1 claims from plan §2.3. These block Stage 2.
 Put the files in a local folder outside the repository and tell me where they are; I will read them and update this log.
 
 ## Cognitive shifts (docs/cognitive-shifts-design.md): sources
-All **✔A**: the PubMed record (citation and abstract) was checked on 2026-11-02. Each must be read in full (✔F) before the exercise that cites it is released, or its line is removed (design §9).
+The PubMed record (citation and abstract) of each was checked on 2026-11-02 (✔A). Each must be read in full (✔F) before the exercise that cites it is released, or its line is removed (design §9). Full-text reading started 2026-11-02 (review plan §9): open copies only, read on screen, no files kept in the project.
 
-| Source | PMID | Used in | Status |
-|---|---|---|---|
-| Webb, Miles & Sheeran 2012, *Psychol Bull* 138(4):775–808 | 22582737 | CS1 | ✔A |
-| Troy, Shallcross & Mauss 2013, *Psychol Sci* 24(12):2505–14 | 24145331 | CS1 | ✔A (was ◐ in the plan) |
-| Kross et al. 2014, *JPSP* 106(2):304–24 | 24467424 | CS1 | ✔A |
-| Bruehlman-Senecal & Ayduk 2015, *JPSP* 108(2):356–375 | 25603380 | CS1 (lens 3) | ✔A; population and setting to confirm |
-| Brunwasser, Gillham & Kim 2009, *J Consult Clin Psychol* 77(6):1042–54 | 19968381 | CS2 | ✔A |
-| Eyal, Steffel & Epley 2018, *JPSP* 114(4):547–571 | 29620401 | CS3 | ✔A; population and setting to confirm |
-| Hallion & Ruscio 2011, *Psychol Bull* 137(6):940–58 | 21728399 | CS3 | ✔A |
-| Cristea, Kok & Cuijpers 2015, *Br J Psychiatry* 206(1):7–16 | 25561486 | CS3 | ✔A |
-| Wang et al. 2021, *Nat Hum Behav* 5(8):1089–1110 | 34341554 | CS1 (pending; not shown) | record found, abstract not read |
-| Lazowski & Hulleman 2016, *Rev Educ Res* | — | CS2 (pending; not shown) | ◐ |
+| Source | PMID | Used in | Status | Full text |
+|---|---|---|---|---|
+| Webb, Miles & Sheeran 2012, *Psychol Bull* 138(4):775–808 | 22582737 | CS1 | ✔A | **To obtain (you):** library |
+| Troy, Shallcross & Mauss 2013, *Psychol Sci* 24(12):2505–14 | 24145331 | CS1 | ✔A | **To obtain (you):** no open copy found (no PMC copy, no author copy). A corrigendum exists on the journal site and should be read with it |
+| Kross et al. 2014, *JPSP* 106(2):304–24 | 24467424 | CS1 | **✔F** | Published version, hosted by the Ayduk lab (UC Berkeley). Read: abstract, participants and procedure of every study, results on distress |
+| Bruehlman-Senecal & Ayduk 2015, *JPSP* 108(2):356–375 | 25603380 | CS1 (lens 3) | **✔F** | Published version, hosted by the Ayduk lab. Read: abstract, participants of every study, Studies 1a–1b method and mediation results, design of Studies 2–6 |
+| Brunwasser, Gillham & Kim 2009, *J Consult Clin Psychol* 77(6):1042–54 | 19968381 | CS2 | **✔F** | PMC author manuscript (PMC4667774). Read: abstract, introduction, method, all results, sensitivity analyses |
+| Eyal, Steffel & Epley 2018, *JPSP* 114(4):547–571 | 29620401 | CS3 | **✔F** | Published version, hosted on an author site. Read: abstract, samples for Experiments 1–24, confidence measures, Experiment 25 (method and accuracy results) |
+| Hallion & Ruscio 2011, *Psychol Bull* 137(6):940–58 | 21728399 | CS3 | ✔A | **To obtain (you):** library |
+| Cristea, Kok & Cuijpers 2015, *Br J Psychiatry* 206(1):7–16 | 25561486 | CS3 | **✔F** | Free from the publisher (Cambridge). Read: abstract, introduction, method, all main and clinical-sample results, publication bias, discussion |
+| Wang et al. 2021, *Nat Hum Behav* 5(8):1089–1110 | 34341554 | CS1 (pending; not shown) | **✔F** | PMC (PMC8742248). Read: abstract, introduction, main and exploratory results, limitations, method summary |
+| Lazowski & Hulleman 2016, *Rev Educ Res* | — | CS2 (pending; not shown) | ◐ | **To obtain (you):** library |
+
+### Full-text findings (2026-11-02)
+Each entry compares the full text with what the exercise's explanation said before this check.
+- **Applied 2026-11-03, before the content review,** so reviewers see the corrected texts in the walkthrough.
+- **Edited in place in the v1 files** (`web/src/content/science/cs-*.v1.json`, `sources-cs.v1.json`): science texts aren't recorded with practice runs, and these were never released. The five sources read in full are marked `full_text`, and Wang 2021 is added.
+- **Final wording** is the proposed wording below, shortened in CS1 to stay within the 280-word limit. Where a proposal used "studies" or "sessions" (not used on screen), it was reworded.
+
+**Brunwasser et al. 2009 (CS2): supported, two precisions.**
+- **Confirmed:**
+  - 17 controlled evaluations, 2,498 young people aged 8–18.
+  - Compared with no intervention, there were fewer depressive symptoms, with small effects: d ≈ 0.11 straight after, ≈ 0.2 at 6–12 months.
+  - There was no advantage over active control programmes, in the 4 studies that had one.
+- **Precision 1:** the programme is a cognitive-behavioural group programme, "typically" in schools but also run in primary care and juvenile detention. "School groups" should be "mostly school groups".
+- **Precision 2:** the paper doesn't describe the programme's content (it refers elsewhere). "Teaches young people to examine their explanations for setbacks" therefore needs a source that describes it, or a more general wording.
+- **Also worth knowing:** the effect straight after the programme lost significance after a publication-bias adjustment. The 6- and 12-month effects held up.
+- **Proposed:** "A review of 17 evaluations of a cognitive-behavioural group programme for young people, mostly run in schools over several sessions, found slightly fewer low-mood symptoms than with no programme, up to a year later, but not fewer than with other active programmes." Who: "2,498 young people aged 8–18 · mostly school groups".
+
+**Kross et al. 2014 (CS1): supported, two corrections.**
+- **Confirmed:**
+  - 585 people.
+  - Non-first-person self-talk made people more self-distanced. In the first-impressions and public-speaking studies (Studies 2–3), those using it showed less distress and performed better, according to raters.
+  - Trait social anxiety didn't change the results.
+- **Correction 1, the manipulation:** it was non-first-person pronouns ("you", "he/she") **and** one's own name, not only the name. Proposed: "using your own name or 'you' instead of 'I'".
+- **Correction 2, who took part:** "7 lab experiments" is wrong.
+  - There were 6 studies plus a meta-analysis across them (Study 6).
+  - Two studies (1b, 5) were online, with Mechanical Turk workers.
+  - Distress was measured in two lab experiments with US undergraduates.
+  - Proposed who: "585 people in 7 studies, mostly US students · distress measured in 2 lab experiments".
+
+**Bruehlman-Senecal & Ayduk 2015 (CS1): supported, "who" corrected.**
+- **Confirmed:**
+  - Picturing a recent personal stressor from a distant-future perspective (e.g. 10 years) lowered distress, compared with a near-future (1 week) or unspecified-future perspective.
+  - Focus on the stressor's impermanence mediated this. So did focus on an idealised future, and in one model avoidance. So "partly because" is right.
+- **Correction:** the "who" line says "7 experiments". There were 7 studies, but Studies 4 and 5 were correlational; 5 manipulated something.
+- **Who took part:** university students (mean age about 20), each reflecting on their own recent stressor. In Study 3 the stressor was a midterm exam.
+- **Proposed who:** "7 studies, 5 of them experiments · university students reflecting on their own recent stressors".
+
+**Eyal et al. 2018 (CS3): supported, one precision.**
+- **Confirmed:**
+  - There were 25 experiments, with tasks such as reading emotions from faces, spotting lies and predicting a partner's preferences. Perspective taking didn't increase accuracy; if anything it lowered it overall. It occasionally increased confidence.
+  - A final experiment (Experiment 25) found that getting the other person's perspective directly, through conversation, increased accuracy. Perspective taking again didn't.
+- **Precision:** "Asking them helped" rests on that one experiment, with romantic couples (aged 19–72) predicting their partner's opinions.
+  - Proposed: "In a final experiment with couples, asking the other person directly helped."
+  - The current "can make them more confident without being more accurate" matches "occasionally increased confidence", so it stays.
+- **Who took part:**
+  - students at a US and a non-US university
+  - online workers (Mechanical Turk)
+  - community volunteers
+  - romantic couples, and strangers after a short conversation
+- **Proposed who:** "25 experiments · students, online and community volunteers, including couples and strangers".
+
+**Cristea et al. 2015 (CS3): the current line overstates it; rewrite needed.**
+- **Scope:** 49 RCTs (52 comparisons) in adults: 15 unselected samples, 16 high-symptom, 16 diagnosed, 2 with pain. 24 trials used students, and 21 trials had only one session.
+- **All samples:**
+  - Effects were small to moderate (g ≈ 0.4) and mostly **stayed significant** after outliers were removed (anxiety 0.23, depression 0.33). Only social anxiety lost significance.
+  - After the publication-bias adjustment (trim and fill), the social anxiety and depression effects were **no longer significant**.
+- **Diagnosed samples only:** the anxiety effect lost significance once one extreme outlier was removed. The depression effect lost significance after the publication-bias adjustment.
+- **Mismatch:** the current text says effects "disappear when unpublished results and extreme outliers are taken into account", which doesn't hold for all samples. "Unpublished results" also isn't what was done: trim and fill *estimates* missing studies.
+- **Scope note:** the review covers all bias-modification training (attention and interpretation), not only interpretation training.
+- **Proposed:** "A later review of 49 trials of this kind of training in adults suggests the effects are smaller than they first looked: in people diagnosed with anxiety or depression they were mostly not reliable, and after allowing for studies that likely went unpublished, several shrank to near zero."
+- **Proposed who:** "49 randomised trials in adults · students, volunteers, and 16 trials with people diagnosed with anxiety or depression".
+- **Wording:** "found" is now allowed, but "suggests" fits a contested result better.
+
+**Wang et al. 2021 (CS1 candidate, not shown): could fill the "similar exercises" layer.**
+- **Design:** 21,644 adults in 87 countries, online, randomly assigned to brief written reappraisal instructions with examples, or to one of two control conditions. They then looked at news photos about COVID-19.
+- **Results:** compared with control, reappraisal reduced negative feelings and increased positive ones straight afterwards, across the outcome measures (e.g. overall change d ≈ 0.4).
+- **Limits (the authors'):**
+  - a convenience sample
+  - possible demand effects
+  - only immediate effects measured
+  - self-report only
+- **Proposed new "Research on similar exercises" finding for CS1:** "A study with 21,644 adults in 87 countries found that short written instructions in reappraisal, used online once, reduced negative feelings straight afterwards, compared with control instructions."
+- **Proposed who:** "21,644 adults, 87 countries · one online session, measured straight afterwards".
+- **Knock-on change:** CS1's `similar_note` ("No research has tested a short, self-guided exercise like this one…") would then become "…with three lenses and a fit board".
+
+**Note for Hallion & Ruscio 2011 (to read when you have it):** CS3's line describes it as practice at "reading ambiguous situations less negatively". If the review pools attention and interpretation training, as Cristea's does, the line must say so, or use the interpretation-training subgroup.
 
 Also checked for the proposal (not cited on screen): Menne-Lothmann 2014 (PMID 24968234), Sisk 2018 (29505339), Macnamara & Burgoyne 2023 (36326645), Burnette 2023 (36227318), Schleider & Weisz 2017 (28117056), Powers & LaBar 2019 (30502352), Fodor 2020 (32445689).
 

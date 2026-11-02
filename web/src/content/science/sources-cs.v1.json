@@ -12,25 +12,25 @@
       "citation": "Kross et al., 2014",
       "title": "Self-talk as a regulatory mechanism: How you do it matters. Journal of Personality and Social Psychology, 106(2), 304–324",
       "url": "https://pubmed.ncbi.nlm.nih.gov/24467424/",
-      "evidence": "abstract"
+      "evidence": "full_text"
     },
     "bruehlman-senecal-2015": {
       "citation": "Bruehlman-Senecal & Ayduk, 2015",
       "title": "This too shall pass: Temporal distance and the regulation of emotional distress. Journal of Personality and Social Psychology, 108(2), 356–375",
       "url": "https://pubmed.ncbi.nlm.nih.gov/25603380/",
-      "evidence": "abstract"
+      "evidence": "full_text"
     },
     "brunwasser-2009": {
       "citation": "Brunwasser, Gillham & Kim, 2009",
       "title": "A meta-analytic review of the Penn Resiliency Program's effect on depressive symptoms. Journal of Consulting and Clinical Psychology, 77(6), 1042–1054",
       "url": "https://pubmed.ncbi.nlm.nih.gov/19968381/",
-      "evidence": "abstract"
+      "evidence": "full_text"
     },
     "eyal-2018": {
       "citation": "Eyal, Steffel & Epley, 2018",
       "title": "Perspective mistaking: Accurately understanding the mind of another requires getting perspective, not taking perspective. Journal of Personality and Social Psychology, 114(4), 547–571",
       "url": "https://pubmed.ncbi.nlm.nih.gov/29620401/",
-      "evidence": "abstract"
+      "evidence": "full_text"
     },
     "hallion-2011": {
       "citation": "Hallion & Ruscio, 2011",
@@ -42,7 +42,13 @@
       "citation": "Cristea, Kok & Cuijpers, 2015",
       "title": "Efficacy of cognitive bias modification interventions in anxiety and depression: Meta-analysis. British Journal of Psychiatry, 206(1), 7–16",
       "url": "https://pubmed.ncbi.nlm.nih.gov/25561486/",
-      "evidence": "abstract"
+      "evidence": "full_text"
+    },
+    "wang-2021": {
+      "citation": "Wang et al., 2021",
+      "title": "A multi-country test of brief reappraisal interventions on emotions during the COVID-19 pandemic. Nature Human Behaviour, 5(8), 1089–1110",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/34341554/",
+      "evidence": "full_text"
     }
   }
 }

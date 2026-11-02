@@ -10,13 +10,13 @@
   "research": [
     {
       "layer": "method",
-      "text": "A review of 17 evaluations of a school programme that, over several sessions, teaches young people to examine their explanations for setbacks suggests that those taking part report slightly fewer low-mood symptoms than those without it, but not fewer than with other active programmes.",
-      "who": "2,498 children and adolescents · school groups, a programme over several sessions",
+      "text": "A review of 17 evaluations of a cognitive-behavioural group programme for young people found slightly fewer low-mood symptoms than with no programme, up to a year later, but not fewer than with other active programmes.",
+      "who": "2,498 young people aged 8–18 · mostly school groups",
       "sources": ["brunwasser-2009"]
     }
   ],
   "similar_note": "No research has tested a short, self-guided cause map like this one.",
-  "about_this_exercise": "This exercise uses attributional reframing, but this version hasn't been tested itself. The programme above ran over many sessions with young people in schools.",
+  "about_this_exercise": "This exercise uses attributional reframing, but this version hasn't been tested itself. The programme above was a longer group programme, mostly with young people in schools.",
   "limits": [
     "Effects in programmes were small.",
     "Looking for outside causes can turn into excuses, and looking for inside causes into blame. The map is meant to show both honestly.",
