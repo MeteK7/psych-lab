@@ -22,6 +22,7 @@ describe('HomePage', () => {
   it('presents every area, with only available ones as links', async () => {
     const fixture = TestBed.createComponent(HomePage);
     backend.expectOne('/api/n1/today').flush(null, { status: 502, statusText: 'Bad Gateway' });
+    backend.expectOne('/api/health').flush({ status: 'ok', database: 'ok', environment: 'production' });
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
     const cards = Array.from(root.querySelectorAll('.areas > li'));
@@ -38,7 +39,19 @@ describe('HomePage', () => {
   it("shows the experiment callout with today's line", async () => {
     const fixture = TestBed.createComponent(HomePage);
     backend.expectOne('/api/n1/today').flush({ status: 'pending', plan: { planned_start: '19:00' } });
+    backend.expectOne('/api/health').flush({ status: 'ok', database: 'ok', environment: 'production' });
     await fixture.whenStable();
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('Today: planned for 19:00.');
+  });
+
+  it('opens the development-only Cognitive shifts area in the development build only', async () => {
+    const fixture = TestBed.createComponent(HomePage);
+    backend.expectOne('/api/n1/today').flush(null, { status: 502, statusText: 'Bad Gateway' });
+    backend.expectOne('/api/health').flush({ status: 'ok', database: 'ok', environment: 'development' });
+    await fixture.whenStable();
+    const linked = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.areas > li'))
+      .filter((c) => c.querySelector('a'))
+      .map((c) => c.querySelector('h3')?.textContent?.trim());
+    expect(linked).toEqual(['Action and growth', 'Cognitive shifts']);
   });
 });

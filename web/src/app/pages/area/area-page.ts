@@ -5,8 +5,9 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
 import { ExerciseId } from '../../api/types';
-import { areaById } from '../../areas';
+import { AREAS, areaById } from '../../areas';
 import { exerciseInfo } from '../../experiences/registry';
+import { AppEnvironment } from '../../shared/app-environment';
 import { Icon } from '../../shared/icon';
 
 /** One area: its topics and their experiences, each with "Try it" (practice mode). */
@@ -18,13 +19,13 @@ import { Icon } from '../../shared/icon';
       <h1>{{ a.title }}</h1>
       <p class="lead">{{ a.intro }}</p>
 
-      @for (topic of a.topics; track topic.title) {
-        <section aria-labelledby="topic-heading">
-          <h2 id="topic-heading">{{ topic.title }}</h2>
+      @for (topic of a.topics; track topic.title; let t = $index) {
+        <section [attr.aria-labelledby]="'topic-heading-' + t">
+          <h2 [id]="'topic-heading-' + t">{{ topic.title }}</h2>
           <p>{{ topic.text }}</p>
           <ul class="experiences">
             @for (value of topic.experiences; track value) {
-              @if (info(value); as e) {
+              @if (visible(value); as e) {
                 <li class="card">
                   <h3>{{ e.label }}</h3>
                   <p>{{ e.description }} About {{ e.minutes }} minutes.</p>
@@ -41,7 +42,7 @@ import { Icon } from '../../shared/icon';
               }
             }
           </ul>
-          <p class="muted">Practice exercises are saved in My records but are never part of your experiment.</p>
+          <p class="muted">{{ a.practiceNote ?? defaultNote }}</p>
 
           @if (topic.hasExperiment) {
             <section class="card prominent" aria-labelledby="experiment-heading">
@@ -52,7 +53,7 @@ import { Icon } from '../../shared/icon';
           }
         </section>
       }
-    } @else {
+    } @else if (!waiting()) {
       <h1>Area not found</h1>
       <p><a routerLink="/">Back to Home</a></p>
     }
@@ -77,8 +78,19 @@ import { Icon } from '../../shared/icon';
 export class AreaPage {
   private readonly router = inject(Router);
   private readonly id = toSignal(inject(ActivatedRoute).paramMap.pipe(map((p) => p.get('id'))));
-  protected readonly area = computed(() => areaById(this.id() ?? null));
-  protected readonly info = exerciseInfo;
+  private readonly environment = inject(AppEnvironment);
+  protected readonly area = computed(() => areaById(this.id() ?? null, this.environment.showsDevelopment()));
+  /** A development-only area is unknown until the build is known; show nothing meanwhile. */
+  protected readonly waiting = computed(
+    () => this.environment.value() === null && AREAS.some((a) => a.id === this.id() && a.status === 'development'),
+  );
+  protected readonly defaultNote = 'Practice exercises are saved in My records but are never part of your experiment.';
+
+  /** Released exercises everywhere; development-only ones in the development build only. */
+  protected visible(value: ExerciseId) {
+    const e = exerciseInfo(value);
+    return e && (e.release === 'released' || this.environment.showsDevelopment()) ? e : undefined;
+  }
 
   constructor() {
     // The route title is generic; the tab shows the area's own name.
