@@ -35,7 +35,12 @@ Implemented as designed, in the development build only. Changes made while build
 - **Full-text corrections (2026-11-03):** the science texts in §7 are the approved drafts. The live wording, corrected after the full-text check, is in `web/src/content/science/cs-*.v1.json` (see `evidence-verification.md`).
 - **"Why it's worth doing" (2026-11-03, all three exercises):**
   - **The part:** after "What you do", an explanation may have a short part saying, in everyday terms, why the exercise is worth doing: what goes on when we read an unclear situation, and what the practice is for. It counts towards the word limit, and follows the same wording rules (no promises that the exercise works).
-  - **CS3 changes:** CS3's method is renamed "Weighing several readings, and finding out", and its text now explains what happens in your mind. It also says this isn't about picking the nicest reading.
+  - **CS3 changes:** CS3's method is now "Checking the facts, and finding out" (first renamed "Weighing several readings, and finding out", then changed with the redesign below). Its text explains what happens in your mind, and says this isn't about picking the nicest reading.
+- **CS3 redesign (2026-11-03):** built from `cs3-redesign-proposal.md` revision 2. It supersedes §5 below for steps 2–5 and the readings; content `cs-not-enough` v3.
+  - **Readings:** by rules (plausible, distinct, covering, same level of detail), five per scenario, and four general ones for an own situation.
+  - **Step 3, "Could these explain it?":** the person ticks which other readings could also explain what happened. The facts of the moment ("What happened") are shown next to the question, so it reads as checking whether the facts can tell readings apart, not as CS1's sorting by fit. The note after "Done" reports only the person's own judgements.
+  - **Step 4, "Can you find out?":** one choice with a short follow-up. The "ask" example is a suggestion, not a rule.
+  - **Step 5:** the certainty question again, without judging the answer, then two questions to keep. A plan link appears after "ask" or "check".
   - **CS1 and CS2 changes:** the methods are renamed in plain words, with the term in brackets: "Seeing it another way (reappraisal)" and "Looking at all the causes (attributional reframing)". To keep CS1 within 280 words, its method text, Troy and Kross lines, one limit and "About this exercise" are condensed. Their claims are unchanged.
   - **Scope:** the four experiment explanations don't get this part.
 
@@ -151,6 +156,7 @@ These are written **before** the refactor, run green on the current code, then m
 ---
 
 ## 5. CS3 · Not enough to go on
+> **Superseded in part (2026-11-03):** steps 2–5 and the readings now follow `cs3-redesign-proposal.md` revision 2 (see "Built" above; content `cs-not-enough` v3). This section shows the design as first approved.
 
 **For:** "I don't know what they meant, and I'm assuming the worst." **Method:** perspective-getting, with alternative interpretations of ambiguity. **4 minutes.** Five steps.
 
