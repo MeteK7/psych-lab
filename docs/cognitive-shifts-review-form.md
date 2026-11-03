@@ -136,6 +136,7 @@ In step 3 the person ticks which other readings **could also explain what happen
 | "It means what I fear it means." | | | |
 | "It's about the circumstances, not about me." | | | |
 | "There's something small I could fix." | | | |
+| Step 2 rating: "How sure are you that this reading is right?" | | | |
 | Step 3 question: "Could these also explain what happened? Tick any that could." | | | |
 | Step 3 hint: "You're not choosing the right one. You're checking whether what happened, on its own, can tell them apart." | | | |
 | Step 3 own reading: "Is there a reason that's about them or the circumstances, not about you?" | | | |
@@ -149,6 +150,10 @@ In step 3 the person ticks which other readings **could also explain what happen
 | Step 4 choice: "I'll check something myself" | | | |
 | Step 4 choice: "I'll wait. It'll probably become clear" · then: "If it's still on your mind later and nothing's changed, the other choices are still there." | | | |
 | Step 4 choice: "I'll leave it. Finding out isn't possible or isn't worth it" · then: "Then the honest answer is: you don't know. That's a real answer, not a failure to work it out." | | | |
+| Step 5 opening: "In Step 2, this was your first reading: ‘{reading}’" · "You've now checked other explanations against what happened." | | | |
+| Step 5 rating of the same reading: "Thinking back to that first reading: how sure are you now that it was right?" | | | |
+| Step 5, no expected direction: "There's no right answer. A lower rating isn't automatically better, and staying just as sure is also valid." | | | |
+| Step 5 after rating: "In Step 2 you rated it {before}. Now you rate it {now}." · "This shows whether how sure you feel changed during the exercise. It doesn't show whether the reading is right." | | | |
 | Step 5, two questions to keep: "Would what happened also fit another reading?" · "What would actually tell me, and is it worth finding out?" | | | |
 | Step 5 after "ask" or "check": "Want to plan when you'll do it? There's a link after you finish." | | | |
 
