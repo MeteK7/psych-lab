@@ -96,6 +96,13 @@ describe('Cognitive shifts exercises', () => {
 
     expect(heading(run)).toBe('Step 1 of 6: Your first reading');
     expect(root(run).textContent).toContain("They aren't for painful experiences");
+    // Each alternative has its instruction right before it: pick above the cards, write above the field.
+    expect(root(run).querySelector('app-card-pick legend')?.textContent).toBe(
+      "What does it seem to say? Pick the reading that's closest:",
+    );
+    expect(root(run).querySelector('app-card-pick .own span')?.textContent).toBe(
+      "Or write it in your own words (only you see this; it isn't saved)",
+    );
     await type(run, root(run).querySelector<HTMLInputElement>('.own input')!, 'PRIVATE first reading');
     await press(run, 'Next');
 
@@ -142,7 +149,7 @@ describe('Cognitive shifts exercises', () => {
     const saved = last(run);
     expect(saved.status).toBe('completed');
     expect(saved.mode).toBe('try');
-    expect(saved.content_versions).toEqual({ 'cs-other-readings': '1' });
+    expect(saved.content_versions).toEqual({ 'cs-other-readings': '2' });
     expect(saved.steps?.map((s) => s.step)).toEqual([
       'cs1_first', 'cs1_feel_before', 'cs1_lenses', 'cs1_sort', 'cs1_feel_after', 'cs1_close',
     ]);

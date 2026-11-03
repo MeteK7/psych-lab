@@ -25,7 +25,8 @@ import scienceStateResetJson from './science/state-reset.v1.json';
 // and a population line to every finding; their sources are kept apart from sources.v1.json,
 // which the experiment exercises' explanations use and which doesn't change.
 import csNotEnoughJson from './cs-not-enough.v1.json';
-import csOtherReadingsJson from './cs-other-readings.v1.json';
+// v2: step 1 asks to pick a reading above the cards, and to write your own above the field.
+import csOtherReadingsJson from './cs-other-readings.v2.json';
 import csWhyItHappenedJson from './cs-why-it-happened.v1.json';
 import scienceCsNotEnoughJson from './science/cs-not-enough.v1.json';
 import scienceCsOtherReadingsJson from './science/cs-other-readings.v1.json';

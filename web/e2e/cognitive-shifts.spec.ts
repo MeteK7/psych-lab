@@ -39,7 +39,7 @@ test.describe('Cognitive shifts, keyboard only', () => {
   test('Other ways to read it', async ({ page }) => {
     const id = await open(page, 'cs_other_readings');
     await step(page, 'Your first reading');
-    await typeInto(page, /My first reading/, 'PRIVATE first reading');
+    await typeInto(page, /Or write it in your own words/, 'PRIVATE first reading');
     await pressButton(page, 'Next');
 
     await step(page, 'How it feels now');
