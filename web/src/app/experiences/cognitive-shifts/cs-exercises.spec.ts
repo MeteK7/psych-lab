@@ -267,6 +267,9 @@ describe('Cognitive shifts exercises', () => {
 
     expect(heading(run)).toBe('Step 2 of 5: Your first reading');
     await check(run, root(run).querySelector('app-card-pick input[value="bothered"]'));
+    expect(root(run).querySelector('app-rating-scale legend')?.textContent).toBe(
+      'How sure are you that this reading is right?',
+    );
     await rate(run, 8);
     await press(run, 'Next');
 
@@ -296,19 +299,36 @@ describe('Cognitive shifts exercises', () => {
     expect(root(run).querySelector('.note')?.textContent).toContain('One way to ask without assuming your reading');
     await press(run, 'Next');
 
-    expect(heading(run)).toBe('Step 5 of 5: How sure are you now?');
+    expect(heading(run)).toBe('Step 5 of 5: Your first reading, looked at again');
+    const reassess = root(run).textContent!;
+    expect(reassess).toContain('In Step 2, this was your first reading: ‘Something I said bothered them a bit.’');
+    expect(reassess).toContain("You've now checked other explanations against what happened.");
+    expect(reassess).toContain("There's no right answer. A lower rating isn't automatically better, and staying just as sure is also valid.");
+    expect(root(run).querySelector('app-rating-scale legend')?.textContent).toBe(
+      'Thinking back to that first reading: how sure are you now that it was right?',
+    );
     expect(Array.from(root(run).querySelectorAll('.keep li')).map((li) => li.textContent)).toEqual([
       'Would what happened also fit another reading?',
       'What would actually tell me, and is it worth finding out?',
     ]);
+    // The comparison appears only after rating, in the same neutral words for any direction.
+    const compared = () => root(run).querySelector('[role="status"]')?.textContent;
+    expect(compared()).toBeUndefined();
+    expect(button(run, 'Finish').disabled).toBe(true);
+    await rate(run, 10);
+    expect(compared()).toContain('In Step 2 you rated it 8. Now you rate it 10.');
+    await rate(run, 8);
+    expect(compared()).toContain('In Step 2 you rated it 8. Now you rate it 8.');
     await rate(run, 4);
+    expect(compared()).toContain('In Step 2 you rated it 8. Now you rate it 4.');
+    expect(compared()).toContain("It doesn't show whether the reading is right.");
     await press(run, 'Finish');
     const plan = Array.from(root(run).querySelectorAll('a')).find((a) => a.textContent?.trim() === 'Plan your first step');
     expect(plan?.getAttribute('href')).toBe('/session?mode=try&condition=action_bridge');
 
     const saved = last(run);
     expect(saved.status).toBe('completed');
-    expect(saved.content_versions).toEqual({ 'cs-not-enough': '3' });
+    expect(saved.content_versions).toEqual({ 'cs-not-enough': '4' });
     expect(saved.ratings).toEqual({ cs3_certainty_pre: 8, cs3_certainty_post: 4 });
     expect(saved.steps?.[2].result).toEqual({ fits: ['busy', 'forgot'], own_added: true, something_else: false });
     expect(saved.steps?.[3].result).toEqual({ choice: 'ask' });
@@ -324,7 +344,8 @@ describe('Cognitive shifts exercises', () => {
     await press(run, 'Next');
 
     expect(root(run).querySelectorAll('app-card-pick .card-option')).toHaveLength(5); // 4 general readings and "my own"
-    await check(run, root(run).querySelector('app-card-pick input[value="feared"]'));
+    await check(run, root(run).querySelector('app-card-pick input[value="own"]'));
+    await type(run, root(run).querySelector<HTMLInputElement>('.own input')!, 'PRIVATE first reading');
     await rate(run, 9);
     await press(run, 'Next');
 
@@ -336,6 +357,7 @@ describe('Cognitive shifts exercises', () => {
     await check(run, root(run).querySelector('input[name="cs3-find"][value="leave"]'));
     expect(root(run).querySelector('.note')?.textContent).toContain("Then the honest answer is: you don't know.");
     await press(run, 'Next');
+    expect(root(run).textContent).toContain('In Step 2, this was your first reading: ‘PRIVATE first reading’'); // shown back, never saved
     await rate(run, 9);
     await press(run, 'Finish');
     expect(Array.from(root(run).querySelectorAll('a')).some((a) => a.textContent?.includes('Plan your first step'))).toBe(false);

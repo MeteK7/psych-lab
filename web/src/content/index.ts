@@ -29,7 +29,8 @@ import scienceStateResetJson from './science/state-reset.v1.json';
 // text field, as in CS3's situation step.
 // cs-not-enough v3 (cs3-redesign-proposal.md, revision 2): readings by kind; step 3 checks which
 // readings the facts could also fit (no points); one "Can you find out?" step; two questions to keep.
-import csNotEnoughJson from './cs-not-enough.v3.json';
+// v4: step 5 reassesses the same first reading, says no direction is expected, and shows both ratings.
+import csNotEnoughJson from './cs-not-enough.v4.json';
 import csOtherReadingsJson from './cs-other-readings.v3.json';
 import csWhyItHappenedJson from './cs-why-it-happened.v2.json';
 import scienceCsNotEnoughJson from './science/cs-not-enough.v1.json';
@@ -354,7 +355,18 @@ export interface CsNotEnoughContent extends Versioned {
     note_always: string;
   };
   find: { intro: string; decide: string; ask: string; options: { id: string; label: string; follow?: string }[] };
-  after: { reading: string; keep_heading: string; keep: string[]; plan_prompt: string; plan_link: string };
+  after: {
+    reading: string;
+    checked: string;
+    certainty: RatingItem;
+    no_direction: string;
+    compared: string;
+    compared_means: string;
+    keep_heading: string;
+    keep: string[];
+    plan_prompt: string;
+    plan_link: string;
+  };
   next_label: string;
   finish_label: string;
 }

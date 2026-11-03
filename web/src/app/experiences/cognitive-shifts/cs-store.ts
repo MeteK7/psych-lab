@@ -35,6 +35,8 @@ export class CsStore {
   // CS3 · Not enough to go on
   readonly scenario = signal<Pick | null>(null);
   readonly cs3First = signal<Pick | null>(null);
+  /** The step 2 rating, shown again beside the step 5 rating of the same reading. */
+  readonly cs3CertaintyBefore = signal<number | null>(null);
   /** Ids of the readings ticked as "could also explain what happened". */
   readonly cs3Fits = signal<string[]>([]);
   readonly cs3SomethingElse = signal(false);

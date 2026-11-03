@@ -138,7 +138,7 @@ test.describe('Cognitive shifts, keyboard only', () => {
     await step(page, 'Your first reading');
     await choose(page, page.getByRole('radio').first(), 1); // the second reading
     await expect(page.getByRole('radio', { name: "They don't want to talk to me." })).toBeChecked();
-    await rateByKeyboard(page, 'How sure are you of this reading?', 8);
+    await rateByKeyboard(page, 'How sure are you that this reading is right?', 8);
     await pressButton(page, 'Next');
 
     await step(page, 'Could these explain it?');
@@ -156,9 +156,13 @@ test.describe('Cognitive shifts, keyboard only', () => {
     await expectNoSeriousA11yIssues(page, 'how to find out');
     await pressButton(page, 'Next');
 
-    await step(page, 'How sure are you now?');
+    await step(page, 'Your first reading, looked at again');
+    await expect(page.getByText("In Step 2, this was your first reading: ‘They don't want to talk to me.’")).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Two questions to keep' })).toBeVisible();
-    await rateByKeyboard(page, 'How sure are you of this reading?', 5);
+    await expect(page.getByRole('status')).toHaveCount(0); // no comparison before rating
+    await rateByKeyboard(page, 'Thinking back to that first reading: how sure are you now that it was right?', 5);
+    await expect(page.getByRole('status')).toContainText('In Step 2 you rated it 8. Now you rate it 5.');
+    await expectNoSeriousA11yIssues(page, 'first reading looked at again');
     await pressButton(page, 'Finish');
     await expect(page.getByRole('heading', { name: 'Exercise complete' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Plan your first step' })).toBeVisible();

@@ -56,7 +56,7 @@ export const STEP_NAMES: Record<StepId, string> = {
   cs3_first: 'Your first reading',
   cs3_fit: 'Could these explain it?',
   cs3_find: 'Can you find out?',
-  cs3_after: 'How sure are you now?',
+  cs3_after: 'Your first reading, looked at again',
 };
 
 // Usability mode belongs to level B and is not offered yet.
