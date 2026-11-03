@@ -45,7 +45,7 @@ describe('ScienceSection', () => {
     expect(headings.slice(0, 3)).toEqual([
       'What you do',
       "Why it's worth doing",
-      'The method: Weighing several readings, and finding out',
+      'The method: Checking the facts, and finding out',
     ]);
     expect(details.querySelectorAll('section.part')[1].querySelectorAll('p')).toHaveLength(2);
   });

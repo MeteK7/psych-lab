@@ -2,11 +2,11 @@
   "id": "science-cs-not-enough",
   "version": "1",
   "experience": "cs_not_enough_to_go_on",
-  "why": "Unclear moments happen every day: a message with no reply, a short email. The reading you settle on shapes what you feel and do next, like worrying for hours or replying coldly.\n\nThis is practice at noticing your first guess, holding it more loosely, and finding out when guessing isn't enough.",
-  "what_you_do": "You share 10 points between possible readings of an unclear situation, then decide whether and how to find out.",
+  "why": "Unclear moments happen every day: a message with no reply, a short email. The reading you settle on shapes what you feel and do next, like worrying for hours or replying coldly.\n\nThis is practice at noticing your first guess, checking whether the facts point to it, and finding out when guessing isn't enough.",
+  "what_you_do": "You check whether what happened could also fit other readings, then decide whether and how to find out.",
   "method": {
-    "name": "Weighing several readings, and finding out",
-    "text": "When information is missing, we tend to fill the gap with one reading, sometimes the one that worries us most, and it can start to feel like a fact. Seeing several readings together shows what's still unknown. To know what someone meant, asking tends to work better than imagining.\n\nThis isn't about picking the nicest reading: sometimes the worrying one is right."
+    "name": "Checking the facts, and finding out",
+    "text": "When information is missing, we tend to fill the gap with one reading, sometimes the one that worries us most, and it can start to feel like a fact. If the facts fit other readings too, they can't settle it. To know what someone meant, asking tends to work better than imagining.\n\nThis isn't about picking the nicest reading: sometimes the worrying one is right."
   },
   "research": [
     {
@@ -28,11 +28,11 @@
       "sources": ["cristea-2015"]
     }
   ],
-  "similar_note": "The training research above repeated many scenarios, often over several sittings, and steered people towards a positive or neutral reading. This exercise doesn't steer: you decide how likely each reading is, in one visit. No research has tested this format.",
+  "similar_note": "The training research above repeated many scenarios, often over several sittings, and steered people towards a positive or neutral reading. This exercise doesn't steer: in one visit, you check which readings the facts could fit, and none is marked as right. No research has tested this format.",
   "about_this_exercise": "This exercise draws on these methods, but this version hasn't been tested itself.",
   "limits": [
     "Asking isn't always possible or wise.",
-    "Sharing out points shows how sure you feel, not what's true.",
-    "The research on reading ambiguity mostly measured effects in the lab."
+    "Ticking readings shows what's possible, not what happened.",
+    "The research on reading ambiguity was mostly in the lab."
   ]
 }
