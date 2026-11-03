@@ -39,7 +39,8 @@ interface BoardCard {
       @case ('cs1_first') {
         <p class="safety">{{ c.safety }}</p>
         <p>{{ c.first.intro }}</p>
-        <app-card-pick [legend]="c.first.ask" [cards]="c.first.cards" [ownLabel]="c.first.own_label" [(value)]="pick" />
+        <app-card-pick [legend]="c.first.ask" [cards]="c.first.cards" [ownChoice]="c.first.own_choice"
+                       [ownLabel]="c.first.own_label" [(value)]="pick" />
         <button type="button" [disabled]="!pick()" (click)="submitFirst()">{{ c.next_label }}</button>
       }
       @case ('cs1_feel_before') {
@@ -64,7 +65,8 @@ interface BoardCard {
         <h3 class="lens" tabindex="-1" #lensHeading>
           {{ say(c.lenses.counter, { n: lensIndex() + 1, total: c.lenses.items.length, title: lens().title }) }}
         </h3>
-        <app-card-pick [legend]="lens().prompt" [cards]="lens().cards" [ownLabel]="c.lenses.own_label" [(value)]="pick" />
+        <app-card-pick [legend]="lens().prompt" [cards]="lens().cards" [ownChoice]="c.lenses.own_choice"
+                       [ownLabel]="c.lenses.own_label" [(value)]="pick" />
         @if (lens().support; as support) {
           <p class="support">{{ support }}</p>
         }

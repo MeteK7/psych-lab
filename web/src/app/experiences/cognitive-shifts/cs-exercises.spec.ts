@@ -96,12 +96,16 @@ describe('Cognitive shifts exercises', () => {
 
     expect(heading(run)).toBe('Step 1 of 6: Your first reading');
     expect(root(run).textContent).toContain("They aren't for painful experiences");
-    // Each alternative has its instruction right before it: pick above the cards, write above the field.
+    // "My own reading" is the last option; choosing it opens the field.
     expect(root(run).querySelector('app-card-pick legend')?.textContent).toBe(
-      "What does it seem to say? Pick the reading that's closest:",
+      "What does it seem to say? Pick the reading that's closest, or write your own:",
     );
+    const options = Array.from(root(run).querySelectorAll('app-card-pick .card-option')).map((o) => o.textContent?.trim());
+    expect(options.at(-1)).toBe('My own reading');
+    expect(root(run).querySelector('app-card-pick .own')).toBeNull();
+    await check(run, root(run).querySelector('app-card-pick input[value="own"]'));
     expect(root(run).querySelector('app-card-pick .own span')?.textContent).toBe(
-      "Or write it in your own words (only you see this; it isn't saved)",
+      "Write it in a few words (only you see this; it isn't saved)",
     );
     await type(run, root(run).querySelector<HTMLInputElement>('.own input')!, 'PRIVATE first reading');
     await press(run, 'Next');
@@ -118,8 +122,10 @@ describe('Cognitive shifts exercises', () => {
     await press(run, 'Next lens');
     expect(root(run).textContent).toContain("Lens 2 of 3: A friend's view");
     expect(root(run).textContent).toContain('It makes sense that this bothers you.'); // a line, not a card
-    expect(root(run).querySelectorAll('app-card-pick input[type="radio"]')).toHaveLength(4);
+    expect(root(run).querySelectorAll('app-card-pick input[type="radio"]')).toHaveLength(5); // 4 cards and "my own"
     await press(run, 'Nothing comes to mind');
+    expect(root(run).querySelector('app-card-pick .own')).toBeNull(); // a new lens starts closed
+    await check(run, root(run).querySelector('app-card-pick input[value="own"]'));
     await type(run, root(run).querySelector<HTMLInputElement>('.own input')!, 'PRIVATE lens reading');
     await press(run, 'Next');
 
@@ -149,7 +155,7 @@ describe('Cognitive shifts exercises', () => {
     const saved = last(run);
     expect(saved.status).toBe('completed');
     expect(saved.mode).toBe('try');
-    expect(saved.content_versions).toEqual({ 'cs-other-readings': '2' });
+    expect(saved.content_versions).toEqual({ 'cs-other-readings': '3' });
     expect(saved.steps?.map((s) => s.step)).toEqual([
       'cs1_first', 'cs1_feel_before', 'cs1_lenses', 'cs1_sort', 'cs1_feel_after', 'cs1_close',
     ]);
@@ -236,7 +242,7 @@ describe('Cognitive shifts exercises', () => {
 
     const saved = last(run);
     expect(saved.status).toBe('completed');
-    expect(saved.content_versions).toEqual({ 'cs-why-it-happened': '1' });
+    expect(saved.content_versions).toEqual({ 'cs-why-it-happened': '2' });
     expect(saved.steps?.[3].result).toEqual({
       positions: [
         { cause: 'not_good', who: 1, time: 1, scope: 1 },

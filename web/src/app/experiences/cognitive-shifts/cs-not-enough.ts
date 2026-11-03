@@ -54,7 +54,8 @@ const SOMETHING_ELSE = 'something_else';
       }
       @case ('cs3_first') {
         <p class="quote">{{ store.scenario()?.text }}</p>
-        <app-card-pick [legend]="c.first.ask" [cards]="readings()" [ownLabel]="c.first.own_label" [(value)]="pick" />
+        <app-card-pick [legend]="readings().length ? c.first.ask : c.first.ask_own" [cards]="readings()" [ownChoice]="c.first.own_choice"
+                       [ownLabel]="c.first.own_label" [(value)]="pick" />
         <app-rating-scale [item]="c.first.certainty" [(value)]="certainty" />
         <button type="button" [disabled]="!pick() || certainty() === null" (click)="submitFirst()">{{ c.next_label }}</button>
       }

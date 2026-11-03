@@ -24,10 +24,12 @@ import scienceStateResetJson from './science/state-reset.v1.json';
 // content review and full-text gates pass. Their science explanations add an evidence layer
 // and a population line to every finding; their sources are kept apart from sources.v1.json,
 // which the experiment exercises' explanations use and which doesn't change.
-import csNotEnoughJson from './cs-not-enough.v1.json';
-// v2: step 1 asks to pick a reading above the cards, and to write your own above the field.
-import csOtherReadingsJson from './cs-other-readings.v2.json';
-import csWhyItHappenedJson from './cs-why-it-happened.v1.json';
+// cs-other-readings v2: step 1 asks to pick a reading above the cards, and to write your own
+// above the field. v3 (all three): "write my own" is an option among the cards that opens the
+// text field, as in CS3's situation step.
+import csNotEnoughJson from './cs-not-enough.v2.json';
+import csOtherReadingsJson from './cs-other-readings.v3.json';
+import csWhyItHappenedJson from './cs-why-it-happened.v2.json';
 import scienceCsNotEnoughJson from './science/cs-not-enough.v1.json';
 import scienceCsOtherReadingsJson from './science/cs-other-readings.v1.json';
 import scienceCsWhyItHappenedJson from './science/cs-why-it-happened.v1.json';
@@ -248,7 +250,13 @@ export interface CsCard {
 
 export interface CsOtherReadingsContent extends Versioned {
   safety: string;
-  first: { intro: string; ask: string; cards: (CsCard & { kind: 'self' | 'situation' })[]; own_label: string };
+  first: {
+    intro: string;
+    ask: string;
+    cards: (CsCard & { kind: 'self' | 'situation' })[];
+    own_choice: string;
+    own_label: string;
+  };
   feel: {
     reading: string;
     belief: RatingItem;
@@ -257,6 +265,7 @@ export interface CsOtherReadingsContent extends Versioned {
   };
   lenses: {
     counter: string;
+    own_choice: string;
     own_label: string;
     nothing: string;
     next_lens: string;
@@ -285,8 +294,16 @@ export interface CsOtherReadingsContent extends Versioned {
 export interface CsWhyItHappenedContent extends Versioned {
   safety: string;
   setback: { intro: string; label: string };
-  first: { ask: string; cards: CsCard[]; own_label: string };
-  more: { intro: string; cards: CsCard[]; own_label: string; add: string; count: string; your_causes: string };
+  first: { ask: string; cards: CsCard[]; own_choice: string; own_label: string };
+  more: {
+    intro: string;
+    cards: CsCard[];
+    own_choice: string;
+    own_label: string;
+    add: string;
+    count: string;
+    your_causes: string;
+  };
   map: {
     counter: string;
     axes: { id: 'who' | 'time' | 'scope'; low: string; high: string }[];
@@ -312,7 +329,8 @@ export interface CsNotEnoughContent extends Versioned {
     own_label: string;
     scenarios: { id: string; text: string; readings: CsReading[] }[];
   };
-  first: { ask: string; own_label: string; certainty: RatingItem };
+  /** ask_own: the question when there are no readings to pick from (an own situation). */
+  first: { ask: string; ask_own: string; own_choice: string; own_label: string; certainty: RatingItem };
   share: {
     intro: string;
     choose: string;

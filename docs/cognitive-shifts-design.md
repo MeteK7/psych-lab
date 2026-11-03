@@ -27,6 +27,11 @@ Implemented as designed, in the development build only. Changes made while build
 - **The fit board** uses three buttons per card; there's no drag and drop. Radio targets are 24 px, the WCAG 2.2 minimum the browser tests found missing at first.
 - **The CS2 "heavy map" step** adds a cause in place, rather than going back a step.
 - **Population lines:** where the abstract didn't say who took part or where, the line says "to be confirmed from the full text" instead of guessing.
+- **"Write my own" is an option (2026-11-03):**
+  - **Rule:** wherever one answer is picked from cards, "My own reading / explanation / cause" is the last option in the same radio group, and choosing it opens the text field. This is the pattern CS3's situation step already used.
+  - **Why:** the selection is always visible; nothing is unticked while typing; switching to a card and back keeps the text; and screen readers announce one group.
+  - **Exceptions:** multi-select steps (CS2 "Other possible causes", CS3 "How likely is each?") keep their always-visible "add your own" field. With no cards to pick (an own situation in CS3), the field is simply open.
+  - **Content versions:** `cs-other-readings` v3, `cs-why-it-happened` v2, `cs-not-enough` v2.
 - **Full-text corrections (2026-11-03):** the science texts in §7 are the approved drafts. The live wording, corrected after the full-text check, is in `web/src/content/science/cs-*.v1.json` (see `evidence-verification.md`).
 - **"Why it's worth doing" (2026-11-03, all three exercises):**
   - **The part:** after "What you do", an explanation may have a short part saying, in everyday terms, why the exercise is worth doing: what goes on when we read an unclear situation, and what the practice is for. It counts towards the word limit, and follows the same wording rules (no promises that the exercise works).

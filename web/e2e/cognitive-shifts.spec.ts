@@ -39,7 +39,10 @@ test.describe('Cognitive shifts, keyboard only', () => {
   test('Other ways to read it', async ({ page }) => {
     const id = await open(page, 'cs_other_readings');
     await step(page, 'Your first reading');
-    await typeInto(page, /Or write it in your own words/, 'PRIVATE first reading');
+    await choose(page, page.getByRole('radio').first(), 4); // → "My own reading", after the 4 cards
+    await expect(page.getByRole('radio', { name: 'My own reading' })).toBeChecked();
+    await expectNoSeriousA11yIssues(page, 'own reading open');
+    await typeInto(page, /Write it in a few words/, 'PRIVATE first reading');
     await pressButton(page, 'Next');
 
     await step(page, 'How it feels now');
@@ -54,7 +57,8 @@ test.describe('Cognitive shifts, keyboard only', () => {
     await expect(page.getByText("Lens 2 of 3: A friend's view")).toBeFocused();
     await expectNoSeriousA11yIssues(page, 'lens 2');
     await pressButton(page, 'Nothing comes to mind');
-    await typeInto(page, 'Or write your own', 'PRIVATE lens reading');
+    await choose(page, page.getByRole('radio').first(), 4); // → "My own reading"
+    await typeInto(page, /Write it in a few words/, 'PRIVATE lens reading');
     await pressButton(page, 'Next');
 
     await step(page, 'Which readings fit?');
