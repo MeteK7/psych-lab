@@ -34,7 +34,7 @@ Implemented as designed, in the development build only. Changes made while build
   - **Content versions:** `cs-other-readings` v3, `cs-why-it-happened` v2, `cs-not-enough` v2.
 - **Full-text corrections (2026-11-03):** the science texts in §7 are the approved drafts. The live wording, corrected after the full-text check, is in `web/src/content/science/cs-*.v1.json` (see `evidence-verification.md`).
 - **"Why it's worth doing" (2026-11-03, all three exercises):**
-  - **The part:** after "What you do", an explanation may have a short part saying, in everyday terms, why the exercise is worth doing: what goes on when we read an unclear situation, and what the practice is for. It counts towards the word limit, and follows the same wording rules (no promises that the exercise works).
+  - **The part:** after "What you do", an explanation may have a part saying, in everyday terms, why the exercise is worth doing: what goes on when we read an unclear situation, and what the practice is for. It follows the same wording rules (no promises that the exercise works).
   - **CS3 changes:** CS3's method is now "Checking the facts, and finding out" (first renamed "Weighing several readings, and finding out", then changed with the redesign below). Its text explains what happens in your mind, and says this isn't about picking the nicest reading.
 - **CS3 redesign (2026-11-03):** built from `cs3-redesign-proposal.md` revision 2. It supersedes §5 below for steps 2–5 and the readings; content `cs-not-enough` v3.
   - **Readings:** by rules (plausible, distinct, covering, same level of detail), five per scenario, and four general ones for an own situation.

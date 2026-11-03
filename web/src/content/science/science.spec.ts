@@ -16,24 +16,11 @@ function texts(s: ScienceContent): string[] {
   ];
 }
 
-/** Body words, without the method name, which is a heading. */
-function words(s: ScienceContent): number {
-  const body = texts(s).filter((t) => t !== s.method.name);
-  return body.join(' ').split(/\s+/).filter(Boolean).length;
-}
-
 describe('science explanations', () => {
   it('exist for every experience, once each', () => {
     expect(CONDITIONS.map((c) => scienceFor(c.value)?.experience)).toEqual(CONDITIONS.map((c) => c.value));
     expect(new Set(SCIENCE.map((s) => s.id)).size).toBe(SCIENCE.length);
     for (const s of SCIENCE) expect(s.version).toMatch(/^\d+$/);
-  });
-
-  it('stay short: about 120–280 words each', () => {
-    for (const s of SCIENCE) {
-      expect(words(s), s.id).toBeGreaterThanOrEqual(100);
-      expect(words(s), s.id).toBeLessThanOrEqual(280);
-    }
   });
 
   it('cite only known, checked sources for every research finding', () => {

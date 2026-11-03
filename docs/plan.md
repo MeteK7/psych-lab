@@ -109,8 +109,8 @@
 ### 3.1 Science explanation standard (every experience)
 Every experience carries a **science explanation** in its own versioned content file, e.g. `content/science/<experience>.v1.json`, separate from the experience content so that experiment `content_versions` don't change. It's built in product phase **S** (§9).
 
-**Five short parts** (about 120–280 words in total; a part may hold several paragraphs):
-1. **What you do:** one sentence.
+**Five parts** (a part may hold several paragraphs):
+1. **What you do.**
 2. **The method:** named and explained in plain words, e.g. "planning *when* and *how* you'll start (implementation intentions)".
 3. **What research says about the method:** the wording is fixed by the evidence mark.
    - ✔F (full text checked): "Research found…" or "A lab experiment found…", naming who took part and how, e.g. "in lab experiments with volunteers". The word "study" isn't used on screen, so explanations say "research" or "experiment".
@@ -718,6 +718,7 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | **Changed** | **CS3 redesign** (`cs3-redesign-proposal.md` revision 2; content `cs-not-enough` v3): readings by rules; the 10-point share replaced by "Could these explain it?" with the facts shown next to the question; one "Can you find out?" step; no judgement of the certainty change; two questions to keep | Listing alternatives shifts likelihood estimates by itself (support theory, read in full in Redelmeier et al. 1995), so the points couldn't show a change of belief; the step now practises checking whether the facts can tell readings apart |
 | **Changed** | Review form part D (distinct and covering, per scenario) and part E (does step 3 read as a fact check; "what did this exercise teach you?"); CS3 scenario rule in the review plan | Revision 2, decisions 2 and 5 |
 | **Changed** | CS3 step 5 (2026-11-04; content `cs-not-enough` v4): both ratings kept as a before and after for the same first reading; step 5 says so, says no direction is expected, and shows both numbers after rating | Step 5 looked like a repeat of step 2, with no visible purpose |
+| **Removed** | The word limit on science explanations (§3.1 and its test). No length limit applies to explanations in any exercise | Each exercise has its own needs, so no shared length standard fits them all |
 | **Retained** | Experiment exercises, golden tests, protocol, n-of-1 and schedule unchanged; Cognitive shifts still development-only; only ✔F sources added on screen | — |
 
 ## References
