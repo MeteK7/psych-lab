@@ -255,7 +255,7 @@ describe('Cognitive shifts exercises', () => {
     expect(JSON.stringify(run.bodies)).not.toContain('PRIVATE');
   });
 
-  it('CS3 shares exactly 10 points, asks how to find out, and keeps own readings private', async () => {
+  it('CS3 checks which readings the facts could fit, then asks how to find out, keeping own text private', async () => {
     const run = start('cs_not_enough_to_go_on');
     await run.fixture.whenStable();
     expect(root(run).textContent).toContain('About 4 minutes.');
@@ -266,53 +266,82 @@ describe('Cognitive shifts exercises', () => {
     await press(run, 'Next');
 
     expect(heading(run)).toBe('Step 2 of 5: Your first reading');
-    await check(run, root(run).querySelector('app-card-pick input[value="annoyed"]'));
+    await check(run, root(run).querySelector('app-card-pick input[value="bothered"]'));
     await rate(run, 8);
     await press(run, 'Next');
 
-    expect(heading(run)).toBe('Step 3 of 5: How likely is each?');
-    const boxes = root(run).querySelectorAll<HTMLInputElement>('input[type="checkbox"]');
-    expect(boxes).toHaveLength(5); // the other readings of the scenario
-    await check(run, boxes[0]);
+    expect(heading(run)).toBe('Step 3 of 5: Could these explain it?');
+    // The facts of the moment sit next to the question, with the person's reading under them.
+    const facts = root(run).querySelector('section.facts')!;
+    expect(facts.querySelector('h3')?.textContent).toBe('What happened');
+    expect(facts.textContent).toContain("A friend hasn't replied to your message for a day.");
+    expect(facts.textContent).toContain('Your reading: “Something I said bothered them a bit.”');
+    const boxes = Array.from(root(run).querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
+    expect(boxes).toHaveLength(5); // every other reading of the scenario, and "something I haven't thought of"
+    expect(boxes.some((b) => b.checked)).toBe(false); // nothing is chosen in advance
+    expect(root(run).querySelector('.note')).toBeNull(); // no verdict before the person has judged
+    await check(run, boxes[0]); // They've got a lot going on right now.
+    await check(run, boxes[3]); // They saw it at a bad moment and forgot.
     await type(run, root(run).querySelector<HTMLInputElement>('form.own input')!, 'PRIVATE other reading');
     await press(run, 'Add');
-    const more = (reading: string) =>
-      root(run).querySelector<HTMLButtonElement>(`button[aria-label="More points for: ${reading}"]`)!;
-    for (const [reading, n] of [
-      ["They're annoyed with me.", 2],
-      ["They're busy and haven't seen it.", 5],
-      ['PRIVATE other reading', 2],
-      ["Something I haven't thought of", 1],
-    ] as const) {
-      for (let i = 0; i < n; i++) {
-        more(reading).click();
-        await run.fixture.whenStable();
-      }
-    }
-    expect(root(run).textContent).toContain('Points left: 0');
-    expect(more("They're annoyed with me.").disabled).toBe(true);
+    await press(run, 'Done');
+    const note = root(run).querySelector('.note')!.textContent!;
+    expect(note).toContain('What happened could fit 4 readings, including yours.');
+    expect(note).toContain('These are possibilities, not information.');
     await press(run, 'Next');
 
-    expect(heading(run)).toBe('Step 4 of 5: Is there a way to find out?');
-    await check(run, root(run).querySelector('input[name="cs3-find"]'));
+    expect(heading(run)).toBe('Step 4 of 5: Can you find out?');
+    expect(root(run).textContent).toContain("Thinking it through tells you what's possible, not what happened.");
+    await check(run, root(run).querySelector('input[name="cs3-find"][value="ask"]'));
+    expect(root(run).querySelector('.note')?.textContent).toContain('One way to ask without assuming your reading');
     await press(run, 'Next');
+
+    expect(heading(run)).toBe('Step 5 of 5: How sure are you now?');
+    expect(Array.from(root(run).querySelectorAll('.keep li')).map((li) => li.textContent)).toEqual([
+      'Would what happened also fit another reading?',
+      'What would actually tell me, and is it worth finding out?',
+    ]);
     await rate(run, 4);
-    expect(root(run).textContent).toContain("Holding more than one reading open isn't indecision.");
     await press(run, 'Finish');
+    const plan = Array.from(root(run).querySelectorAll('a')).find((a) => a.textContent?.trim() === 'Plan your first step');
+    expect(plan?.getAttribute('href')).toBe('/session?mode=try&condition=action_bridge');
 
     const saved = last(run);
     expect(saved.status).toBe('completed');
+    expect(saved.content_versions).toEqual({ 'cs-not-enough': '3' });
     expect(saved.ratings).toEqual({ cs3_certainty_pre: 8, cs3_certainty_post: 4 });
-    expect(saved.steps?.[2].result).toEqual({
-      readings: [
-        { reading: 'first', card: 'annoyed', points: 2 },
-        { reading: 'other-0', card: 'busy', points: 5 },
-        { reading: 'other-1', card: 'own', points: 2 },
-        { reading: 'something_else', card: 'something_else', points: 1 },
-      ],
-      none_fit: false,
-    });
+    expect(saved.steps?.[2].result).toEqual({ fits: ['busy', 'forgot'], own_added: true, something_else: false });
     expect(saved.steps?.[3].result).toEqual({ choice: 'ask' });
+    expect(JSON.stringify(run.bodies)).not.toContain('PRIVATE');
+  });
+
+  it('CS3 offers general readings for an own situation, and takes a lone first reading seriously', async () => {
+    const run = start('cs_not_enough_to_go_on');
+    await run.fixture.whenStable();
+    await press(run, 'Begin');
+    await check(run, Array.from(root(run).querySelectorAll<HTMLInputElement>('input[name="cs3-situation"]')).at(-1)!);
+    await type(run, root(run).querySelector<HTMLInputElement>('input[type="text"]')!, 'PRIVATE situation');
+    await press(run, 'Next');
+
+    expect(root(run).querySelectorAll('app-card-pick .card-option')).toHaveLength(5); // 4 general readings and "my own"
+    await check(run, root(run).querySelector('app-card-pick input[value="feared"]'));
+    await rate(run, 9);
+    await press(run, 'Next');
+
+    expect(root(run).querySelector('section.facts')?.textContent).toContain('PRIVATE situation'); // shown back, never saved
+    await press(run, 'Done');
+    expect(root(run).querySelector('.note')?.textContent).toContain('You think only your reading fits what happened.');
+    await press(run, 'Next');
+
+    await check(run, root(run).querySelector('input[name="cs3-find"][value="leave"]'));
+    expect(root(run).querySelector('.note')?.textContent).toContain("Then the honest answer is: you don't know.");
+    await press(run, 'Next');
+    await rate(run, 9);
+    await press(run, 'Finish');
+    expect(Array.from(root(run).querySelectorAll('a')).some((a) => a.textContent?.includes('Plan your first step'))).toBe(false);
+
+    const saved = last(run);
+    expect(saved.steps?.[2].result).toEqual({ fits: [], own_added: false, something_else: false });
     expect(JSON.stringify(run.bodies)).not.toContain('PRIVATE');
   });
 

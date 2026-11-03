@@ -1,4 +1,4 @@
-import { changeOrder, firstReadingClose, pointsLeft, reflections, shareComplete } from './cs-logic';
+import { changeOrder, firstReadingClose, fitNote, offersPlan, reflections } from './cs-logic';
 
 describe('Cognitive shifts rules', () => {
   describe('CS1 close for a first reading that still fits', () => {
@@ -42,16 +42,24 @@ describe('Cognitive shifts rules', () => {
     });
   });
 
-  describe('CS3 share of 10', () => {
-    it('counts the points left', () => {
-      expect(pointsLeft({})).toBe(10);
-      expect(pointsLeft({ first: 3, 'other-0': 5 })).toBe(2);
+  describe('CS3 note on what the facts could fit', () => {
+    it('counts the readings the facts could fit, the first one included', () => {
+      expect(fitNote(1)).toEqual({ key: 'note_some', n: 2 });
+      expect(fitNote(4)).toEqual({ key: 'note_some', n: 5 });
     });
 
-    it('is complete only with all 10 points over the first reading and at least two others', () => {
-      expect(shareComplete({ first: 4, 'other-0': 3, 'other-1': 3 }, 3)).toBe(true);
-      expect(shareComplete({ first: 4, 'other-0': 3 }, 3)).toBe(false);
-      expect(shareComplete({ first: 5, 'other-0': 5 }, 2)).toBe(false);
+    it('takes seriously a first reading that nothing else fits', () => {
+      expect(fitNote(0)).toEqual({ key: 'note_none', n: 1 });
+    });
+  });
+
+  describe('CS3 plan link', () => {
+    it('is offered for asking or checking, not for waiting or leaving it', () => {
+      expect(offersPlan('ask')).toBe(true);
+      expect(offersPlan('check')).toBe(true);
+      expect(offersPlan('wait')).toBe(false);
+      expect(offersPlan('leave')).toBe(false);
+      expect(offersPlan(null)).toBe(false);
     });
   });
 });

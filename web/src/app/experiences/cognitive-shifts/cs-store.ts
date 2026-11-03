@@ -35,8 +35,10 @@ export class CsStore {
   // CS3 · Not enough to go on
   readonly scenario = signal<Pick | null>(null);
   readonly cs3First = signal<Pick | null>(null);
-  /** Other readings chosen for the share, in order. */
-  readonly others = signal<Pick[]>([]);
-  readonly points = signal<Record<string, number>>({});
-  readonly cs3NoneFit = signal(false);
+  /** Ids of the readings ticked as "could also explain what happened". */
+  readonly cs3Fits = signal<string[]>([]);
+  readonly cs3SomethingElse = signal(false);
+  /** The person's own extra reading; its text is never saved. */
+  readonly cs3Own = signal<Pick | null>(null);
+  readonly cs3Find = signal<string | null>(null);
 }

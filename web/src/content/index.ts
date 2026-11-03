@@ -27,7 +27,9 @@ import scienceStateResetJson from './science/state-reset.v1.json';
 // cs-other-readings v2: step 1 asks to pick a reading above the cards, and to write your own
 // above the field. v3 (all three): "write my own" is an option among the cards that opens the
 // text field, as in CS3's situation step.
-import csNotEnoughJson from './cs-not-enough.v2.json';
+// cs-not-enough v3 (cs3-redesign-proposal.md, revision 2): readings by kind; step 3 checks which
+// readings the facts could also fit (no points); one "Can you find out?" step; two questions to keep.
+import csNotEnoughJson from './cs-not-enough.v3.json';
 import csOtherReadingsJson from './cs-other-readings.v3.json';
 import csWhyItHappenedJson from './cs-why-it-happened.v2.json';
 import scienceCsNotEnoughJson from './science/cs-not-enough.v1.json';
@@ -317,8 +319,12 @@ export interface CsWhyItHappenedContent extends Versioned {
   finish_label: string;
 }
 
+/**
+ * A CS3 reading. Its kind is for authors and reviewers (cs3-redesign-proposal.md §3): each set
+ * covers the feared reading, a milder one, and readings that aren't about the person.
+ */
 export interface CsReading extends CsCard {
-  lean: 'negative' | 'neutral' | 'positive';
+  kind: 'feared' | 'mild' | 'them' | 'circumstances' | 'positive';
 }
 
 export interface CsNotEnoughContent extends Versioned {
@@ -328,23 +334,27 @@ export interface CsNotEnoughContent extends Versioned {
     own_choice: string;
     own_label: string;
     scenarios: { id: string; text: string; readings: CsReading[] }[];
+    /** General readings for a situation the person describes themself. */
+    own_readings: CsReading[];
   };
-  /** ask_own: the question when there are no readings to pick from (an own situation). */
-  first: { ask: string; ask_own: string; own_choice: string; own_label: string; certainty: RatingItem };
-  share: {
-    intro: string;
-    choose: string;
+  first: { ask: string; own_choice: string; own_label: string; certainty: RatingItem };
+  fit: {
+    facts_label: string;
+    your_reading: string;
+    ask: string;
+    hint: string;
+    something_else: string;
+    own_prompt: string;
     own_label: string;
     add: string;
-    something_else: string;
-    first_tag: string;
-    left: string;
-    more: string;
-    fewer: string;
-    none_fit: string;
+    done: string;
+    note_some: string;
+    note_none: string;
+    note_something: string;
+    note_always: string;
   };
-  find: { intro: string; options: { id: string; label: string }[] };
-  after: { reading: string; close: string };
+  find: { intro: string; decide: string; ask: string; options: { id: string; label: string; follow?: string }[] };
+  after: { reading: string; keep_heading: string; keep: string[]; plan_prompt: string; plan_link: string };
   next_label: string;
   finish_label: string;
 }
