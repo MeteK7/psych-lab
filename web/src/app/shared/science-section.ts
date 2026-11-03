@@ -12,7 +12,8 @@ const EVIDENCE_LABELS: Record<Evidence, string> = {
 /**
  * "Why this exercise?" (plan §3.1): the science behind an exercise, in the page itself.
  * Native <details>, collapsed by default, so it works with keyboard and screen readers and
- * never interrupts a step. Each part has its own heading; each research finding shows its
+ * never interrupts a step. After "What you do", an explanation may say why the exercise is
+ * worth doing, in everyday terms. Each part has its own heading; each research finding shows its
  * sources and how far they were checked; "About this exercise" is highlighted, because it
  * separates the method's evidence from this untested version.
  */
@@ -39,6 +40,15 @@ const EVIDENCE_LABELS: Record<Evidence, string> = {
             <p>{{ para }}</p>
           }
         </section>
+
+        @if (science().why; as why) {
+          <section class="part">
+            <h3><app-icon name="flag" /> Why it's worth doing</h3>
+            @for (para of paragraphs(why); track $index) {
+              <p>{{ para }}</p>
+            }
+          </section>
+        }
 
         <section class="part">
           <h3><app-icon name="bulb" /> The method: {{ science().method.name }}</h3>

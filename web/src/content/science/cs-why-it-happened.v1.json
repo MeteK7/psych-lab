@@ -3,8 +3,9 @@
   "version": "1",
   "experience": "cs_why_it_happened",
   "what_you_do": "You collect possible causes of a setback and place each one on a map: about you or the situation, lasting or just this time, everything or just this kind of task.",
+  "why": "After a setback, a quick explanation like “I'm just bad at this” can make it feel like it will always be this way. Usually more than one thing played a part.\n\nThis is practice at seeing the whole range of causes, including ones you can change next time, without turning it into excuses or blame.",
   "method": {
-    "name": "Attributional reframing",
+    "name": "Looking at all the causes (attributional reframing)",
     "text": "The explanations we give for setbacks matter. “I'm just bad at this” is about you, lasting and general. Other causes are about the situation, this time only, or this kind of task. Looking at the full range of causes can give a more accurate picture. Some causes may really be about you; that's information, not a verdict."
   },
   "research": [

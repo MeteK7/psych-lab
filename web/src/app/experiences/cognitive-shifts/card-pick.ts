@@ -1,4 +1,4 @@
-import { Component, input, model } from '@angular/core';
+import { Component, effect, input, linkedSignal, model, untracked } from '@angular/core';
 
 import { CsCard } from '../../../content';
 import { Pick } from './cs-store';
@@ -6,29 +6,37 @@ import { Pick } from './cs-store';
 let nextId = 0;
 
 /**
- * Pick one card, or write your own. Native radio buttons and a text field, so it works with
- * the keyboard and screen readers. Writing clears the card choice, and picking a card clears
- * the text; own text is held in the value only and never saved.
+ * Pick one card, or choose "my own" and write it. One group of native radio buttons, with the
+ * own option last; choosing it opens the text field, so what's selected is always visible and
+ * nothing is unticked behind the person's back. Switching to a card closes the field but keeps
+ * the text, so it comes back on switching back. Own text is held in the value only and never saved.
  */
 @Component({
   selector: 'app-card-pick',
   template: `
     <fieldset class="pick">
       <legend>{{ legend() }}</legend>
-      <div class="cards">
-        @for (card of cards(); track card.id) {
-          <label class="card-option" [class.chosen]="value()?.id === card.id">
-            <input type="radio" [name]="group" [value]="card.id" [checked]="value()?.id === card.id"
-                   (change)="value.set({ id: card.id, text: card.text })" />
-            <span>{{ card.text }}</span>
+      @if (cards().length) {
+        <div class="cards">
+          @for (card of cards(); track card.id) {
+            <label class="card-option" [class.chosen]="!own() && value()?.id === card.id">
+              <input type="radio" [name]="group" [value]="card.id" [checked]="!own() && value()?.id === card.id"
+                     (change)="chooseCard(card)" />
+              <span>{{ card.text }}</span>
+            </label>
+          }
+          <label class="card-option" [class.chosen]="own()">
+            <input type="radio" [name]="group" value="own" [checked]="own()" (change)="chooseOwn()" />
+            <span>{{ ownChoice() }}</span>
           </label>
-        }
-      </div>
-      <label class="own">
-        <span>{{ ownLabel() }}</span>
-        <input type="text" maxlength="120" [value]="value()?.id === 'own' ? value()!.text : ''"
-               (input)="write($event)" />
-      </label>
+        </div>
+      }
+      @if (own()) {
+        <label class="own">
+          <span>{{ ownLabel() }}</span>
+          <input type="text" maxlength="120" [value]="ownText()" (input)="write($event)" />
+        </label>
+      }
     </fieldset>
   `,
   styles: `
@@ -46,13 +54,45 @@ let nextId = 0;
 export class CardPick {
   readonly legend = input.required<string>();
   readonly cards = input.required<CsCard[]>();
+  /** The label of the "my own" option. */
+  readonly ownChoice = input.required<string>();
+  /** The label of the text field it opens. */
   readonly ownLabel = input.required<string>();
   readonly value = model<Pick | null>(null);
 
   protected readonly group = `card-pick-${nextId++}`;
+  /**
+   * Whether "my own" is chosen, and its text; both start afresh when the cards change (next lens).
+   * With no cards to pick from (an own situation in CS3), the field is simply open.
+   */
+  protected readonly own = linkedSignal({ source: this.cards, computation: (cards) => cards.length === 0 });
+  protected readonly ownText = linkedSignal({ source: this.cards, computation: () => '' });
+
+  constructor() {
+    // A parent that clears the choice (after adding a cause, or for the next lens) clears "my own" too.
+    effect(() => {
+      if (this.value() === null && untracked(() => this.ownText().trim())) {
+        untracked(() => {
+          this.own.set(this.cards().length === 0);
+          this.ownText.set('');
+        });
+      }
+    });
+  }
+
+  protected chooseCard(card: CsCard): void {
+    this.own.set(false);
+    this.value.set({ id: card.id, text: card.text });
+  }
+
+  protected chooseOwn(): void {
+    this.own.set(true);
+    this.value.set(this.ownText().trim() ? { id: 'own', text: this.ownText() } : null);
+  }
 
   protected write(event: Event): void {
     const text = (event.target as HTMLInputElement).value;
+    this.ownText.set(text);
     this.value.set(text.trim() ? { id: 'own', text } : null);
   }
 }

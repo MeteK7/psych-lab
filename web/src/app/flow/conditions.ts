@@ -23,7 +23,7 @@ export type StepId =
   | 'cs2_change'
   | 'cs3_situation'
   | 'cs3_first'
-  | 'cs3_share'
+  | 'cs3_fit'
   | 'cs3_find'
   | 'cs3_after';
 
@@ -54,8 +54,8 @@ export const STEP_NAMES: Record<StepId, string> = {
   cs2_change: 'Anything to change?',
   cs3_situation: 'An unclear situation',
   cs3_first: 'Your first reading',
-  cs3_share: 'How likely is each?',
-  cs3_find: 'Is there a way to find out?',
+  cs3_fit: 'Could these explain it?',
+  cs3_find: 'Can you find out?',
   cs3_after: 'How sure are you now?',
 };
 

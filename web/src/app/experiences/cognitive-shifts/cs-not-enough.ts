@@ -5,22 +5,13 @@ import { StepId } from '../../flow/conditions';
 import { Experience, StepOutcome } from '../../flow/step-outcome';
 import { RatingScale } from '../../shared/rating-scale';
 import { CardPick } from './card-pick';
-import { pointsLeft, shareComplete } from './cs-logic';
+import { fitNote, offersPlan } from './cs-logic';
 import { CsStore, Pick } from './cs-store';
 
-interface Row {
-  key: string;
-  card: string;
-  text: string;
-  first: boolean;
-}
-
-const SOMETHING_ELSE = 'something_else';
-
 /**
- * CS3 · Not enough to go on (cognitive-shifts-design.md §5): readings of an unclear situation
- * compete for 10 points, then the person decides whether and how to find out. Own texts stay
- * in CsStore.
+ * CS3 · Not enough to go on (cs3-redesign-proposal.md, revision 2): name the first reading, check
+ * which other readings the facts of the moment could also fit, then decide whether and how to
+ * find out. Own texts stay in CsStore; only ids, the choice and the two ratings are reported.
  */
 @Component({
   selector: 'app-cs-not-enough',
@@ -54,77 +45,94 @@ const SOMETHING_ELSE = 'something_else';
       }
       @case ('cs3_first') {
         <p class="quote">{{ store.scenario()?.text }}</p>
-        <app-card-pick [legend]="c.first.ask" [cards]="readings()" [ownLabel]="c.first.own_label" [(value)]="pick" />
+        <app-card-pick [legend]="c.first.ask" [cards]="readings()" [ownChoice]="c.first.own_choice"
+                       [ownLabel]="c.first.own_label" [(value)]="pick" />
         <app-rating-scale [item]="c.first.certainty" [(value)]="certainty" />
         <button type="button" [disabled]="!pick() || certainty() === null" (click)="submitFirst()">{{ c.next_label }}</button>
       }
-      @case ('cs3_share') {
-        <p class="quote">{{ store.scenario()?.text }}</p>
-        <p>{{ c.share.intro }}</p>
-        @if (readings().length) {
-          <fieldset class="choice">
-            <legend>{{ c.share.choose }}</legend>
-            @for (reading of otherCards(); track reading.id) {
-              <label class="check">
-                <input type="checkbox" [checked]="chosen(reading.id)" (change)="toggleOther(reading)" />
-                {{ reading.text }}
-              </label>
-            }
-          </fieldset>
-        }
-        <form class="own" (submit)="$event.preventDefault(); addOwn()">
-          <label class="field">
-            <span>{{ c.share.own_label }}</span>
-            <input type="text" maxlength="120" [value]="ownText()" (input)="ownText.set(value($event))" />
-          </label>
-          <button type="submit" [disabled]="!ownText().trim()">{{ c.share.add }}</button>
-        </form>
-
-        <ul class="rows">
-          @for (row of rows(); track row.key) {
-            <li class="row">
-              <span class="label">
-                {{ row.text }}
-                @if (row.first) {
-                  <span class="tag">({{ c.share.first_tag }})</span>
-                }
-                <span class="bar" [style.width.%]="(store.points()[row.key] ?? 0) * 10" aria-hidden="true"></span>
-              </span>
-              <span class="stepper">
-                <button type="button" [attr.aria-label]="say(c.share.fewer, { reading: row.text })"
-                        [disabled]="!(store.points()[row.key] ?? 0)" (click)="adjust(row.key, -1)">−</button>
-                <span class="value">{{ store.points()[row.key] ?? 0 }}</span>
-                <button type="button" [attr.aria-label]="say(c.share.more, { reading: row.text })"
-                        [disabled]="left() === 0" (click)="adjust(row.key, 1)">+</button>
-              </span>
-            </li>
+      @case ('cs3_fit') {
+        <!-- The facts of the moment sit next to the question: this checks whether the facts can
+             tell readings apart, unlike CS1's board, which sorts readings by how well they fit. -->
+        <section class="facts" aria-labelledby="cs3-facts">
+          <h3 id="cs3-facts">{{ c.fit.facts_label }}</h3>
+          <p class="fact">{{ store.scenario()?.text }}</p>
+          <p class="mine">{{ say(c.fit.your_reading, { reading: store.cs3First()?.text ?? '' }) }}</p>
+        </section>
+        <fieldset class="choice">
+          <legend>{{ c.fit.ask }}</legend>
+          <p class="hint">{{ c.fit.hint }}</p>
+          @for (reading of others(); track reading.id) {
+            <label class="check">
+              <input type="checkbox" [checked]="ticked(reading.id)" (change)="toggle(reading.id)" />
+              {{ reading.text }}
+            </label>
           }
-        </ul>
-        <p role="status">{{ say(c.share.left, { n: left() }) }}</p>
-        <div class="actions">
-          <button type="button" [attr.aria-pressed]="store.cs3NoneFit()" (click)="store.cs3NoneFit.set(!store.cs3NoneFit())">
-            {{ c.share.none_fit }}
-          </button>
-          <button type="button" [disabled]="!canShare()" (click)="submitShare()">{{ c.next_label }}</button>
-        </div>
+          @if (store.cs3Own(); as own) {
+            <label class="check">
+              <input type="checkbox" checked disabled />
+              {{ own.text }}
+            </label>
+          }
+          <label class="check">
+            <input type="checkbox" [checked]="store.cs3SomethingElse()" (change)="store.cs3SomethingElse.set(!store.cs3SomethingElse())" />
+            {{ c.fit.something_else }}
+          </label>
+        </fieldset>
+        @if (!store.cs3Own()) {
+          <form class="own" (submit)="$event.preventDefault(); addOwn()">
+            <label class="field">
+              <span>{{ c.fit.own_prompt }}</span>
+              <span class="sub">{{ c.fit.own_label }}</span>
+              <input type="text" maxlength="120" [value]="ownText()" (input)="ownText.set(value($event))" />
+            </label>
+            <button type="submit" [disabled]="!ownText().trim()">{{ c.fit.add }}</button>
+          </form>
+        }
+        @if (noteShown()) {
+          <div class="note" role="status">
+            <p>{{ say(c.fit[note().key], { n: note().n }) }}</p>
+            @if (store.cs3SomethingElse()) {
+              <p>{{ c.fit.note_something }}</p>
+            }
+            <p>{{ c.fit.note_always }}</p>
+          </div>
+          <button type="button" (click)="submitFit()">{{ c.next_label }}</button>
+        } @else {
+          <button type="button" (click)="noteShown.set(true)">{{ c.fit.done }}</button>
+        }
       }
       @case ('cs3_find') {
         <p>{{ c.find.intro }}</p>
+        <p class="decide">{{ c.find.decide }}</p>
         <fieldset class="choice">
-          <legend class="sr-only">{{ c.find.intro }}</legend>
+          <legend>{{ c.find.ask }}</legend>
           @for (option of c.find.options; track option.id) {
             <label class="check">
-              <input type="radio" name="cs3-find" [checked]="find() === option.id" (change)="find.set(option.id)" />
+              <input type="radio" name="cs3-find" [value]="option.id" [checked]="store.cs3Find() === option.id"
+                     (change)="store.cs3Find.set(option.id)" />
               {{ option.label }}
             </label>
           }
         </fieldset>
-        <button type="button" [disabled]="!find()" (click)="done({ choice: find() })">{{ c.next_label }}</button>
+        @if (follow(); as text) {
+          <p class="note" role="status">{{ text }}</p>
+        }
+        <button type="button" [disabled]="!store.cs3Find()" (click)="done({ choice: store.cs3Find() })">{{ c.next_label }}</button>
       }
       @case ('cs3_after') {
         <p class="quote">{{ say(c.after.reading, { reading: store.cs3First()?.text ?? '' }) }}</p>
         <app-rating-scale [item]="c.first.certainty" [(value)]="certainty" />
-        <p class="note">{{ c.after.close }}</p>
+        <section class="keep" aria-labelledby="cs3-keep">
+          <h3 id="cs3-keep">{{ c.after.keep_heading }}</h3>
+          <ol>
+            @for (question of c.after.keep; track question) {
+              <li>{{ question }}</li>
+            }
+          </ol>
+        </section>
+        @if (plan()) {
+          <p class="note">{{ c.after.plan_prompt }}</p>
+        }
         <button type="button" [disabled]="certainty() === null" (click)="finish()">{{ c.finish_label }}</button>
       }
     }
@@ -141,18 +149,21 @@ const SOMETHING_ELSE = 'something_else';
     .check { display: flex; gap: 0.5rem; align-items: flex-start; margin-bottom: 0.4rem; }
     .field { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.75rem; max-width: 32rem; }
     .field input { padding: 0.4rem; font: inherit; }
+    .sub { font-size: 0.875rem; color: var(--muted); }
     .own { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; }
-    .rows { list-style: none; padding: 0; margin: 1rem 0 0.5rem; display: grid; gap: 0.6rem; max-width: 36rem; }
-    .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.75rem; align-items: center; }
-    .label { display: flex; flex-direction: column; gap: 0.25rem; }
-    .tag { color: var(--muted); font-size: 0.875rem; }
-    .bar { display: block; height: 6px; border-radius: 3px; background: var(--accent); }
-    .stepper { display: inline-flex; align-items: center; gap: 0.4rem; }
-    .stepper button { min-width: 2rem; }
-    .value { min-width: 1.5rem; text-align: center; font-variant-numeric: tabular-nums; }
-    .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .facts { margin: 0 0 1rem; padding: 0.75rem 0.875rem; border: 1px solid var(--border); border-radius: 8px;
+             background: color-mix(in srgb, var(--text) 4%, transparent); }
+    .facts h3 { margin: 0 0 0.25rem; font-size: 0.95rem; }
+    .facts p { margin: 0; }
+    .fact { font-size: 1.05rem; }
+    .mine { margin-top: 0.5rem !important; color: var(--muted); }
+    .hint { margin: 0 0 0.6rem; color: var(--muted); font-size: 0.95rem; }
+    .decide { color: var(--muted); }
     .note { border-left: 4px solid var(--accent); padding-left: 0.75rem; }
-    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .note p { margin: 0 0 0.4rem; }
+    .keep { margin: 1rem 0; }
+    .keep h3 { font-size: 1rem; margin: 0 0 0.25rem; }
+    .keep ol { margin: 0; padding-left: 1.25rem; }
   `,
 })
 export class CsNotEnough implements Experience {
@@ -167,25 +178,19 @@ export class CsNotEnough implements Experience {
   protected readonly pick = signal<Pick | null>(null);
   protected readonly certainty = signal<number | null>(null);
   protected readonly ownText = signal('');
-  protected readonly find = signal<string | null>(null);
+  protected readonly noteShown = signal(false);
 
-  /** The chosen scenario's readings; none for an own situation. */
+  /** The chosen scenario's readings, or the general ones for an own situation. */
   protected readonly readings = computed(
-    () => this.c.situation.scenarios.find((s) => s.id === this.store.scenario()?.id)?.readings ?? [],
+    () =>
+      this.c.situation.scenarios.find((s) => s.id === this.store.scenario()?.id)?.readings ??
+      this.c.situation.own_readings,
   );
-  protected readonly otherCards = computed(() => this.readings().filter((r) => r.id !== this.store.cs3First()?.id));
-  protected readonly rows = computed<Row[]>(() => {
-    const first = this.store.cs3First();
-    const rows: Row[] = first ? [{ key: 'first', card: first.id, text: first.text, first: true }] : [];
-    this.store.others().forEach((o, i) => rows.push({ key: `other-${i}`, card: o.id, text: o.text, first: false }));
-    rows.push({ key: SOMETHING_ELSE, card: SOMETHING_ELSE, text: this.c.share.something_else, first: false });
-    return rows;
-  });
-  protected readonly left = computed(() => pointsLeft(this.store.points()));
-  /** The first reading plus at least two others (not counting "something else"). */
-  protected readonly canShare = computed(
-    () => this.store.cs3NoneFit() || shareComplete(this.store.points(), this.rows().length - 1),
-  );
+  /** Every reading other than the person's first one; all are shown, none chosen in advance. */
+  protected readonly others = computed(() => this.readings().filter((r) => r.id !== this.store.cs3First()?.id));
+  protected readonly note = computed(() => fitNote(this.store.cs3Fits().length + (this.store.cs3Own() ? 1 : 0)));
+  protected readonly follow = computed(() => this.c.find.options.find((o) => o.id === this.store.cs3Find())?.follow);
+  protected readonly plan = computed(() => offersPlan(this.store.cs3Find()));
 
   protected value(event: Event): string {
     return (event.target as HTMLInputElement).value;
@@ -195,8 +200,19 @@ export class CsNotEnough implements Experience {
     return fill(text, values);
   }
 
-  protected chosen(id: string): boolean {
-    return this.store.others().some((o) => o.id === id);
+  protected ticked(id: string): boolean {
+    return this.store.cs3Fits().includes(id);
+  }
+
+  protected toggle(id: string): void {
+    this.store.cs3Fits.update((ids) => (ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id]));
+  }
+
+  protected addOwn(): void {
+    const text = this.ownText().trim();
+    if (!text) return;
+    this.store.cs3Own.set({ id: 'own', text });
+    this.ownText.set('');
   }
 
   protected done(result: Record<string, unknown>): void {
@@ -218,52 +234,20 @@ export class CsNotEnough implements Experience {
     this.completed.emit({ result: { first: pick.id }, ratings: { cs3_certainty_pre: this.certainty()! } });
   }
 
-  protected toggleOther(reading: Pick): void {
-    if (this.chosen(reading.id)) {
-      const index = this.store.others().findIndex((o) => o.id === reading.id);
-      this.store.others.update((os) => os.filter((o) => o.id !== reading.id));
-      this.dropPoints(index);
-    } else {
-      this.store.others.update((os) => [...os, { id: reading.id, text: reading.text }]);
-    }
-  }
-
-  protected addOwn(): void {
-    const text = this.ownText().trim();
-    if (!text) return;
-    this.store.others.update((os) => [...os, { id: 'own', text }]);
-    this.ownText.set('');
-  }
-
-  protected adjust(key: string, by: number): void {
-    const now = this.store.points()[key] ?? 0;
-    const next = now + by;
-    if (next < 0 || (by > 0 && this.left() === 0)) return;
-    this.store.points.update((p) => ({ ...p, [key]: next }));
-  }
-
-  /** Removing a reading frees its points and shifts later rows' points to their new keys. */
-  private dropPoints(index: number): void {
-    this.store.points.update((p) => {
-      const out: Record<string, number> = {};
-      for (const [key, n] of Object.entries(p)) {
-        const m = /^other-(\d+)$/.exec(key);
-        if (!m) out[key] = n;
-        else if (Number(m[1]) < index) out[key] = n;
-        else if (Number(m[1]) > index) out[`other-${Number(m[1]) - 1}`] = n;
-      }
-      return out;
-    });
-  }
-
-  protected submitShare(): void {
+  protected submitFit(): void {
+    const order = this.others().map((r) => r.id);
     this.done({
-      readings: this.rows().map((r) => ({ reading: r.key, card: r.card, points: this.store.points()[r.key] ?? 0 })),
-      none_fit: this.store.cs3NoneFit(),
+      fits: order.filter((id) => this.ticked(id)),
+      own_added: this.store.cs3Own() !== null,
+      something_else: this.store.cs3SomethingElse(),
     });
   }
 
   protected finish(): void {
-    this.completed.emit({ result: {}, ratings: { cs3_certainty_post: this.certainty()! } });
+    this.completed.emit({
+      result: {},
+      ratings: { cs3_certainty_post: this.certainty()! },
+      next: this.plan() ? { label: this.c.after.plan_link, exercise: 'action_bridge' } : undefined,
+    });
   }
 }

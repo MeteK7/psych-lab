@@ -35,7 +35,7 @@ const CONTENT: Record<StepId, Versioned> = {
   cs2_change: CS_WHY_IT_HAPPENED,
   cs3_situation: CS_NOT_ENOUGH,
   cs3_first: CS_NOT_ENOUGH,
-  cs3_share: CS_NOT_ENOUGH,
+  cs3_fit: CS_NOT_ENOUGH,
   cs3_find: CS_NOT_ENOUGH,
   cs3_after: CS_NOT_ENOUGH,
 };

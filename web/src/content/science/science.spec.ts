@@ -6,6 +6,7 @@ import { CONDITIONS } from '../../app/flow/conditions';
 
 function texts(s: ScienceContent): string[] {
   return [
+    ...(s.why ? [s.why] : []),
     s.what_you_do,
     s.method.name,
     s.method.text,
@@ -112,6 +113,10 @@ describe('Cognitive shifts science explanations (cognitive-shifts-design.md §7)
     }
   });
 
+  it("say why each exercise is worth doing, in everyday terms", () => {
+    for (const s of cs) expect(s.why?.trim(), s.id).toBeTruthy();
+  });
+
   it('follow the on-screen wording rules in the population lines and notes too', () => {
     const forbidden = /\b(stud(y|ying|ies)|phases?|sessions?)\b/i;
     for (const s of cs) {
@@ -125,6 +130,7 @@ describe('Cognitive shifts science explanations (cognitive-shifts-design.md §7)
     for (const s of experiment) {
       expect(s.research.some((r) => r.layer || r.who), s.id).toBe(false);
       expect(s.similar_note, s.id).toBeUndefined();
+      expect(s.why, s.id).toBeUndefined();
     }
   });
 });

@@ -2,27 +2,28 @@
   "id": "science-cs-other-readings",
   "version": "1",
   "experience": "cs_other_readings",
-  "what_you_do": "You write how you read a situation, look at it through three lenses, and sort the readings by how well they fit.",
+  "what_you_do": "You write your reading of a situation, look at it through three lenses, and sort the readings by fit.",
+  "why": "When something goes wrong, one reading can take over, like “It means I'm not good enough”, and shape how bad it feels. It may not be the only fair reading.\n\nThis is practice at finding other realistic readings and keeping the ones that fit.",
   "method": {
-    "name": "Reappraisal (cognitive reappraisal)",
-    "text": "How we read a situation shapes how we feel about it. Reappraisal means looking for other realistic ways to read the same situation, not pretending it's fine. One lens asks what you'd say to a friend; taking a step back like this is called self-distancing. Another asks what will matter in a month; looking ahead like this is called temporal distancing."
+    "name": "Seeing it another way (reappraisal)",
+    "text": "How we read a situation shapes how we feel. Reappraisal means finding other realistic readings, not pretending it's fine. One lens asks what you'd say to a friend (self-distancing); another asks what will matter in a month (temporal distancing)."
   },
   "research": [
     {
       "layer": "method",
-      "text": "A review of emotion-regulation experiments suggests that reconsidering what a situation means reduces negative feelings, with a small-to-moderate effect measured straight afterwards.",
+      "text": "A review of emotion-regulation experiments suggests that reconsidering what a situation means reduces negative feelings straight afterwards, with a small-to-moderate effect.",
       "who": "306 experimental comparisons · settings to be confirmed from the full text",
       "sources": ["webb-2012"]
     },
     {
       "layer": "method",
-      "text": "Research with 170 adults suggests reappraisal isn't always helpful: being good at it went with fewer depressive symptoms when stress was out of people's control, and with more when it was within their control. That's why this exercise asks whether you can do something about the situation.",
+      "text": "Research with 170 adults suggests reappraisal isn't always helpful: skill at it went with fewer depressive symptoms under stress people couldn't control, but more under stress they could. So this exercise asks whether you can act on the situation.",
       "who": "170 adults · measured, not an experiment",
       "sources": ["troy-2013"]
     },
     {
       "layer": "method",
-      "text": "Experiments found that talking to yourself from a distance, using your own name or “you” instead of “I”, lowered distress in stressful social tasks.",
+      "text": "Experiments found that using your own name or “you” instead of “I” when talking to yourself lowered distress in stressful social tasks.",
       "who": "585 people, mostly US students · 6 experiments, 2 of them online; distress measured in 2 lab experiments (first impressions, a speech)",
       "sources": ["kross-2014"]
     },
@@ -40,10 +41,10 @@
     }
   ],
   "similar_note": "The trial above gave one kind of reappraisal instruction for one topic. No research has tested an exercise with three lenses and a fit board like this one.",
-  "about_this_exercise": "This exercise uses reappraisal, but this version hasn't been tested itself. The research above used other instructions and measured feelings right afterwards.",
+  "about_this_exercise": "This exercise uses reappraisal, but this version hasn't been tested itself. The research above used other instructions.",
   "limits": [
     "Effects measured were short-term.",
-    "Changing how you see something doesn't change the situation. If you can act on it, planning a step may matter more.",
-    "The before-and-after ratings show how it feels right now, not whether the exercise works."
+    "Seeing it differently doesn't change the situation; if you can act on it, planning a step may matter more.",
+    "Before-and-after ratings show how it feels now, not whether the exercise works."
   ]
 }

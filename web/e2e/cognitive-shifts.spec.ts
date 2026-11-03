@@ -39,7 +39,10 @@ test.describe('Cognitive shifts, keyboard only', () => {
   test('Other ways to read it', async ({ page }) => {
     const id = await open(page, 'cs_other_readings');
     await step(page, 'Your first reading');
-    await typeInto(page, /My first reading/, 'PRIVATE first reading');
+    await choose(page, page.getByRole('radio').first(), 4); // → "My own reading", after the 4 cards
+    await expect(page.getByRole('radio', { name: 'My own reading' })).toBeChecked();
+    await expectNoSeriousA11yIssues(page, 'own reading open');
+    await typeInto(page, /Write it in a few words/, 'PRIVATE first reading');
     await pressButton(page, 'Next');
 
     await step(page, 'How it feels now');
@@ -54,7 +57,8 @@ test.describe('Cognitive shifts, keyboard only', () => {
     await expect(page.getByText("Lens 2 of 3: A friend's view")).toBeFocused();
     await expectNoSeriousA11yIssues(page, 'lens 2');
     await pressButton(page, 'Nothing comes to mind');
-    await typeInto(page, 'Or write your own', 'PRIVATE lens reading');
+    await choose(page, page.getByRole('radio').first(), 4); // → "My own reading"
+    await typeInto(page, /Write it in a few words/, 'PRIVATE lens reading');
     await pressButton(page, 'Next');
 
     await step(page, 'Which readings fit?');
@@ -133,35 +137,31 @@ test.describe('Cognitive shifts, keyboard only', () => {
 
     await step(page, 'Your first reading');
     await choose(page, page.getByRole('radio').first(), 1); // the second reading
-    await expect(page.getByRole('radio', { name: "They're annoyed with me." })).toBeChecked();
+    await expect(page.getByRole('radio', { name: "They don't want to talk to me." })).toBeChecked();
     await rateByKeyboard(page, 'How sure are you of this reading?', 8);
     await pressButton(page, 'Next');
 
-    await step(page, 'How likely is each?');
-    await choose(page, page.getByRole('checkbox', { name: "They're busy and haven't seen it." }));
-    await choose(
-      page,
-      page.getByRole('checkbox', { name: "They're thinking about what to reply." }),
-    );
-    for (const [reading, n] of [
-      ["They're annoyed with me.", 3],
-      ["They're busy and haven't seen it.", 5],
-      ["They're thinking about what to reply.", 2],
-    ] as const) {
-      for (let i = 0; i < n; i++) await pressButton(page, `More points for: ${reading}`);
-    }
-    await expect(page.getByText('Points left: 0')).toBeVisible();
-    await expectNoSeriousA11yIssues(page, 'points shared');
+    await step(page, 'Could these explain it?');
+    await expect(page.getByRole('heading', { name: 'What happened' })).toBeVisible();
+    await choose(page, page.getByRole('checkbox', { name: "They've got a lot going on right now." }));
+    await choose(page, page.getByRole('checkbox', { name: 'They saw it at a bad moment and forgot.' }));
+    await pressButton(page, 'Done');
+    await expect(page.getByRole('status')).toContainText('What happened could fit 3 readings, including yours.');
+    await expectNoSeriousA11yIssues(page, 'what the facts could fit');
     await pressButton(page, 'Next');
 
-    await step(page, 'Is there a way to find out?');
-    await choose(page, page.getByRole('radio').first());
+    await step(page, 'Can you find out?');
+    await choose(page, page.getByRole('radio', { name: "I'll ask them" }));
+    await expect(page.getByRole('status')).toContainText('One way to ask without assuming your reading');
+    await expectNoSeriousA11yIssues(page, 'how to find out');
     await pressButton(page, 'Next');
 
     await step(page, 'How sure are you now?');
+    await expect(page.getByRole('heading', { name: 'Two questions to keep' })).toBeVisible();
     await rateByKeyboard(page, 'How sure are you of this reading?', 5);
     await pressButton(page, 'Finish');
     await expect(page.getByRole('heading', { name: 'Exercise complete' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Plan your first step' })).toBeVisible();
 
     await expect.poll(async () => (await savedSession(page, id)).status).toBe('completed');
     expect((await savedSession(page, id)).ratings).toEqual({

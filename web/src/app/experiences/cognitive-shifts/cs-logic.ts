@@ -46,14 +46,15 @@ export function changeOrder<T extends CausePosition>(causes: T[]): T[] {
   return [...causes.filter(changeable), ...causes.filter((c) => !changeable(c))];
 }
 
-export const POINTS = 10;
-
-/** CS3: points still to share out. */
-export function pointsLeft(points: Record<string, number>): number {
-  return POINTS - Object.values(points).reduce((sum, n) => sum + n, 0);
+/**
+ * CS3 step 3 note. It reports only the person's own judgements and what follows from them: how
+ * many readings, theirs included, the facts could fit. It never says they changed their mind.
+ */
+export function fitNote(othersTicked: number): { key: 'note_some' | 'note_none'; n: number } {
+  return othersTicked > 0 ? { key: 'note_some', n: othersTicked + 1 } : { key: 'note_none', n: 1 };
 }
 
-/** CS3: the share step is complete when all 10 points are placed over at least three readings. */
-export function shareComplete(points: Record<string, number>, readings: number): boolean {
-  return pointsLeft(points) === 0 && readings >= 3;
+/** CS3: a plan link is offered only for something the person can do: asking or checking. */
+export function offersPlan(choice: string | null): boolean {
+  return choice === 'ask' || choice === 'check';
 }

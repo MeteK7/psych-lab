@@ -1,0 +1,144 @@
+{
+  "id": "cs-not-enough",
+  "version": "3",
+  "safety": "These exercises are for everyday situations, like learning, work or friends. They aren't for painful experiences such as loss, abuse or health worries, or for times of crisis. If that's where you are, talk to someone you trust or a support line. You can stop at any time.",
+  "situation": {
+    "ask": "Pick a situation, or describe your own:",
+    "own_choice": "My own situation",
+    "own_label": "Describe it in a few words (only you see this; it isn't saved)",
+    "scenarios": [
+      {
+        "id": "teacher_note",
+        "text": "Your teacher writes ‘Come and see me after class’ on your assignment.",
+        "readings": [
+          { "id": "in_person", "text": "They'd rather explain feedback in person than in writing.", "kind": "them" },
+          { "id": "bad_grade", "text": "It's bad news about my grade.", "kind": "feared" },
+          { "id": "several", "text": "They're asking several students to come by.", "kind": "circumstances" },
+          { "id": "fix", "text": "There's something I need to fix before it's final.", "kind": "mild" },
+          { "id": "liked", "text": "They liked something and want to talk about it.", "kind": "positive" }
+        ]
+      },
+      {
+        "id": "no_reply",
+        "text": "A friend hasn't replied to your message for a day.",
+        "readings": [
+          { "id": "busy", "text": "They've got a lot going on right now.", "kind": "them" },
+          { "id": "dont_want", "text": "They don't want to talk to me.", "kind": "feared" },
+          { "id": "properly", "text": "They want to reply properly when they have time.", "kind": "positive" },
+          { "id": "bothered", "text": "Something I said bothered them a bit.", "kind": "mild" },
+          { "id": "forgot", "text": "They saw it at a bad moment and forgot.", "kind": "circumstances" }
+        ]
+      },
+      {
+        "id": "meeting_moved",
+        "text": "Your manager moves your weekly meeting without saying why.",
+        "readings": [
+          { "id": "slot", "text": "Something else had to go in that slot.", "kind": "circumstances" },
+          { "id": "bad_coming", "text": "Something bad is coming for me.", "kind": "feared" },
+          { "id": "attention", "text": "They want a time when they can give it proper attention.", "kind": "positive" },
+          { "id": "pressure", "text": "They're under pressure from above.", "kind": "them" },
+          { "id": "priority", "text": "My project isn't their priority this week.", "kind": "mild" }
+        ]
+      },
+      {
+        "id": "no_reactions",
+        "text": "In a group chat, your suggestion gets no reactions.",
+        "readings": [
+          { "id": "buried", "text": "It got buried and people haven't really read it.", "kind": "circumstances" },
+          { "id": "bad_idea", "text": "They think it's a bad idea but don't want to say so.", "kind": "feared" },
+          { "id": "waiting", "text": "Everyone's waiting for someone else to answer.", "kind": "them" },
+          { "id": "unclear", "text": "It wasn't clear what I was suggesting.", "kind": "mild" },
+          { "id": "agree", "text": "Some people agree but didn't think to react.", "kind": "positive" }
+        ]
+      },
+      {
+        "id": "essay_comment",
+        "text": "Your essay comes back with: ‘Interesting, but is this the right question?’",
+        "readings": [
+          { "id": "marking", "text": "They had a lot to mark, so the comment is short.", "kind": "circumstances" },
+          { "id": "all_wrong", "text": "The whole essay misses the point.", "kind": "feared" },
+          { "id": "challenge", "text": "They found it interesting enough to challenge.", "kind": "positive" },
+          { "id": "pushes", "text": "That's how this teacher pushes everyone.", "kind": "them" },
+          { "id": "sharpen", "text": "My question needs sharpening.", "kind": "mild" }
+        ]
+      },
+      {
+        "id": "no_hello",
+        "text": "A classmate walks past you without saying hello.",
+        "readings": [
+          { "id": "didnt_see", "text": "They didn't see me.", "kind": "circumstances" },
+          { "id": "dont_like", "text": "They don't like me.", "kind": "feared" },
+          { "id": "lost_thought", "text": "They were caught up in their own thoughts.", "kind": "them" },
+          { "id": "annoyed", "text": "They're a bit annoyed with me about something.", "kind": "mild" },
+          { "id": "awkward", "text": "They felt awkward and weren't sure whether to say hi.", "kind": "them" }
+        ]
+      }
+    ],
+    "own_readings": [
+      { "id": "about_them", "text": "It's about something going on with them.", "kind": "them" },
+      { "id": "feared", "text": "It means what I fear it means.", "kind": "feared" },
+      { "id": "circumstances", "text": "It's about the circumstances, not about me.", "kind": "circumstances" },
+      { "id": "small_fix", "text": "There's something small I could fix.", "kind": "mild" }
+    ]
+  },
+  "first": {
+    "ask": "What's your first thought about what it means? Pick the reading that's closest, or write your own:",
+    "own_choice": "My own reading",
+    "own_label": "Write it in a few words (only you see this; it isn't saved)",
+    "certainty": {
+      "label": "How sure are you of this reading?",
+      "min_label": "not at all",
+      "max_label": "completely"
+    }
+  },
+  "fit": {
+    "facts_label": "What happened",
+    "your_reading": "Your reading: “{reading}”",
+    "ask": "Could these also explain what happened? Tick any that could.",
+    "hint": "You're not choosing the right one. You're checking whether what happened, on its own, can tell them apart.",
+    "something_else": "Something I haven't thought of",
+    "own_prompt": "Is there a reason that's about them or the circumstances, not about you?",
+    "own_label": "Write it in a few words (only you see this; it isn't saved)",
+    "add": "Add",
+    "done": "Done",
+    "note_some": "What happened could fit {n} readings, including yours. On its own, it doesn't show which is right.",
+    "note_none": "You think only your reading fits what happened. If you know more than this moment, it may well be right. If you don't, the others may deserve a second look.",
+    "note_something": "You also left room for something you haven't thought of.",
+    "note_always": "These are possibilities, not information."
+  },
+  "find": {
+    "intro": "Thinking it through tells you what's possible, not what happened.",
+    "decide": "It's worth finding out if it matters to you, and finding out wouldn't cost more than it's worth, like time or awkwardness.",
+    "ask": "What will you do?",
+    "options": [
+      {
+        "id": "ask",
+        "label": "I'll ask them",
+        "follow": "One way to ask without assuming your reading: ‘I wasn't sure what you meant. Could you tell me?’"
+      },
+      { "id": "check", "label": "I'll check something myself" },
+      {
+        "id": "wait",
+        "label": "I'll wait. It'll probably become clear",
+        "follow": "If it's still on your mind later and nothing's changed, the other choices are still there."
+      },
+      {
+        "id": "leave",
+        "label": "I'll leave it. Finding out isn't possible or isn't worth it",
+        "follow": "Then the honest answer is: you don't know. That's a real answer, not a failure to work it out."
+      }
+    ]
+  },
+  "after": {
+    "reading": "Your first reading: “{reading}”",
+    "keep_heading": "Two questions to keep",
+    "keep": [
+      "Would what happened also fit another reading?",
+      "What would actually tell me, and is it worth finding out?"
+    ],
+    "plan_prompt": "Want to plan when you'll do it? There's a link after you finish.",
+    "plan_link": "Plan your first step"
+  },
+  "next_label": "Next",
+  "finish_label": "Finish"
+}

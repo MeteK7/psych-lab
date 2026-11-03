@@ -34,7 +34,8 @@ const MIN_CAUSES = 3;
         </button>
       }
       @case ('cs2_first') {
-        <app-card-pick [legend]="c.first.ask" [cards]="c.first.cards" [ownLabel]="c.first.own_label" [(value)]="pick" />
+        <app-card-pick [legend]="c.first.ask" [cards]="c.first.cards" [ownChoice]="c.first.own_choice"
+                       [ownLabel]="c.first.own_label" [(value)]="pick" />
         <button type="button" [disabled]="!pick()" (click)="submitFirst()">{{ c.next_label }}</button>
       }
       @case ('cs2_more') {
@@ -94,7 +95,8 @@ const MIN_CAUSES = 3;
         @if (shown().includes('heavy') && !full()) {
           <section class="add" aria-labelledby="cs2-add">
             <h3 id="cs2-add">{{ c.reflect.add_heading }}</h3>
-            <app-card-pick [legend]="c.more.intro" [cards]="unusedCards()" [ownLabel]="c.more.own_label" [(value)]="pick" />
+            <app-card-pick [legend]="c.more.intro" [cards]="unusedCards()" [ownChoice]="c.more.own_choice"
+                           [ownLabel]="c.more.own_label" [(value)]="pick" />
             @if (pick()) {
               @for (axis of c.map.axes; track axis.id) {
                 <label class="slider">
