@@ -32,7 +32,7 @@ The two gates can run at the same time. Neither depends on the other, except tha
 | Step | What happens | Time |
 |---|---|---|
 | 1. Briefing | You go through §8 with each reviewer, alone or together | 10 min |
-| 2. Walkthrough | Each reviewer completes CS1, CS2 and CS3 once in the app, with a made-up situation, in person or by screen-share video call (§3). You note any confusion they voice, but don't explain the texts | 15 min |
+| 2. Walkthrough | Each reviewer completes CS1, CS2 and CS3 once in the app, with a made-up situation, in person or by screen-share video call (§3). You note any confusion they voice, but don't explain the texts. After each exercise, ask: **"In your own words, what did this exercise teach you?"** and note the answer (form part E, question 6) | 20 min |
 | 3. Independent rating | Each reviewer fills in the form **alone**, without discussing it with the others | 45 min |
 | 4. Collect | You enter every rating into the results spreadsheet (§6). It flags the items that need consolidation | 30 min |
 | 5. Consolidation | **Only the items that failed or were flagged** (§5). For each one, the outcome is keep, rewrite or drop. Either way below | 30–45 min, or about a week by message |
@@ -59,7 +59,8 @@ The two gates can run at the same time. Neither depends on the other, except tha
   - the item is **dropped**.
 
   It's never resolved by discussion or by majority alone, including when the other two reviewers agree it doesn't apply. If more than one reviewer has that training, the veto applies to each.
-- **Scenario rule (CS3):** a scenario stays only if **at least two of three** reviewers rate its six readings as balanced. Otherwise its readings are rebalanced and go to round 2.
+- **Scenario rule (CS3, revised 2026-11-03 with `cs3-redesign-proposal.md` revision 2):** a scenario stays only if **at least two of three** reviewers judge its readings **distinct** (finding out could tell them apart), and at least two judge them **covering**: the feared reading, a milder one, at least two not about the person, and a positive reading only where realistic. Otherwise its readings are rewritten and go to round 2.
+- **Learning check:** if reviewers' answers to "what did this exercise teach you?" don't come close to CS3's two questions to keep, that's discussed in consolidation even if every item passed.
 - **Overall questions** (form part E):
   - Any "this pushes towards a positive reading" or "this suggests blame" answer is discussed in the meeting, even if every item passed.
   - If two or more reviewers raise the same overall concern, it's treated as a failed item.

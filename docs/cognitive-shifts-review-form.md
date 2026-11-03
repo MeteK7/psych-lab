@@ -75,73 +75,97 @@ Please also flag anything that touches on clinical topics, trauma, health or cri
 | Map: "Effort is one possible cause among many. It isn't the answer by default." | | | |
 
 ## D. CS3 · Not enough to go on
-For each scenario, rate the scenario itself and each reading. Also say whether the six readings, taken together, are **balanced**: not tilted towards negative or towards positive.
+For each scenario, rate the scenario itself and each reading. Then answer two questions about the scenario's readings as a set:
+- **Distinct?** Could finding out tell these readings apart, or do two of them say much the same thing? If so, which pair?
+- **Covering?** Does the set include the feared reading, a milder one about you, and at least two that aren't about you (the other person, or the circumstances)? Is a positive reading there only where it's realistic?
+
+In step 3 the person ticks which other readings **could also explain what happened**, with the facts of the moment ("What happened: …") shown next to the question. Unlike the board in CS1, this isn't about which reading fits best: it checks whether the facts can tell the readings apart. Part E asks whether it reads that way.
 
 | Scenario and readings | Plausibility (1–5) | Invalidating? (why) | Rewrite |
 |---|---|---|---|
 | **1. "Your teacher writes ‘Come and see me after class’ on your assignment."** | | | |
-| "I've done something wrong." | | | |
+| "They'd rather explain feedback in person than in writing." | | | |
 | "It's bad news about my grade." | | | |
-| "They want to explain something." | | | |
-| "They're checking in with several people." | | | |
-| "They want to give me feedback in person." | | | |
-| "They liked something in it." | | | |
-| Balanced? ☐ Yes ☐ No (which way) | | | |
+| "They're asking several students to come by." | | | |
+| "There's something I need to fix before it's final." | | | |
+| "They liked something and want to talk about it." | | | |
+| Distinct? ☐ Yes ☐ No (which pair) | | | |
+| Covering? ☐ Yes ☐ No (what's missing) | | | |
 | **2. "A friend hasn't replied to your message for a day."** | | | |
-| "They're annoyed with me." | | | |
+| "They've got a lot going on right now." | | | |
 | "They don't want to talk to me." | | | |
-| "They're busy and haven't seen it." | | | |
-| "They saw it and forgot to answer." | | | |
-| "They're thinking about what to reply." | | | |
-| "They're saving it to answer properly." | | | |
-| Balanced? ☐ Yes ☐ No (which way) | | | |
+| "They want to reply properly when they have time." | | | |
+| "Something I said bothered them a bit." | | | |
+| "They saw it at a bad moment and forgot." | | | |
+| Distinct? ☐ Yes ☐ No (which pair) | | | |
+| Covering? ☐ Yes ☐ No (what's missing) | | | |
 | **3. "Your manager moves your weekly meeting without saying why."** | | | |
-| "They're unhappy with my work." | | | |
-| "Something bad is coming." | | | |
-| "Their calendar changed." | | | |
-| "They're rearranging lots of meetings." | | | |
-| "They want more time for my topic." | | | |
-| "They're making room for something useful." | | | |
-| Balanced? ☐ Yes ☐ No (which way) | | | |
+| "Something else had to go in that slot." | | | |
+| "Something bad is coming for me." | | | |
+| "They want a time when they can give it proper attention." | | | |
+| "They're under pressure from above." | | | |
+| "My project isn't their priority this week." | | | |
+| Distinct? ☐ Yes ☐ No (which pair) | | | |
+| Covering? ☐ Yes ☐ No (what's missing) | | | |
 | **4. "In a group chat, your suggestion gets no reactions."** | | | |
-| "They think it's a bad idea." | | | |
-| "They're ignoring me." | | | |
-| "People haven't read it yet." | | | |
+| "It got buried and people haven't really read it." | | | |
+| "They think it's a bad idea but don't want to say so." | | | |
 | "Everyone's waiting for someone else to answer." | | | |
-| "They're thinking it over." | | | |
-| "They'll pick it up in the meeting." | | | |
-| Balanced? ☐ Yes ☐ No (which way) | | | |
+| "It wasn't clear what I was suggesting." | | | |
+| "Some people agree but didn't think to react." | | | |
+| Distinct? ☐ Yes ☐ No (which pair) | | | |
+| Covering? ☐ Yes ☐ No (what's missing) | | | |
 | **5. "Your essay comes back with: ‘Interesting, but is this the right question?’"** | | | |
-| "The whole essay is wrong." | | | |
-| "They think I missed the point." | | | |
-| "They want me to sharpen the question." | | | |
-| "It's a standard prompt to think further." | | | |
-| "They found it interesting enough to push me." | | | |
-| "They see potential in it." | | | |
-| Balanced? ☐ Yes ☐ No (which way) | | | |
+| "They had a lot to mark, so the comment is short." | | | |
+| "The whole essay misses the point." | | | |
+| "They found it interesting enough to challenge." | | | |
+| "That's how this teacher pushes everyone." | | | |
+| "My question needs sharpening." | | | |
+| Distinct? ☐ Yes ☐ No (which pair) | | | |
+| Covering? ☐ Yes ☐ No (what's missing) | | | |
 | **6. "A classmate walks past you without saying hello."** | | | |
-| "They don't like me." | | | |
-| "They're upset with me." | | | |
 | "They didn't see me." | | | |
-| "They were lost in thought." | | | |
-| "They were in a hurry to get somewhere." | | | |
-| "They meant to say hi later." | | | |
-| Balanced? ☐ Yes ☐ No (which way) | | | |
-| Step 4: "Guessing what someone meant is often less reliable than finding out." | | | |
-| Step 4 example: "I wasn't sure what you meant, could you tell me?" | | | |
-| Close: "Holding more than one reading open isn't indecision. It's an accurate picture of what you know." | | | |
+| "They don't like me." | | | |
+| "They were caught up in their own thoughts." | | | |
+| "They're a bit annoyed with me about something." | | | |
+| "They felt awkward and weren't sure whether to say hi." | | | |
+| Distinct? ☐ Yes ☐ No (which pair) | | | |
+| Covering? ☐ Yes ☐ No (what's missing) | | | |
+| **General readings for an own situation** | | | |
+| "It's about something going on with them." | | | |
+| "It means what I fear it means." | | | |
+| "It's about the circumstances, not about me." | | | |
+| "There's something small I could fix." | | | |
+| Step 3 question: "Could these also explain what happened? Tick any that could." | | | |
+| Step 3 hint: "You're not choosing the right one. You're checking whether what happened, on its own, can tell them apart." | | | |
+| Step 3 own reading: "Is there a reason that's about them or the circumstances, not about you?" | | | |
+| Step 3 note when other readings are ticked: "What happened could fit {n} readings, including yours. On its own, it doesn't show which is right." | | | |
+| Step 3 note when none are ticked: "You think only your reading fits what happened. If you know more than this moment, it may well be right. If you don't, the others may deserve a second look." | | | |
+| Step 3 note when "Something I haven't thought of" is ticked: "You also left room for something you haven't thought of." | | | |
+| Step 3 note, always: "These are possibilities, not information." | | | |
+| Step 4 opening: "Thinking it through tells you what's possible, not what happened." | | | |
+| Step 4 deciding: "It's worth finding out if it matters to you, and finding out wouldn't cost more than it's worth, like time or awkwardness." | | | |
+| Step 4 choice: "I'll ask them" · then: "One way to ask without assuming your reading: ‘I wasn't sure what you meant. Could you tell me?’" | | | |
+| Step 4 choice: "I'll check something myself" | | | |
+| Step 4 choice: "I'll wait. It'll probably become clear" · then: "If it's still on your mind later and nothing's changed, the other choices are still there." | | | |
+| Step 4 choice: "I'll leave it. Finding out isn't possible or isn't worth it" · then: "Then the honest answer is: you don't know. That's a real answer, not a failure to work it out." | | | |
+| Step 5, two questions to keep: "Would what happened also fit another reading?" · "What would actually tell me, and is it worth finding out?" | | | |
+| Step 5 after "ask" or "check": "Want to plan when you'll do it? There's a link after you finish." | | | |
 
 ## E. Overall
 1. Does any exercise, as a whole, push towards a positive reading? Where?
 2. Does any exercise suggest the person is to blame for their difficulty? Where?
 3. Is there anything an ordinary user might find upsetting or confusing?
 4. Anything missing, such as an everyday situation that should be a scenario?
+5. CS3 step 3: does it read as checking whether the facts can tell readings apart, rather than choosing the reading that fits (as in CS1)? ☐ Yes ☐ No (why)
+6. After doing each exercise: in your own words, what did it teach you? CS1: ______ · CS2: ______ · CS3: ______
 
 ## For the session lead: decision rule
 Full procedure: `cognitive-shifts-review-plan.md` §4–5. Ratings go into `cognitive-shifts-review-results.xlsx`.
 - **A card or scenario stays** if its mean plausibility across reviewers is **≥ 4** and no reviewer's invalidation concern remains unresolved after consolidation. A concern is resolved when at least two of the three reviewers agree it doesn't apply, or when the item is rewritten and passes round 2.
 - **Safety veto:** an invalidation or safety concern raised by a reviewer with psychology or counselling training is resolved **only** if the item is rewritten and re-rated in round 2, or dropped. Discussion or a majority alone never resolves it.
-- **A scenario stays** only if at least two of three reviewers rate its readings as balanced.
+- **A CS3 scenario stays** only if at least two of three reviewers judge its readings **distinct** and at least two judge them **covering** (part D). Otherwise its readings are rewritten and go to round 2.
+- **Learning check (part E, question 6):** if reviewers can't name something close to CS3's two questions to keep, the exercise isn't teaching what it should; this is discussed in consolidation even if every item passed.
 - **Failing items** are rewritten and re-rated in round 2, or dropped. An item that fails round 2 is dropped.
 - **Consolidation** happens by video call, in person, or by message: each reviewer gets the flagged items with proposed decisions and replies agree, disagree or rewrite.
 - **Recording:** the outcome is entered in `content-review.md` (review record) with date, reviewer codes and changes.
