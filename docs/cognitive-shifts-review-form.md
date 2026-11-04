@@ -51,6 +51,10 @@ Please also flag anything that touches on clinical topics, trauma, health or cri
 | Lens 3: "What I learned from it." | | | |
 | Lens 3: "Whether I tried again." | | | |
 | Lens 3: "It may still matter, and that's real." | | | |
+| Step 5 opening: "In Step 1, this was your first reading: ‘{reading}’" · "You've now looked at other ways to see it and sorted which ones fit." | | | |
+| Step 5 ratings of the same reading: "Thinking back to that first reading: how much do you believe it now?" · "And how upsetting does it feel now?" | | | |
+| Step 5, no expected direction: "There's no right answer. These numbers don't have to go down, and they don't have to move together. Believing the reading just as much, or still finding it upsetting, is also valid." | | | |
+| Step 5 after rating: "In Step 2 you rated your belief in it {before}. Now you rate it {now}." · "In Step 2 you rated how upsetting it felt {before}. Now you rate it {now}." · "This shows whether how you see it and how it feels changed during the exercise. It doesn't show whether the reading is right." | | | |
 | Close for **self-judgement** first readings and own readings placed in "Fits": "It still feels like it fits. You can keep it alongside the other readings that fit." **Please check:** does it acknowledge the feeling without agreeing that the self-judgement is true? | | | |
 | Close when **nothing** was placed in "Fits": "None of the readings fit right now. That's an honest answer too." | | | |
 | Close for **situation** first readings placed in "Fits": "Your first reading still fits. That's a real outcome: sometimes the first reading is right." **Please check:** could this ever read as confirming a harsh judgement of oneself? | | | |
