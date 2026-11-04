@@ -44,7 +44,9 @@ Please also flag anything that touches on clinical topics, trauma, health or cri
 | Lens 2: "One time doesn't decide it." | | | |
 | Lens 2: "You're being harder on yourself than on anyone else." | | | |
 | Lens 2: "Anyone could struggle with this." | | | |
-| Lens 2 supportive line (not a reading, not on the board): "It makes sense that this bothers you. That isn't something you need to talk yourself out of." | | | |
+| Lens 2 opening (above the question): "Let's switch the perspective for a moment." · "Imagine a friend telling you they're experiencing the same everyday situation you described in Step 1 and interpreting it in exactly the same way you do." | | | |
+| Lens 2 suggested words to the friend (not a reading, not on the board): "You might start by telling them:" · "It makes sense that this bothers you. That isn't something you need to talk yourself out of." | | | |
+| Lens 2 question: "What else would you say to them?" | | | |
 | Lens 3: "Most of it will have faded." | | | |
 | Lens 3: "What I learned from it." | | | |
 | Lens 3: "Whether I tried again." | | | |
