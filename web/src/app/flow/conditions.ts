@@ -44,7 +44,7 @@ export const STEP_NAMES: Record<StepId, string> = {
   cs1_feel_before: 'How it feels now',
   cs1_lenses: 'Other ways to see it',
   cs1_sort: 'Which readings fit?',
-  cs1_feel_after: 'How it feels now',
+  cs1_feel_after: 'Your first reading, looked at again',
   cs1_close: "What you're keeping",
   cs2_setback: 'The setback',
   cs2_first: 'Why do you think it happened?',

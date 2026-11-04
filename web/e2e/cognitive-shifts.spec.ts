@@ -69,9 +69,14 @@ test.describe('Cognitive shifts, keyboard only', () => {
     await expectNoSeriousA11yIssues(page, 'board filled');
     await pressButton(page, 'Next');
 
-    await step(page, 'How it feels now');
-    await rateByKeyboard(page, 'How much do you believe this reading right now?', 4);
-    await rateByKeyboard(page, 'How upsetting does it feel right now?', 3);
+    await step(page, 'Your first reading, looked at again');
+    await expect(page.getByText('In Step 1, this was your first reading: ‘PRIVATE first reading’')).toBeVisible();
+    await expect(page.getByRole('status')).toHaveCount(0); // no comparison before rating
+    await rateByKeyboard(page, 'Thinking back to that first reading: how much do you believe it now?', 4);
+    await rateByKeyboard(page, 'And how upsetting does it feel now?', 3);
+    await expect(page.getByRole('status')).toContainText('In Step 2 you rated your belief in it 7. Now you rate it 4.');
+    await expect(page.getByRole('status')).toContainText('In Step 2 you rated how upsetting it felt 6. Now you rate it 3.');
+    await expectNoSeriousA11yIssues(page, 'first reading looked at again');
     await pressButton(page, 'Next');
 
     await step(page, "What you're keeping");

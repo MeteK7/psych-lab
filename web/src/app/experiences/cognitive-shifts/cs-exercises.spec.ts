@@ -148,7 +148,33 @@ describe('Cognitive shifts exercises', () => {
     await check(run, root(run).querySelector('#place-later-fits'));
     await press(run, 'Next');
 
-    await rate(run, 4);
+    expect(heading(run)).toBe('Step 5 of 6: Your first reading, looked at again');
+    const reassess = root(run).textContent!;
+    expect(reassess).toContain('In Step 1, this was your first reading: ‘PRIVATE first reading’');
+    expect(reassess).toContain("You've now looked at other ways to see it and sorted which ones fit.");
+    expect(reassess).toContain(
+      "There's no right answer. These numbers don't have to go down, and they don't have to move together. Believing the reading just as much, or still finding it upsetting, is also valid.",
+    );
+    const scales = Array.from(root(run).querySelectorAll('app-rating-scale fieldset'));
+    expect(scales.map((s) => s.querySelector('legend')?.textContent)).toEqual([
+      'Thinking back to that first reading: how much do you believe it now?',
+      'And how upsetting does it feel now?',
+    ]);
+    const rateOne = (scale: number, value: number) =>
+      check(run, scales[scale].querySelector<HTMLInputElement>(`input[value="${value}"]`));
+    // The comparison waits for both ratings, and uses the same words for any direction.
+    const compared = () => root(run).querySelector('[role="status"]')?.textContent;
+    expect(compared()).toBeUndefined();
+    await rateOne(0, 4);
+    expect(compared()).toBeUndefined();
+    expect(button(run, 'Next').disabled).toBe(true);
+    await rateOne(1, 9);
+    expect(compared()).toContain('In Step 2 you rated your belief in it 7. Now you rate it 4.');
+    expect(compared()).toContain('In Step 2 you rated how upsetting it felt 7. Now you rate it 9.');
+    expect(compared()).toContain("It doesn't show whether the reading is right.");
+    await rateOne(1, 7);
+    expect(compared()).toContain('In Step 2 you rated how upsetting it felt 7. Now you rate it 7.');
+    await rateOne(1, 4);
     await press(run, 'Next');
     expect(heading(run)).toBe("Step 6 of 6: What you're keeping");
     const close = root(run).textContent!;
@@ -167,7 +193,7 @@ describe('Cognitive shifts exercises', () => {
     const saved = last(run);
     expect(saved.status).toBe('completed');
     expect(saved.mode).toBe('try');
-    expect(saved.content_versions).toEqual({ 'cs-other-readings': '4' });
+    expect(saved.content_versions).toEqual({ 'cs-other-readings': '5' });
     expect(saved.steps?.map((s) => s.step)).toEqual([
       'cs1_first', 'cs1_feel_before', 'cs1_lenses', 'cs1_sort', 'cs1_feel_after', 'cs1_close',
     ]);

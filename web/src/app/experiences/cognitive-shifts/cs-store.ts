@@ -22,6 +22,9 @@ export class CsStore {
   // CS1 · Other ways to read it
   readonly firstReading = signal<(Pick & { kind: 'self' | 'situation' | 'own' }) | null>(null);
   readonly control = signal<'yes' | 'partly' | 'no' | null>(null);
+  /** The step 2 ratings, shown again beside the step 5 ratings of the same reading. */
+  readonly beliefBefore = signal<number | null>(null);
+  readonly upsetBefore = signal<number | null>(null);
   /** One reading per lens (null = "Nothing comes to mind"). */
   readonly lensReadings = signal<(Pick | null)[]>([]);
   /** Where each reading sits on the fit board: 'first' or a lens index. */

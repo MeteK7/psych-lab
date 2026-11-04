@@ -1,0 +1,126 @@
+{
+  "id": "cs-other-readings",
+  "version": "5",
+  "safety": "These exercises are for everyday situations, like learning, work or friends. They aren't for painful experiences such as loss, abuse or health worries, or for times of crisis. If that's where you are, talk to someone you trust or a support line. You can stop at any time.",
+  "first": {
+    "intro": "Think of an everyday situation you keep seeing one way.",
+    "ask": "What does it seem to say? Pick the reading that's closest, or write your own:",
+    "cards": [
+      { "id": "not_good_enough", "text": "It means I'm not good enough.", "kind": "self" },
+      { "id": "always", "text": "It'll always be like this.", "kind": "situation" },
+      { "id": "think_less", "text": "Everyone will think less of me.", "kind": "self" },
+      { "id": "ruined", "text": "I've ruined it.", "kind": "self" }
+    ],
+    "own_choice": "My own reading",
+    "own_label": "Write it in a few words (only you see this; it isn't saved)"
+  },
+  "feel": {
+    "reading": "Your first reading: “{reading}”",
+    "belief": {
+      "label": "How much do you believe this reading right now?",
+      "min_label": "not at all",
+      "max_label": "completely"
+    },
+    "upset": {
+      "label": "How upsetting does it feel right now?",
+      "min_label": "not at all",
+      "max_label": "extremely"
+    },
+    "control": {
+      "question": "Can you do something about the situation itself?",
+      "options": [
+        { "id": "yes", "label": "Yes" },
+        { "id": "partly", "label": "Partly" },
+        { "id": "no", "label": "No" }
+      ]
+    }
+  },
+  "after": {
+    "reading": "In Step 1, this was your first reading: ‘{reading}’",
+    "checked": "You've now looked at other ways to see it and sorted which ones fit.",
+    "belief": {
+      "label": "Thinking back to that first reading: how much do you believe it now?",
+      "min_label": "not at all",
+      "max_label": "completely"
+    },
+    "upset": {
+      "label": "And how upsetting does it feel now?",
+      "min_label": "not at all",
+      "max_label": "extremely"
+    },
+    "no_direction": "There's no right answer. These numbers don't have to go down, and they don't have to move together. Believing the reading just as much, or still finding it upsetting, is also valid.",
+    "compared_belief": "In Step 2 you rated your belief in it {before}. Now you rate it {now}.",
+    "compared_upset": "In Step 2 you rated how upsetting it felt {before}. Now you rate it {now}.",
+    "compared_means": "This shows whether how you see it and how it feels changed during the exercise. It doesn't show whether the reading is right."
+  },
+  "lenses": {
+    "counter": "Lens {n} of {total}: {title}",
+    "own_choice": "My own reading",
+    "own_label": "Write it in a few words (only you see this; it isn't saved)",
+    "nothing": "Nothing comes to mind",
+    "next_lens": "Next lens",
+    "items": [
+      {
+        "id": "explain",
+        "title": "Other explanations",
+        "prompt": "What else could explain what happened?",
+        "cards": [
+          { "id": "harder", "text": "It was harder than it looked." },
+          { "id": "not_what_needed", "text": "I didn't have what I needed this time." },
+          { "id": "other_things", "text": "Other things were going on." },
+          { "id": "one_moment", "text": "It's one moment, not the whole picture." }
+        ]
+      },
+      {
+        "id": "friend",
+        "title": "A friend's view",
+        "lead": [
+          "Let's switch the perspective for a moment.",
+          "Imagine a friend telling you they're experiencing the same everyday situation you described in Step 1 and interpreting it in exactly the same way you do.",
+          "You might start by telling them:",
+          "“It makes sense that this bothers you. That isn't something you need to talk yourself out of.”"
+        ],
+        "prompt": "What else would you say to them?",
+        "cards": [
+          { "id": "whole_story", "text": "That doesn't sound like the whole story." },
+          { "id": "one_time", "text": "One time doesn't decide it." },
+          { "id": "harder_on_self", "text": "You're being harder on yourself than on anyone else." },
+          { "id": "anyone_struggle", "text": "Anyone could struggle with this." }
+        ]
+      },
+      {
+        "id": "later",
+        "title": "Later on",
+        "prompt": "In a month, what will probably matter about this?",
+        "cards": [
+          { "id": "faded", "text": "Most of it will have faded." },
+          { "id": "learned", "text": "What I learned from it." },
+          { "id": "tried_again", "text": "Whether I tried again." },
+          { "id": "still_matters", "text": "It may still matter, and that's real." }
+        ]
+      }
+    ]
+  },
+  "sort": {
+    "intro": "Place each reading where it fits best. More than one can fit, and your first reading can stay where it is.",
+    "first_tag": "Your first reading",
+    "place_label": "Where does this reading fit?",
+    "columns": [
+      { "id": "fits", "label": "Fits" },
+      { "id": "partly", "label": "Partly fits" },
+      { "id": "not", "label": "Doesn't fit" }
+    ],
+    "unplaced": "Not placed yet",
+    "none_fit": "None of these fit"
+  },
+  "close": {
+    "kept": "Readings that fit:",
+    "none_kept": "None of the readings fit right now. That's an honest answer too.",
+    "first_self": "It still feels like it fits. You can keep it alongside the other readings that fit.",
+    "first_situation": "Your first reading still fits. That's a real outcome: sometimes the first reading is right.",
+    "control": "You said you can do something about this. Changing how you see it isn't the goal then; planning a step might help more.",
+    "plan_link": "Plan your first step"
+  },
+  "next_label": "Next",
+  "finish_label": "Finish"
+}
