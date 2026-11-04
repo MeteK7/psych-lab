@@ -118,12 +118,24 @@ describe('Cognitive shifts exercises', () => {
 
     expect(heading(run)).toBe('Step 3 of 6: Other ways to see it');
     expect(root(run).textContent).toContain('Lens 1 of 3: Other explanations');
+    expect(root(run).querySelector('.lead')).toBeNull();
     await check(run, root(run).querySelector('app-card-pick input[type="radio"]'));
     await press(run, 'Next lens');
     expect(root(run).textContent).toContain("Lens 2 of 3: A friend's view");
-    expect(root(run).textContent).toContain('It makes sense that this bothers you.'); // a line, not a card
-    expect(root(run).querySelectorAll('app-card-pick input[type="radio"]')).toHaveLength(5); // 4 cards and "my own"
+    // The friend's perspective is set up before the question, so it can't read as feedback on an answer.
+    const lead = Array.from(root(run).querySelectorAll('.lead'));
+    expect(lead.map((p) => p.textContent)).toEqual([
+      "Let's switch the perspective for a moment.",
+      "Imagine a friend telling you they're experiencing the same everyday situation you described in Step 1 and interpreting it in exactly the same way you do.",
+      'You might start by telling them:',
+      "“It makes sense that this bothers you. That isn't something you need to talk yourself out of.”",
+    ]);
+    const pickArea = root(run).querySelector('app-card-pick')!;
+    expect(lead.every((p) => p.compareDocumentPosition(pickArea) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+    expect(pickArea.querySelector('legend')?.textContent).toBe('What else would you say to them?');
+    expect(pickArea.querySelectorAll('input[type="radio"]')).toHaveLength(5); // 4 cards and "my own"
     await press(run, 'Nothing comes to mind');
+    expect(root(run).querySelector('.lead')).toBeNull();
     expect(root(run).querySelector('app-card-pick .own')).toBeNull(); // a new lens starts closed
     await check(run, root(run).querySelector('app-card-pick input[value="own"]'));
     await type(run, root(run).querySelector<HTMLInputElement>('.own input')!, 'PRIVATE lens reading');
@@ -155,7 +167,7 @@ describe('Cognitive shifts exercises', () => {
     const saved = last(run);
     expect(saved.status).toBe('completed');
     expect(saved.mode).toBe('try');
-    expect(saved.content_versions).toEqual({ 'cs-other-readings': '3' });
+    expect(saved.content_versions).toEqual({ 'cs-other-readings': '4' });
     expect(saved.steps?.map((s) => s.step)).toEqual([
       'cs1_first', 'cs1_feel_before', 'cs1_lenses', 'cs1_sort', 'cs1_feel_after', 'cs1_close',
     ]);

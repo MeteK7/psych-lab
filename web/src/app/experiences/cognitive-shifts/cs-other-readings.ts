@@ -65,11 +65,11 @@ interface BoardCard {
         <h3 class="lens" tabindex="-1" #lensHeading>
           {{ say(c.lenses.counter, { n: lensIndex() + 1, total: c.lenses.items.length, title: lens().title }) }}
         </h3>
+        @for (line of lens().lead; track line) {
+          <p class="lead">{{ line }}</p>
+        }
         <app-card-pick [legend]="lens().prompt" [cards]="lens().cards" [ownChoice]="c.lenses.own_choice"
                        [ownLabel]="c.lenses.own_label" [(value)]="pick" />
-        @if (lens().support; as support) {
-          <p class="support">{{ support }}</p>
-        }
         <div class="actions">
           <button type="button" [disabled]="!pick()" (click)="nextLens(pick())">
             {{ lensIndex() + 1 < c.lenses.items.length ? c.lenses.next_lens : c.next_label }}
@@ -159,7 +159,6 @@ interface BoardCard {
   styles: `
     .safety { border-left: 4px solid var(--accent); padding-left: 0.75rem; }
     .quote { font-size: 1.1rem; }
-    .support { color: var(--muted); }
     .choice { border: 0; padding: 0; margin: 0 0 1.25rem; }
     .choice legend { font-weight: 600; margin-bottom: 0.5rem; }
     .inline { display: inline-flex; gap: 0.35rem; align-items: center; margin-right: 1rem; }

@@ -26,12 +26,13 @@ import scienceStateResetJson from './science/state-reset.v1.json';
 // which the experiment exercises' explanations use and which doesn't change.
 // cs-other-readings v2: step 1 asks to pick a reading above the cards, and to write your own
 // above the field. v3 (all three): "write my own" is an option among the cards that opens the
-// text field, as in CS3's situation step.
+// text field, as in CS3's situation step. cs-other-readings v4: Lens 2 sets up the friend's
+// perspective above the question, instead of a fixed line below the options.
 // cs-not-enough v3 (cs3-redesign-proposal.md, revision 2): readings by kind; step 3 checks which
 // readings the facts could also fit (no points); one "Can you find out?" step; two questions to keep.
 // v4: step 5 reassesses the same first reading, says no direction is expected, and shows both ratings.
 import csNotEnoughJson from './cs-not-enough.v4.json';
-import csOtherReadingsJson from './cs-other-readings.v3.json';
+import csOtherReadingsJson from './cs-other-readings.v4.json';
 import csWhyItHappenedJson from './cs-why-it-happened.v2.json';
 import scienceCsNotEnoughJson from './science/cs-not-enough.v1.json';
 import scienceCsOtherReadingsJson from './science/cs-other-readings.v1.json';
@@ -272,7 +273,8 @@ export interface CsOtherReadingsContent extends Versioned {
     own_label: string;
     nothing: string;
     next_lens: string;
-    items: { id: string; title: string; prompt: string; support?: string; cards: CsCard[] }[];
+    /** lead: paragraphs that set up the lens, shown above its question. */
+    items: { id: string; title: string; lead?: string[]; prompt: string; cards: CsCard[] }[];
   };
   sort: {
     intro: string;
