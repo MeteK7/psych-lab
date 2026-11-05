@@ -203,6 +203,28 @@ test.describe('Cognitive shifts area', () => {
     await expectNoSeriousA11yIssues(page, 'explanation');
   });
 
+  test('shows the scale labels as a key right beside the scale', async ({ page }) => {
+    await open(page, 'cs_not_enough_to_go_on');
+    await choose(page, page.getByRole('radio').first());
+    await pressButton(page, 'Next');
+
+    const scale = page.locator('app-rating-scale');
+    const box = async (locator: ReturnType<Page['locator']>) => (await locator.boundingBox())!;
+    const options = await box(scale.locator('.options'));
+    const key = await box(scale.locator('.anchors'));
+    const min = await box(scale.getByText('0 = not at all'));
+    const max = await box(scale.getByText('10 = completely'));
+
+    const middle = (b: { y: number; height: number }) => b.y + b.height / 2;
+    expect(Math.abs(middle(key) - middle(options))).toBeLessThanOrEqual(2);
+    const gap = key.x - (options.x + options.width);
+    expect(gap).toBeGreaterThanOrEqual(16);
+    expect(gap).toBeLessThanOrEqual(32);
+    expect(min.y).toBeLessThan(max.y);
+    const radios = scale.getByRole('radio');
+    expect((await box(radios.first())).y).toBe((await box(radios.last())).y); // one line
+  });
+
   test('fits a phone screen without sideways scrolling', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 800 });
     for (const url of [
