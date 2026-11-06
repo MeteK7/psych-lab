@@ -184,3 +184,36 @@ def test_development_only_exercises_are_refused_in_production(
         assert client.put(f"/api/sessions/{uuid.uuid4()}", json=released).status_code == 201
     finally:
         n1_settings.app_env = "development"
+
+
+# ---------- MCII ----------
+
+
+def test_mcii_is_saved_in_try_mode(client: TestClient) -> None:
+    # An explicit save: the migration comparison may not notice a missing check-constraint value.
+    body = session_body(mode="try", condition="mcii", content_versions={"mcii": "1"})
+    response = client.put(f"/api/sessions/{uuid.uuid4()}", json=body)
+    assert response.status_code == 201
+    assert response.json()["condition"] == "mcii"
+
+
+@pytest.mark.parametrize("mode", ["self_use", "dev"])
+def test_mcii_never_runs_in_the_experiment(client: TestClient, mode: str) -> None:
+    body = session_body(mode=mode, condition="mcii")
+    response = client.put(f"/api/sessions/{uuid.uuid4()}", json=body)
+    assert response.status_code == 422
+    assert "only in Try it" in response.text
+
+
+def test_mcii_never_has_a_reveal(client: TestClient) -> None:
+    body = session_body(mode="try", condition="mcii", n1_reveal_id=str(uuid.uuid4()))
+    assert client.put(f"/api/sessions/{uuid.uuid4()}", json=body).status_code == 422
+
+
+def test_mcii_is_refused_in_production_until_released(client: TestClient, n1_settings: Any) -> None:
+    body = session_body(mode="try", condition="mcii", content_versions={})
+    n1_settings.app_env = "production"
+    try:
+        assert client.put(f"/api/sessions/{uuid.uuid4()}", json=body).status_code == 403
+    finally:
+        n1_settings.app_env = "development"

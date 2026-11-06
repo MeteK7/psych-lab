@@ -37,6 +37,8 @@ EXERCISES = CONDITIONS + (
     "cs_other_readings",
     "cs_why_it_happened",
     "cs_not_enough_to_go_on",
+    # MCII (docs/mcii-design.md): never part of the experiment.
+    "mcii",
 )
 STATUSES = ("in_progress", "completed", "aborted")
 
