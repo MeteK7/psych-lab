@@ -1,0 +1,130 @@
+{
+  "id": "mcii",
+  "version": "2",
+  "wish": {
+    "safety": "This exercise is for everyday wishes, like learning, work, friends or a habit. It isn't for painful experiences such as loss, abuse or health worries, or for times of crisis. If that's where you are, talk to someone you trust or a support line. It also isn't for wishes about changing another person, or for big changes to eating or your body. You can stop at any time.",
+    "ask": "Think of something you'd really like to happen in the next four weeks. It should matter to you and be a challenge, but be possible.",
+    "field_label": "My wish, in a few words (only you see this; it isn't saved)",
+    "example": "For example: finish the first draft of my essay.",
+    "category_ask": "What's it about?",
+    "categories": [
+      { "id": "learning", "label": "Learning" },
+      { "id": "work", "label": "Work" },
+      { "id": "people", "label": "Friends or family" },
+      { "id": "habit", "label": "A habit or routine" },
+      { "id": "other", "label": "Something else" }
+    ],
+    "matter": {
+      "label": "How much does this matter to you?",
+      "min_label": "not at all",
+      "max_label": "very much"
+    },
+    "likely": {
+      "label": "How likely do you think it is that your wish will come true?",
+      "min_label": "not at all likely",
+      "max_label": "very likely"
+    }
+  },
+  "outcome": {
+    "your_wish": "Your wish: “{wish}”",
+    "ask": "What would be the best thing about this wish coming true? Name the one that matters most to you.",
+    "field_label": "The best part, in a few words (only you see this; it isn't saved)",
+    "picture": "Now picture it. Imagine it happening, as clearly as you can. Take as long as you like."
+  },
+  "obstacle": {
+    "best_part": "The best part: “{outcome}”",
+    "ask": "Things can get in the way. What in you is most likely to get in the way of this? It might be a habit, a feeling or a thought.",
+    "cards": [
+      { "id": "tired", "text": "I put it off when I'm tired.", "if_text": "I'm tired and want to put it off" },
+      { "id": "phone", "text": "I get distracted by my phone.", "if_text": "I reach for my phone" },
+      { "id": "hard", "text": "I avoid it when it feels hard.", "if_text": "it starts to feel hard" },
+      { "id": "worry", "text": "I worry about how it will go.", "if_text": "I start to worry about how it will go" },
+      { "id": "yes_first", "text": "I say yes to other things first.", "if_text": "someone asks me to do something else first" }
+    ],
+    "own_choice": "My own",
+    "own_label": "What gets in the way, in a few words (only you see this; it isn't saved)",
+    "outside_choice": "It's mostly something outside me",
+    "outside_label": "What is it, in a few words (only you see this; it isn't saved)",
+    "picture": "Now picture the moment it happens. Where are you? What's going on? Take as long as you like."
+  },
+  "decide": {
+    "your_wish": "Your wish: “{wish}”",
+    "lead": "Here's what you want, and what's in the way.",
+    "best_part": "The best part",
+    "in_the_way": "What's in the way",
+    "outside_note": "You said this is mostly outside you. A plan can only cover the part you can do something about.",
+    "likely": {
+      "label": "Now that you've looked at both, how likely do you think it is that your wish will come true?",
+      "min_label": "not at all likely",
+      "max_label": "very likely"
+    },
+    "compared": "Earlier you said {before}, and now you say {now}. No direction is expected. This shows how it looks to you right now, not whether your wish will come true.",
+    "ask": "What do you want to do with this wish?",
+    "options": [
+      { "id": "keep", "label": "Keep it", "hint": "Go ahead with it as it is." },
+      { "id": "change", "label": "Change it", "hint": "Make it something you'd rather go for." },
+      { "id": "set_aside", "label": "Set it aside", "hint": "Leave it for now." }
+    ],
+    "new_wish_label": "My wish now, in a few words (only you see this; it isn't saved)",
+    "any_answer": "Any of these is a fine answer. This exercise can't tell you whether your wish is realistic. That's up to you."
+  },
+  "plan": {
+    "your_wish": "Your wish: “{wish}”",
+    "lead": "Plan for the moment it happens.",
+    "if_label": "If… (only you see this; it isn't saved)",
+    "then_ask": "then I will…",
+    "then_cards": [
+      { "id": "five_minutes", "text": "start with just five minutes." },
+      { "id": "phone_away", "text": "put my phone in another room." },
+      { "id": "together", "text": "ask someone to do it with me." },
+      { "id": "best_part", "text": "remind myself of the best part." },
+      { "id": "next_step", "text": "write down one small next step." }
+    ],
+    "own_choice": "My own",
+    "own_label": "Then I will, in a few words (only you see this; it isn't saved)",
+    "read_back": "Your plan: {plan}",
+    "rehearse": "Say it to yourself slowly, once or twice.",
+    "set_aside": [
+      "You've set this wish aside. That's a real decision too.",
+      "You can come back to it whenever you like, or try this exercise with a different wish."
+    ]
+  },
+  "close": {
+    "plan_heading": "Your plan",
+    "copy": "Copy my plan",
+    "copy_note": "It isn't saved here, so copy it if you want to keep it.",
+    "copied": "Copied.",
+    "copy_failed": "That didn't work. You can select the plan above and copy it yourself.",
+    "copy_wish": "My wish: {wish}",
+    "copy_best_part": "The best part: {outcome}",
+    "copy_plan": "My plan: {plan}",
+    "ready": {
+      "label": "How ready do you feel to act on your plan?",
+      "min_label": "not at all",
+      "max_label": "completely"
+    },
+    "ready_means": "This shows how it feels right now, not whether the exercise works.",
+    "feeling_ask": "How has this left you feeling about the wish?",
+    "feelings": [
+      { "id": "encouraged", "label": "More encouraged" },
+      { "id": "same", "label": "About the same" },
+      { "id": "discouraged", "label": "More discouraged" }
+    ],
+    "discouraged_note": "Looking closely at what's in the way can feel discouraging, and that's understandable. It doesn't say anything about you. If it stays with you, talk to someone you trust or a support line."
+  },
+  "scenes": {
+    "future": { "alt": "A path leading to a far marker." },
+    "contrast": { "alt": "A path leading to a far marker, with a low wall across it." },
+    "plan": { "alt": "A path leading to a far marker, with a low wall across it and a dashed bridge over the wall." },
+    "aside": { "alt": "A faded path leading to a far marker." }
+  },
+  "scene_labels": {
+    "now": "Now",
+    "wish": "Your wish",
+    "obstacle": "What's in the way",
+    "plan": "Your plan"
+  },
+  "next_label": "Next",
+  "done_label": "Done",
+  "finish_label": "Finish"
+}

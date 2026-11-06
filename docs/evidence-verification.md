@@ -184,6 +184,54 @@ Each entry compares the full text with what the exercise's explanation said befo
 
 Also checked for the proposal (not cited on screen): Menne-Lothmann 2014 (PMID 24968234), Sisk 2018 (29505339), Macnamara & Burgoyne 2023 (36326645), Burnette 2023 (36227318), Schleider & Weisz 2017 (28117056), Powers & LaBar 2019 (30502352), Fodor 2020 (32445689).
 
+## MCII (`mcii-design.md`): source verification, 2026-11-06
+**Status marks below describe what was actually read.** Anything marked ◐ or "not accessed" can't appear on screen (plan §3.1). The three evidence tracks are kept apart on purpose: mental contrasting alone (MC), implementation intentions alone (II), and the combination (MCII).
+
+| Source | Track | Status | What was read |
+|---|---|---|---|
+| Sheeran, Listrom & Gollwitzer 2024/2025 | II | **✔F** | Already logged above |
+| Wang, Wang & Gai 2021, *Front. Psychol.* 12:565202 (open access) | MCII | **✔F** | Whole article, including Tables 1–2. Not the raw data |
+| Voigt, Mutter & Oettingen 2022, *Front. Psychol.* 13:801028 (open access) | MCII | **✔F** | Whole article. Not the supplementary appendix or the exact instructions |
+| Adriaanse et al. 2010, *Eur. J. Soc. Psychol.* 40, 1277–1293 (Konstanz copy) | MCII vs parts | **✔F (Study 2)** | Study 2 method, results, discussion, limitation. Study 1 only from the abstract and summary lines |
+| Kirk, Oettingen & Gollwitzer 2013, *Int. J. Confl. Manag.* 24(2), 148–165 (Konstanz copy) | MCII vs parts | **✔F** | Hypotheses, method, results, discussion, caveats |
+| Kizilcec & Cohen 2017, *PNAS* 114(17), 4348–4353, PMC5410783 | MCII | **✔A** | Abstract from Europe PMC. Effect sizes as listed in Wang 2021 Table 1. Full text refused (HTTP 403 and 500) |
+| Cross & Sheffield 2019, *Health Psychol. Rev.* 13(2), DOI 10.1080/17437199.2019.1594332 | MC, MCII | **✔A** | Abstract only; subscription. Moderator and publication-bias sections unread |
+| Abdulla & Woods 2021, *Sch. Psychol. Int.* 42(4), 398–421 | MCII | **✔A** | Abstract only. Repository copy refused (HTTP 403) |
+| Wang & Gai 2016, *Soc. Behav. Pers.* 44(5), 767–784 | MCII | **✔A** | The journal's article page, through a summarising tool. PDF not read |
+| Fritzsche et al. 2016, *Cogn. Ther. Res.* 40(4), 557–564 | MCII | **✔A** | Abstract only. Three copies failed to load |
+| Keeler, Nydegger & Crano 2023, *Front. Psychol.* 14:1145969 | MCII | **✔A** (not cited on screen) | Most of the text through a summarising tool, which is not the same as reading it |
+| Sheeran, Webb & Gollwitzer 2005, *PSPB* | II | **✔A** | Abstract |
+| Kappes, Singmann & Oettingen 2012; Kappes & Oettingen 2011, 2014; Wittleder et al. 2020; Oettingen, Mayer & Portnow 2016 | MC | **◐** | Search snippets of abstracts only. Hamburg copies returned HTTP 500 |
+| SCORE replication of Kappes 2012 (Milyavskaya et al. 2026) | MC | **Not accessed** | Only the FORRT atlas summary. No OSF address could be found |
+| Kizilcec et al. 2020, *PNAS* | II | **◐** | A university press summary. Whether it tested MC or MCII is unconfirmed |
+
+### Findings that change what the plan said
+1. **The largest online MCII trials found very small effects.** Wang's Table 1 lists Kizilcec & Cohen at **g = 0.09 (N = 9,619) and g = 0.06 (N = 4,290)**.
+   - Wang's "document" figure (g = 0.277) **excludes these two studies**, along with all other moderator analyses. It doesn't describe large-scale online delivery.
+   - Random-effects pooling gives small trials a lot of weight, which is how a sample dominated by g ≈ 0.07 still yields g = 0.34.
+   - So for an app, g ≈ 0.07 is at least as relevant as 0.24 or 0.28. These were course-completion outcomes, so they don't transfer directly either.
+2. **WOOP is MCII, confirmed by a paper Oettingen co-authored:** Voigt et al. 2022 calls WOOP the colloquial name of MCII. Oettingen's 2015 article, the woopmylife.org science page and the TK page don't use the abbreviation.
+3. **Expectancy moderation looks weaker than the theory suggests.**
+   - Wang 2021: high g = 0.297 (k = 5), low g = 0.481 (k = 4), not significant. The authors blame a ceiling effect, since all reported means were above 4 of 7 and only 9 studies reported expectations.
+   - Adriaanse 2010: no moderation, again with mostly high scores.
+   - Abdulla & Woods 2021: no moderation.
+   - None of this shows moderation is false. Field trials asked people to choose feasible goals, so they tested it poorly.
+4. **Direct comparisons with the parts** (as the plan already said):
+   - Adriaanse Study 2 (59 female students): MCII 5.37, MC 4.47, II 4.08 on a self-rated success index, 1 week. No control arm; the authors say additive or interactive effects can't be concluded. Participants were also told to repeat the exercise every morning.
+   - Kirk 2013 (66 dyads): MCII 24,845; MC 24,114; II 23,400 joint points. MCII vs II p = .02; **MCII vs MC p = .24**; MC vs II p = .24. No control arm.
+5. **A search for a crossed MC × II trial found none** (two further searches). Wang & Gai 2016 looked likely but is MCII vs control. It found no difference in reading time, and the control group read about more paintings. Wang lists it at g = -0.11.
+6. **Delivery detail worth copying or noting:**
+   - Adriaanse Study 2 used one best aspect and one obstacle, and is precedent for a single round. Kirk used two of each, alternating, starting with the future. Voigt used two rounds, plus a reminder 3 days later.
+   - Several tested versions had repetition or reminders, unlike ours.
+   - In Voigt, **fewer MCII participants completed the first survey than controls (90% vs 98%, p = .001)**. It is more effort, so drop-off should be watched.
+7. **Which obstacles it worked for:** Kizilcec & Cohen's language analysis suggests MCII worked best for predictable, surmountable obstacles (work or family duties), and not for practical constraints or simply lacking time. In Wang & Gai 2016, more internal obstacles went with *less* reading time within the MCII group (r = -.40), a small within-group correlation. So the literature doesn't settle how internal an obstacle should be.
+8. **Depression:** Keeler et al. 2023 used online MCII with a help-seeking goal, in US online workers with raised BDI-II scores. Study 1 found no effect on help-seeking; Study 2 found more self-reported success than a control (p = .013). High attrition, unequal groups, self-report. No harms were reported in what I read, but harms don't appear to have been a measured outcome, so this isn't evidence of safety.
+
+### Still open
+- **SCORE report:** please check the OSF project if you can find it. If it shows mental contrasting behaving as predicted at high expectations, the "mixed results" wording stays accurate. If it failed outright, the limits line should be stronger.
+- **WOOP trademark:** no statement found. The site's notice page didn't load, and registers weren't searched. A question for a qualified adviser before using the name beyond attribution.
+- **To upgrade to ✔F if you can get the PDFs:** Kizilcec & Cohen 2017, Cross & Sheffield 2019, Abdulla & Woods 2021, Fritzsche 2016.
+
 ## Memory reconsolidation (future candidate, plan §3.2): sources to verify
 **Status:** nothing here has been checked; every entry is **◐** until it is read. Titles and details come from memory. Each is confirmed (exact title, DOI, sample, outcome) when obtained, and anything that can't be found is removed, not cited.
 

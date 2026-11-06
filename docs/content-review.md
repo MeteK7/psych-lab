@@ -51,6 +51,9 @@
 | `web/src/content/science/state-reset.v1.json` | 1 | Why this exercise? (Picture it, then follow the dot) |
 | `web/src/content/science/game-only.v1.json` | 1 | Why this exercise? (Follow the dot, then plan) |
 | `web/src/content/science/sources.v1.json` | 1 | Sources in every explanation |
+| `web/src/content/mcii.v2.json` | 2 | Your wish, and what's in the way (development only; also see `mcii-design.md` §7) |
+| `web/src/content/science/mcii.v1.json` | 1 | Why this exercise? (Your wish, and what's in the way) |
+| `web/src/content/science/sources-mcii.v1.json` | 1 | Sources in that explanation |
 | `web/src/app/flow/conditions.ts` | — | Card names, descriptions, method names, "What happens" lists |
 | `web/src/app/areas.ts` | — | Home and area texts |
 | `web/src/app/pages/experiment/experiment-texts.ts` | — | My experiment page |
