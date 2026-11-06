@@ -81,6 +81,34 @@ describe('AreaPage', () => {
     expect((fixture.nativeElement as HTMLElement).querySelector('h1')?.textContent).toContain('Area not found');
   });
 
+  describe('MCII (development only)', () => {
+    it('adds its own topic, with its method and note, in the development build', async () => {
+      const fixture = create('action-growth', 'development');
+      await fixture.whenStable();
+      const root = fixture.nativeElement as HTMLElement;
+      const sections = Array.from(root.querySelectorAll('section[aria-labelledby^="topic-heading"]'));
+      expect(sections.map((s) => s.querySelector('h2')?.textContent)).toEqual([
+        'Getting started on learning',
+        'Choosing what to go after',
+      ]);
+      const card = sections[1].querySelector('.card');
+      expect(card?.querySelector('h3')?.textContent?.trim()).toBe("Your wish, and what's in the way");
+      expect(card?.querySelector('a.method')?.textContent).toContain('Picturing the obstacle, then planning (MCII)');
+      expect(card?.textContent).toContain('About 6 minutes');
+      expect(sections[1].textContent).toContain('without anything you write');
+      expect(sections[1].textContent).not.toContain('Open My experiment');
+      expect(sections[0].textContent).not.toContain('without anything you write');
+    });
+
+    it('leaves no empty section in the production build', async () => {
+      const fixture = create('action-growth', 'production');
+      await fixture.whenStable();
+      const root = fixture.nativeElement as HTMLElement;
+      expect(root.textContent).not.toContain('Choosing what to go after');
+      expect(root.querySelectorAll('section[aria-labelledby^="topic-heading"]')).toHaveLength(1);
+    });
+  });
+
   describe('Cognitive shifts (development only)', () => {
     it('lists its three exercises with their methods and fixed durations in the development build', async () => {
       const fixture = create('cognitive-shifts', 'development');

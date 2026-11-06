@@ -11,6 +11,8 @@ export interface Topic {
   experiences: ExerciseId[];
   /** Whether My experiment runs on this topic. */
   hasExperiment: boolean;
+  /** The note under this topic's exercises, when it differs from the area's. */
+  practiceNote?: string;
 }
 
 export interface Area {
@@ -43,6 +45,15 @@ export const AREAS: Area[] = [
           'game_only+action_bridge',
         ],
         hasExperiment: true,
+      },
+      {
+        // Development only until its gates pass (docs/mcii-design.md §7).
+        title: 'Choosing what to go after',
+        text: "For something you want, when you're not sure what's in the way or whether to go for it.",
+        experiences: ['mcii'],
+        hasExperiment: false,
+        practiceNote:
+          "Practice exercises are saved in My records, without anything you write. They're never part of your experiment.",
       },
     ],
   },
