@@ -17,6 +17,8 @@ const PATHS = {
   causes: ['M4 4v16h16', 'M9 13a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z', 'M13 7a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z', 'M17 12a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z'],
   // A question in a speech bubble: not enough to go on.
   question: ['M4 5h16v11H10l-4 3.5V16H4z', 'M10 9a2 2 0 1 1 2.5 1.9c-.3.1-.5.4-.5.7v.4', 'M12 13.5h.01'],
+  // A path with a low wall on it, and a way over: the obstacle, then a plan.
+  wall: ['M3 19h18', 'M9 13h6v6H9z', 'M5 19c1-9 13-9 14 0'],
   // Parts of a science explanation
   flask: ['M9 3h6', 'M10 3v6l-5.5 9.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3', 'M7.5 15h9'],
   play: ['M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z', 'm10 8.5 5.5 3.5-5.5 3.5z'],

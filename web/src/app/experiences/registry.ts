@@ -166,6 +166,25 @@ export const EXERCISES: ExerciseInfo[] = [
     area: 'cognitive-shifts',
     release: 'development',
   },
+  {
+    value: 'mcii',
+    label: "Your wish, and what's in the way",
+    description: 'Picture what you want and what gets in the way, then decide what to do about it.',
+    summary: [
+      'Choose a wish for the next four weeks.',
+      'Picture the best part of it.',
+      "Name what's in the way, and picture that too.",
+      'Look at both, and decide what to do with the wish.',
+      'If you keep it, make an if-then plan.',
+    ],
+    minutes: 6,
+    experimental: false,
+    method: { name: 'Picturing the obstacle, then planning (MCII)', icon: 'wall' },
+    steps: ['mcii_wish', 'mcii_outcome', 'mcii_obstacle', 'mcii_decide', 'mcii_plan', 'mcii_close'],
+    experiment: null,
+    area: 'action-growth',
+    release: 'development',
+  },
 ];
 
 export function exerciseInfo(value: string | null | undefined): ExerciseInfo | undefined {

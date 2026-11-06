@@ -1,5 +1,6 @@
 import { SCIENCE, SCIENCE_SOURCES, ScienceContent, scienceFor } from '..';
-import { CONDITIONS } from '../../app/flow/conditions';
+import { CONDITIONS, isCondition } from '../../app/flow/conditions';
+import { EXERCISES } from '../../app/experiences/registry';
 
 // Plan §3.1: the science explanation standard. Evidence is for the method, never for this
 // exercise; only checked sources (✔F full text, ✔A abstract) are cited.
@@ -19,6 +20,7 @@ function texts(s: ScienceContent): string[] {
 describe('science explanations', () => {
   it('exist for every experience, once each', () => {
     expect(CONDITIONS.map((c) => scienceFor(c.value)?.experience)).toEqual(CONDITIONS.map((c) => c.value));
+    expect(EXERCISES.map((e) => scienceFor(e.value)?.experience)).toEqual(EXERCISES.map((e) => e.value));
     expect(new Set(SCIENCE.map((s) => s.id)).size).toBe(SCIENCE.length);
     for (const s of SCIENCE) expect(s.version).toMatch(/^\d+$/);
   });
@@ -78,15 +80,16 @@ describe('science explanations', () => {
   });
 });
 
-describe('Cognitive shifts science explanations (cognitive-shifts-design.md §7)', () => {
-  const cs = SCIENCE.filter((s) => s.experience.startsWith('cs_'));
-  const experiment = SCIENCE.filter((s) => !s.experience.startsWith('cs_'));
+describe('Science explanations of exercises outside the experiment (cognitive-shifts-design.md §7)', () => {
+  const cs = SCIENCE.filter((s) => !isCondition(s.experience));
+  const experiment = SCIENCE.filter((s) => isCondition(s.experience));
 
-  it('exist for all three exercises', () => {
+  it('exist for all of them', () => {
     expect(cs.map((s) => s.experience).sort()).toEqual([
       'cs_not_enough_to_go_on',
       'cs_other_readings',
       'cs_why_it_happened',
+      'mcii',
     ]);
   });
 
@@ -119,5 +122,22 @@ describe('Cognitive shifts science explanations (cognitive-shifts-design.md §7)
       expect(s.similar_note, s.id).toBeUndefined();
       expect(s.why, s.id).toBeUndefined();
     }
+  });
+});
+
+describe('MCII science explanation (mcii-design.md §6)', () => {
+  const mcii = scienceFor('mcii')!;
+
+  it('names each evidence track on the method side, so no effect is borrowed from another', () => {
+    const method = mcii.research.filter((r) => r.layer === 'method').map((r) => r.text);
+    expect(method.some((t) => t.startsWith('Mental contrasting alone:'))).toBe(true);
+    expect(method.some((t) => t.startsWith('If-then plans alone:'))).toBe(true);
+    expect(method.some((t) => t.startsWith('The two together:'))).toBe(true);
+    expect(method.some((t) => t.startsWith('The two together, compared with each part:'))).toBe(true);
+  });
+
+  it('says the picture is only an illustration, and cites no research for it', () => {
+    expect(mcii.about_this_exercise).toMatch(/path picture is only an illustration/);
+    for (const r of mcii.research) expect(r.text).not.toMatch(/\b(picture|path|wall|bridge)\b/i);
   });
 });

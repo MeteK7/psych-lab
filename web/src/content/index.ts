@@ -39,6 +39,11 @@ import scienceCsNotEnoughJson from './science/cs-not-enough.v1.json';
 import scienceCsOtherReadingsJson from './science/cs-other-readings.v1.json';
 import scienceCsWhyItHappenedJson from './science/cs-why-it-happened.v1.json';
 import scienceSourcesCsJson from './science/sources-cs.v1.json';
+// MCII (docs/mcii-design.md): Try it only, development only until its gates pass.
+// v2: the likelihood questions say "your wish" instead of "it", and step 4 shows the wish.
+import mciiJson from './mcii.v2.json';
+import scienceMciiJson from './science/mcii.v1.json';
+import scienceSourcesMciiJson from './science/sources-mcii.v1.json';
 
 export interface Versioned {
   id: string;
@@ -196,7 +201,7 @@ export interface ScienceSource {
 export interface ScienceContent extends Versioned {
   /** The experience (condition value) this explains. */
   experience: string;
-  /** Cognitive shifts: why it's worth doing, in everyday terms; shown after "What you do". */
+  /** Exercises outside the experiment: why it's worth doing, in everyday terms; shown after "What you do". */
   why?: string;
   what_you_do: string;
   method: { name: string; text: string };
@@ -223,7 +228,11 @@ export interface ScienceSources extends Versioned {
 const SOURCES_V1 = scienceSourcesJson as ScienceSources;
 export const SCIENCE_SOURCES: ScienceSources = {
   ...SOURCES_V1,
-  sources: { ...SOURCES_V1.sources, ...(scienceSourcesCsJson as ScienceSources).sources },
+  sources: {
+    ...SOURCES_V1.sources,
+    ...(scienceSourcesCsJson as ScienceSources).sources,
+    ...(scienceSourcesMciiJson as ScienceSources).sources,
+  },
 };
 export const SCIENCE: ScienceContent[] = [
   scienceActionBridgeJson,
@@ -233,6 +242,7 @@ export const SCIENCE: ScienceContent[] = [
   scienceCsOtherReadingsJson as ScienceContent,
   scienceCsWhyItHappenedJson as ScienceContent,
   scienceCsNotEnoughJson as ScienceContent,
+  scienceMciiJson as ScienceContent,
 ];
 
 export function scienceFor(experience: string | null | undefined): ScienceContent | undefined {
@@ -387,3 +397,86 @@ export interface CsNotEnoughContent extends Versioned {
 export const CS_OTHER_READINGS = csOtherReadingsJson as CsOtherReadingsContent;
 export const CS_WHY_IT_HAPPENED = csWhyItHappenedJson as CsWhyItHappenedContent;
 export const CS_NOT_ENOUGH = csNotEnoughJson as CsNotEnoughContent;
+
+// ---------- MCII ----------
+
+export interface MciiObstacleCard extends CsCard {
+  /** The same obstacle worded to follow "If", so the plan reads as a sentence. */
+  if_text: string;
+}
+
+export interface MciiContent extends Versioned {
+  wish: {
+    safety: string;
+    ask: string;
+    field_label: string;
+    example: string;
+    category_ask: string;
+    categories: { id: string; label: string }[];
+    matter: RatingItem;
+    likely: RatingItem;
+  };
+  outcome: {
+    your_wish: string;
+    ask: string;
+    field_label: string;
+    picture: string;
+  };
+  obstacle: {
+    best_part: string;
+    ask: string;
+    cards: MciiObstacleCard[];
+    own_choice: string;
+    own_label: string;
+    outside_choice: string;
+    outside_label: string;
+    picture: string;
+  };
+  decide: {
+    your_wish: string;
+    lead: string;
+    best_part: string;
+    in_the_way: string;
+    outside_note: string;
+    likely: RatingItem;
+    compared: string;
+    ask: string;
+    options: { id: 'keep' | 'change' | 'set_aside'; label: string; hint: string }[];
+    new_wish_label: string;
+    any_answer: string;
+  };
+  plan: {
+    your_wish: string;
+    lead: string;
+    if_label: string;
+    then_ask: string;
+    then_cards: CsCard[];
+    own_choice: string;
+    own_label: string;
+    read_back: string;
+    rehearse: string;
+    set_aside: string[];
+  };
+  close: {
+    plan_heading: string;
+    copy: string;
+    copy_note: string;
+    copied: string;
+    copy_failed: string;
+    copy_wish: string;
+    copy_best_part: string;
+    copy_plan: string;
+    ready: RatingItem;
+    ready_means: string;
+    feeling_ask: string;
+    feelings: { id: 'encouraged' | 'same' | 'discouraged'; label: string }[];
+    discouraged_note: string;
+  };
+  scenes: Record<'future' | 'contrast' | 'plan' | 'aside', { alt: string }>;
+  scene_labels: { now: string; wish: string; obstacle: string; plan: string };
+  next_label: string;
+  done_label: string;
+  finish_label: string;
+}
+
+export const MCII = mciiJson as MciiContent;

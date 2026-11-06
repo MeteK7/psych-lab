@@ -1,4 +1,4 @@
-import { ACTION_BRIDGE, GOAL_RESTATEMENT, RATINGS, STATE_RESET, STATE_RESET_SOUND } from '.';
+import { ACTION_BRIDGE, GOAL_RESTATEMENT, MCII, RATINGS, STATE_RESET, STATE_RESET_SOUND } from '.';
 
 const ALL = [ACTION_BRIDGE, GOAL_RESTATEMENT, RATINGS, STATE_RESET, STATE_RESET_SOUND];
 
@@ -37,7 +37,7 @@ describe('on-screen wording', () => {
   // mean nothing to a user. Internal names live in code and docs only.
   it('never uses "study", "phase", "session" or internal experience names', () => {
     const forbidden = /\b(stud(y|ying|ies)|phases?|sessions?|action bridge|state reset|restatement)\b/i;
-    for (const c of ALL) {
+    for (const c of [...ALL, MCII]) {
       // ids, versions and option values are internal, never shown.
       const { id: _id, version: _version, ...shown } = c;
       const texts = strings(shown).filter((t) => !/^[a-z_]+$/.test(t));

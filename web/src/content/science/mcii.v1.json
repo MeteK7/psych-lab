@@ -1,0 +1,64 @@
+{
+  "id": "science-mcii",
+  "version": "1",
+  "experience": "mcii",
+  "why": "Picturing a future you want can feel good, but on its own it doesn't show you what stands in the way. Looking at the wish and then at the obstacle gives you a clearer picture of both, so you can decide whether to go for it. If you do, you can prepare for the moment the obstacle shows up.",
+  "what_you_do": "You picture the best part of a wish, then what's in the way. You decide what to do with the wish, and if you keep it, you make an if-then plan for that obstacle.",
+  "method": {
+    "name": "Picturing the obstacle, then planning (MCII)",
+    "text": "This method joins two techniques. Mental contrasting means imagining a future you want, then the obstacle in the present. If-then planning (implementation intentions) means linking a situation to what you'll do: “If it happens, then I will…”. Together they're called mental contrasting with implementation intentions (MCII).\n\nTheir everyday form is known as WOOP: Wish, Outcome, Obstacle, Plan. It was developed by Gabriele Oettingen and Peter Gollwitzer and their colleagues."
+  },
+  "research": [
+    {
+      "layer": "method",
+      "text": "Mental contrasting alone: a review of health behaviour research suggests a small-to-moderate effect over the following weeks.",
+      "who": "12 reports, 1,528 people · clinical, student and general groups",
+      "sources": ["cross-sheffield-2019"]
+    },
+    {
+      "layer": "method",
+      "text": "If-then plans alone: a review of 642 experiments found that, after allowing for experiments that were never published, the benefit is small. It was close to zero when people didn't strongly want the goal.",
+      "who": "642 experiments · many settings",
+      "sources": ["sheeran-2025"]
+    },
+    {
+      "layer": "method",
+      "text": "The two together: a review of 24 field experiments found a small-to-moderate effect of MCII on reaching goals, and smaller after allowing for likely unpublished results.",
+      "who": "15,907 people · adults, students, children and patients; 87% of them in two online course experiments",
+      "sources": ["wang-gai-2021"]
+    },
+    {
+      "layer": "method",
+      "text": "The two together, compared with each part: one experiment found MCII ahead of both parts, by people's own reports. Another found it ahead of if-then plans, but not clearly ahead of mental contrasting. Neither had a comparison group doing neither, so whether the two parts really add up is still open.",
+      "who": "59 female students, over one week · 66 pairs in a negotiation task",
+      "sources": ["adriaanse-2010", "kirk-2013"]
+    },
+    {
+      "layer": "similar",
+      "text": "Two large online course experiments suggest a very small effect overall: more learners from individualist cultures finished, and there was no difference for learners from collectivist cultures.",
+      "who": "17,963 learners · written online exercise, about 8 minutes",
+      "sources": ["kizilcec-cohen-2017", "wang-gai-2021"]
+    },
+    {
+      "layer": "similar",
+      "text": "A preregistered online experiment with smokers found no overall difference in cutting down, compared with another written strategy.",
+      "who": "325 moderate-to-heavy smokers · 4 weeks, self-reported",
+      "sources": ["voigt-2022"]
+    },
+    {
+      "layer": "similar",
+      "text": "An experiment suggests MCII may be no better than other carefully designed planning methods.",
+      "who": "98 female students · one week",
+      "sources": ["abdulla-woods-2021"]
+    }
+  ],
+  "similar_note": "No research has tested this format: one visit, with a decision about the wish before the plan.",
+  "about_this_exercise": "This exercise follows the structure of MCII, but this version hasn't been tested itself. It's one visit in this app, and it adds a step where you decide what to do with the wish. Some of the research above also used practice rounds, reminders or repeats. The path picture is only an illustration: no research has tested it.",
+  "limits": [
+    "Expect a small effect at most, and only for wishes you really want. The largest online experiments found very little.",
+    "One idea behind the method, that it helps people commit when success seems likely and let go when it doesn't, has had mixed results. So this exercise never tells you what to do with your wish.",
+    "It may do less for practical limits, like not having the time or the means, than for things you can prepare for.",
+    "Little research has looked for unwanted effects, such as feeling discouraged.",
+    "The ratings show how it feels right now, not whether the exercise works."
+  ]
+}

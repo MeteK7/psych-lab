@@ -1,0 +1,48 @@
+{
+  "id": "science-sources-mcii",
+  "version": "1",
+  "sources": {
+    "cross-sheffield-2019": {
+      "citation": "Cross & Sheffield, 2019",
+      "title": "Mental contrasting for health behaviour change: A systematic review and meta-analysis of effects and moderator variables. Health Psychology Review, 13(2)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/30879403/",
+      "evidence": "abstract"
+    },
+    "wang-gai-2021": {
+      "citation": "Wang, Wang & Gai, 2021",
+      "title": "A meta-analysis of the effects of mental contrasting with implementation intentions on goal attainment. Frontiers in Psychology, 12, 565202",
+      "url": "https://www.frontiersin.org/articles/10.3389/fpsyg.2021.565202/full",
+      "evidence": "full_text"
+    },
+    "adriaanse-2010": {
+      "citation": "Adriaanse et al., 2010",
+      "title": "When planning is not enough: Fighting unhealthy snacking habits by mental contrasting with implementation intentions (MCII). European Journal of Social Psychology, 40(7), 1277–1293",
+      "url": "https://www.socmot.uni-konstanz.de/sites/default/files/10_adriaanse_ea_when_planning.pdf",
+      "evidence": "full_text"
+    },
+    "kirk-2013": {
+      "citation": "Kirk, Oettingen & Gollwitzer, 2013",
+      "title": "Promoting integrative bargaining: Mental contrasting with implementation intentions. International Journal of Conflict Management, 24(2), 148–165",
+      "url": "https://www.socmot.uni-konstanz.de/sites/default/files/Kirk_Oettingen_Gollwitzer_2013_01.pdf",
+      "evidence": "full_text"
+    },
+    "kizilcec-cohen-2017": {
+      "citation": "Kizilcec & Cohen, 2017",
+      "title": "Eight-minute self-regulation intervention raises educational attainment at scale in individualist but not collectivist cultures. PNAS, 114(17), 4348–4353",
+      "url": "https://doi.org/10.1073/pnas.1611898114",
+      "evidence": "abstract"
+    },
+    "voigt-2022": {
+      "citation": "Voigt, Mutter & Oettingen, 2022",
+      "title": "Effectiveness of a motivational smoking reduction strategy across socioeconomic status and stress levels. Frontiers in Psychology, 13, 801028",
+      "url": "https://www.frontiersin.org/articles/10.3389/fpsyg.2022.801028/full",
+      "evidence": "full_text"
+    },
+    "abdulla-woods-2021": {
+      "citation": "Abdulla & Woods, 2021",
+      "title": "Comparing mental contrasting with implementation intentions against solution-focused and autonomous planning. School Psychology International, 42(4), 398–421",
+      "url": "https://doi.org/10.1177/01430343211000399",
+      "evidence": "abstract"
+    }
+  }
+}
