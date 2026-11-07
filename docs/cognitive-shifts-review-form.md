@@ -44,11 +44,17 @@ Please also flag anything that touches on clinical topics, trauma, health or cri
 | Lens 2: "One time doesn't decide it." | | | |
 | Lens 2: "You're being harder on yourself than on anyone else." | | | |
 | Lens 2: "Anyone could struggle with this." | | | |
-| Lens 2 supportive line (not a reading, not on the board): "It makes sense that this bothers you. That isn't something you need to talk yourself out of." | | | |
+| Lens 2 opening (above the question): "Let's switch the perspective for a moment." · "Imagine a friend telling you they're experiencing the same everyday situation you described in Step 1 and interpreting it in exactly the same way you do." | | | |
+| Lens 2 suggested words to the friend (not a reading, not on the board): "You might start by telling them:" · "It makes sense that this bothers you. That isn't something you need to talk yourself out of." | | | |
+| Lens 2 question: "What else would you say to them?" | | | |
 | Lens 3: "Most of it will have faded." | | | |
 | Lens 3: "What I learned from it." | | | |
 | Lens 3: "Whether I tried again." | | | |
 | Lens 3: "It may still matter, and that's real." | | | |
+| Step 5 opening: "In Step 1, this was your first reading: ‘{reading}’" · "You've now looked at other ways to see it and sorted which ones fit." | | | |
+| Step 5 ratings of the same reading: "Thinking back to that first reading: how much do you believe it now?" · "And how upsetting does it feel now?" | | | |
+| Step 5, no expected direction: "There's no right answer. These numbers don't have to go down, and they don't have to move together. Believing the reading just as much, or still finding it upsetting, is also valid." | | | |
+| Step 5 after rating: "In Step 2 you rated your belief in it {before}. Now you rate it {now}." · "In Step 2 you rated how upsetting it felt {before}. Now you rate it {now}." · "This shows whether how you see it and how it feels changed during the exercise. It doesn't show whether the reading is right." | | | |
 | Close for **self-judgement** first readings and own readings placed in "Fits": "It still feels like it fits. You can keep it alongside the other readings that fit." **Please check:** does it acknowledge the feeling without agreeing that the self-judgement is true? | | | |
 | Close when **nothing** was placed in "Fits": "None of the readings fit right now. That's an honest answer too." | | | |
 | Close for **situation** first readings placed in "Fits": "Your first reading still fits. That's a real outcome: sometimes the first reading is right." **Please check:** could this ever read as confirming a harsh judgement of oneself? | | | |
@@ -136,6 +142,7 @@ In step 3 the person ticks which other readings **could also explain what happen
 | "It means what I fear it means." | | | |
 | "It's about the circumstances, not about me." | | | |
 | "There's something small I could fix." | | | |
+| Step 2 rating: "How sure are you that this reading is right?" | | | |
 | Step 3 question: "Could these also explain what happened? Tick any that could." | | | |
 | Step 3 hint: "You're not choosing the right one. You're checking whether what happened, on its own, can tell them apart." | | | |
 | Step 3 own reading: "Is there a reason that's about them or the circumstances, not about you?" | | | |
@@ -149,6 +156,10 @@ In step 3 the person ticks which other readings **could also explain what happen
 | Step 4 choice: "I'll check something myself" | | | |
 | Step 4 choice: "I'll wait. It'll probably become clear" · then: "If it's still on your mind later and nothing's changed, the other choices are still there." | | | |
 | Step 4 choice: "I'll leave it. Finding out isn't possible or isn't worth it" · then: "Then the honest answer is: you don't know. That's a real answer, not a failure to work it out." | | | |
+| Step 5 opening: "In Step 2, this was your first reading: ‘{reading}’" · "You've now checked other explanations against what happened." | | | |
+| Step 5 rating of the same reading: "Thinking back to that first reading: how sure are you now that it was right?" | | | |
+| Step 5, no expected direction: "There's no right answer. A lower rating isn't automatically better, and staying just as sure is also valid." | | | |
+| Step 5 after rating: "In Step 2 you rated it {before}. Now you rate it {now}." · "This shows whether how sure you feel changed during the exercise. It doesn't show whether the reading is right." | | | |
 | Step 5, two questions to keep: "Would what happened also fit another reading?" · "What would actually tell me, and is it worth finding out?" | | | |
 | Step 5 after "ask" or "check": "Want to plan when you'll do it? There's a link after you finish." | | | |
 

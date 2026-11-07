@@ -25,7 +25,14 @@ export type StepId =
   | 'cs3_first'
   | 'cs3_fit'
   | 'cs3_find'
-  | 'cs3_after';
+  | 'cs3_after'
+  // MCII: one step per screen; the exercise keeps its state in MciiStore.
+  | 'mcii_wish'
+  | 'mcii_outcome'
+  | 'mcii_obstacle'
+  | 'mcii_decide'
+  | 'mcii_plan'
+  | 'mcii_close';
 
 /** An experiment exercise: one of the n-of-1 conditions (protocol-n-of-1.md). */
 export type ConditionInfo = ExerciseInfo & { value: Condition; experiment: 1 | 2 };
@@ -44,7 +51,7 @@ export const STEP_NAMES: Record<StepId, string> = {
   cs1_feel_before: 'How it feels now',
   cs1_lenses: 'Other ways to see it',
   cs1_sort: 'Which readings fit?',
-  cs1_feel_after: 'How it feels now',
+  cs1_feel_after: 'Your first reading, looked at again',
   cs1_close: "What you're keeping",
   cs2_setback: 'The setback',
   cs2_first: 'Why do you think it happened?',
@@ -56,7 +63,13 @@ export const STEP_NAMES: Record<StepId, string> = {
   cs3_first: 'Your first reading',
   cs3_fit: 'Could these explain it?',
   cs3_find: 'Can you find out?',
-  cs3_after: 'How sure are you now?',
+  cs3_after: 'Your first reading, looked at again',
+  mcii_wish: 'Your wish',
+  mcii_outcome: 'The best part',
+  mcii_obstacle: "What's in the way",
+  mcii_decide: 'Look at both',
+  mcii_plan: "What you'll do",
+  mcii_close: 'Keeping it',
 };
 
 // Usability mode belongs to level B and is not offered yet.

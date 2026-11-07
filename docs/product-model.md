@@ -55,6 +55,11 @@
 - Released once its gates pass: a content review by at least 3 reviewers, and full texts of every cited source.
 - It is part of Try it (M1), never part of the experiment.
 
+**MCII** (`mcii-design.md`): one Try it-only exercise in Action and growth, "Your wish, and what's in the way".
+- Built and **development only:** shown in the development build, refused by the API in production.
+- Released once its gates pass: a content review, usability sessions, and a versioned protocol change, because it contains an if-then plan.
+- Never part of the experiment. Typed text is never saved.
+
 **Future research candidate, not an approved feature:** **Memory update**, based on memory reconsolidation (plan §3.2).
 - It passes five gates before any build: evidence review, design feasibility, safety and ethics review, usability, and a feasibility study.
 - It needs return visits, so it depends on M2.

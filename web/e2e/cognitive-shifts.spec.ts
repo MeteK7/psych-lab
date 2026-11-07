@@ -69,9 +69,14 @@ test.describe('Cognitive shifts, keyboard only', () => {
     await expectNoSeriousA11yIssues(page, 'board filled');
     await pressButton(page, 'Next');
 
-    await step(page, 'How it feels now');
-    await rateByKeyboard(page, 'How much do you believe this reading right now?', 4);
-    await rateByKeyboard(page, 'How upsetting does it feel right now?', 3);
+    await step(page, 'Your first reading, looked at again');
+    await expect(page.getByText('In Step 1, this was your first reading: ‘PRIVATE first reading’')).toBeVisible();
+    await expect(page.getByRole('status')).toHaveCount(0); // no comparison before rating
+    await rateByKeyboard(page, 'Thinking back to that first reading: how much do you believe it now?', 4);
+    await rateByKeyboard(page, 'And how upsetting does it feel now?', 3);
+    await expect(page.getByRole('status')).toContainText('In Step 2 you rated your belief in it 7. Now you rate it 4.');
+    await expect(page.getByRole('status')).toContainText('In Step 2 you rated how upsetting it felt 6. Now you rate it 3.');
+    await expectNoSeriousA11yIssues(page, 'first reading looked at again');
     await pressButton(page, 'Next');
 
     await step(page, "What you're keeping");
@@ -138,7 +143,7 @@ test.describe('Cognitive shifts, keyboard only', () => {
     await step(page, 'Your first reading');
     await choose(page, page.getByRole('radio').first(), 1); // the second reading
     await expect(page.getByRole('radio', { name: "They don't want to talk to me." })).toBeChecked();
-    await rateByKeyboard(page, 'How sure are you of this reading?', 8);
+    await rateByKeyboard(page, 'How sure are you that this reading is right?', 8);
     await pressButton(page, 'Next');
 
     await step(page, 'Could these explain it?');
@@ -156,9 +161,13 @@ test.describe('Cognitive shifts, keyboard only', () => {
     await expectNoSeriousA11yIssues(page, 'how to find out');
     await pressButton(page, 'Next');
 
-    await step(page, 'How sure are you now?');
+    await step(page, 'Your first reading, looked at again');
+    await expect(page.getByText("In Step 2, this was your first reading: ‘They don't want to talk to me.’")).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Two questions to keep' })).toBeVisible();
-    await rateByKeyboard(page, 'How sure are you of this reading?', 5);
+    await expect(page.getByRole('status')).toHaveCount(0); // no comparison before rating
+    await rateByKeyboard(page, 'Thinking back to that first reading: how sure are you now that it was right?', 5);
+    await expect(page.getByRole('status')).toContainText('In Step 2 you rated it 8. Now you rate it 5.');
+    await expectNoSeriousA11yIssues(page, 'first reading looked at again');
     await pressButton(page, 'Finish');
     await expect(page.getByRole('heading', { name: 'Exercise complete' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Plan your first step' })).toBeVisible();
@@ -192,6 +201,28 @@ test.describe('Cognitive shifts area', () => {
     await expect(why.getByRole('heading', { name: 'Research on similar exercises' })).toBeVisible();
     await expect(why.getByText('170 adults · measured, not an experiment')).toBeVisible();
     await expectNoSeriousA11yIssues(page, 'explanation');
+  });
+
+  test('shows the scale labels as a key right beside the scale', async ({ page }) => {
+    await open(page, 'cs_not_enough_to_go_on');
+    await choose(page, page.getByRole('radio').first());
+    await pressButton(page, 'Next');
+
+    const scale = page.locator('app-rating-scale');
+    const box = async (locator: ReturnType<Page['locator']>) => (await locator.boundingBox())!;
+    const options = await box(scale.locator('.options'));
+    const key = await box(scale.locator('.anchors'));
+    const min = await box(scale.getByText('0 = not at all'));
+    const max = await box(scale.getByText('10 = completely'));
+
+    const middle = (b: { y: number; height: number }) => b.y + b.height / 2;
+    expect(Math.abs(middle(key) - middle(options))).toBeLessThanOrEqual(2);
+    const gap = key.x - (options.x + options.width);
+    expect(gap).toBeGreaterThanOrEqual(16);
+    expect(gap).toBeLessThanOrEqual(32);
+    expect(min.y).toBeLessThan(max.y);
+    const radios = scale.getByRole('radio');
+    expect((await box(radios.first())).y).toBe((await box(radios.last())).y); // one line
   });
 
   test('fits a phone screen without sideways scrolling', async ({ page }) => {

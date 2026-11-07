@@ -13,6 +13,9 @@ import { CsOtherReadings } from '../experiences/cognitive-shifts/cs-other-readin
 import { CsStore } from '../experiences/cognitive-shifts/cs-store';
 import { CsWhyItHappened } from '../experiences/cognitive-shifts/cs-why-it-happened';
 import { GoalRestatement } from '../experiences/goal-restatement/goal-restatement';
+import { Mcii } from '../experiences/mcii/mcii';
+import { isMciiStage } from '../experiences/mcii/mcii-logic';
+import { MciiStore } from '../experiences/mcii/mcii-store';
 import { RatingStep } from '../experiences/rating-step/rating-step';
 import { exerciseInfo, isExerciseId, stepsFor } from '../experiences/registry';
 import { StateReset } from '../experiences/state-reset/state-reset';
@@ -32,14 +35,15 @@ type SaveState = 'idle' | 'saving' | 'error';
     CsOtherReadings,
     CsWhyItHappened,
     GoalRestatement,
+    Mcii,
     RatingStep,
     StateReset,
     ScienceSection,
     DatePipe,
     RouterLink,
   ],
-  // Cognitive shifts exercises keep their state across steps here, for one exercise only.
-  providers: [CsStore],
+  // Cognitive shifts and MCII keep their state across steps here, for one exercise only.
+  providers: [CsStore, MciiStore],
   template: `
     @if (!setup()) {
       <h1>Exercise</h1>
@@ -122,6 +126,12 @@ type SaveState = 'idle' | 'saving' | 'error';
             }
           }
         }
+        <!-- MCII: one component, recreated for each step. -->
+        @if (mciiStage(); as stage) {
+          @for (s of [stage]; track s) {
+            <app-mcii [stage]="s" (completed)="onCompleted($event)" />
+          }
+        }
         @switch (step()) {
           @case ('pre_rating') {
             <app-rating-step phase="pre" (completed)="onCompleted($event)" />
@@ -192,6 +202,10 @@ export class SessionPage {
   protected readonly csGroup = computed(() => {
     const prefix = this.step()?.slice(0, 4);
     return prefix === 'cs1_' || prefix === 'cs2_' || prefix === 'cs3_' ? prefix.slice(0, 3) : null;
+  });
+  protected readonly mciiStage = computed(() => {
+    const step = this.step();
+    return isMciiStage(step) ? step : null;
   });
   protected readonly info = computed(() => exerciseInfo(this.setup()?.condition));
   /**

@@ -12,7 +12,8 @@ export type ExerciseId =
   | Condition
   | 'cs_other_readings'
   | 'cs_why_it_happened'
-  | 'cs_not_enough_to_go_on';
+  | 'cs_not_enough_to_go_on'
+  | 'mcii';
 export type Status = 'in_progress' | 'completed' | 'aborted';
 
 export interface StepSummary {

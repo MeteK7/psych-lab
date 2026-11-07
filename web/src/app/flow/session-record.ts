@@ -4,6 +4,7 @@ import {
   CS_OTHER_READINGS,
   CS_WHY_IT_HAPPENED,
   GOAL_RESTATEMENT,
+  MCII,
   RATINGS,
   STATE_RESET,
   STATE_RESET_SOUND,
@@ -38,6 +39,12 @@ const CONTENT: Record<StepId, Versioned> = {
   cs3_fit: CS_NOT_ENOUGH,
   cs3_find: CS_NOT_ENOUGH,
   cs3_after: CS_NOT_ENOUGH,
+  mcii_wish: MCII,
+  mcii_outcome: MCII,
+  mcii_obstacle: MCII,
+  mcii_decide: MCII,
+  mcii_plan: MCII,
+  mcii_close: MCII,
 };
 
 export interface SessionDraft {

@@ -2,6 +2,7 @@ import hashlib
 import json
 import uuid
 
+import pytest
 from alembic import command
 from alembic.autogenerate import compare_metadata
 from alembic.migration import MigrationContext
@@ -58,14 +59,15 @@ def test_0004_moves_try_it_rows_to_try_and_keeps_test_mode_rows(
             conn.execute(text("DELETE FROM n1_reveals"))
 
 
-def test_0005_leaves_the_experiment_export_byte_identical(
-    engine: Engine, settings: Settings
+@pytest.mark.parametrize("before_widening", ["0004", "0005"])
+def test_widening_the_exercise_list_leaves_the_experiment_export_byte_identical(
+    engine: Engine, settings: Settings, before_widening: str
 ) -> None:
     """Widening the exercise list must not change anything the n-of-1 analysis reads."""
     assert settings.test_database_url is not None
     cfg = alembic_config(settings.test_database_url)
     reveal = uuid.uuid4()
-    command.downgrade(cfg, "0004")
+    command.downgrade(cfg, before_widening)
     try:
         with engine.begin() as conn:
             conn.execute(

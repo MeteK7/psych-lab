@@ -65,11 +65,11 @@ interface BoardCard {
         <h3 class="lens" tabindex="-1" #lensHeading>
           {{ say(c.lenses.counter, { n: lensIndex() + 1, total: c.lenses.items.length, title: lens().title }) }}
         </h3>
+        @for (line of lens().lead; track line) {
+          <p class="lead">{{ line }}</p>
+        }
         <app-card-pick [legend]="lens().prompt" [cards]="lens().cards" [ownChoice]="c.lenses.own_choice"
                        [ownLabel]="c.lenses.own_label" [(value)]="pick" />
-        @if (lens().support; as support) {
-          <p class="support">{{ support }}</p>
-        }
         <div class="actions">
           <button type="button" [disabled]="!pick()" (click)="nextLens(pick())">
             {{ lensIndex() + 1 < c.lenses.items.length ? c.lenses.next_lens : c.next_label }}
@@ -128,9 +128,19 @@ interface BoardCard {
         </ng-template>
       }
       @case ('cs1_feel_after') {
-        <p class="quote">{{ reading() }}</p>
-        <app-rating-scale [item]="c.feel.belief" [(value)]="belief" />
-        <app-rating-scale [item]="c.feel.upset" [(value)]="upset" />
+        <p class="quote">{{ say(c.after.reading, { reading: store.firstReading()?.text ?? '' }) }}</p>
+        <p>{{ c.after.checked }}</p>
+        <app-rating-scale [item]="c.after.belief" [(value)]="belief" />
+        <app-rating-scale [item]="c.after.upset" [(value)]="upset" />
+        <p>{{ c.after.no_direction }}</p>
+        <!-- Shown only after rating, so the earlier numbers don't pull the new answers towards them. -->
+        @if (belief() !== null && upset() !== null) {
+          <div class="note" role="status">
+            <p>{{ say(c.after.compared_belief, { before: store.beliefBefore() ?? 0, now: belief() ?? 0 }) }}</p>
+            <p>{{ say(c.after.compared_upset, { before: store.upsetBefore() ?? 0, now: upset() ?? 0 }) }}</p>
+            <p>{{ c.after.compared_means }}</p>
+          </div>
+        }
         <button type="button" [disabled]="belief() === null || upset() === null" (click)="submitFeelAfter()">
           {{ c.next_label }}
         </button>
@@ -159,7 +169,6 @@ interface BoardCard {
   styles: `
     .safety { border-left: 4px solid var(--accent); padding-left: 0.75rem; }
     .quote { font-size: 1.1rem; }
-    .support { color: var(--muted); }
     .choice { border: 0; padding: 0; margin: 0 0 1.25rem; }
     .choice legend { font-weight: 600; margin-bottom: 0.5rem; }
     .inline { display: inline-flex; gap: 0.35rem; align-items: center; margin-right: 1rem; }
@@ -179,6 +188,7 @@ interface BoardCard {
     .place .inline { margin: 0; min-height: 1.75rem; }
     .place input { width: 1.5rem; height: 1.5rem; margin: 0; }
     .note { border-left: 4px solid var(--accent); padding-left: 0.75rem; }
+    .note p { margin: 0 0 0.4rem; }
     .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   `,
 })
@@ -235,6 +245,8 @@ export class CsOtherReadings implements Experience {
 
   protected submitFeelBefore(): void {
     this.store.control.set(this.control());
+    this.store.beliefBefore.set(this.belief());
+    this.store.upsetBefore.set(this.upset());
     this.completed.emit({
       result: { control: this.control() },
       ratings: { cs1_belief_pre: this.belief()!, cs1_upset_pre: this.upset()! },

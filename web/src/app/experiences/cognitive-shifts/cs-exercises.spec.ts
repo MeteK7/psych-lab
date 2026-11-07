@@ -118,12 +118,24 @@ describe('Cognitive shifts exercises', () => {
 
     expect(heading(run)).toBe('Step 3 of 6: Other ways to see it');
     expect(root(run).textContent).toContain('Lens 1 of 3: Other explanations');
+    expect(root(run).querySelector('.lead')).toBeNull();
     await check(run, root(run).querySelector('app-card-pick input[type="radio"]'));
     await press(run, 'Next lens');
     expect(root(run).textContent).toContain("Lens 2 of 3: A friend's view");
-    expect(root(run).textContent).toContain('It makes sense that this bothers you.'); // a line, not a card
-    expect(root(run).querySelectorAll('app-card-pick input[type="radio"]')).toHaveLength(5); // 4 cards and "my own"
+    // The friend's perspective is set up before the question, so it can't read as feedback on an answer.
+    const lead = Array.from(root(run).querySelectorAll('.lead'));
+    expect(lead.map((p) => p.textContent)).toEqual([
+      "Let's switch the perspective for a moment.",
+      "Imagine a friend telling you they're experiencing the same everyday situation you described in Step 1 and interpreting it in exactly the same way you do.",
+      'You might start by telling them:',
+      "“It makes sense that this bothers you. That isn't something you need to talk yourself out of.”",
+    ]);
+    const pickArea = root(run).querySelector('app-card-pick')!;
+    expect(lead.every((p) => p.compareDocumentPosition(pickArea) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+    expect(pickArea.querySelector('legend')?.textContent).toBe('What else would you say to them?');
+    expect(pickArea.querySelectorAll('input[type="radio"]')).toHaveLength(5); // 4 cards and "my own"
     await press(run, 'Nothing comes to mind');
+    expect(root(run).querySelector('.lead')).toBeNull();
     expect(root(run).querySelector('app-card-pick .own')).toBeNull(); // a new lens starts closed
     await check(run, root(run).querySelector('app-card-pick input[value="own"]'));
     await type(run, root(run).querySelector<HTMLInputElement>('.own input')!, 'PRIVATE lens reading');
@@ -136,7 +148,33 @@ describe('Cognitive shifts exercises', () => {
     await check(run, root(run).querySelector('#place-later-fits'));
     await press(run, 'Next');
 
-    await rate(run, 4);
+    expect(heading(run)).toBe('Step 5 of 6: Your first reading, looked at again');
+    const reassess = root(run).textContent!;
+    expect(reassess).toContain('In Step 1, this was your first reading: ‘PRIVATE first reading’');
+    expect(reassess).toContain("You've now looked at other ways to see it and sorted which ones fit.");
+    expect(reassess).toContain(
+      "There's no right answer. These numbers don't have to go down, and they don't have to move together. Believing the reading just as much, or still finding it upsetting, is also valid.",
+    );
+    const scales = Array.from(root(run).querySelectorAll('app-rating-scale fieldset'));
+    expect(scales.map((s) => s.querySelector('legend')?.textContent)).toEqual([
+      'Thinking back to that first reading: how much do you believe it now?',
+      'And how upsetting does it feel now?',
+    ]);
+    const rateOne = (scale: number, value: number) =>
+      check(run, scales[scale].querySelector<HTMLInputElement>(`input[value="${value}"]`));
+    // The comparison waits for both ratings, and uses the same words for any direction.
+    const compared = () => root(run).querySelector('[role="status"]')?.textContent;
+    expect(compared()).toBeUndefined();
+    await rateOne(0, 4);
+    expect(compared()).toBeUndefined();
+    expect(button(run, 'Next').disabled).toBe(true);
+    await rateOne(1, 9);
+    expect(compared()).toContain('In Step 2 you rated your belief in it 7. Now you rate it 4.');
+    expect(compared()).toContain('In Step 2 you rated how upsetting it felt 7. Now you rate it 9.');
+    expect(compared()).toContain("It doesn't show whether the reading is right.");
+    await rateOne(1, 7);
+    expect(compared()).toContain('In Step 2 you rated how upsetting it felt 7. Now you rate it 7.');
+    await rateOne(1, 4);
     await press(run, 'Next');
     expect(heading(run)).toBe("Step 6 of 6: What you're keeping");
     const close = root(run).textContent!;
@@ -155,7 +193,7 @@ describe('Cognitive shifts exercises', () => {
     const saved = last(run);
     expect(saved.status).toBe('completed');
     expect(saved.mode).toBe('try');
-    expect(saved.content_versions).toEqual({ 'cs-other-readings': '3' });
+    expect(saved.content_versions).toEqual({ 'cs-other-readings': '5' });
     expect(saved.steps?.map((s) => s.step)).toEqual([
       'cs1_first', 'cs1_feel_before', 'cs1_lenses', 'cs1_sort', 'cs1_feel_after', 'cs1_close',
     ]);
@@ -267,6 +305,9 @@ describe('Cognitive shifts exercises', () => {
 
     expect(heading(run)).toBe('Step 2 of 5: Your first reading');
     await check(run, root(run).querySelector('app-card-pick input[value="bothered"]'));
+    expect(root(run).querySelector('app-rating-scale legend')?.textContent).toBe(
+      'How sure are you that this reading is right?',
+    );
     await rate(run, 8);
     await press(run, 'Next');
 
@@ -296,19 +337,36 @@ describe('Cognitive shifts exercises', () => {
     expect(root(run).querySelector('.note')?.textContent).toContain('One way to ask without assuming your reading');
     await press(run, 'Next');
 
-    expect(heading(run)).toBe('Step 5 of 5: How sure are you now?');
+    expect(heading(run)).toBe('Step 5 of 5: Your first reading, looked at again');
+    const reassess = root(run).textContent!;
+    expect(reassess).toContain('In Step 2, this was your first reading: ‘Something I said bothered them a bit.’');
+    expect(reassess).toContain("You've now checked other explanations against what happened.");
+    expect(reassess).toContain("There's no right answer. A lower rating isn't automatically better, and staying just as sure is also valid.");
+    expect(root(run).querySelector('app-rating-scale legend')?.textContent).toBe(
+      'Thinking back to that first reading: how sure are you now that it was right?',
+    );
     expect(Array.from(root(run).querySelectorAll('.keep li')).map((li) => li.textContent)).toEqual([
       'Would what happened also fit another reading?',
       'What would actually tell me, and is it worth finding out?',
     ]);
+    // The comparison appears only after rating, in the same neutral words for any direction.
+    const compared = () => root(run).querySelector('[role="status"]')?.textContent;
+    expect(compared()).toBeUndefined();
+    expect(button(run, 'Finish').disabled).toBe(true);
+    await rate(run, 10);
+    expect(compared()).toContain('In Step 2 you rated it 8. Now you rate it 10.');
+    await rate(run, 8);
+    expect(compared()).toContain('In Step 2 you rated it 8. Now you rate it 8.');
     await rate(run, 4);
+    expect(compared()).toContain('In Step 2 you rated it 8. Now you rate it 4.');
+    expect(compared()).toContain("It doesn't show whether the reading is right.");
     await press(run, 'Finish');
     const plan = Array.from(root(run).querySelectorAll('a')).find((a) => a.textContent?.trim() === 'Plan your first step');
     expect(plan?.getAttribute('href')).toBe('/session?mode=try&condition=action_bridge');
 
     const saved = last(run);
     expect(saved.status).toBe('completed');
-    expect(saved.content_versions).toEqual({ 'cs-not-enough': '3' });
+    expect(saved.content_versions).toEqual({ 'cs-not-enough': '4' });
     expect(saved.ratings).toEqual({ cs3_certainty_pre: 8, cs3_certainty_post: 4 });
     expect(saved.steps?.[2].result).toEqual({ fits: ['busy', 'forgot'], own_added: true, something_else: false });
     expect(saved.steps?.[3].result).toEqual({ choice: 'ask' });
@@ -324,7 +382,8 @@ describe('Cognitive shifts exercises', () => {
     await press(run, 'Next');
 
     expect(root(run).querySelectorAll('app-card-pick .card-option')).toHaveLength(5); // 4 general readings and "my own"
-    await check(run, root(run).querySelector('app-card-pick input[value="feared"]'));
+    await check(run, root(run).querySelector('app-card-pick input[value="own"]'));
+    await type(run, root(run).querySelector<HTMLInputElement>('.own input')!, 'PRIVATE first reading');
     await rate(run, 9);
     await press(run, 'Next');
 
@@ -336,6 +395,7 @@ describe('Cognitive shifts exercises', () => {
     await check(run, root(run).querySelector('input[name="cs3-find"][value="leave"]'));
     expect(root(run).querySelector('.note')?.textContent).toContain("Then the honest answer is: you don't know.");
     await press(run, 'Next');
+    expect(root(run).textContent).toContain('In Step 2, this was your first reading: ‘PRIVATE first reading’'); // shown back, never saved
     await rate(run, 9);
     await press(run, 'Finish');
     expect(Array.from(root(run).querySelectorAll('a')).some((a) => a.textContent?.includes('Plan your first step'))).toBe(false);

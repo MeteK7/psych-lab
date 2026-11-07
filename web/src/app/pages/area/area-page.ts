@@ -19,7 +19,7 @@ import { Icon } from '../../shared/icon';
       <h1>{{ a.title }}</h1>
       <p class="lead">{{ a.intro }}</p>
 
-      @for (topic of a.topics; track topic.title; let t = $index) {
+      @for (topic of shownTopics(); track topic.title; let t = $index) {
         <section [attr.aria-labelledby]="'topic-heading-' + t">
           <h2 [id]="'topic-heading-' + t">{{ topic.title }}</h2>
           <p>{{ topic.text }}</p>
@@ -42,7 +42,7 @@ import { Icon } from '../../shared/icon';
               }
             }
           </ul>
-          <p class="muted">{{ a.practiceNote ?? defaultNote }}</p>
+          <p class="muted">{{ topic.practiceNote ?? a.practiceNote ?? defaultNote }}</p>
 
           @if (topic.hasExperiment) {
             <section class="card prominent" aria-labelledby="experiment-heading">
@@ -85,6 +85,10 @@ export class AreaPage {
     () => this.environment.value() === null && AREAS.some((a) => a.id === this.id() && a.status === 'development'),
   );
   protected readonly defaultNote = 'Practice exercises are saved in My records but are never part of your experiment.';
+  /** A topic whose exercises are all hidden in this build would be an empty section. */
+  protected readonly shownTopics = computed(() =>
+    (this.area()?.topics ?? []).filter((topic) => topic.experiences.some((value) => this.visible(value))),
+  );
 
   /** Released exercises everywhere; development-only ones in the development build only. */
   protected visible(value: ExerciseId) {

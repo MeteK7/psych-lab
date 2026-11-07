@@ -121,7 +121,16 @@ import { CsStore, Pick } from './cs-store';
       }
       @case ('cs3_after') {
         <p class="quote">{{ say(c.after.reading, { reading: store.cs3First()?.text ?? '' }) }}</p>
-        <app-rating-scale [item]="c.first.certainty" [(value)]="certainty" />
+        <p>{{ c.after.checked }}</p>
+        <app-rating-scale [item]="c.after.certainty" [(value)]="certainty" />
+        <p>{{ c.after.no_direction }}</p>
+        <!-- Shown only after rating, so the earlier number doesn't pull the new answer towards it. -->
+        @if (certainty() !== null) {
+          <div class="note" role="status">
+            <p>{{ say(c.after.compared, { before: store.cs3CertaintyBefore() ?? 0, now: certainty() ?? 0 }) }}</p>
+            <p>{{ c.after.compared_means }}</p>
+          </div>
+        }
         <section class="keep" aria-labelledby="cs3-keep">
           <h3 id="cs3-keep">{{ c.after.keep_heading }}</h3>
           <ol>
@@ -231,6 +240,7 @@ export class CsNotEnough implements Experience {
     const pick = this.pick();
     if (!pick) return;
     this.store.cs3First.set(pick);
+    this.store.cs3CertaintyBefore.set(this.certainty());
     this.completed.emit({ result: { first: pick.id }, ratings: { cs3_certainty_pre: this.certainty()! } });
   }
 
