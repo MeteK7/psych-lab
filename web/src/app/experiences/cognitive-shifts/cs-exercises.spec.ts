@@ -282,6 +282,11 @@ describe('Cognitive shifts exercises', () => {
     expect(map).toContain("Effort is one possible cause among many. It isn't the answer by default.");
     expect(root(run).querySelector('figure [role="img"]')?.getAttribute('aria-label')).toContain('Map of your causes');
     expect(root(run).querySelectorAll('.map-list li')).toHaveLength(3);
+    // A cause that ends a sentence takes no colon; one that doesn't keeps it.
+    const lines = Array.from(root(run).querySelectorAll('.map-list li')).map((li) => li.textContent!.trim());
+    expect(lines[0]).toBe("I'm just not good at this. About me, lasting, affects everything");
+    expect(lines[2]).toBe('PRIVATE cause: about me, lasting, affects everything');
+    expect(lines.join(' ')).not.toContain('.:');
     // The heavy map shows all three causes, in one place, with nothing in bold.
     await mapShown();
     expect(marks()).toEqual(['1 2 3']);

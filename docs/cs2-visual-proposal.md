@@ -1,6 +1,6 @@
 # CS2 cause map: Visual System proposal (v0.2)
 
-> **Status:** proposal, 2026-11-08. **C1–C5 approved and built** on the development branch: change 1, then the rebuild as the instrument `cs2.cause-map@1` (§5.5), integrated into CS2. For review in the Visual Lab (R2) and in the test environment (R3, the psychology-trained reviewer). C6 is still open (§8).
+> **Status:** proposal, 2026-11-08. **C1–C5 approved and built** on the development branch: change 1, then the rebuild as the instrument `cs2.cause-map@1` (§5.5), integrated into CS2. For review in the Visual Lab (R2) and in the test environment (R3, the psychology-trained reviewer). C6 decided (§8).
 > - The screenshots are in `docs/cs2-visual-proposal/`. The "current" ones show the chart before change 1. The "built" ones show change 1 in the running development build (they replace the mock-ups the proposal was reviewed with, which matched them).
 > - It follows the approach that worked for MCII: start from what exists, change only what serves a named purpose (`visual-policy.md` principle 6), keep the exercise looking like the rest of the application, and show one small change first.
 > - CS2 stays development-only. Its own release gates (content review, full texts; `cognitive-shifts-design.md` §9) are unchanged by this proposal.
@@ -81,9 +81,9 @@ Found by running the exercise. Each is a fact, with the screenshot that shows it
 |---|---|
 | ![Heavy map, current](cs2-visual-proposal/current-heavy.png) | ![High contrast, current](cs2-visual-proposal/current-forced.png) |
 
-**Two text issues I noticed** (content, not the chart: for the content review, not changed here):
-- **Double punctuation in the list:** a card that ends with a full stop reads "I'm just not good at this.: about me, …".
-- **The "Add a cause" box on a heavy map** repeats step 3's instruction, "Add at least two more; pick from these or write your own", where only one cause is being added.
+**Two text issues I noticed** (not the chart; decision C6 in §8):
+- **Double punctuation in the list:** a card that ends with a full stop reads "I'm just not good at this.: about me, …". **Fixed in code (C6):** a cause that ends a sentence takes no colon, and its answers start a new sentence ("I'm just not good at this. About me, …"). The texts are unchanged.
+- **The "Add a cause" box on a heavy map** repeats step 3's instruction, "Add at least two more; pick from these or write your own", where only one cause is being added. **For the CS2 content review (C6);** unchanged here.
 
 ---
 
@@ -240,4 +240,4 @@ If change 1 alone is enough for now, the rebuild can wait. Change 1 works on the
 | C3 | On step 4, the cause being placed in the Cognitive colour and heavier; the others neutral. On step 5, all causes the same | **Approved and built** |
 | C4 | No dragging, no motion, no third scale on the chart, no quadrant labels (§5.4) | **Approved** |
 | C5 | Revise the v0.2 scope as in §6: the instrument tier and the cause map; S6 and value transitions wait for a composition that needs them | **Approved; `visual-system.md` §14 revised** |
-| C6 | The two text issues in §4 go to the CS2 content review rather than being fixed here | Your call: they're small, but they change content (a version bump) |
+| C6 | The two text issues in §4 | **Decided 2026-11-08, split:** the double punctuation is fixed in code (no content change, no version bump); the heavy-map "Add a cause" wording goes to the CS2 content review |

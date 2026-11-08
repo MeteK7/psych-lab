@@ -145,7 +145,7 @@ const MIN_CAUSES = 3;
           <p class="list-heading">{{ c.map.list_heading }}</p>
           <ol class="map-list">
             @for (cause of store.causes(); track $index) {
-              <li>{{ cause.text }}: {{ describe('who', cause.who) }}, {{ describe('time', cause.time) }}, {{ describe('scope', cause.scope) }}</li>
+              <li>{{ listLine(cause) }}</li>
             }
           </ol>
         </figcaption>
@@ -218,6 +218,17 @@ export class CsWhyItHappened implements Experience {
     if (value <= 2) return a.low.toLowerCase();
     if (value >= 4) return a.high.toLowerCase();
     return `between ${a.low.toLowerCase()} and ${a.high.toLowerCase()}`;
+  }
+
+  /**
+   * A cause and its three answers, for the list under the map. A cause that already ends a sentence
+   * ("I'm just not good at this.") takes no colon; its answers then start a new sentence.
+   */
+  protected listLine(cause: Cause): string {
+    const answers = `${this.describe('who', cause.who)}, ${this.describe('time', cause.time)}, ${this.describe('scope', cause.scope)}`;
+    const text = cause.text.trimEnd();
+    if (!/[.!?…]$/.test(text)) return `${text}: ${answers}`;
+    return `${text} ${answers.charAt(0).toUpperCase()}${answers.slice(1)}`;
   }
 
   protected has(id: string): boolean {

@@ -79,6 +79,7 @@ Please also flag anything that touches on clinical topics, trauma, health or cri
 | Map: "Some causes may really be about you. That's information, not a verdict on what you can do." | | | |
 | Map: "That's a heavy way to see it. Is there any cause that's about this time only? You can add one below, or keep the map as it is." | | | |
 | Map: "Effort is one possible cause among many. It isn't the answer by default." | | | |
+| "Add a cause" box (step 5, on a heavy map): it repeats step 3's instruction, "Most things have more than one cause. Add at least two more; pick from these or write your own:", where one cause is added. Is it clear here? | | | |
 
 ## D. CS3 · Not enough to go on
 For each scenario, rate the scenario itself and each reading. Then answer two questions about the scenario's readings as a set:
