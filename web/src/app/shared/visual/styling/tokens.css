@@ -1,0 +1,85 @@
+/*
+ * S1 Styling: the visual language's colour tokens (docs/visual-language.md §2–§3, §7).
+ * The source of truth for colour in figures: a spec parses this file and checks every contrast
+ * pair. Used as the host styles of a figure surface; the page's own tokens are only read
+ * (--bg, --text, --muted), never changed.
+ *
+ * - Ramps: --vis-n-<step> is the neutral ramp; the theme attribute sets --vis-a-<step>, the area ramp.
+ * - Roles: set once per scheme from ramp steps. Scenes and backends use roles only.
+ * - Scheme: data-vis-scheme="auto" follows the page; "light" or "dark" pins it (the Visual Lab).
+ */
+:host {
+  --vis-n-050: #f6f7f8; --vis-n-100: #ecedef; --vis-n-200: #d9dbde; --vis-n-300: #bec1c6;
+  --vis-n-400: #a1a5ab; --vis-n-500: #82868e; --vis-n-600: #686c73; --vis-n-700: #52555b;
+  --vis-n-800: #3d4044; --vis-n-900: #2a2b2e; --vis-n-950: #1d1e20;
+}
+:host([data-vis-theme='action']) {
+  --vis-a-050: #f3f7ff; --vis-a-100: #e4edff; --vis-a-200: #c8dbff; --vis-a-300: #a0c1ff;
+  --vis-a-400: #76a3fa; --vis-a-600: #3766c7; --vis-a-700: #274fa4; --vis-a-800: #1d3c7c;
+  --vis-a-900: #152953; --vis-a-950: #0f1d39;
+}
+:host([data-vis-theme='cognitive']) {
+  --vis-a-050: #f8f5ff; --vis-a-100: #f0e9ff; --vis-a-200: #e0d3fb; --vis-a-300: #c9b5f1;
+  --vis-a-400: #b093e4; --vis-a-600: #7955b0; --vis-a-700: #614190; --vis-a-800: #49316c;
+  --vis-a-900: #312249; --vis-a-950: #221832;
+}
+:host([data-vis-theme='attention']) {
+  --vis-a-050: #f2f8fb; --vis-a-100: #e4eff4; --vis-a-200: #cbdee8; --vis-a-300: #a9c6d5;
+  --vis-a-400: #84abbf; --vis-a-600: #457388; --vis-a-700: #345b6e; --vis-a-800: #264452;
+  --vis-a-900: #1b2e37; --vis-a-950: #132026;
+}
+:host([data-vis-theme='regulation']) {
+  --vis-a-050: #effaf7; --vis-a-100: #def2ed; --vis-a-200: #c0e4db; --vis-a-300: #96cfc1;
+  --vis-a-400: #65b6a5; --vis-a-600: #007e6c; --vis-a-700: #006455; --vis-a-800: #004b40;
+  --vis-a-900: #05332b; --vis-a-950: #07241e;
+}
+:host([data-vis-theme='recovery']) {
+  --vis-a-050: #fef5ed; --vis-a-100: #f9eadb; --vis-a-200: #f1d6ba; --vis-a-300: #e1b88d;
+  --vis-a-400: #cf985b; --vis-a-600: #975d00; --vis-a-700: #784900; --vis-a-800: #5b3600;
+  --vis-a-900: #3f2503; --vis-a-950: #2b1a05;
+}
+
+/* Roles, light. */
+:host {
+  --vis-ground: var(--bg);
+  --vis-far: var(--vis-a-050); --vis-far-edge: var(--vis-a-200);
+  --vis-mid: var(--vis-a-100); --vis-mid-edge: var(--vis-a-300);
+  --vis-near: var(--vis-a-200); --vis-near-edge: var(--vis-a-400);
+  --vis-subject-fill: var(--vis-a-100); --vis-subject: var(--vis-a-600);
+  --vis-context: var(--vis-n-500); --vis-ink: var(--text);
+  --vis-label: var(--text); --vis-label-soft: var(--muted);
+  --vis-receded: var(--vis-n-600); --vis-receded-fill: var(--vis-n-100);
+}
+
+/* Roles, dark: farther planes move towards the dark ground, as they move towards white in light. */
+@media (prefers-color-scheme: dark) {
+  :host([data-vis-scheme='auto']) {
+    --vis-far: var(--vis-a-950); --vis-far-edge: var(--vis-a-800);
+    --vis-mid: var(--vis-a-900); --vis-mid-edge: var(--vis-a-700);
+    --vis-near: var(--vis-a-800); --vis-near-edge: var(--vis-a-600);
+    --vis-subject-fill: var(--vis-a-800); --vis-subject: var(--vis-a-300);
+    --vis-context: var(--vis-n-400);
+    --vis-receded: var(--vis-n-300); --vis-receded-fill: var(--vis-n-800);
+  }
+}
+:host([data-vis-scheme='dark']) {
+  --vis-far: var(--vis-a-950); --vis-far-edge: var(--vis-a-800);
+  --vis-mid: var(--vis-a-900); --vis-mid-edge: var(--vis-a-700);
+  --vis-near: var(--vis-a-800); --vis-near-edge: var(--vis-a-600);
+  --vis-subject-fill: var(--vis-a-800); --vis-subject: var(--vis-a-300);
+  --vis-context: var(--vis-n-400);
+  --vis-receded: var(--vis-n-300); --vis-receded-fill: var(--vis-n-800);
+}
+
+/* Forced colours (§3.6): every role mapped to a system colour, so weight and dashes keep their meaning. */
+@media (forced-colors: active) {
+  :host([data-vis-scheme]) {
+    forced-color-adjust: none;
+    --vis-ground: Canvas; --vis-far: Canvas; --vis-mid: Canvas; --vis-near: Canvas;
+    --vis-subject-fill: Canvas; --vis-receded-fill: Canvas;
+    --vis-far-edge: GrayText; --vis-mid-edge: GrayText; --vis-near-edge: GrayText;
+    --vis-subject: CanvasText; --vis-context: CanvasText; --vis-ink: CanvasText;
+    --vis-label: CanvasText; --vis-label-soft: CanvasText;
+    --vis-receded: GrayText; --vis-focal: Highlight;
+  }
+}
