@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
+import { causeMapFrame } from '../instruments/cause-map/cause-map';
 import { buildFrame, buildTimeline } from '../integration/pipeline';
 import { SCENES } from '../scenes';
 import { readSource } from '../testing/source-files';
@@ -39,6 +40,15 @@ describe('SVG backend conformance', () => {
       expect(host.querySelectorAll('svg *').length).toBe(frame.items.length);
     });
   }
+
+  it('draws a bold text item bold, and every other text in the normal weight', async () => {
+    const frame = causeMapFrame({ causes: [{ who: 1, time: 1 }, { who: 1, time: 1 }], placing: 2, axes: { left: 'a', right: 'b', top: 'c', bottom: 'd' } });
+    const host = (await render(frame)).nativeElement as HTMLElement;
+    const weights = Object.fromEntries([...host.querySelectorAll('text')].map((t) => [t.getAttribute('data-vis-id'), (t as SVGElement).style.fontWeight]));
+    expect(weights['mark-1-num-2']).toBe('700');
+    expect(weights['mark-1-num-1']).toBe('');
+    expect(weights['axis-left']).toBe('');
+  });
 
   it('hides the drawing from assistive technology; the slot carries the text alternative', async () => {
     const { scene, text } = SCENES[0];

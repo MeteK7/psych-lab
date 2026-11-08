@@ -1,8 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
 
+import { CS_WHY_IT_HAPPENED } from '../../../content';
 import { AppEnvironment } from '../../shared/app-environment';
 import { PURPOSE_LABELS, SceneDefinition, elementsOf } from '../../shared/visual/composition/scene';
 import { validateScene } from '../../shared/visual/composition/validate';
+import { CAUSE_MAP, CAUSE_MAP_PURPOSES, CauseMapInput } from '../../shared/visual/instruments/cause-map/cause-map';
+import { CauseMap } from '../../shared/visual/integration/cause-map';
 import { QualityTier, SceneFigure, SurfaceScheme } from '../../shared/visual/integration/scene-figure';
 import { Mover, motionProblems, movers } from '../../shared/visual/motion/plan-motion';
 import { SCENES } from '../../shared/visual/scenes';
@@ -16,7 +19,7 @@ import { EMPHASIS_CHANGE, MOTION, MOTION_EFFECTS, THEMES } from '../../shared/vi
  */
 @Component({
   selector: 'app-lab-page',
-  imports: [SceneFigure],
+  imports: [SceneFigure, CauseMap],
   template: `
     <h1>Visual Lab</h1>
     @if (env.showsDevelopment()) {
@@ -106,6 +109,39 @@ import { EMPHASIS_CHANGE, MOTION, MOTION_EFFECTS, THEMES } from '../../shared/vi
           }
         </section>
       }
+
+      <section class="scene" aria-labelledby="lab-instruments">
+        <h2 id="lab-instruments">
+          {{ causeMap.id }}<span class="meta">&#64;{{ causeMap.version }} · theme {{ causeMap.theme }}&#64;{{ themeVersion(causeMap.theme) }} · instrument</span>
+        </h2>
+        <p class="note muted">
+          The CS2 cause map, drawn from the exercise's answers (docs/cs2-visual-proposal.md). In the exercise, the sliders set the
+          answers and the list under the map gives them in words; here, a few sets of answers show every case.
+        </p>
+        @for (set of causeSets; track set.key) {
+          <h3>{{ set.name }}</h3>
+          <div class="grid">
+            @for (scheme of schemes; track scheme) {
+              <div class="panel" [class]="scheme">
+                <span class="tag">{{ causeMap.id }}&#64;{{ causeMap.version }} · {{ scheme }}</span>
+                <figure role="img" [attr.aria-label]="chartLabel" [attr.data-instrument]="causeMap.id + '-' + set.key + '-' + scheme">
+                  <app-vis-cause-map [causes]="set.causes" [placing]="set.placing" [axes]="axes" [scheme]="scheme" />
+                </figure>
+              </div>
+            }
+          </div>
+        }
+        <h3>Why each element is there</h3>
+        <table>
+          <caption>Every element serves at least one purpose (visual-policy §2).</caption>
+          <thead><tr><th scope="col">Element</th><th scope="col">Serves</th><th scope="col">Why</th></tr></thead>
+          <tbody>
+            @for (row of causeMapPurposes; track row.id) {
+              <tr><th scope="row"><code>{{ row.id }}</code></th><td>{{ row.serves }}</td><td>{{ row.why }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </section>
     } @else {
       <p>The Visual Lab is available in the development build only.</p>
     }
@@ -144,6 +180,28 @@ export class LabPage {
   protected readonly env = inject(AppEnvironment);
   protected readonly schemes: SurfaceScheme[] = ['light', 'dark'];
   protected readonly tier = signal<QualityTier | 'auto'>('auto');
+  protected readonly causeMap = CAUSE_MAP;
+  protected readonly chartLabel = CS_WHY_IT_HAPPENED.map.chart_label;
+  private readonly axisWords = CS_WHY_IT_HAPPENED.map.axes;
+  protected readonly axes: CauseMapInput['axes'] = {
+    left: this.axisWords[0].low,
+    right: this.axisWords[0].high,
+    top: this.axisWords[1].low,
+    bottom: this.axisWords[1].high,
+  };
+  /** Answer sets covering every case the map has to draw. */
+  protected readonly causeSets: { key: string; name: string; placing: number; causes: CauseMapInput['causes'] }[] = [
+    { key: 'start', name: 'Step 4, the start: every cause in the middle, cause 1 being placed', placing: 1, causes: [{ who: 3, time: 3 }, { who: 3, time: 3 }, { who: 3, time: 3 }] },
+    { key: 'placing', name: 'Step 4: cause 2 being placed', placing: 2, causes: [{ who: 1, time: 2 }, { who: 3, time: 3 }, { who: 3, time: 3 }] },
+    { key: 'spread', name: 'Step 5: causes spread out', placing: 0, causes: [{ who: 1, time: 2 }, { who: 5, time: 5 }, { who: 2, time: 5 }] },
+    { key: 'heavy', name: 'Step 5: a heavy map, every cause in one corner', placing: 0, causes: [{ who: 1, time: 1 }, { who: 1, time: 1 }, { who: 1, time: 1 }] },
+    { key: 'six', name: 'Step 5: six causes in one place, at the edge', placing: 0, causes: Array.from({ length: 6 }, () => ({ who: 5, time: 1 })) },
+  ];
+  protected readonly causeMapPurposes = CAUSE_MAP_PURPOSES.map(({ id, purpose }) => ({
+    id,
+    serves: purpose.serves.map((k) => PURPOSE_LABELS[k]).join('; '),
+    why: purpose.why,
+  }));
   /** Bumped by Replay: a new run re-creates the figures, which then play the change again. */
   protected readonly runs = signal<Record<string, number>>({});
 

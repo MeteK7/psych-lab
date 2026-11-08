@@ -9,7 +9,8 @@ import { expectNoSeriousA11yIssues } from './helpers';
 
 const STATES = 4; // mcii.path
 const TRANSITIONS = 3; // mcii.path: future → contrast, contrast → plan, contrast → aside
-const PANELS = STATES * 2 + TRANSITIONS * 2; // light and dark
+const CAUSE_SETS = 5; // cs2.cause-map: the answer sets in the Lab
+const PANELS = (STATES + TRANSITIONS + CAUSE_SETS) * 2; // light and dark
 
 for (const [name, media] of [
   ['light', { colorScheme: 'light' }],
@@ -27,7 +28,8 @@ for (const [name, media] of [
     }
     await expect(page.getByRole('list', { name: 'Validation problems' })).toHaveCount(0);
     // The purpose of every element is explained.
-    await expect(page.getByRole('table').getByRole('row')).toHaveCount(1 + 11);
+    await expect(page.getByRole('table').first().getByRole('row')).toHaveCount(1 + 11); // mcii.path
+    await expect(page.getByRole('table').nth(1).getByRole('row')).toHaveCount(1 + 7); // cs2.cause-map
     // Every figure draws something.
     for (const count of await page.locator('app-vis-svg svg').evaluateAll((els) => els.map((e) => e.childElementCount))) {
       expect(count).toBeGreaterThan(0);

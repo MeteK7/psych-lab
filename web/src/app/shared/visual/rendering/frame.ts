@@ -28,6 +28,8 @@ export type FrameItem =
       anchor: 'start' | 'middle' | 'end';
       fill: string;
       size: number;
+      /** Bold marks the one item a person is working on (an instrument's current value). Default normal. */
+      weight?: 'bold';
     };
 
 export interface ResolvedFrame {

@@ -76,7 +76,7 @@ function keyframes(track: ResolvedTrack): Keyframe[] {
       @for (item of items(); track item.id) {
         @if (item.kind === 'text') {
           <text [attr.data-vis-id]="item.id" [attr.x]="item.x" [attr.y]="item.y" [attr.text-anchor]="item.anchor"
-                [style.fill]="item.fill" [style.font-size.px]="item.size">{{ item.text }}</text>
+                [style.fill]="item.fill" [style.font-size.px]="item.size" [style.font-weight]="item.weight === 'bold' ? 700 : null">{{ item.text }}</text>
         } @else {
           <path [attr.data-vis-id]="item.id" [attr.d]="item.d" [style.fill]="item.paint.fill" [style.stroke]="item.paint.stroke"
                 [style.stroke-width.px]="item.paint.width" [style.stroke-dasharray]="item.paint.dash"

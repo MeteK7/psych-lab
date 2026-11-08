@@ -3,6 +3,7 @@ import { Component, computed, inject, input, output, signal } from '@angular/cor
 
 import { CS_WHY_IT_HAPPENED, fill } from '../../../content';
 import { StepId } from '../../flow/conditions';
+import { CauseMapSlot } from '../../shared/visual/integration/cause-map-slot';
 import { Experience, StepOutcome } from '../../flow/step-outcome';
 import { CardPick } from './card-pick';
 import { CausePosition, Reflection, changeOrder, reflections } from './cs-logic';
@@ -16,10 +17,12 @@ const MIN_CAUSES = 3;
 /**
  * CS2 · Why did it happen? (cognitive-shifts-design.md §4): collect causes, place each on
  * three scales, and see them on a map. Cause and setback texts stay in CsStore.
+ * The map is the Visual System's cause-map instrument (docs/cs2-visual-proposal.md): it gets the
+ * causes' places only, never their texts, which the list under it gives in words.
  */
 @Component({
   selector: 'app-cs-why-it-happened',
-  imports: [CardPick, NgTemplateOutlet],
+  imports: [CardPick, NgTemplateOutlet, CauseMapSlot],
   template: `
     @switch (stage()) {
       @case ('cs2_setback') {
@@ -136,21 +139,8 @@ const MIN_CAUSES = 3;
 
     <ng-template #chart>
       <figure class="chart">
-        <svg viewBox="0 0 260 190" role="img" [attr.aria-label]="c.map.chart_label">
-          <rect x="34" y="8" width="214" height="150" rx="6" class="frame" />
-          <line x1="141" y1="8" x2="141" y2="158" class="grid" />
-          <line x1="34" y1="83" x2="248" y2="83" class="grid" />
-          <text x="34" y="176" class="axis">{{ c.map.axes[0].low }}</text>
-          <text x="248" y="176" class="axis" text-anchor="end">{{ c.map.axes[0].high }}</text>
-          <text x="28" y="20" class="axis" text-anchor="end">{{ short(c.map.axes[1].low) }}</text>
-          <text x="28" y="156" class="axis" text-anchor="end">{{ short(c.map.axes[1].high) }}</text>
-          @for (cause of store.causes(); track $index; let i = $index) {
-            <g [class.current]="stage() === 'cs2_map' && i === mapIndex()">
-              <circle [attr.cx]="x(cause.who)" [attr.cy]="y(cause.time)" r="9" class="dot" />
-              <text [attr.x]="x(cause.who)" [attr.y]="y(cause.time) + 4" class="num" text-anchor="middle">{{ i + 1 }}</text>
-            </g>
-          }
-        </svg>
+        <!-- The map loads on demand, holding its space meanwhile. The list below carries the same information. -->
+        <app-vis-cause-map-slot role="img" [attr.aria-label]="c.map.chart_label" [causes]="positions()" [placing]="placing()" [axes]="axes" />
         <figcaption>
           <p class="list-heading">{{ c.map.list_heading }}</p>
           <ol class="map-list">
@@ -176,13 +166,6 @@ const MIN_CAUSES = 3;
     .slider input { width: 100%; }
     .ends { display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--muted); }
     .chart { margin: 0 0 1rem; max-width: 26rem; }
-    .chart svg { width: 100%; }
-    .frame { fill: none; stroke: var(--border); }
-    .grid { stroke: var(--border); stroke-dasharray: 3 3; }
-    .axis { font-size: 10px; fill: var(--muted); }
-    .dot { fill: var(--bg); stroke: var(--muted); stroke-width: 2; }
-    .current .dot { stroke: var(--accent); stroke-width: 3; }
-    .num { font-size: 10px; fill: var(--text); }
     .list-heading { font-weight: 600; margin: 0.5rem 0 0.25rem; font-size: 0.9rem; }
     .map-list { margin: 0; padding-left: 1.25rem; font-size: 0.9rem; }
     .note { border-left: 4px solid var(--accent); padding-left: 0.75rem; }
@@ -211,6 +194,16 @@ export class CsWhyItHappened implements Experience {
   protected readonly shown = computed<Reflection[]>(() => reflections(this.store.causes()));
   protected readonly ordered = computed(() => changeOrder(this.store.causes()));
   protected readonly unusedCards = computed(() => this.c.more.cards.filter((k) => !this.has(k.id)));
+  /** The number of the cause being placed (step 4), or 0. */
+  protected readonly placing = computed(() => (this.stage() === 'cs2_map' ? this.mapIndex() + 1 : 0));
+  /** The causes' places for the map: numbers only, never the texts. */
+  protected readonly positions = computed(() => this.store.causes().map(({ who, time }) => ({ who, time })));
+  protected readonly axes = {
+    left: this.c.map.axes[0].low,
+    right: this.c.map.axes[0].high,
+    top: this.c.map.axes[1].low,
+    bottom: this.c.map.axes[1].high,
+  };
 
   protected value(event: Event): string {
     return (event.target as HTMLInputElement).value;
@@ -218,19 +211,6 @@ export class CsWhyItHappened implements Experience {
 
   protected say(text: string, values: Record<string, string | number>): string {
     return fill(text, values);
-  }
-
-  /** Short label for the vertical axis. */
-  protected short(label: string): string {
-    return label.replace('Just this time', 'This time');
-  }
-
-  protected x(who: number): number {
-    return 34 + 20 + ((who - 1) / 4) * 174;
-  }
-
-  protected y(time: number): number {
-    return 8 + 18 + ((time - 1) / 4) * 114;
   }
 
   protected describe(axis: Axis, value: number): string {

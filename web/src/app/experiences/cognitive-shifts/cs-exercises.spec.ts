@@ -251,25 +251,48 @@ describe('Cognitive shifts exercises', () => {
     await press(run, 'Next');
 
     expect(heading(run)).toBe('Step 4 of 6: Place each cause');
+    // The map's marks, as the numbers each lists; [n] is the cause being placed, in bold.
+    const marks = () => {
+      const byMark = new Map<string, string[]>();
+      for (const t of Array.from(root(run).querySelectorAll<SVGElement>('figure text[data-vis-id*="-num-"]'))) {
+        const [mark] = t.getAttribute('data-vis-id')!.split('-num-');
+        const n = t.textContent!.trim();
+        byMark.set(mark, [...(byMark.get(mark) ?? []), t.style.fontWeight === '700' ? `[${n}]` : n]);
+      }
+      return [...byMark.values()].map((numbers) => numbers.join(' '));
+    };
+    // The map loads on demand; wait for it as a person would.
+    const mapShown = async () => {
+      for (let i = 0; i < 50 && !root(run).querySelector('figure [data-vis-id="frame"]'); i++) await settle(run);
+    };
+    await mapShown();
+    // Every cause starts in the middle: one mark lists them all, so the one being placed isn't hidden.
+    expect(marks()).toEqual(['[1] 2 3']);
     for (let i = 0; i < 3; i++) {
       for (const slider of Array.from(root(run).querySelectorAll<HTMLInputElement>('input[type="range"]'))) {
         await slide(run, slider, 1);
       }
       await press(run, i < 2 ? 'Next cause' : 'Next');
+      if (i === 0) expect(marks()).toEqual(['1', '[2] 3']);
     }
 
     expect(heading(run)).toBe('Step 5 of 6: What the map shows');
     const map = root(run).textContent!;
     expect(map).toContain("That's a heavy way to see it.");
     expect(map).toContain("Effort is one possible cause among many. It isn't the answer by default.");
-    expect(root(run).querySelector('figure svg[role="img"]')).not.toBeNull();
+    expect(root(run).querySelector('figure [role="img"]')?.getAttribute('aria-label')).toContain('Map of your causes');
     expect(root(run).querySelectorAll('.map-list li')).toHaveLength(3);
+    // The heavy map shows all three causes, in one place, with nothing in bold.
+    await mapShown();
+    expect(marks()).toEqual(['1 2 3']);
+    expect(root(run).querySelector('figure [data-vis-id="mark-2"]')).toBeNull();
     await check(run, root(run).querySelector('.add app-card-pick input[value="chance"]'));
     for (const slider of Array.from(root(run).querySelectorAll<HTMLInputElement>('.add input[type="range"]'))) {
       await slide(run, slider, 5);
     }
     await press(run, 'Add');
     expect(root(run).querySelectorAll('.map-list li')).toHaveLength(4);
+    expect(marks()).toEqual(['1 2 3', '4']);
     await press(run, 'Next');
 
     expect(heading(run)).toBe('Step 6 of 6: Anything to change?');
