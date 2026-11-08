@@ -4,6 +4,7 @@
 > - **Built so far:** S1 tokens and resolver, S3 types and validator, S4 visibility and emphasis, S5 motion for state changes, the SVG backend, the pipeline and a scene figure (S9), and the Visual Lab (development build, `/lab`). See the capability log (§15).
 > - **Reviewed:** `mcii.path`'s states and transitions, accepted by you (`visual-reviews.md`, entries 1 and 2), with 12 screenshot baselines.
 > - **Integrated (MCII step 4d):** the MCII exercise draws `mcii.path` on the development branch; the old built-in picture is removed.
+> - **v0.2 (2026-11-08, scope revised by the pull rule):** the first instrument, the CS2 cause map (`cs2.cause-map@1`, `cs2-visual-proposal.md`), drawn from the exercise's answers and integrated into CS2 on the development branch. It's in the Visual Lab for R2; R3 and the psychology-trained reviewer follow in the test environment.
 > - **Before you merge to production:** R3 (you, the exercise in context) and the psychology-trained reviewer's review of psychological suitability, both in the test environment (§10).
 > - **Revision 3 (2026-11-08), after your review of `mcii.path@1`:**
 >   - every element carries a purpose (§4.1, §4.3; `visual-policy.md` principle 6)
@@ -138,7 +139,8 @@ Each boundary carries an example of the independence it buys:
 2. **S1 Styling** is data plus a resolver. It imports only its own types.
 3. **S3 Composition** imports type definitions only: S1's style-reference vocabulary and S2's generator ids. Its validator also reads S1's vocabulary lists and S2's parameter checks (revision 2), and nothing else.
 4. **S4 State** imports S3 types. **S5 Motion** imports S3 and S4 (the scene's entrances and the state targets) and S1 motion tokens.
-5. **S7 Rendering** imports the resolved-frame and timeline types, and **nothing imports a backend except S9 Integration.**
+5. **S7 Rendering** imports the resolved-frame and timeline types, and **nothing imports a backend except S9 Integration.** Instruments may import the resolved-frame *types* (`rendering/frame`), because they build frames (revision 3, v0.2).
+5b. **Instruments** (`instruments/`) are pure: they import composition types, S1 and the resolved-frame types, and nothing else (no Angular, no backend). Their components live in S9.
 6. **Exercises import only S9:** a visual source, the slot, an instrument component. They never import a backend, a generator or a rendering library.
 7. **`*-logic.ts` and `*-store.ts` import nothing from the Visual System.**
 8. **Heavy libraries load lazily,** through dynamic `import()` or `@defer` inside the backend that uses them.
@@ -274,7 +276,7 @@ Every capability is built **from a composition, not ahead of one**:
 | S3 Composition | `SceneDefinition` with `shape` and `label` elements, each with a purpose; the validator | `generated`, `custom`, `asset`, `group` and `region` elements |
 | S4 State | Visibility and emphasis | Parameter targets (v0.2) |
 | S5 Motion | Built for MCII step 4c: entrances with `fade`, `rise` and `draw`; emphasis changes eased between paints; the motion budget; departures at once | `recede` as a cross-fade, departures with motion, value transitions, layout transitions, the scalar tween, View Transitions |
-| S6 Interaction | — | Everything (v0.2, with CS2) |
+| S6 Interaction | — | Everything, when a composition first needs pointer input on a figure. CS2 doesn't: its sliders stay the controls (`cs2-visual-proposal.md` §5.4) |
 | S7 Rendering | The SVG backend | Canvas, GPU, 3D, embedded runtimes |
 | S8 Assets | Static images through the existing contract (already built) | The manifest, pipeline and export |
 | S9 Integration | `SceneSpecSource` for illustrations; `facets.from`; provenance | Instruments (v0.2), stimuli (v0.4) |
@@ -361,7 +363,7 @@ A custom element can't become a whole scene, so a bespoke renderer can't come in
 | Visual | Status | Migration |
 |---|---|---|
 | `MciiPathScene` (`mcii-path-scene.ts`) and its source `builtin.v1` | Removed | Replaced in MCII step 4d (2026-11-08) by scene `mcii.path`. Production keeps it until you merge |
-| CS2 cause chart (`cs-why-it-happened.ts`) | Legacy | v0.2, as an instrument |
+| CS2 cause chart (`cs-why-it-happened.ts`) | Migrated (2026-11-08) | The instrument `cs2.cause-map@1` (v0.2); the inline chart is removed. Production keeps it until you merge |
 | CS1 and CS3 visuals | Legacy | v0.3 |
 | `GamePreview`, `TrackingGame`, `ToneGame` | Experiment exercises: frozen | Only after the n-of-1 study, as a new protocol phase through the stimulus lane |
 | `icon.ts` | Outside scope | Unchanged |
@@ -377,7 +379,7 @@ A custom element can't become a whole scene, so a bespoke renderer can't come in
 | Can be absent | Yes (`none`, fallback tested) [F] | No: the native controls and the text equivalent are always there | No |
 | Quality tiers | Full, reduced, static | Full, reduced, static (the controls never degrade) | Fixed by the protocol; if the device can't meet it, the task says so and doesn't run |
 | Recorded | Provenance (§9) | Provenance | Spec version, seed, measured timing |
-| Status | NOW | DESIGNED (v0.2) | DESIGNED (v0.4) |
+| Status | NOW | NOW (v0.2): `cs2.cause-map`, display only (no pointer input yet) | DESIGNED (v0.4) |
 
 **Stimulus rules (unchanged from revision 3):**
 - **Determinism:** pure `f(t, seed, params)`.
@@ -485,7 +487,8 @@ web/src/app/shared/visual/
   motion/       policy.ts · plan.ts · tokens.ts                                 S5
   interaction/  scales.ts · regions.ts · bindings.ts                            S6 (v0.2)
   rendering/    frame.ts (resolved-frame types) · conformance.spec.ts · svg/    S7 (canvas/, gpu/ later)
-  integration/  scene-source.ts · provenance.ts                                 S9
+  integration/  scene-source.ts · scene-figure.ts · <instrument>.ts (+ -slot.ts) S9
+  instruments/  <instrument>/<instrument>.ts + .policy.spec.ts (pure frames)    instruments (v0.2)
   scenes/       <area>/<scene>.scene.ts + <scene>.policy.spec.ts                compositions
   testing/      source-files.ts (reads project files in specs)                  tests only
 web/src/app/pages/lab/                Visual Lab (development build only)        S10
@@ -497,7 +500,7 @@ docs/visual-system.md · visual-policy.md · visual-language.md · visual-review
 |---|---|---|---|
 | **Phase 2 (this)** | These three documents; the S1 review sheet | — | R1 of the S1 proposal |
 | **v0.1** | §5.3 scope | MCII 4a–4d (revision 3: the area studies were removed) | R1 on the S1 sheet; R2 each MCII state next to the original, then the transitions (done); R3 MCII and the psychology-trained reviewer, in the test environment, before your merge |
-| **v0.2** | S6 Interaction; S4 parameter targets; value transitions; instruments in the Lab | CS2 | R2, R3; CS2 usability |
+| **v0.2** (revised 2026-11-08 by the pull rule, decision C5) | The instrument tier: frames built from an exercise's data, an instrument component and its on-demand slot, instruments in the Lab; bold text items. Not S6, S4 parameter targets or value transitions: CS2 doesn't need them | CS2 (`cs2.cause-map@1`) | R2 in the Lab; R3 and the psychology-trained reviewer in the test environment; CS2 usability |
 | **v0.3** | The layout generators and layout transitions that CS1 and CS3 pull | CS1, CS3 | R2, R3 |
 | **v0.4** | Canvas backend; stimulus lane; frame clock; timing log; watchdog | The first approved Attention task | R2; a timing validation report |
 | **v0.5** | GPU backend (trigger) | Its first scene | R2; conformance |
@@ -539,6 +542,10 @@ One row per capability added to code, naming the composition that pulled it.
 | 2026-11-08 | `buildTimeline` (emphasis tracks resolved to paint); the scene figure plays the change from the previous state, takes `from` for a figure created by a step change, and follows the reduced-motion setting | S9 | `mcii.path@4` | — |
 | 2026-11-08 | `SceneSpecSource` and `provideSceneVisuals`: an exercise's requests (`<prefix>.<state>`, `facets.from`) answered with a registered scene; the scene and the renderer load on the first request, in their own chunk; its id (`scene:<id>@<v>;theme:<theme>@<v>`) is the recorded visual source | S9 | MCII step 4d | R3 pending |
 | 2026-11-08 | Baselines captured on a fixed 480-px surface, independent of the Lab's layout; the Lab no longer shows the original picture, which is removed | S10 | MCII step 4d | Entry 2 |
+| 2026-11-08 | Instrument tier: `instruments/cause-map/` (a pure frame from the exercise's answers: one mark per place listing its causes' numbers, the cause being placed as subject and focal with a bold number, solid scale lines, labels laid out inside the figure), its policy spec, the `CauseMap` component and `CauseMapSlot` (loads it on demand) in S9 | S3, S9 | `cs2.cause-map@1` (decisions C2–C5) | R2 pending |
+| 2026-11-08 | Bold text items (`weight: 'bold'`) in the resolved frame, drawn by the SVG backend; a conformance test | S7 | `cs2.cause-map@1` (the number of the cause being placed) | — |
+| 2026-11-08 | Dependency rules 4c and 5 refined: instruments import composition types, S1 and the resolved-frame types only; only S9 imports a backend | Rules | `cs2.cause-map@1` | — |
+| 2026-11-08 | The Lab's instrument section: five answer sets (start, placing, spread, heavy, six in one place) in light and dark, with the purpose table | S10 | `cs2.cause-map@1` | — |
 | 2026-11-08 | The Lab's "Transitions" section: each declared change, replayable, in full or reduced motion, with what moves and why; browser tests that each change ends on the approved state and that nothing moves under reduced motion | S10 | `mcii.path@4` | — |
 
 **Retired 2026-11-08** (removed from code before it was ever committed, so it isn't in git history; the designs stay described in §4–§5 and `visual-language.md` §8, and are rebuilt if a composition pulls them):
