@@ -755,6 +755,8 @@ The test database resets itself on each test run (migrate once; roll back a tran
 | **Added** (2026-11-08) | `cs2-visual-proposal.md`: the CS2 cause map on the Visual System (v0.2), with decisions C1–C6 | Next Visual System step after MCII |
 | **Changed** (2026-11-08) | CS2 change 1: causes in the same place on the map are drawn as one mark listing their numbers, so none is hidden (`mapMarks` in `cs-logic.ts`). No content, step, rule or record change | Approved decision C1 |
 | **Changed** (2026-11-08) | CS2 map rebuilt on the Visual System as its first instrument, `cs2.cause-map@1`, and integrated into CS2 (decisions C2–C5). Visual System v0.2 rescoped by the pull rule: the instrument tier, without S6 Interaction, parameter targets or value transitions | `cs2-visual-proposal.md` §5.5, §6; `visual-system.md` §14 |
+| **Changed** (2026-11-08) | CS2 list under the map: a cause that ends a sentence takes no colon ("this. About me", not "this.: about me"). Code only; content unchanged. The heavy-map "Add a cause" wording goes to the CS2 content review | Decision C6 (`cs2-visual-proposal.md` §8) |
+| **Added** (2026-11-08) | `cs1-cs3-visual-audit.md`: CS1 and CS3 have no figure, so nothing pulls Visual System v0.3 as planned; `visual-system.md` §6.6 corrected, §14 marked. Decisions A1 and A2 open | Next Visual System step after CS2 |
 | **Retained** (superseded for MCII by step 4d above) | No exercise shows a new visual yet: MCII still uses `builtin.v1`. No dependency, configuration or content change. Experiment exercises and golden tests unchanged. The §11 row changes with the first integration (MCII step 4d), not before | Composition first (`visual-system.md` §5.1); reviews R1 and R2 come first |
 
 ## References

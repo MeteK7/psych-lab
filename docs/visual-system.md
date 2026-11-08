@@ -364,7 +364,7 @@ A custom element can't become a whole scene, so a bespoke renderer can't come in
 |---|---|---|
 | `MciiPathScene` (`mcii-path-scene.ts`) and its source `builtin.v1` | Removed | Replaced in MCII step 4d (2026-11-08) by scene `mcii.path`. Production keeps it until you merge |
 | CS2 cause chart (`cs-why-it-happened.ts`) | Migrated (2026-11-08) | The instrument `cs2.cause-map@1` (v0.2); the inline chart is removed. Production keeps it until you merge |
-| CS1 and CS3 visuals | Legacy | v0.3 |
+| CS1 and CS3 | Audited 2026-11-08: no figure. CS1's fit board is an HTML control; CS3 has no visual element (`cs1-cs3-visual-audit.md`) | Nothing to migrate, if you confirm decision A1 |
 | `GamePreview`, `TrackingGame`, `ToneGame` | Experiment exercises: frozen | Only after the n-of-1 study, as a new protocol phase through the stimulus lane |
 | `icon.ts` | Outside scope | Unchanged |
 
@@ -501,7 +501,7 @@ docs/visual-system.md · visual-policy.md · visual-language.md · visual-review
 | **Phase 2 (this)** | These three documents; the S1 review sheet | — | R1 of the S1 proposal |
 | **v0.1** | §5.3 scope | MCII 4a–4d (revision 3: the area studies were removed) | R1 on the S1 sheet; R2 each MCII state next to the original, then the transitions (done); R3 MCII and the psychology-trained reviewer, in the test environment, before your merge |
 | **v0.2** (revised 2026-11-08 by the pull rule, decision C5) | The instrument tier: frames built from an exercise's data, an instrument component and its on-demand slot, instruments in the Lab; bold text items. Not S6, S4 parameter targets or value transitions: CS2 doesn't need them | CS2 (`cs2.cause-map@1`) | R2 in the Lab; R3 and the psychology-trained reviewer in the test environment; CS2 usability |
-| **v0.3** | The layout generators and layout transitions that CS1 and CS3 pull | CS1, CS3 | R2, R3 |
+| **v0.3** | The layout generators and layout transitions that CS1 and CS3 pull. **The audit found no figure in either (`cs1-cs3-visual-audit.md`), so nothing pulls this release; its future is decision A2, open** | CS1, CS3 (see the audit) | R2, R3 |
 | **v0.4** | Canvas backend; stimulus lane; frame clock; timing log; watchdog | The first approved Attention task | R2; a timing validation report |
 | **v0.5** | GPU backend (trigger) | Its first scene | R2; conformance |
 | **v0.6** | Asset manifest, pipeline, offline export | The first conventional asset or exported fallback | R1 for each asset |
