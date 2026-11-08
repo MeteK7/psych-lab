@@ -1,6 +1,6 @@
 import { MCII } from '../../../../content';
 import { SceneDefinition, TextLookup } from '../composition/scene';
-import { contentText } from '../integration/pipeline';
+import { contentText } from '../integration/content-text';
 import { MCII_PATH } from './action/mcii-path.scene';
 
 /** Every composition in the platform, with where its text comes from. The Visual Lab and the specs enumerate this. */

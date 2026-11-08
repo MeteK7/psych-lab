@@ -151,7 +151,7 @@ describe('MCII exercise', () => {
       'mcii_close',
     ]);
     expect(body.steps.map((s) => s.result)).toEqual([
-      { category: 'work', visual_source: 'builtin.v1' },
+      { category: 'work', visual_source: expect.stringMatching(/^scene:mcii\.path@\d+;theme:action@\d+$/) },
       {},
       { obstacle: 'tired' },
       { choice: 'keep' },
@@ -407,32 +407,35 @@ describe('MCII exercise', () => {
     function shownAlt(run: Run): string | null | undefined {
       return root(run).querySelector('figure')?.getAttribute('aria-label');
     }
+    const drawn = (run: Run, id: string) => root(run).querySelector<SVGElement>(`figure [data-vis-id="${id}"]`);
 
     it('adds the wall with the obstacle, and the bridge only after the plan is made', async () => {
       const run = start();
       await settle(run);
       await press(run, 'Begin');
       expect(shownAlt(run)).toBe('A path leading to a far marker.');
-      expect(root(run).querySelector('.wall')).toBeNull();
+      expect(drawn(run, 'wish')).not.toBeNull();
+      expect(drawn(run, 'wall')).toBeNull();
       run.fixture.destroy();
 
       TestBed.resetTestingModule();
       const next = start();
       await toDecide(next);
       expect(shownAlt(next)).toBe('A path leading to a far marker, with a low wall across it.');
-      expect(root(next).querySelector('.wall')).not.toBeNull();
-      expect(root(next).querySelector('.bridge')).toBeNull();
+      expect(drawn(next, 'wall')).not.toBeNull();
+      expect(drawn(next, 'bridge')).toBeNull();
       await decide(next, 'keep');
-      expect(root(next).querySelector('.bridge')).not.toBeNull();
+      expect(drawn(next, 'bridge')).not.toBeNull();
     });
 
-    it('fades the path after setting aside, with no wall', async () => {
+    it('quietens the path after setting aside, with no wall, and the wish keeps its colour', async () => {
       const run = start();
       await toDecide(run);
       await decide(run, 'set_aside');
       expect(shownAlt(run)).toBe('A faded path leading to a far marker.');
-      expect(root(run).querySelector('svg.faded')).not.toBeNull();
-      expect(root(run).querySelector('.wall')).toBeNull();
+      expect(drawn(run, 'wall')).toBeNull();
+      expect(drawn(run, 'path')?.style.strokeWidth).toBe('1.5px');
+      expect(drawn(run, 'wish')?.style.stroke).toBe('var(--vis-subject)');
     });
 
     /** What a run saves, leaving out timings and the source's own id. */

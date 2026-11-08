@@ -43,7 +43,7 @@ import { VISUAL_SOURCE, Visual, VisualRequest, resolveWithin } from './visual';
 export class VisualSlot {
   readonly request = input.required<VisualRequest>();
   /** The shape of the space held while waiting. */
-  readonly ratio = input('480 / 116');
+  readonly ratio = input('480 / 120');
   /** How long to wait before showing nothing. */
   readonly timeoutMs = input(1500);
 

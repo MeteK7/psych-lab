@@ -103,7 +103,7 @@ test.describe('MCII, keyboard only', () => {
       mcii_ready_post: 7,
     });
     expect(saved.steps.map((s) => s.result)).toEqual([
-      { category: 'work', visual_source: 'builtin.v1' },
+      { category: 'work', visual_source: expect.stringMatching(/^scene:mcii\.path@\d+;theme:action@\d+$/) },
       {},
       { obstacle: 'hard' },
       { choice: 'keep' },

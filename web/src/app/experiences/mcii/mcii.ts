@@ -3,6 +3,7 @@ import { Component, computed, inject, input, linkedSignal, output, signal } from
 import { MCII, fill } from '../../../content';
 import { Experience, StepOutcome } from '../../flow/step-outcome';
 import { RatingScale } from '../../shared/rating-scale';
+import { provideSceneVisuals } from '../../shared/visual/integration/scene-source';
 import { VISUAL_SOURCE } from '../../shared/visual/visual';
 import { VisualSlot } from '../../shared/visual/visual-slot';
 import { CardPick } from '../cognitive-shifts/card-pick';
@@ -30,7 +31,6 @@ import {
 } from './mcii-logic';
 import { sceneFor } from './mcii-scenes';
 import { MciiStore } from './mcii-store';
-import { MciiBuiltInVisuals } from './mcii-visual-source';
 
 /**
  * MCII · Your wish, and what's in the way (docs/mcii-design.md). Future first, then the obstacle,
@@ -41,8 +41,8 @@ import { MciiBuiltInVisuals } from './mcii-visual-source';
 @Component({
   selector: 'app-mcii',
   imports: [CardPick, RatingScale, VisualSlot],
-  // The one place this exercise's visual source is chosen.
-  providers: [{ provide: VISUAL_SOURCE, useClass: MciiBuiltInVisuals }],
+  // The one place this exercise's visual source is chosen: the path scene (docs/mcii-design.md §5).
+  providers: [provideSceneVisuals('mcii.path', 'mcii')],
   template: `
     @switch (stage()) {
       @case ('mcii_wish') {
