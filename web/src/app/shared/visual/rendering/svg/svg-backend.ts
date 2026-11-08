@@ -1,6 +1,6 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, DestroyRef, ElementRef, afterRenderEffect, computed, inject, input } from '@angular/core';
 
-import { Drawable, ResolvedFrame } from '../frame';
+import { DrawPaint, Drawable, ResolvedFrame, ResolvedTimeline, ResolvedTrack } from '../frame';
 
 /** How the surface picks light or dark: from the page, or pinned (the Visual Lab shows both side by side). */
 export type SurfaceScheme = 'auto' | 'light' | 'dark';
@@ -29,24 +29,58 @@ export function pathData(shape: Drawable): string {
   }
 }
 
+let surfaces = 0;
+
+function keyframes(track: ResolvedTrack): Keyframe[] {
+  switch (track.property) {
+    case 'opacity':
+      return [{ opacity: track.from }, { opacity: track.to }];
+    case 'offsetY':
+      return [{ transform: `translate(0px, ${track.from}px)` }, { transform: `translate(0px, ${track.to}px)` }];
+    case 'reveal':
+      // The mask's dash covers the drawn fraction: offset 1 shows nothing, offset 0 all of it.
+      return [{ strokeDashoffset: 1 - track.from }, { strokeDashoffset: 1 - track.to }];
+    case 'paint': {
+      const paint = (p: DrawPaint) => ({ fill: p.fill, stroke: p.stroke, strokeWidth: `${p.width}px` });
+      return [paint(track.from), paint(track.to)];
+    }
+  }
+}
+
 /**
  * S7 Rendering, the SVG backend. Draws a resolved frame and decides nothing: colours are S1 token
  * references evaluated by the host styles (tokens.css), so light, dark and forced colours need no
  * new frame. Line widths don't scale with the figure (visual-language.md §4.1). The surface is
  * hidden from assistive technology; the slot or the Lab gives the text alternative.
+ *
+ * Motion: the frame always holds the final state. The backend plays the timeline's tracks towards
+ * it with the Web Animations API (no timers, no frame loop) and cancels them when a new timeline
+ * arrives or the surface goes away. Where the API is missing, the final state simply shows. A
+ * `reveal` track draws its element through a mask, so a dashed line's dashes don't crawl.
  */
 @Component({
   selector: 'app-vis-svg',
   host: { '[attr.data-vis-theme]': 'frame().theme', '[attr.data-vis-scheme]': 'scheme()' },
   template: `
     <svg [attr.viewBox]="viewBox()" aria-hidden="true" focusable="false">
+      @if (reveals().size) {
+        <defs>
+          @for (item of revealed(); track item.id) {
+            <mask [attr.id]="maskId(item.id)" maskUnits="userSpaceOnUse" x="0" y="0" [attr.width]="frame().width" [attr.height]="frame().height">
+              <path class="reveal" [attr.data-vis-mask]="item.id" [attr.d]="item.d" pathLength="1" fill="none" stroke="white"
+                    stroke-width="16" stroke-dasharray="1 2" stroke-dashoffset="0" />
+            </mask>
+          }
+        </defs>
+      }
       @for (item of items(); track item.id) {
         @if (item.kind === 'text') {
           <text [attr.data-vis-id]="item.id" [attr.x]="item.x" [attr.y]="item.y" [attr.text-anchor]="item.anchor"
                 [style.fill]="item.fill" [style.font-size.px]="item.size">{{ item.text }}</text>
         } @else {
           <path [attr.data-vis-id]="item.id" [attr.d]="item.d" [style.fill]="item.paint.fill" [style.stroke]="item.paint.stroke"
-                [style.stroke-width.px]="item.paint.width" [style.stroke-dasharray]="item.paint.dash" />
+                [style.stroke-width.px]="item.paint.width" [style.stroke-dasharray]="item.paint.dash"
+                [attr.mask]="reveals().has(item.id) ? 'url(#' + maskId(item.id) + ')' : null" />
         }
       }
     </svg>
@@ -56,6 +90,8 @@ export function pathData(shape: Drawable): string {
     :host { display: block; }
     svg { display: block; width: 100%; height: auto; overflow: hidden; }
     path { vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
+    /* The mask's own stroke is a plain band along the path: square ends, so nothing shows early. */
+    path.reveal { vector-effect: none; stroke-linecap: butt; }
     text { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; }
   `,
 })
@@ -65,9 +101,43 @@ export class SvgBackend {
 
   readonly frame = input.required<ResolvedFrame>();
   readonly scheme = input<SurfaceScheme>('auto');
+  /** Tracks towards the frame's state; empty means show the frame as it is. */
+  readonly timeline = input<ResolvedTimeline>([]);
+
+  private readonly host: HTMLElement = inject(ElementRef).nativeElement;
+  private readonly surface = `vis-${++surfaces}`;
+  private running: Animation[] = [];
 
   protected readonly viewBox = computed(() => `0 0 ${this.frame().width} ${this.frame().height}`);
   protected readonly items = computed(() =>
     this.frame().items.map((item) => (item.kind === 'text' ? item : { ...item, d: pathData(item.shape) })),
   );
+  protected readonly reveals = computed(() => new Set(this.timeline().filter((t) => t.property === 'reveal').map((t) => t.id)));
+  protected readonly revealed = computed(() => this.items().filter((i) => i.kind === 'shape' && this.reveals().has(i.id)) as { id: string; d: string }[]);
+
+  constructor() {
+    afterRenderEffect(() => this.play(this.timeline()));
+    inject(DestroyRef).onDestroy(() => this.stop());
+  }
+
+  protected maskId(id: string): string {
+    return `${this.surface}-${id}`;
+  }
+
+  private play(timeline: ResolvedTimeline): void {
+    this.stop();
+    for (const track of timeline) {
+      const attr = track.property === 'reveal' ? 'data-vis-mask' : 'data-vis-id';
+      const target = [...this.host.querySelectorAll(`[${attr}]`)].find((e) => e.getAttribute(attr) === track.id);
+      if (typeof target?.animate !== 'function') continue;
+      const { delay, duration, easing } = track;
+      // `backwards`: the start value holds during the delay; afterwards the frame's own state shows.
+      this.running.push(target.animate(keyframes(track), { delay, duration, easing, fill: 'backwards' }));
+    }
+  }
+
+  private stop(): void {
+    for (const animation of this.running) animation.cancel();
+    this.running = [];
+  }
 }

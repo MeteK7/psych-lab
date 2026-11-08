@@ -71,6 +71,10 @@ describe('Visual System dependency rules', () => {
     expect(outside(inFolder('state'), ['state', 'composition', 'styling'])).toEqual([]);
   });
 
+  it('4b. motion imports only composition and state types and the styling tokens', () => {
+    expect(outside(inFolder('motion'), ['motion', 'state', 'composition', 'styling'])).toEqual([]);
+  });
+
   it('5. rendering imports only itself and Angular, and only integration imports a backend', () => {
     expect(outside(inFolder('rendering'), ['rendering', '@angular/core'])).toEqual([]);
     const users = app

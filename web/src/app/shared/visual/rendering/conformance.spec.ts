@@ -1,22 +1,22 @@
 import { TestBed } from '@angular/core/testing';
 
-import { buildFrame } from '../integration/pipeline';
+import { buildFrame, buildTimeline } from '../integration/pipeline';
 import { SCENES } from '../scenes';
 import { readSource } from '../testing/source-files';
-import { ResolvedFrame } from './frame';
+import { ResolvedFrame, ResolvedTimeline } from './frame';
 import { SvgBackend, pathData } from './svg/svg-backend';
 
 /**
  * The backend conformance suite (docs/visual-system.md §6.2), run for every backend. With one
- * backend so far, it checks the SVG backend against the resolved frame for every scene × state.
- * Motion checks (reduced motion gives the final state with nothing running) join when a
- * composition pulls motion; until then no backend plays anything.
+ * backend so far, it checks the SVG backend against the resolved frame for every scene × state,
+ * and that it plays a timeline towards that frame, and nothing without one.
  */
-async function render(frame: ResolvedFrame, scheme: 'auto' | 'light' | 'dark' = 'auto') {
+async function render(frame: ResolvedFrame, scheme: 'auto' | 'light' | 'dark' = 'auto', timeline: ResolvedTimeline = []) {
   TestBed.configureTestingModule({ imports: [SvgBackend] });
   const fixture = TestBed.createComponent(SvgBackend);
   fixture.componentRef.setInput('frame', frame);
   fixture.componentRef.setInput('scheme', scheme);
+  fixture.componentRef.setInput('timeline', timeline);
   await fixture.whenStable();
   return fixture;
 }
@@ -76,6 +76,74 @@ describe('SVG backend conformance', () => {
     const fixture = await render(buildFrame(scene, scene.states.initial, text));
     fixture.destroy();
     expect(fixture.componentRef.hostView.destroyed).toBe(true);
+  });
+});
+
+describe('SVG backend conformance: motion', () => {
+  // jsdom has no Web Animations API, so the backend's calls are recorded instead.
+  let calls: { target: Element; keyframes: Keyframe[]; options: KeyframeAnimationOptions; cancel: ReturnType<typeof vi.fn> }[] = [];
+  beforeEach(() => {
+    calls = [];
+    Element.prototype.animate = function (this: Element, keyframes: Keyframe[], options: KeyframeAnimationOptions) {
+      const cancel = vi.fn();
+      calls.push({ target: this, keyframes, options, cancel });
+      return { cancel } as unknown as Animation;
+    } as Element['animate'];
+  });
+  afterEach(() => delete (Element.prototype as Partial<Element>).animate);
+
+  const CHANGES = SCENES.flatMap(({ scene, text }) => (scene.transitions ?? []).map(([from, to]) => ({ scene, text, from, to })));
+
+  for (const { scene, text, from, to } of CHANGES) {
+    it(`plays ${scene.id} ${from} → ${to} towards the frame, with every track on its element`, async () => {
+      const frame = buildFrame(scene, to, text);
+      const timeline = buildTimeline(scene, from, to, 'full');
+      expect(timeline.length).toBeGreaterThan(0);
+      const host = (await render(frame, 'auto', timeline)).nativeElement as HTMLElement;
+      // The final state is drawn whatever plays: the same items as without motion.
+      expect([...host.querySelectorAll('[data-vis-id]')].map((e) => e.getAttribute('data-vis-id'))).toEqual(frame.items.map((i) => i.id));
+      expect(calls).toHaveLength(timeline.length);
+      timeline.forEach((track, i) => {
+        const attr = track.property === 'reveal' ? 'data-vis-mask' : 'data-vis-id';
+        expect(calls[i].target.getAttribute(attr), `${track.id} ${track.property}`).toBe(track.id);
+        expect(calls[i].options).toEqual({ delay: track.delay, duration: track.duration, easing: track.easing, fill: 'backwards' });
+      });
+    });
+  }
+
+  it('draws a reveal through a mask on the element, ending fully drawn', async () => {
+    const { scene, text } = SCENES[0];
+    const timeline = buildTimeline(scene, 'contrast', 'plan', 'full');
+    const host = (await render(buildFrame(scene, 'plan', text), 'auto', timeline)).nativeElement as HTMLElement;
+    const bridge = host.querySelector('[data-vis-id="bridge"]')!;
+    const mask = host.querySelector('mask')!;
+    expect(bridge.getAttribute('mask')).toBe(`url(#${mask.id})`);
+    expect(mask.querySelector('[data-vis-mask="bridge"]')?.getAttribute('stroke-dashoffset')).toBe('0');
+    expect(calls.find((c) => c.target.getAttribute('data-vis-mask') === 'bridge')?.keyframes).toEqual([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }]);
+  });
+
+  it('plays nothing and adds nothing without a timeline (reduced and static tiers)', async () => {
+    const { scene, text } = SCENES[0];
+    const frame = buildFrame(scene, 'plan', text);
+    const host = (await render(frame, 'auto', buildTimeline(scene, 'contrast', 'plan', 'reduced'))).nativeElement as HTMLElement;
+    expect(calls).toEqual([]);
+    expect(host.querySelectorAll('svg *').length).toBe(frame.items.length);
+  });
+
+  it('cancels what is playing when it goes away', async () => {
+    const { scene, text } = SCENES[0];
+    const fixture = await render(buildFrame(scene, 'contrast', text), 'auto', buildTimeline(scene, 'future', 'contrast', 'full'));
+    fixture.destroy();
+    expect(calls.length).toBeGreaterThan(0);
+    for (const c of calls) expect(c.cancel).toHaveBeenCalled();
+  });
+
+  it('shows the final state where the Web Animations API is missing', async () => {
+    delete (Element.prototype as Partial<Element>).animate;
+    const { scene, text } = SCENES[0];
+    const frame = buildFrame(scene, 'plan', text);
+    const host = (await render(frame, 'auto', buildTimeline(scene, 'contrast', 'plan', 'full'))).nativeElement as HTMLElement;
+    expect(host.querySelectorAll('[data-vis-id]').length).toBe(frame.items.length);
   });
 });
 

@@ -1,5 +1,6 @@
 import { SceneDefinition, StateName, TextLookup } from '../composition/scene';
-import { FrameItem, ResolvedFrame } from '../rendering/frame';
+import { QualityTier, planMotion } from '../motion/plan-motion';
+import { FrameItem, ResolvedFrame, ResolvedTimeline, ResolvedTrack } from '../rendering/frame';
 import { resolveState } from '../state/resolve-state';
 import { resolveLabel, resolveStyle } from '../styling/resolve';
 import { FRAMES } from '../styling/vocabulary';
@@ -8,7 +9,7 @@ import { FRAMES } from '../styling/vocabulary';
  * The pipeline (docs/visual-system.md §3.2), assembled outside every capability: S3 gives the
  * elements and their geometry, S4 their targets for the state, S1 their paint. The result is a
  * resolved frame any backend can draw. It runs when a scene or state changes, never per frame.
- * S2 Generation and S5 Motion join here once a composition pulls them.
+ * S2 Generation joins here once a composition pulls it.
  */
 export function buildFrame(scene: SceneDefinition, state: StateName, text: TextLookup): ResolvedFrame {
   const targets = resolveState(scene, state);
@@ -43,14 +44,18 @@ export function buildFrame(scene: SceneDefinition, state: StateName, text: TextL
   return { width, height, theme: scene.theme, items };
 }
 
-/** Looks keys up in nested content objects: `contentText({ mcii: MCII })('mcii.scenes.future.alt')`. */
-export function contentText(root: Record<string, unknown>): TextLookup {
-  return (key) => {
-    let node: unknown = root;
-    for (const part of key.split('.')) {
-      if (!node || typeof node !== 'object' || !Object.hasOwn(node, part)) return undefined;
-      node = (node as Record<string, unknown>)[part];
-    }
-    return typeof node === 'string' ? node : undefined;
-  };
+/**
+ * S5's timeline for a change, resolved for a backend: emphasis tracks become paint tracks through
+ * S1, so a backend never sees an emphasis level. Labels take no emphasis, so only shapes get paint.
+ */
+export function buildTimeline(scene: SceneDefinition, from: StateName | null, to: StateName, tier: QualityTier): ResolvedTimeline {
+  const shapes = new Map(scene.layers.flatMap((l) => l.elements).flatMap((e) => (e.kind === 'shape' ? [[e.id, e] as const] : [])));
+  return planMotion(scene, from, to, tier).flatMap((track): ResolvedTrack[] => {
+    if (track.property !== 'emphasis') return [track];
+    const shape = shapes.get(track.id);
+    if (!shape) return [];
+    return [{ ...track, property: 'paint', from: resolveStyle(shape.style, track.from), to: resolveStyle(shape.style, track.to) }];
+  });
 }
+
+export { contentText } from './content-text';

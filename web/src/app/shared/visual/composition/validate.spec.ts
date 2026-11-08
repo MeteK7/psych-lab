@@ -122,6 +122,51 @@ describe('validateScene', () => {
     expect(validateScene(soft, TEXT)).toContain("element 's': soft labels aren't allowed on the near plane");
   });
 
+  describe('entrances and transitions', () => {
+    /** The base scene with `extra` shown only in a second state `b`, entering as given. */
+    function entering(extra: SceneElement, more: Partial<SceneDefinition> = {}): SceneDefinition {
+      const base = withElement(extra);
+      const a = base.states.states['a'];
+      return {
+        ...base,
+        states: { initial: 'a', states: { a: { ...a, visible: a.visible.filter((id) => id !== extra.id) }, b: a } },
+        alt: { a: 'alt.a', b: 'alt.a' },
+        ...more,
+      };
+    }
+    const line = { kind: 'shape', id: 'arc', geometry: { type: 'path', d: 'M0 0 Q5 -5 10 0' }, style: { role: 'ink' }, purpose: P } as const;
+
+    it('accepts an element that moves on its own with a reason, and declared transitions', () => {
+      const s = entering({ ...line, enter: { effect: 'draw', why: 'A plan being made.' } }, { transitions: [['a', 'b']] });
+      expect(validateScene(s, TEXT)).toEqual([]);
+    });
+
+    it('requires a reason for motion, like any element', () => {
+      const s = entering({ ...line, enter: { effect: 'rise', why: ' ' } });
+      expect(validateScene(s, TEXT)).toContain("element 'arc': motion without a reason; an element that moves on its own says why");
+    });
+
+    it('rejects unknown effects, drawing labels and drawing filled shapes', () => {
+      expect(validateScene(entering({ ...line, enter: { effect: 'spin' as never, why: 'x' } }), TEXT)).toContain("element 'arc': unknown motion effect 'spin'");
+      const label = { kind: 'label', id: 'tag', text: 'label.x', at: [0, 0], align: 'middle', purpose: P, enter: { effect: 'draw', why: 'x' } } as const;
+      expect(validateScene(entering(label), TEXT)).toContain("element 'tag': a label can't draw; it fades");
+      const filled = { ...line, style: { role: 'subject', material: 'tonal' }, enter: { effect: 'draw', why: 'x' } } as const;
+      expect(validateScene(entering(filled), TEXT)).toContain("element 'arc': only line shapes can draw");
+    });
+
+    it('lets an element enter with a lead, but not with an unknown element or through a chain', () => {
+      expect(validateScene(entering({ ...line, enter: { with: 'ghost' } }), TEXT)).toContain("element 'arc': enters with unknown element 'ghost'");
+      const base = entering({ ...line, enter: { with: 'dot' } });
+      const chained = { ...base, layers: base.layers.map((l) => ({ ...l, elements: l.elements.map((e) => (e.id === 'dot' ? { ...e, enter: { with: 'dot2' } } : e)) })) };
+      expect(validateScene(chained, TEXT)).toContain("element 'arc': enters with 'dot', which itself enters with another element");
+    });
+
+    it('flags an entrance on an element that is never hidden, and transitions between unknown states', () => {
+      expect(validateScene(withElement({ ...line, enter: { effect: 'fade', why: 'x' } }), TEXT)).toContain("element 'arc': has an entrance but is shown in every state");
+      expect(validateScene(scene({ transitions: [['a', 'z']] }), TEXT)).toContain("transition a → z: unknown state 'z'");
+    });
+  });
+
   it('rejects raw colour values anywhere', () => {
     const s = withElement({ kind: 'shape', id: 'p', geometry: { type: 'path', d: 'M0 0 #ff0000' }, style: { role: 'subject' }, purpose: P });
     expect(validateScene(s, TEXT)).toContain('raw colour values found; use roles');

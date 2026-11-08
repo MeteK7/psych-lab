@@ -4,12 +4,13 @@ import {
   FRAMES,
   LINE_WEIGHTS,
   MATERIALS,
+  MOTION_EFFECTS,
   NOT_ON_NEAR,
   PLANE_ROLES,
   StyleRef,
   THEMES,
 } from '../styling/vocabulary';
-import { PURPOSE_KINDS, Purpose, SceneDefinition, TextLookup, elementsOf } from './scene';
+import { PURPOSE_KINDS, Purpose, SceneDefinition, SceneElement, TextLookup, elementsOf } from './scene';
 
 /** Any raw colour value: scenes use roles only (docs/visual-system.md §4.3). */
 const RAW_COLOUR = /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch|color)\(/i;
@@ -30,6 +31,29 @@ function purposeProblems(where: string, purpose: Purpose | undefined): string[] 
   return purpose.serves
     .filter((k) => !(PURPOSE_KINDS as readonly string[]).includes(k))
     .map((k) => `${where}: unknown purpose '${k}'`);
+}
+
+/** Entrances (read by S5): a known effect, a reason for anything that moves on its own, no chains. */
+function entranceProblems(element: SceneElement, all: Map<string, SceneElement>): string[] {
+  const { enter } = element;
+  if (!enter) return [];
+  const where = `element '${element.id}'`;
+  const problems: string[] = [];
+  if (enter.effect && !Object.hasOwn(MOTION_EFFECTS, enter.effect)) problems.push(`${where}: unknown motion effect '${enter.effect}'`);
+  if (enter.effect === 'draw' && element.kind === 'label') problems.push(`${where}: a label can't draw; it fades`);
+  // Drawing reveals a band along the outline, so a filled shape's inside would stay hidden.
+  if (enter.effect === 'draw' && element.kind === 'shape' && (element.style.material ?? 'line') !== 'line')
+    problems.push(`${where}: only line shapes can draw`);
+  if (enter.with === undefined) {
+    if (!enter.why?.trim()) problems.push(`${where}: motion without a reason; an element that moves on its own says why`);
+    return problems;
+  }
+  const lead = all.get(enter.with);
+  if (!lead || enter.with === element.id) problems.push(`${where}: enters with unknown element '${enter.with}'`);
+  else if (lead.enter?.with !== undefined) problems.push(`${where}: enters with '${enter.with}', which itself enters with another element`);
+  else if (!enter.effect && lead.enter?.effect === 'draw' && element.kind === 'shape' && (element.style.material ?? 'line') !== 'line')
+    problems.push(`${where}: would draw with '${enter.with}', but only line shapes can draw; give it its own effect`);
+  return problems;
 }
 
 function strings(value: unknown): string[] {
@@ -63,6 +87,9 @@ export function validateScene(scene: SceneDefinition, text: TextLookup): string[
       problems.push(`${where}: the '${element.style.role}' role isn't allowed on the near plane`);
   }
 
+  const all = new Map(elementsOf(scene).map(({ element }) => [element.id, element]));
+  for (const element of all.values()) problems.push(...entranceProblems(element, all));
+
   const { initial, states } = scene.states;
   if (!Object.hasOwn(states, initial)) problems.push(`initial state '${initial}' doesn't exist`);
   const maxFocal = scene.policy?.maxFocal ?? 1;
@@ -88,6 +115,12 @@ export function validateScene(scene: SceneDefinition, text: TextLookup): string[
     if (focal > maxFocal) problems.push(`${where}: ${focal} focal elements; the scene allows ${maxFocal}`);
   }
   for (const id of ids.keys()) if (!shown.has(id)) problems.push(`element '${id}': no state shows it`);
+  for (const element of all.values())
+    if (element.enter && Object.values(states).every((s) => s.visible.includes(element.id)))
+      problems.push(`element '${element.id}': has an entrance but is shown in every state`);
+  for (const [from, to] of scene.transitions ?? [])
+    for (const name of [from, to])
+      if (!Object.hasOwn(states, name)) problems.push(`transition ${from} → ${to}: unknown state '${name}'`);
   for (const name of Object.keys(scene.alt))
     if (!Object.hasOwn(states, name)) problems.push(`text alternative for unknown state '${name}'`);
 

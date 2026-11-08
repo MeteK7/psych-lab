@@ -1,9 +1,9 @@
-import type { Emphasis, FrameRatio, LabelTone, StyleRef, ThemeId } from '../styling/vocabulary';
+import type { Emphasis, FrameRatio, LabelTone, MotionEffect, StyleRef, ThemeId } from '../styling/vocabulary';
 
 /**
  * S3 Composition: the Scene Specification, version 0 (docs/visual-system.md §4). A scene is typed
  * data: no DSL, no parser, no scenes from the server. Each section is read by one capability:
- * layers by composition, `states` by S4 State, and (once pulled) `motion` by S5 Motion.
+ * layers by composition, `states` by S4 State, and `enter` and `transitions` by S5 Motion.
  * It contains no colour values, durations or backend names.
  */
 export type SceneId = string;
@@ -42,8 +42,18 @@ export type Geometry =
   | { type: 'rect'; x: number; y: number; width: number; height: number; rx?: number }
   | { type: 'line'; x1: number; y1: number; x2: number; y2: number };
 
+/**
+ * How an element appears when a state change shows it (read by S5). Without `enter` it fades in.
+ * Motion earns its place like any element: an element that moves on its own says why.
+ */
+export type Entrance =
+  /** Moves on its own, with an effect, and counts towards the motion budget. */
+  | { effect: MotionEffect; why: string; with?: undefined }
+  /** Moves as part of another element (its courses, its label), at the same moment. Default effect: the lead's (`fade` for a label led by `draw`). */
+  | { with: ElementId; effect?: MotionEffect; why?: undefined };
+
 export type SceneElement =
-  | { kind: 'shape'; id: ElementId; geometry: Geometry; style: StyleRef; purpose: Purpose }
+  | { kind: 'shape'; id: ElementId; geometry: Geometry; style: StyleRef; purpose: Purpose; enter?: Entrance }
   | {
       kind: 'label';
       id: ElementId;
@@ -52,6 +62,7 @@ export type SceneElement =
       align: 'start' | 'middle' | 'end';
       tone?: LabelTone;
       purpose: Purpose;
+      enter?: Entrance;
     };
 
 export interface Layer {
@@ -82,6 +93,11 @@ export interface SceneDefinition {
   states: StateModel;
   /** The text alternative for each state. */
   alt: Readonly<Record<StateName, ContentKey>>;
+  /**
+   * The state changes the exercise makes, from → to. S5 checks the motion budget for each, and the
+   * Visual Lab replays each for review. Other changes still work; they just aren't reviewed.
+   */
+  transitions?: readonly (readonly [StateName, StateName])[];
   /** Scene policy settings the validator reads (docs/visual-policy.md §8). */
   policy?: { maxFocal?: number };
   /**

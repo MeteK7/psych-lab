@@ -4,10 +4,16 @@ import { SceneDefinition } from '../../composition/scene';
  * MCII, "Your wish, and what's in the way" (docs/mcii-design.md §5). The original picture's
  * composition, kept: a horizontal path from now to a marker for the wish, a low wall across it,
  * and a dashed bridge over the wall. Nothing else. Version 2 drops the version 1 landscape,
- * which added layers without meaning (review, 2026-11-08). S1 is used only where it fixes or
- * clarifies something: see `changes`.
+ * which added layers without meaning (review, 2026-11-08). Version 3 keeps the wish in its colour
+ * when it's set aside, because the wish stands for hope and grey reads as loss (review, 2026-11-08).
+ * S1 is used only where it fixes or clarifies something: see `changes`. Version 4 adds motion
+ * between the states (MCII step 4c); the states themselves are version 3's, as approved
+ * (docs/visual-reviews.md, entry 1).
  * Geometry: the original's, moved 40 units up to fit the 480 × 120 banner frame.
- * Policy assertions: `mcii-path.policy.spec.ts`. Static states only; motion is MCII step 4c.
+ * Motion: the wall rises into place when the obstacle appears; the bridge is drawn from left to
+ * right when there's a plan; emphasis changes ease. Nothing else moves, and nothing moves under
+ * reduced motion.
+ * Policy assertions: `mcii-path.policy.spec.ts`.
  */
 const ROUTE = ['path', 'now', 'wish', 'wish-centre', 'label-now', 'label-wish'];
 const OBSTACLE = ['wall', 'wall-courses', 'label-obstacle'];
@@ -16,7 +22,7 @@ const NAMES = { serves: ['understanding'], why: "Names the element in the exerci
 
 export const MCII_PATH: SceneDefinition = {
   id: 'mcii.path',
-  version: 2,
+  version: 4,
   theme: 'action',
   frame: 'banner',
   layers: [
@@ -48,7 +54,7 @@ export const MCII_PATH: SceneDefinition = {
           style: { role: 'subject', material: 'tonal' },
           purpose: {
             serves: ['concept', 'feedback'],
-            why: 'The desired future, as a place ahead rather than something achieved (no flag or trophy). Heavier at the wish steps, then equal with the wall once the obstacle appears.',
+            why: 'The desired future, as a place ahead rather than something achieved (no flag or trophy). It keeps its colour in every state, including set aside, because it stands for hope. Heavier at the wish steps, then equal with the wall once the obstacle appears.',
           },
         },
         {
@@ -67,6 +73,10 @@ export const MCII_PATH: SceneDefinition = {
             serves: ['concept'],
             why: "The obstacle. The same colour and line weight as the wish, because the method holds the wish and what's in the way with equal weight. Low, so it reads as something to get past, not a threat.",
           },
+          enter: {
+            effect: 'rise',
+            why: 'Shows what this step adds: the obstacle comes up into its place on the path just pictured. A short rise rather than a drop, so it arrives without looking sudden or threatening.',
+          },
         },
         {
           kind: 'shape',
@@ -77,6 +87,7 @@ export const MCII_PATH: SceneDefinition = {
           },
           style: { role: 'subject', line: 'fine' },
           purpose: { serves: ['understanding'], why: 'Courses of bricks, so the rectangle reads as a wall.' },
+          enter: { with: 'wall' },
         },
         {
           kind: 'shape',
@@ -87,6 +98,10 @@ export const MCII_PATH: SceneDefinition = {
             serves: ['concept'],
             why: "The if-then plan: a way over the obstacle. Dashed, because a plan is intended, not done; a solid bridge would suggest it's already solved.",
           },
+          enter: {
+            effect: 'draw',
+            why: 'The plan is drawn from this side of the wall to the far side, in the reading direction: a way over that the participant has just made, rather than one that was always there. It stays dashed while it draws.',
+          },
         },
       ],
     },
@@ -96,8 +111,8 @@ export const MCII_PATH: SceneDefinition = {
       elements: [
         { kind: 'label', id: 'label-now', text: 'mcii.scene_labels.now', at: [40, 110], align: 'middle', purpose: NAMES },
         { kind: 'label', id: 'label-wish', text: 'mcii.scene_labels.wish', at: [430, 110], align: 'middle', purpose: NAMES },
-        { kind: 'label', id: 'label-obstacle', text: 'mcii.scene_labels.obstacle', at: [240, 110], align: 'middle', purpose: NAMES },
-        { kind: 'label', id: 'label-plan', text: 'mcii.scene_labels.plan', at: [240, 22], align: 'middle', purpose: NAMES },
+        { kind: 'label', id: 'label-obstacle', text: 'mcii.scene_labels.obstacle', at: [240, 110], align: 'middle', purpose: NAMES, enter: { with: 'wall', effect: 'fade' } },
+        { kind: 'label', id: 'label-plan', text: 'mcii.scene_labels.plan', at: [240, 22], align: 'middle', purpose: NAMES, enter: { with: 'bridge' } },
       ],
     },
   ],
@@ -108,10 +123,17 @@ export const MCII_PATH: SceneDefinition = {
       // The wish and the wall with equal weight: neither is focal.
       contrast: { visible: [...ROUTE, ...OBSTACLE] },
       plan: { visible: [...ROUTE, ...OBSTACLE, ...PLAN] },
-      // Set aside: the route turns neutral grey at the same lightness, so it stays legible.
-      aside: { visible: ROUTE, emphasis: { path: 'receded', now: 'receded', wish: 'receded', 'wish-centre': 'receded' } },
+      // Set aside: the path to the wish gets quieter; the wish keeps its colour, so it reads as
+      // "for now", not as lost. The step's own words carry the decision.
+      aside: { visible: ROUTE, emphasis: { path: 'receded', now: 'receded' } },
     },
   },
+  // The changes the exercise makes (mcii-scenes.ts): the obstacle step, then a plan or setting aside.
+  transitions: [
+    ['future', 'contrast'],
+    ['contrast', 'plan'],
+    ['contrast', 'aside'],
+  ],
   alt: {
     future: 'mcii.scenes.future.alt',
     contrast: 'mcii.scenes.contrast.alt',
@@ -119,7 +141,7 @@ export const MCII_PATH: SceneDefinition = {
     aside: 'mcii.scenes.aside.alt',
   },
   changes: [
-    'Set aside stays readable: the route turns neutral grey at the same lightness (5.3:1 in light) instead of fading to 45% opacity, which drops below the 3:1 minimum for graphics.',
+    'Set aside keeps the wish in its colour and at full contrast; only the path to it gets lighter (1.5 px instead of 2). The original fades the whole picture to 45% opacity, which drops below the 3:1 minimum for graphics.',
     'Works in Windows High Contrast: every element is mapped to a system colour; the original has no forced-colours handling.',
     "Colours come from the Action theme, a little softer than the buttons, so the page's controls stay the strongest colour.",
     'Clearer hierarchy: the path is lighter (2 px instead of 3) than the elements it connects, and the wish is emphasised only at the wish steps.',

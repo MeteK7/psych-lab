@@ -38,3 +38,24 @@ export interface ResolvedFrame {
   /** Visible items, in drawing order. */
   items: readonly FrameItem[];
 }
+
+/**
+ * A timeline as a backend gets it: every value decided. `opacity`, `offsetY` (scene units, positive
+ * is lower) and `reveal` (the drawn fraction along the element's direction) are numbers; `paint`
+ * eases between two paints. The frame holds each element's final state; a backend plays tracks
+ * towards it and, when it can't play them, simply shows the frame.
+ */
+interface TrackTiming {
+  id: string;
+  delay: number;
+  duration: number;
+  easing: string;
+}
+
+export type ResolvedTrack = TrackTiming &
+  (
+    | { property: 'opacity' | 'offsetY' | 'reveal'; from: number; to: number }
+    | { property: 'paint'; from: DrawPaint; to: DrawPaint }
+  );
+
+export type ResolvedTimeline = readonly ResolvedTrack[];

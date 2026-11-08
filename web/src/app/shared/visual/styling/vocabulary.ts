@@ -67,7 +67,7 @@ export interface StyleRef {
  */
 export const NOT_ON_NEAR = { roles: ['context'] as readonly ColorRole[], tones: ['label-soft'] as readonly LabelTone[] };
 
-/** Motion tokens (§10), read by S5 once a composition pulls motion. */
+/** Motion tokens (§10), read by S5. */
 export const MOTION = {
   durations: { quick: 150, moderate: 300, deliberate: 600, slow: 900 },
   easing: {
@@ -76,5 +76,27 @@ export const MOTION = {
     move: 'cubic-bezier(0.4, 0, 0.2, 1)',
   },
   staggerMs: 60,
+  /** At most this many elements move in one state change (visual-policy.md §3.12). */
   maxStaggered: 3,
 } as const;
+export type MotionDuration = keyof typeof MOTION.durations;
+export type MotionEasing = keyof typeof MOTION.easing;
+
+/**
+ * Effects built so far (§10), each with its preset. An element that appears in a state change
+ * enters with one of them; the effect is named in the scene, the values live here.
+ * `fade`: opacity 0 → 1. `rise`: fades in while moving up `distance` units into its place.
+ * `draw`: revealed along its own direction (shapes only; dashed lines are revealed through a mask).
+ */
+export const MOTION_EFFECTS = {
+  fade: { duration: 'moderate', easing: 'arrive' },
+  rise: { duration: 'deliberate', easing: 'arrive', distance: 8 },
+  draw: { duration: 'deliberate', easing: 'move' },
+} as const satisfies Record<string, { duration: MotionDuration; easing: MotionEasing; distance?: number }>;
+export type MotionEffect = keyof typeof MOTION_EFFECTS;
+
+/** An element that stays but changes emphasis eases between the two paints (§3.7). */
+export const EMPHASIS_CHANGE = { duration: 'moderate', easing: 'move' } as const satisfies {
+  duration: MotionDuration;
+  easing: MotionEasing;
+};
