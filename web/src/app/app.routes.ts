@@ -14,6 +14,12 @@ export const routes: Routes = [
   { path: 'records', component: RecordsPage, title: 'My records' },
   { path: 'about', component: AboutPage, title: 'About' },
   { path: 'session', component: SessionPage, title: 'Exercise' },
+  // The Visual Lab: development build only (the page checks), loaded on demand.
+  {
+    path: 'lab',
+    loadComponent: () => import('./pages/lab/lab-page').then((m) => m.LabPage),
+    title: 'Visual Lab',
+  },
   // Old addresses from before the platform structure.
   { path: 'dev', redirectTo: 'areas/action-growth' },
   { path: 'history', redirectTo: 'records' },
