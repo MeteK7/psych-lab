@@ -1,8 +1,10 @@
 # The Visual System: architecture and foundations (revision 3)
 
 > **Status:** v0.1 in progress, branch `test-visual-system`.
-> - **Built so far:** S1 tokens and resolver, S3 types and validator, S4 visibility and emphasis, the SVG backend, the pipeline and a scene figure (S9), and the Visual Lab (development build, `/lab`). See the capability log (§15).
-> - **For review before anything else is built:** R2 of `mcii.path@2` in the Lab, side by side with the picture participants see now. Motion (MCII 4c) and integration into the exercise (4d) wait for that review.
+> - **Built so far:** S1 tokens and resolver, S3 types and validator, S4 visibility and emphasis, S5 motion for state changes, the SVG backend, the pipeline and a scene figure (S9), and the Visual Lab (development build, `/lab`). See the capability log (§15).
+> - **Reviewed:** `mcii.path`'s states and transitions, accepted by you (`visual-reviews.md`, entries 1 and 2), with 12 screenshot baselines.
+> - **Integrated (MCII step 4d):** the MCII exercise draws `mcii.path` on the development branch; the old built-in picture is removed.
+> - **Before you merge to production:** R3 (you, the exercise in context) and the psychology-trained reviewer's review of psychological suitability, both in the test environment (§10).
 > - **Revision 3 (2026-11-08), after your review of `mcii.path@1`:**
 >   - every element carries a purpose (§4.1, §4.3; `visual-policy.md` principle 6)
 >   - compositions start from the existing picture (§5.1)
@@ -135,7 +137,7 @@ Each boundary carries an example of the independence it buys:
 1. **S2 Generation imports nothing** from the project, Angular or the DOM.
 2. **S1 Styling** is data plus a resolver. It imports only its own types.
 3. **S3 Composition** imports type definitions only: S1's style-reference vocabulary and S2's generator ids. Its validator also reads S1's vocabulary lists and S2's parameter checks (revision 2), and nothing else.
-4. **S4 State** imports S3 types. **S5 Motion** imports S4 types and S1 motion tokens.
+4. **S4 State** imports S3 types. **S5 Motion** imports S3 and S4 (the scene's entrances and the state targets) and S1 motion tokens.
 5. **S7 Rendering** imports the resolved-frame and timeline types, and **nothing imports a backend except S9 Integration.**
 6. **Exercises import only S9:** a visual source, the slot, an instrument component. They never import a backend, a generator or a rendering library.
 7. **`*-logic.ts` and `*-store.ts` import nothing from the Visual System.**
@@ -145,13 +147,13 @@ Each boundary carries an example of the independence it buys:
 | Step | Capability | What happens |
 |---|---|---|
 | 1 | S9 | `sceneFor('mcii_obstacle', …)` (in `mcii-scenes.ts`, unchanged in kind) asks for `mcii.contrast`, previously `mcii.future` |
-| 2 | S3 | Scene `mcii.path` v2 gives the frame and the elements `path`, `now`, `wish`, `wish-centre`, `wall`, `wall-courses`, `bridge`, plus four labels, each with its purpose |
+| 2 | S3 | Scene `mcii.path` v4 gives the frame and the elements `path`, `now`, `wish`, `wish-centre`, `wall`, `wall-courses`, `bridge`, plus four labels, each with its purpose |
 | 3 | S2 | Not used: every element is hand-placed geometry |
 | 4 | S1 | Theme `action`, scheme light: `wall` and `wish` take the role `subject` with the `tonal` material; `path` takes `context` |
 | 5 | S4 | State `contrast`: `wall` becomes visible; `wish` drops from `focal` to `normal`, so the wish and the obstacle have equal weight |
 | 6 | S5 | From `future` to `contrast`: one change, `wall` appears with the `rise` effect and the `deliberate` preset. Under reduced motion the timeline is empty and the final state is shown at once |
 | 7 | S7 | The SVG backend draws the resolved frame and plays the timeline |
-| 8 | S9 | Provenance is recorded as `{ source: 'builtin.v2', scene: 'mcii.path@2', theme: 'action@1', tier: 'full' }` |
+| 8 | S9 | The exercise records its visual source as `scene:mcii.path@4;theme:action@1` (§9) |
 
 ---
 
@@ -268,10 +270,10 @@ Every capability is built **from a composition, not ahead of one**:
 | Capability | In v0.1 (NOW) | Interface only (DESIGNED) |
 |---|---|---|
 | S1 Styling | Neutral and area ramps, roles, line weights, dashes, the `line`, `tonal` and `solid` materials, emphasis resolution, motion tokens, forced-colours mapping, the five area themes (the palette under review R1, through the S1 sheet) | The `lit` and `translucent` materials, textures, light presets beyond the platform default: each one added when a scene pulls it |
-| S2 Generation | Nothing (revision 3): `mcii.path@2` is hand-placed | Seeded random, noise, curves, ridges, blobs, arcs, layouts, distributions, flow fields, rhythm curves |
+| S2 Generation | Nothing (revision 3): `mcii.path@3` is hand-placed | Seeded random, noise, curves, ridges, blobs, arcs, layouts, distributions, flow fields, rhythm curves |
 | S3 Composition | `SceneDefinition` with `shape` and `label` elements, each with a purpose; the validator | `generated`, `custom`, `asset`, `group` and `region` elements |
 | S4 State | Visibility and emphasis | Parameter targets (v0.2) |
-| S5 Motion | Only once MCII step 4c needs it: `fade`, `rise`, `draw`; the motion policy | Value transitions, layout transitions, the scalar tween, View Transitions |
+| S5 Motion | Built for MCII step 4c: entrances with `fade`, `rise` and `draw`; emphasis changes eased between paints; the motion budget; departures at once | `recede` as a cross-fade, departures with motion, value transitions, layout transitions, the scalar tween, View Transitions |
 | S6 Interaction | — | Everything (v0.2, with CS2) |
 | S7 Rendering | The SVG backend | Canvas, GPU, 3D, embedded runtimes |
 | S8 Assets | Static images through the existing contract (already built) | The manifest, pipeline and export |
@@ -358,7 +360,7 @@ A custom element can't become a whole scene, so a bespoke renderer can't come in
 ### 6.6 Existing visuals (legacy until migrated)
 | Visual | Status | Migration |
 |---|---|---|
-| `MciiPathScene` (`mcii-path-scene.ts`) | Legacy | Replaced in MCII step 4d by scene `mcii.path`; then removed |
+| `MciiPathScene` (`mcii-path-scene.ts`) and its source `builtin.v1` | Removed | Replaced in MCII step 4d (2026-11-08) by scene `mcii.path`. Production keeps it until you merge |
 | CS2 cause chart (`cs-why-it-happened.ts`) | Legacy | v0.2, as an instrument |
 | CS1 and CS3 visuals | Legacy | v0.3 |
 | `GamePreview`, `TrackingGame`, `ToneGame` | Experiment exercises: frozen | Only after the n-of-1 study, as a new protocol phase through the stimulus lane |
@@ -393,13 +395,16 @@ A custom element can't become a whole scene, so a bespoke renderer can't come in
 
 **The motion policy:**
 - **When motion happens:** only on a state change (an explicit pacer excepted), and only for elements that changed.
+- **What moves (as built):** an element that appears enters with the effect its scene names (`enter`; default `fade`), and the elements that belong to it (`enter.with`) move with it. An element that stays but changes emphasis eases between its two paints. An element that goes away goes at once: in MCII the page changes at the same moment, and no departure needs motion to be understood. A scene that needs one pulls it.
+- **Reviewed changes:** a scene lists the state changes its exercise makes (`transitions`). Each is checked against the budget and replayed in the Lab.
 - **Limits:** at most three elements per change; durations from S1 tokens; never during typing; never in reaction to a choice in progress.
 - **Reduced motion is explicit.** Meaningful motion switches to a different representation and never relies on the global rule in `styles.css` (which shortens every CSS animation to 0.01 ms) [F]. Illustrations take the empty timeline.
 
 **Fallback:** a missing, failing or slow source falls back to `none` (already built and tested) [F]. A backend that can't run falls back to the static tier. The exercise never knows which happened.
 
 ## 9. Provenance and recording
-- **Illustrations and instruments** in development exercises record `{ source, scene@version, theme@version, tier }`, extending the `visual_source` already recorded with MCII step 1 [F: `mcii-logic.ts`].
+- **Illustrations** in development exercises record what was drawn in the `visual_source` already recorded with MCII step 1 [F: `mcii-logic.ts`]: `scene:<scene>@<version>;theme:<theme>@<version>`, for example `scene:mcii.path@4;theme:action@1`. One string, so the stored data keeps its shape. The quality tier isn't recorded: the states look the same in every tier, and only motion differs.
+- **Instruments** (v0.2) will record the same, plus what they need.
 - **Stimuli** record their spec version, seed and measured timing.
 - **No typed text** reaches a visual request or a provenance record. Requests stay closed-vocabulary.
 - **Experiment exercises record nothing new.**
@@ -421,11 +426,13 @@ Automated checks prove technical correctness, consistency and accessibility. **T
 | Review | What is reviewed | Where | Reviewers | Gate for |
 |---|---|---|---|---|
 | **R1 Language** | The S1 sheet; each theme in its first real composition | The review sheet; the Lab | You | Phase 2 (this proposal); v0.1 themes; every new theme or material |
-| **R2 Composition** | Each scene: every state, light, dark, forced colours, reduced motion, each tier; each transition replayed | The Lab | You; for exercise scenes, also the psychology-trained reviewer (scientific appropriateness, with a veto) | Integration of that scene |
-| **R3 In context** | The integrated exercise from start to end, at 1280 and 2560 px, 100% and 150% scaling | The development build (port 4310) | You | Release of the integration to the development build |
+| **R2 Composition** | Each scene: every state, light, dark, forced colours, reduced motion, each tier; each transition replayed | The Lab | You | Integrating the scene on the development branch |
+| **R3 In context** | The integrated exercise from start to end, at 1280 and 2560 px, 100% and 150% scaling | The test environment | You; for exercise scenes, also the psychology-trained reviewer (psychological suitability, with a veto) | Your merge to production |
 | **R4 Usability** | Participants' understanding and experience | `usability-procedure.md` sessions | Participants, with the questions in `visual-policy.md` §9.5 | The exercise's existing usability gate |
 
-**Screenshot baselines are updated only with an accepted review entry** that names them, so automated checks can never quietly accept a visual change.
+**How reviews fit the workflow (2026-11-08):** reviews gate the merge to production, not anything in the software. Work is integrated normally on the development branch and reviewed in the test environment; you merge and deploy once the reviews it needs are complete. Production stays unchanged until then. There are no feature flags, approval switches or activation controls for visuals: a reviewer approves, and the merge carries the change.
+
+**Screenshot baselines are updated only with an accepted review entry** that names them, so automated checks can never quietly accept a visual change. Each figure is captured on its own fixed 480-px surface, so a change to the Lab's layout doesn't move a pixel of it.
 
 ## 11. Automated testing
 | Level | What |
@@ -489,7 +496,7 @@ docs/visual-system.md · visual-policy.md · visual-language.md · visual-review
 | Release | Contents | Validated by | Human review |
 |---|---|---|---|
 | **Phase 2 (this)** | These three documents; the S1 review sheet | — | R1 of the S1 proposal |
-| **v0.1** | §5.3 scope | MCII 4a–4d (revision 3: the area studies were removed) | R1 on the S1 sheet; R2 each MCII state next to the original, then the transitions; R3 MCII |
+| **v0.1** | §5.3 scope | MCII 4a–4d (revision 3: the area studies were removed) | R1 on the S1 sheet; R2 each MCII state next to the original, then the transitions (done); R3 MCII and the psychology-trained reviewer, in the test environment, before your merge |
 | **v0.2** | S6 Interaction; S4 parameter targets; value transitions; instruments in the Lab | CS2 | R2, R3; CS2 usability |
 | **v0.3** | The layout generators and layout transitions that CS1 and CS3 pull | CS1, CS3 | R2, R3 |
 | **v0.4** | Canvas backend; stimulus lane; frame clock; timing log; watchdog | The first approved Attention task | R2; a timing validation report |
@@ -522,7 +529,17 @@ One row per capability added to code, naming the composition that pulled it.
 | 2026-11-08 | `purpose` on every element; validator rules for purposes and never-shown elements; the purpose table in the Lab | S3, S10 | Your review of `mcii.path@1` (`visual-policy.md` principle 6) | — |
 | 2026-11-08 | `solid` material (dots and small marks in the line colour) | S1 | `mcii.path@2` (the wish's centre) | R2 pending |
 | 2026-11-08 | Receded `context` lines keep their colour and recede by weight only, so they never get darker | S1 | `mcii.path@2` (set aside) | R2 pending |
-| 2026-11-08 | The Lab compares a revision with the picture it replaces, drawn by the exercise's own source (`builtin.v1`) | S10 | `mcii.path@2` | — |
+| 2026-11-08 | Scene policy: hope-bearing elements keep their colour in every state (asserted in the scene's policy spec; no new code) | S3 | Your review of `mcii.path@2` (the wish turned grey when set aside; `visual-policy.md` §3.9) | — |
+| 2026-11-08 | The Lab compares a revision with the picture it replaces, drawn by the exercise's own source (`builtin.v1`); removed with that picture in step 4d | S10 | `mcii.path@2` | — |
+| 2026-11-08 | Screenshot baselines: every state of an accepted composition in light, dark and forced colours (12 for `mcii.path`) | S10 | `mcii.path@3` (`visual-reviews.md`, entry 1) | Accepted |
+| 2026-11-08 | Effect presets (`fade`, `rise`, `draw`) and the emphasis-change preset, as data next to the motion tokens | S1 | `mcii.path@4` (the wall rises, the bridge draws, emphasis eases) | R2 pending |
+| 2026-11-08 | `enter` on elements (an effect with a reason, or `with` a lead) and `transitions` on scenes; validator rules: a reason for motion, known effects, only line shapes draw, no chains, no entrance on an element shown in every state | S3 | `mcii.path@4` | R2 pending |
+| 2026-11-08 | `planMotion` (timeline of opacity, offset, reveal and emphasis tracks), `movers` (the reviewable summary), `motionProblems` (the budget per transition); empty timelines on first appearance and below the full tier | S5 | `mcii.path@4` | R2 pending |
+| 2026-11-08 | The SVG backend plays a timeline with the Web Animations API (no timers), reveals through a mask so dashes don't crawl, cancels on change and destroy, and shows the final state where the API is missing; conformance tests for motion | S7 | `mcii.path@4` (the bridge) | — |
+| 2026-11-08 | `buildTimeline` (emphasis tracks resolved to paint); the scene figure plays the change from the previous state, takes `from` for a figure created by a step change, and follows the reduced-motion setting | S9 | `mcii.path@4` | — |
+| 2026-11-08 | `SceneSpecSource` and `provideSceneVisuals`: an exercise's requests (`<prefix>.<state>`, `facets.from`) answered with a registered scene; the scene and the renderer load on the first request, in their own chunk; its id (`scene:<id>@<v>;theme:<theme>@<v>`) is the recorded visual source | S9 | MCII step 4d | R3 pending |
+| 2026-11-08 | Baselines captured on a fixed 480-px surface, independent of the Lab's layout; the Lab no longer shows the original picture, which is removed | S10 | MCII step 4d | Entry 2 |
+| 2026-11-08 | The Lab's "Transitions" section: each declared change, replayable, in full or reduced motion, with what moves and why; browser tests that each change ends on the approved state and that nothing moves under reduced motion | S10 | `mcii.path@4` | — |
 
 **Retired 2026-11-08** (removed from code before it was ever committed, so it isn't in git history; the designs stay described in §4–§5 and `visual-language.md` §8, and are rebuilt if a composition pulls them):
 
@@ -532,7 +549,7 @@ One row per capability added to code, naming the composition that pulled it.
 | Five area studies (`study.action`, `.cognitive`, `.attention`, `.regulation`, `.recovery`) | v0.1 scope | Mostly decorative; an area's language is tested in its first real composition instead |
 | S2: seeded random, value noise, `ridge`, `curve`, `blob`, `wave`; the `generated` element kind and the scene seed | The landscape and the studies | No remaining composition uses them (the pull rule) |
 
-**Not built in this step:** S5 Motion (waits for MCII 4c), `SceneSpecSource` and provenance (4d), screenshot baselines (added with the first accepted review, §10), the `lit` and `translucent` materials.
+**Not built yet:** the `lit` and `translucent` materials, departures with motion, recording the quality tier with the visual source (the states look the same in every tier; only motion differs).
 
 ## 16. Decisions for your review
 | # | Decision | Recommendation |
@@ -542,5 +559,5 @@ One row per capability added to code, naming the composition that pulled it.
 | V3 | The pull rule, the capability log and the v0.1 scope in §5.3, with the size guard | Approve |
 | V4 | The backend contract, the conformance suite and the custom-element limits in §6 | Approve |
 | V5 | The four reviews R1–R4 as acceptance gates, the review log, and baselines updated only with an accepted review | Approve |
-| V6 | The psychology-trained reviewer takes part in R2 for exercise scenes, with a veto on scientific appropriateness | Approve; confirm who that is for MCII |
+| V6 | The psychology-trained reviewer reviews exercise scenes for psychological suitability, with a veto, in the test environment before your merge (revised 2026-11-08: reviews gate merges, not software) | Approve; confirm who that is for MCII |
 | V7 | The S1 proposal (`visual-language.md`) | Review the sheet; changes go into revision 2 |

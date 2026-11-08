@@ -211,6 +211,8 @@ Where a rule is a design judgement rather than a measured fact, it is marked [J]
 - **Chroma budget [J]:** ground planes keep low chroma (the S1 plane steps); only the focal element uses the ramp's peak chroma.
 - **Never colour alone:** colour never carries meaning by itself (WCAG 1.4.1). Every distinction also has form, line, position or a label.
 - **No valence colours:** no green for good or red for bad, no traffic lights, no warning colours for an emotion, a cause or a reading.
+- **A change of state never changes what an element means.** An element that stands for something the participant hopes for or values (a wish, a value, a strength, a goal) keeps its area colour in every state. Turning it grey or black reads as loss, failure or a verdict, which judges the participant's choice (principle 5). To show that something is paused, set aside or not current, quieten the elements *around* it (the path, the context) or use position and the step's own words. `receded` is for context and supporting elements, not for the thing the participant cares about. Each scene's policy names its hope-bearing elements and asserts that they keep their colour.
+  - **Why it's here:** `mcii.path@2` turned the wish grey when it was set aside. The wish stands for hope and aspiration, and the exercise tells the participant that setting it aside is "a real decision too" (review, 2026-11-08).
 - **Contrast:** at least 3:1 for essential graphics and 4.5:1 for labels, in light, dark and forced colours (checked by tests, `visual-language.md` §3.5).
 - **Mixing:** colour is mixed in OKLab. No mixing in sRGB, which goes muddy and greyish.
 
@@ -218,6 +220,7 @@ Where a rule is a design judgement rather than a measured fact, it is marked [J]
 - several saturated hues
 - colour as the only cue
 - valence-coded options
+- greying out the thing the participant hopes for to show a change of state
 - dark-mode colours that are just inverted
 
 ### 3.10 Line
@@ -254,6 +257,7 @@ Where a rule is a design judgement rather than a measured fact, it is marked [J]
 **Rules:**
 - **When:** only on a state change; only the elements that changed move; at most three per change.
 - **Continuity:** an element present in both states persists and is never redrawn from nothing.
+- **Motion earns its place too** (principle 6): an element that moves on its own says why in its scene (`enter.why`), and the Lab shows it next to the replay.
 - **Direction carries meaning:**
   - things that appear rise from the ground or draw along their direction of travel (left to right for paths)
   - things that recede fade and desaturate, rather than flying away
@@ -324,7 +328,7 @@ The aim is visuals that are **simple to read and sophisticated to look at.** The
 8. **Privacy:** visuals are chosen only from closed-vocabulary requests. Typed text never reaches a visual.
 9. **Stimuli** follow their protocol (`visual-system.md` §7); this policy can't override it.
 
-**The psychology-trained reviewer** has a veto on this section in review R2, as in the content reviews [F: `cognitive-shifts-review-plan.md`].
+**The psychology-trained reviewer** has a veto on this section, in the integrated exercise in the test environment, as in the content reviews [F: `cognitive-shifts-review-plan.md`].
 
 ## 6. Accessibility (summary; normative detail in `visual-system.md` §12)
 - **Text alternatives:** one per state, from content; decorative layers hidden from assistive technology.
@@ -372,12 +376,14 @@ Automated tests prove that a visual is correct, consistent and accessible. **Onl
 |---|---|---|
 | R1 Language | The S1 proposal; each area study; each new theme, material or asset | The review sheet; the Lab |
 | R2 Composition | Each scene, each state, each transition | The Lab: every state in light, dark, forced colours, reduced motion and each tier, at 1280 and 2560 px |
-| R3 In context | Each integrated exercise | The development build, start to end |
+| R3 In context | Each integrated exercise | The test environment, start to end |
 | R4 Usability | Each exercise integration | The existing usability sessions |
 
 ### 9.2 Who
 - **You** take part in R1, R2 and R3, covering visual quality, concept and product fit.
-- **The psychology-trained reviewer** takes part in R2 for exercise scenes, covering scientific appropriateness, with a veto.
+- **The psychology-trained reviewer** reviews each exercise scene for psychological suitability (§5), with a veto. They look at the integrated exercise in the test environment, with the Lab for the states and transitions. Their approval is recorded in the review log; nothing is switched on in the software.
+
+**When:** reviews gate your merge to production, not anything in the software. A composition is integrated on the development branch after R2, reviewed in context (R3, the psychology-trained reviewer) in the test environment, and merged by you once those reviews accept it. Production stays unchanged until then.
 - **A visual designer, if one is available,** may take part in R1 and R2, advising on visual quality.
 - **Participants** take part in R4.
 
@@ -401,7 +407,7 @@ Each criterion is scored for the reviewed item:
 | Purpose (§2, principle 6) | For every element: what does it tell the participant, and what would be lost without it? Any element without a clear answer is removed |
 | Visual quality (§3) | 3.1 Composition · 3.2 Hierarchy · 3.3 Depth · 3.4 Perspective · 3.5 Geometry · 3.6 Organic forms · 3.7 Light · 3.8 Materials · 3.9 Colour · 3.10 Line · 3.11 Type · 3.12 Motion · 3.13 Simplicity and sophistication |
 | Conceptual clarity (§4) | One idea · Metaphor fit · Paraphrase test · Labels test · Continuity across states |
-| Scientific appropriateness (§5) | Never required · No steering · No claims · No reward · No judgement · Valence balance · Consistency · Privacy |
+| Scientific appropriateness (§5) | Never required · No steering · No claims · No reward · No judgement · Valence balance · Hope-bearing elements keep their colour in every state (§3.9) · Consistency · Privacy |
 | Coherence | Speaks the S1 language; sits with the other approved scenes when shown side by side in the Lab |
 | Technical (from the automated run) | Tests, axe, screenshots, budgets: attached, not re-judged |
 

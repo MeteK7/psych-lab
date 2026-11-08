@@ -157,6 +157,8 @@ Figures set `forced-color-adjust: none` and map every role to a system colour ex
 
 **Why the neutral swap:** a receded element keeps its lightness, so it stays legible: receded subject on ground is 5.27:1 in light and 9.83:1 in dark [F, computed]. Fading it towards the ground would drop it below 3:1 (1.8–2.1:1 for a 50–60% mix [F, computed]). The existing MCII "aside" picture fades to 45% opacity [F: `mcii-path-scene.ts`]; the swap replaces that.
 
+**What may recede:** context and supporting elements. An element that stands for something the participant hopes for or values never recedes, because a neutral swap turns it grey and grey reads as loss (`visual-policy.md` §3.9). A `context` element is already neutral, so it recedes by weight only.
+
 ---
 
 ## 4. Line
@@ -254,9 +256,12 @@ Figures set `forced-color-adjust: none` and map every role to a system colour ex
 | `fade` | Opacity 0 → 1 (or 1 → 0) | `quick` / `moderate` |
 | `rise` | Moves up 8 units from below its place while fading in | `deliberate` |
 | `draw` | A reveal fraction 0 → 1 along the line's direction (left to right for paths). Dashed lines are revealed through a mask, so the dashes don't crawl | `deliberate` / `slow` |
-| `recede` | A cross-fade to the `receded` emphasis (§3.7) | `moderate` |
+| Emphasis change | An element that stays eases from one emphasis to the other: line weight and colour (§3.7). Built for MCII as the form of `recede` | `moderate`, `ease-move` |
+| `recede` | A cross-fade to the `receded` emphasis (§3.7). Not built: the emphasis change covers what MCII needs | `moderate` |
 
 **Under reduced motion,** every timeline is empty and the final state appears at once. No bounce, overshoot, elastic, spin or looping.
+
+**Departures** happen at once (as built): nothing so far needs a departure to be understood, and the page changes at the same moment. The presets live in `styling/vocabulary.ts` (`MOTION_EFFECTS`, `EMPHASIS_CHANGE`).
 
 ## 11. Area themes
 **The forms below are options, not obligations** (revision 2, `visual-policy.md` principle 6). A form is used only when a scene can name what it tells the participant. The hue and the line language are what make an area recognisable; ridges, lenses, rings or terrain are not added for atmosphere. The Action terrain, for example, was tried in `mcii.path@1` and removed, because it carried no meaning.
