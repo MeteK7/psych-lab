@@ -38,11 +38,14 @@ for (const [name, media] of [
   });
 }
 
-// Approved baselines (docs/visual-reviews.md, entries 1 and 2): every state of each accepted
-// composition, light and dark, and in forced colours. Each figure is captured on its own fixed
-// surface, 480 px wide (the scene's design width) at the page's top left, so the Lab's layout
-// can change without moving a single pixel of the capture.
-const BASELINES = { 'mcii.path': ['future', 'contrast', 'plan', 'aside'] };
+// Approved baselines (docs/visual-reviews.md, entries 1–3): every state of each accepted scene
+// and every answer set of each accepted instrument, light and dark, and in forced colours. Each
+// figure is captured on its own fixed surface, 480 px wide (the scene's design width) at the
+// page's top left, so the Lab's layout can change without moving a single pixel of the capture.
+const BASELINES = [
+  { id: 'mcii.path', attribute: 'data-baseline', keys: ['future', 'contrast', 'plan', 'aside'] }, // entry 1
+  { id: 'cs2.cause-map', attribute: 'data-instrument', keys: ['start', 'placing', 'spread', 'heavy', 'six'] }, // entry 3
+];
 const CAPTURE = `.capture { position: fixed !important; left: 0; top: 0; width: 480px; margin: 0;
   z-index: 2147483647; background: var(--bg); }`;
 
@@ -61,12 +64,12 @@ for (const [name, media, schemes] of [
     await page.emulateMedia(media);
     await page.goto('/lab');
     await page.addStyleTag({ content: CAPTURE });
-    for (const [scene, states] of Object.entries(BASELINES))
-      for (const state of states)
+    for (const { id: composition, attribute, keys } of BASELINES)
+      for (const key of keys)
         for (const scheme of schemes) {
-          const id = `${scene}-${state}-${scheme}`;
-          const file = media.forcedColors ? `${scene}-${state}-forced.png` : `${id}.png`;
-          await capture(page, `figure[data-baseline="${id}"]`, file);
+          const id = `${composition}-${key}-${scheme}`;
+          const file = media.forcedColors ? `${composition}-${key}-forced.png` : `${id}.png`;
+          await capture(page, `figure[${attribute}="${id}"]`, file);
         }
   });
 }

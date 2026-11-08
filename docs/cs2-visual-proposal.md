@@ -1,6 +1,6 @@
 # CS2 cause map: Visual System proposal (v0.2)
 
-> **Status:** proposal, 2026-11-08. **C1–C5 approved and built** on the development branch: change 1, then the rebuild as the instrument `cs2.cause-map@1` (§5.5), integrated into CS2. For review in the Visual Lab (R2) and in the test environment (R3, the psychology-trained reviewer). C6 decided (§8).
+> **Status:** proposal, 2026-11-08. **C1–C5 approved and built** on the development branch: change 1, then the rebuild as the instrument `cs2.cause-map@1` (§5.5), integrated into CS2. **R2 accepted 2026-11-09** (`visual-reviews.md`, entry 3), with solid midlines; 15 screenshot baselines. Still to come, in the test environment: R3 and the psychology-trained reviewer. C6 decided (§8).
 > - The screenshots are in `docs/cs2-visual-proposal/`. The "current" ones show the chart before change 1. The "built" ones show change 1 in the running development build (they replace the mock-ups the proposal was reviewed with, which matched them).
 > - It follows the approach that worked for MCII: start from what exists, change only what serves a named purpose (`visual-policy.md` principle 6), keep the exercise looking like the rest of the application, and show one small change first.
 > - CS2 stays development-only. Its own release gates (content review, full texts; `cognitive-shifts-design.md` §9) are unchanged by this proposal.
@@ -186,7 +186,7 @@ The cause texts the person wrote never enter the Visual System. The figure gets 
 - **In the exercise:** `CauseMapSlot` (S9) loads the instrument and the renderer on demand and holds the map's space meanwhile. The figure keeps its text alternative and the list under it. The exercise passes places only (`positions()`), never the cause texts.
 - **Change 1 moved into the instrument:** the grouping is `groupByPlace` there, so `mapMarks` left `cs-logic.ts`.
 - **Size:** the map is drawn at 416 × 284, its usual width, so labels and numbers render at the S1 sizes (13 and 14 px). The vertical labels have their own margin, so "Lasting" and "Just this time" show in full; the old shortening to "This time" is gone.
-- **For your review:** the solid midlines are firmer than the old light dashes. They meet the S1 line contrast (the old ones were about 1.4:1 against the page); if they compete with the marks, the next step is a lighter S1 role for reference lines, not dashes.
+- **For your review:** the solid midlines are firmer than the old light dashes. They meet the S1 line contrast (the old ones were about 1.4:1 against the page); if they compete with the marks, the next step is a lighter S1 role for reference lines, not dashes. **Settled in R2 (2026-11-09): the solid midlines stay** (`visual-reviews.md`, entry 3).
 
 | Step 4, placing cause 2 (light) | Step 4, placing cause 2 (dark) |
 |---|---|
@@ -236,8 +236,8 @@ If change 1 alone is enough for now, the rebuild can wait. Change 1 works on the
 | # | Decision | My recommendation |
 |---|---|---|
 | C1 | Change 1: causes in the same place drawn as one mark listing their numbers | **Approved and built (2026-11-08).** Try it in the test environment |
-| C2 | Rebuild the chart on the Visual System with the fixes for D1, D3 and D4 | **Approved and built (2026-11-08)** |
-| C3 | On step 4, the cause being placed in the Cognitive colour and heavier; the others neutral. On step 5, all causes the same | **Approved and built** |
+| C2 | Rebuild the chart on the Visual System with the fixes for D1, D3 and D4 | **Approved and built (2026-11-08); R2 accepted 2026-11-09, solid midlines kept** |
+| C3 | On step 4, the cause being placed in the Cognitive colour and heavier; the others neutral. On step 5, all causes the same | **Approved and built; R2 accepted 2026-11-09** |
 | C4 | No dragging, no motion, no third scale on the chart, no quadrant labels (§5.4) | **Approved** |
 | C5 | Revise the v0.2 scope as in §6: the instrument tier and the cause map; S6 and value transitions wait for a composition that needs them | **Approved; `visual-system.md` §14 revised** |
 | C6 | The two text issues in §4 | **Decided 2026-11-08, split:** the double punctuation is fixed in code (no content change, no version bump); the heavy-map "Add a cause" wording goes to the CS2 content review |

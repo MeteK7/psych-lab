@@ -65,3 +65,36 @@ None new: motion has no static baseline. The browser tests check that each trans
 
 ### Next
 The scene is integrated into the MCII exercise on the development branch (MCII step 4d). R3 (you, in context) and the psychology-trained reviewer's review of psychological suitability happen in the test environment, before you merge to production (`visual-policy.md` §9.2).
+
+---
+
+## Entry 3 · R2 Composition · `cs2.cause-map@1` (instrument)
+
+| | |
+|---|---|
+| **Date** | 2026-11-09 |
+| **Review** | R2 Composition, in the Visual Lab |
+| **Reviewers** | You (visual quality, concept, product fit) |
+| **Still needed** | R3 (you, in the integrated exercise) and the psychology-trained reviewer (psychological suitability, with a veto; `visual-policy.md` §9.2), in the test environment, before your merge to production |
+| **Item** | Instrument `cs2.cause-map@1`, theme `cognitive@1`, drawn from the exercise's answers (`cs2-visual-proposal.md` §5.5; decisions C1–C5) |
+| **Answer sets seen** | Five, in light and dark: `start` (every cause in the middle, cause 1 being placed), `placing` (cause 2 being placed), `spread`, `heavy` (every cause in one corner), `six` (six causes in one place, at the edge). Forced colours were checked by the automated run (axe) and are in the baselines |
+
+### Open question settled
+**The midlines stay solid.** They read more firmly than the old light dashes. A dash means "intended, not done" on the platform, and the solid lines meet S1's 3:1 contrast for figure lines (the old ones were about 1.4:1). No lighter reference-line role is added.
+
+### Verdict
+**Accept** (yours), as built, with solid midlines.
+
+### Baselines approved
+In `web/e2e/visual-lab.spec.ts-snapshots/`, checked by `e2e/visual-lab.spec.ts` ("approved baselines"), each captured on the fixed 480-px surface:
+
+| Answer set | Light | Dark | Forced colours |
+|---|---|---|---|
+| `start` | `cs2-cause-map-start-light-win32.png` | `cs2-cause-map-start-dark-win32.png` | `cs2-cause-map-start-forced-win32.png` |
+| `placing` | `cs2-cause-map-placing-light-win32.png` | `cs2-cause-map-placing-dark-win32.png` | `cs2-cause-map-placing-forced-win32.png` |
+| `spread` | `cs2-cause-map-spread-light-win32.png` | `cs2-cause-map-spread-dark-win32.png` | `cs2-cause-map-spread-forced-win32.png` |
+| `heavy` | `cs2-cause-map-heavy-light-win32.png` | `cs2-cause-map-heavy-dark-win32.png` | `cs2-cause-map-heavy-forced-win32.png` |
+| `six` | `cs2-cause-map-six-light-win32.png` | `cs2-cause-map-six-dark-win32.png` | `cs2-cause-map-six-forced-win32.png` |
+
+### Next
+The instrument is already integrated into CS2 on the development branch. R3 and the psychology-trained reviewer's review happen in the test environment, before you merge. CS2's own release gates (the content review and full texts; `cognitive-shifts-design.md` §9) are unchanged.

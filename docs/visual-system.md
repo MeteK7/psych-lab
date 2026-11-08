@@ -364,7 +364,7 @@ A custom element can't become a whole scene, so a bespoke renderer can't come in
 |---|---|---|
 | `MciiPathScene` (`mcii-path-scene.ts`) and its source `builtin.v1` | Removed | Replaced in MCII step 4d (2026-11-08) by scene `mcii.path`. Production keeps it until you merge |
 | CS2 cause chart (`cs-why-it-happened.ts`) | Migrated (2026-11-08) | The instrument `cs2.cause-map@1` (v0.2); the inline chart is removed. Production keeps it until you merge |
-| CS1 and CS3 | Audited 2026-11-08: no figure. CS1's fit board is an HTML control; CS3 has no visual element (`cs1-cs3-visual-audit.md`) | Nothing to migrate, if you confirm decision A1 |
+| CS1 and CS3 | Audited 2026-11-08: no figure. CS1's fit board is an HTML control; CS3 has no visual element (`cs1-cs3-visual-audit.md`) | Nothing to migrate (decision A1, 2026-11-09) |
 | `GamePreview`, `TrackingGame`, `ToneGame` | Experiment exercises: frozen | Only after the n-of-1 study, as a new protocol phase through the stimulus lane |
 | `icon.ts` | Outside scope | Unchanged |
 
@@ -501,7 +501,7 @@ docs/visual-system.md · visual-policy.md · visual-language.md · visual-review
 | **Phase 2 (this)** | These three documents; the S1 review sheet | — | R1 of the S1 proposal |
 | **v0.1** | §5.3 scope | MCII 4a–4d (revision 3: the area studies were removed) | R1 on the S1 sheet; R2 each MCII state next to the original, then the transitions (done); R3 MCII and the psychology-trained reviewer, in the test environment, before your merge |
 | **v0.2** (revised 2026-11-08 by the pull rule, decision C5) | The instrument tier: frames built from an exercise's data, an instrument component and its on-demand slot, instruments in the Lab; bold text items. Not S6, S4 parameter targets or value transitions: CS2 doesn't need them | CS2 (`cs2.cause-map@1`) | R2 in the Lab; R3 and the psychology-trained reviewer in the test environment; CS2 usability |
-| **v0.3** | The layout generators and layout transitions that CS1 and CS3 pull. **The audit found no figure in either (`cs1-cs3-visual-audit.md`), so nothing pulls this release; its future is decision A2, open** | CS1, CS3 (see the audit) | R2, R3 |
+| **v0.3** (revised 2026-11-09 by the pull rule, decision A2) | **Unassigned until a composition pulls it.** It was planned as the layout generators and layout transitions for CS1 and CS3, but the audit found no figure in either (`cs1-cs3-visual-audit.md`). Layout generators and layout transitions stay designed, not built | The first composition that needs them | R2, R3 |
 | **v0.4** | Canvas backend; stimulus lane; frame clock; timing log; watchdog | The first approved Attention task | R2; a timing validation report |
 | **v0.5** | GPU backend (trigger) | Its first scene | R2; conformance |
 | **v0.6** | Asset manifest, pipeline, offline export | The first conventional asset or exported fallback | R1 for each asset |
@@ -525,24 +525,25 @@ One row per capability added to code, naming the composition that pulled it.
 | 2026-11-07 | Tokens (`tokens.css`): neutral ramp, five area ramps, roles for light and dark, forced-colours mapping, pinned schemes for the Lab; resolver for roles, line weights, dashes, `line` and `tonal`, emphasis | S1 | `mcii.path@1` (the themes: the S1 sheet) | R1 pending |
 | 2026-11-07 | Motion tokens (data only; nothing plays them yet) | S1 | v0.1 scope (§5.3) | R1 pending |
 | 2026-11-07 | `SceneDefinition` v0 with `shape` and `label` elements; the validator (§4.3), including the near-plane contrast rule | S3 | `mcii.path@1` | — |
-| 2026-11-07 | Visibility and emphasis targets | S4 | `mcii.path@1` (set aside recedes; the wish is focal at the future step) | R2 pending |
+| 2026-11-07 | Visibility and emphasis targets | S4 | `mcii.path@1` (set aside recedes; the wish is focal at the future step) | Entry 1 |
 | 2026-11-07 | SVG backend (every drawable drawn as one path type; non-scaling strokes) and the conformance suite | S7 | `mcii.path@1` | — |
 | 2026-11-07 | Pipeline, `contentText`, scene figure | S9 | `mcii.path@1` | — |
 | 2026-11-07 | Visual Lab (every scene × state, light and dark pinned); browser test with axe in light, dark and forced colours | S10 | v0.1 scope (§5.3) | — |
 | 2026-11-08 | `purpose` on every element; validator rules for purposes and never-shown elements; the purpose table in the Lab | S3, S10 | Your review of `mcii.path@1` (`visual-policy.md` principle 6) | — |
-| 2026-11-08 | `solid` material (dots and small marks in the line colour) | S1 | `mcii.path@2` (the wish's centre) | R2 pending |
-| 2026-11-08 | Receded `context` lines keep their colour and recede by weight only, so they never get darker | S1 | `mcii.path@2` (set aside) | R2 pending |
+| 2026-11-08 | `solid` material (dots and small marks in the line colour) | S1 | `mcii.path@2` (the wish's centre) | Entry 1 |
+| 2026-11-08 | Receded `context` lines keep their colour and recede by weight only, so they never get darker | S1 | `mcii.path@2` (set aside) | Entry 1 |
 | 2026-11-08 | Scene policy: hope-bearing elements keep their colour in every state (asserted in the scene's policy spec; no new code) | S3 | Your review of `mcii.path@2` (the wish turned grey when set aside; `visual-policy.md` §3.9) | — |
 | 2026-11-08 | The Lab compares a revision with the picture it replaces, drawn by the exercise's own source (`builtin.v1`); removed with that picture in step 4d | S10 | `mcii.path@2` | — |
 | 2026-11-08 | Screenshot baselines: every state of an accepted composition in light, dark and forced colours (12 for `mcii.path`) | S10 | `mcii.path@3` (`visual-reviews.md`, entry 1) | Accepted |
-| 2026-11-08 | Effect presets (`fade`, `rise`, `draw`) and the emphasis-change preset, as data next to the motion tokens | S1 | `mcii.path@4` (the wall rises, the bridge draws, emphasis eases) | R2 pending |
-| 2026-11-08 | `enter` on elements (an effect with a reason, or `with` a lead) and `transitions` on scenes; validator rules: a reason for motion, known effects, only line shapes draw, no chains, no entrance on an element shown in every state | S3 | `mcii.path@4` | R2 pending |
-| 2026-11-08 | `planMotion` (timeline of opacity, offset, reveal and emphasis tracks), `movers` (the reviewable summary), `motionProblems` (the budget per transition); empty timelines on first appearance and below the full tier | S5 | `mcii.path@4` | R2 pending |
+| 2026-11-08 | Effect presets (`fade`, `rise`, `draw`) and the emphasis-change preset, as data next to the motion tokens | S1 | `mcii.path@4` (the wall rises, the bridge draws, emphasis eases) | Entry 2 |
+| 2026-11-08 | `enter` on elements (an effect with a reason, or `with` a lead) and `transitions` on scenes; validator rules: a reason for motion, known effects, only line shapes draw, no chains, no entrance on an element shown in every state | S3 | `mcii.path@4` | Entry 2 |
+| 2026-11-08 | `planMotion` (timeline of opacity, offset, reveal and emphasis tracks), `movers` (the reviewable summary), `motionProblems` (the budget per transition); empty timelines on first appearance and below the full tier | S5 | `mcii.path@4` | Entry 2 |
 | 2026-11-08 | The SVG backend plays a timeline with the Web Animations API (no timers), reveals through a mask so dashes don't crawl, cancels on change and destroy, and shows the final state where the API is missing; conformance tests for motion | S7 | `mcii.path@4` (the bridge) | — |
 | 2026-11-08 | `buildTimeline` (emphasis tracks resolved to paint); the scene figure plays the change from the previous state, takes `from` for a figure created by a step change, and follows the reduced-motion setting | S9 | `mcii.path@4` | — |
 | 2026-11-08 | `SceneSpecSource` and `provideSceneVisuals`: an exercise's requests (`<prefix>.<state>`, `facets.from`) answered with a registered scene; the scene and the renderer load on the first request, in their own chunk; its id (`scene:<id>@<v>;theme:<theme>@<v>`) is the recorded visual source | S9 | MCII step 4d | R3 pending |
 | 2026-11-08 | Baselines captured on a fixed 480-px surface, independent of the Lab's layout; the Lab no longer shows the original picture, which is removed | S10 | MCII step 4d | Entry 2 |
-| 2026-11-08 | Instrument tier: `instruments/cause-map/` (a pure frame from the exercise's answers: one mark per place listing its causes' numbers, the cause being placed as subject and focal with a bold number, solid scale lines, labels laid out inside the figure), its policy spec, the `CauseMap` component and `CauseMapSlot` (loads it on demand) in S9 | S3, S9 | `cs2.cause-map@1` (decisions C2–C5) | R2 pending |
+| 2026-11-08 | Instrument tier: `instruments/cause-map/` (a pure frame from the exercise's answers: one mark per place listing its causes' numbers, the cause being placed as subject and focal with a bold number, solid scale lines, labels laid out inside the figure), its policy spec, the `CauseMap` component and `CauseMapSlot` (loads it on demand) in S9 | S3, S9 | `cs2.cause-map@1` (decisions C2–C5) | Entry 3 (R2 accepted); R3 pending |
+| 2026-11-09 | Screenshot baselines for instruments: every answer set in the Lab in light, dark and forced colours (15 for `cs2.cause-map`), on the same fixed surface as the scenes | S10 | `cs2.cause-map@1` (`visual-reviews.md`, entry 3) | Accepted |
 | 2026-11-08 | Bold text items (`weight: 'bold'`) in the resolved frame, drawn by the SVG backend; a conformance test | S7 | `cs2.cause-map@1` (the number of the cause being placed) | — |
 | 2026-11-08 | Dependency rules 4c and 5 refined: instruments import composition types, S1 and the resolved-frame types only; only S9 imports a backend | Rules | `cs2.cause-map@1` | — |
 | 2026-11-08 | The Lab's instrument section: five answer sets (start, placing, spread, heavy, six in one place) in light and dark, with the purpose table | S10 | `cs2.cause-map@1` | — |

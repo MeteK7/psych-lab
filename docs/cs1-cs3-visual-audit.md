@@ -1,6 +1,6 @@
 # CS1 and CS3: Visual System audit
 
-> **Status:** audit, 2026-11-08. Docs only: no code, content or exercise changed. Decisions A1 and A2 (§6) are open.
+> **Status:** audit, 2026-11-08. Docs only: no code, content or exercise changed. **Decisions A1 and A2 (§6) accepted 2026-11-09, both as recommended:** CS1 and CS3 stay without figures, and v0.3 stays unassigned until a composition pulls it.
 > - **Why:** the release plan (`visual-system.md` §14) named CS1 and CS3 as the compositions that would validate v0.3 (layout generators and layout transitions), and §6.6 listed "CS1 and CS3 visuals" as legacy, waiting to migrate. Both were written before the CS3 redesign (2026-11-03) and before the pull rule was applied to v0.2. This audit checks what is actually on screen.
 > - **Method:** the same as the CS2 proposal (`cs2-visual-proposal.md` §3). Run the exercise, then for each visual element name its purpose (`visual-policy.md` principle 6) and whether a figure would serve it better than what is there.
 > - **Screenshots:** in `docs/cs1-cs3-visual-audit/`, captured from the running development build with the test database.
@@ -11,14 +11,14 @@
 3. CS3 · Not enough to go on
 4. Across the platform
 5. What it means for the Visual System
-6. Decisions for you
+6. Decisions
 
 ---
 
 ## 1. In short
 - **Neither exercise has a figure.** CS1's fit board is an interaction control built from HTML: cards with radio buttons, in three columns. CS3 has no visual element beyond text, tick boxes and the shared 0–10 scale; its share-of-10 step was removed in the redesign.
 - **Nothing in either would be served better by a figure.** Each element is either how the person answers (and native controls are the right form for that) or words that a picture would only repeat. The one tempting candidate, the before-and-after ratings, must not become a figure: a chart would show a direction the exercises explicitly say isn't expected (§2.3).
-- **So nothing pulls v0.3 as planned.** With MCII and CS2 done, every figure outside the frozen experiment exercises is on the Visual System (§4). What v0.3 becomes is decision A2.
+- **So nothing pulls v0.3 as planned.** With MCII and CS2 done, every figure outside the frozen experiment exercises is on the Visual System (§4). v0.3 stays unassigned until a composition pulls it (decision A2).
 
 ## 2. CS1 · Other ways to read it
 
@@ -96,13 +96,19 @@ Every figure in the application, from a search of the code:
 Action Bridge, goal restatement and the rating step have no figures. Once MCII and CS2 are merged, no non-experiment exercise has a legacy figure left.
 
 ## 5. What it means for the Visual System
-- **§6.6, the legacy list:** the "CS1 and CS3 visuals" row described something that doesn't exist. It's corrected to say the audit found no figure (a factual fix, made with this audit).
-- **§14, v0.3:** its validators were CS1 and CS3, so by the pull rule nothing pulls it. Layout generators and layout transitions stay designed and unbuilt, like S6 and value transitions after the v0.2 rescope. What happens to the release is decision A2; §14 is marked, not rewritten, until you decide.
+- **§6.6, the legacy list:** the "CS1 and CS3 visuals" row described something that doesn't exist. It's corrected to say the audit found no figure, and nothing to migrate (decision A1).
+- **§14, v0.3:** its validators were CS1 and CS3, so by the pull rule nothing pulls it. Layout generators and layout transitions stay designed and unbuilt, like S6 and value transitions after the v0.2 rescope. By decision A2, v0.3 stays unassigned until a composition pulls it; v0.4 onwards keep their numbers.
 - **What could pull next** (none is in hand today):
   - a new exercise, or a reviewed change to an existing one, that needs a figure to communicate (Tier 1 or Tier 2)
   - the first approved Attention task, which pulls the stimulus lane (v0.4); it waits for the n-of-1 study
 
-## 6. Decisions for you
+## 6. Decisions
+| # | Decision | Outcome |
+|---|---|---|
+| A1 | Do CS1 and CS3 stay without figures? | **Accepted 2026-11-09: (a)**, nothing to migrate |
+| A2 | What happens to v0.3 in the release plan? | **Accepted 2026-11-09: (a)**, unassigned until a composition pulls it |
+
+The alternatives as they were put:
 
 **A1. Do CS1 and CS3 stay without figures?**
 - **(a) Yes: record "nothing to migrate"** for both, with this audit as the reason. *Recommended:* no element would be served better by a figure, and the obvious candidate (the ratings) would break §5.3–§5.5.
