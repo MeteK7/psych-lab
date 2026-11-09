@@ -405,7 +405,7 @@ A custom element can't become a whole scene, so a bespoke renderer can't come in
 **Fallback:** a missing, failing or slow source falls back to `none` (already built and tested) [F]. A backend that can't run falls back to the static tier. The exercise never knows which happened.
 
 ## 9. Provenance and recording
-- **Illustrations** in development exercises record what was drawn in the `visual_source` already recorded with MCII step 1 [F: `mcii-logic.ts`]: `scene:<scene>@<version>;theme:<theme>@<version>`, for example `scene:mcii.path@4;theme:action@1`. One string, so the stored data keeps its shape. The quality tier isn't recorded: the states look the same in every tier, and only motion differs.
+- **Illustrations** in development exercises record what was drawn in the `visual_source` already recorded with MCII step 1 [F: `mcii-logic.ts`]: `scene:<scene>@<version>;theme:<theme>@<version>`, for example `scene:mcii.path@4;theme:action@1`. One string, so the stored data keeps its shape. The quality tier isn't recorded: the states look the same in every tier, and only motion differs. **Try it keeps it** (M1, 2026-11-09): `visual_source` is one of the three step metadata keys a Try it record may carry, so provenance survives where answers don't.
 - **Instruments** (v0.2) will record the same, plus what they need.
 - **Stimuli** record their spec version, seed and measured timing.
 - **No typed text** reaches a visual request or a provenance record. Requests stay closed-vocabulary.

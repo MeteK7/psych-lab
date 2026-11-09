@@ -42,7 +42,7 @@
 | Phase | Covers | Depends on | Goes live when |
 |---|---|---|---|
 | **E: Environments** | Development/production split and guards; production serves the built web app; release procedure; `try` mode; exposure rule (protocol §7) | — | **Done** (revision 6.0); needed before phase-1 day 1 |
-| **M1: Try it** | The boundary that decides where a finished result goes (discard, anonymous counts, My history, research record); end-of-visit choices (Done / Take it with you); a storage sentence on each screen; a "safe unsupervised" flag per experience; the booth profile (idle reset, cleanup) | E | §3, M1 criteria pass |
+| **M1: Try it** | The boundary that decides where a finished result goes (discard, anonymous counts, My history, research record); end-of-visit choices (Done / Take it with you); a storage sentence on each screen; a "safe unsupervised" flag per experience; the booth profile (idle reset, cleanup) | E | §3, M1 criteria pass. **Built on the development branch (2026-11-09), for your review; see §3, "M1 as built"** |
 | **M2: Personal** | Optional accounts (sign-in method decided in the M2 plan); owned records; My history (view, export, delete); saving a finished guest visit to an account; rule-based suggestions; the operator's n-of-1 data assigned to an owner | M1 live | §3, M2 criteria pass |
 | **M3: Organisational** | Organisations and roles; grants (scope, purpose, expiry, revocation); an append-only access log; professional configuration of existing experiences within declared ranges | M2 live | §3, M3 criteria pass, **and** the expert-testing stage and release gate (§5) are complete |
 | **H: Public hosting** (per model) | Server, domain, TLS, production authentication, privacy notice, data-protection review | That model is live locally | Its own gate, decided when hosting exists |
@@ -85,6 +85,32 @@
 - **Accessibility:** a keyboard path for every interaction; an axe scan with no serious violations; reduced motion respected.
 - **Safety:** experiences without the "safe unsupervised" flag are not offered in the booth profile. State Reset is excluded until usability shows it is tolerable.
 - **Experiment:** in production, Try it runs are stored as `try` and appear in the n-of-1 exposure export.
+
+**M1 as built (2026-11-09, development branch; decisions of 2026-11-09):**
+- **The result sink** (`web/src/app/flow/result-sink.ts`): the session page, not the exercise, chooses where a record goes, by mode.
+  - The experiment, Test mode and usability sessions keep everything, as before. Golden tests prove those records are byte-identical.
+  - **Try it keeps a minimal row only:** the exercise, mode, status, content versions, the step names and times. No typed text, choices or ratings. Step results keep only metadata: where a stopped run ended, which dot-game version ran, and which picture was drawn.
+  - The row stays, because the n-of-1 exposure analysis reads Try it runs on session days. Its six fields are unchanged.
+- **The API refuses** a Try it record that carries answers (422), and the follow-up on a Try it run (409). A test inspects the database after Try it runs of every exercise.
+- **Storage sentences** come from the sink, so the screens can't say more or less than what is sent: before Begin, the done screen, the stop confirmation and the area pages.
+- **End of a Try it visit:**
+  - **Take it with you:** the person's plan or goal, to copy or save as a file. It's built in the browser and never sent.
+  - **Done:** a full load of Home that replaces the visit in the tab's history.
+  - MCII keeps its own Copy step; the Cognitive shifts exercises get one with their content review.
+- **"Safe unsupervised":** one list in the API (`SAFE_UNSUPERVISED_EXERCISES`, empty: no exercise is rated yet), reported to the web app through `/api/health`. An unrated exercise is excluded. State Reset is excluded until usability shows it's tolerable. A rating is a reviewed decision by you and the psychology-trained reviewer.
+- **The booth profile** (`APP_PROFILE=booth`; runbook):
+  - Try it only, rated exercises only.
+  - No My records, My experiment or Lab: the API refuses them (403) and the pages aren't offered.
+  - The operator's support line on every screen.
+  - An idle reset ("Still there?", then a full load of Home).
+- **Development-only exercises** no longer open by link in production: a route check sends the link to "Not available here".
+- **Tests:**
+  - **Visitor leakage** (`web/e2e-booth/booth.spec.ts`): after Done and after the idle reset, nothing is left in the page, browser storage or back navigation, and the database holds no answers.
+- **Not built:**
+  - **Anonymous counts:** deferred until their consent mode is decided (M2/H plans).
+  - **Existing rows:** Try it rows saved before M1 keep what they held. M1 applies to new runs only (your decision, 2026-11-09); you can delete old practice data yourself.
+  - **Booth setup:** no booth machine or kiosk set-up.
+- **For your merge:** Try it now keeps less, and the experiment's records are unchanged. During an n-of-1 phase, log the release (runbook, "Release to production"). It changes no experiment exercise, content version, n-of-1 logic or analysis.
 
 ### M2: Personal
 - **Cross-account isolation:**

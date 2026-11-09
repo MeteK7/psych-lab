@@ -127,12 +127,22 @@ Development's checks must be green on `test` first (`powershell -File scripts/ch
 - A release must not change any experiment exercise, a content version in use, the n-of-1 logic or the analysis.
 - A change that would is a protocol amendment and applies only to later days.
 
+## The booth profile (M1)
+A Try it deployment for visitors (`docs/product-model.md` §6). It is built and tested, but no booth machine is set up yet.
+- **Settings** (in `.env`):
+  - `APP_PROFILE=booth`
+  - `BOOTH_SUPPORT_LINE`: the local support line shown on every screen. Set by you; a booth refuses to start without it.
+  - `BOOTH_IDLE_SECONDS`: default 180, then a 30-second "Still there?" notice.
+- **Offered:** only exercises rated safe for unsupervised use (`SAFE_UNSUPERVISED_EXERCISES` in `api/app/schemas.py`, empty until you rate one). With none rated, Home says nothing is offered.
+- **Never in a booth:** My records, My experiment, the Lab and the follow-up.
+- **Stored:** only that an exercise ran, and when, as in Try it everywhere.
+
 ## Development-only areas
 **Cognitive shifts** (three exercises) appears only in the development build, at http://localhost:4310/areas/cognitive-shifts. In production its Home card shows as planned, and the API refuses its saves. It's released by changing its status in `web/src/app/areas.ts` and its exercises' `release` in `web/src/app/experiences/registry.ts`, and by removing the API's development-only list. That happens only after the content review and the full-text gates (`docs/cognitive-shifts-design.md` §9).
 
 ## Pages
 - **Home** (`/`): the areas. Only **Action and growth** is available; the others are shown as planned.
-- **Area page** (`/areas/action-growth`): the experiences, each with **Try it**. Try it is saved in `try` mode and is never part of the experiment.
+- **Area page** (`/areas/action-growth`): the experiences, each with **Try it**. Try it is recorded in `try` mode, with only that it ran and when (no answers), and is never part of the experiment.
 - **My experiment** (`/experiment`), **My records** (`/records`), **About** (`/about`, includes the local server status).
 - Old links `/dev` and `/history` redirect.
 
@@ -188,6 +198,7 @@ This runs:
 - the Angular unit tests (Vitest)
 - the production build
 - **the browser tests** (about 4 minutes): every exercise completed keyboard-only, accessibility scans (axe, WCAG 2.2 AA), reduced motion and the sound version
+- **the booth browser tests** (under a minute, `npx playwright test -c playwright.booth.config.ts`): visitor leakage, the idle reset and the booth's refusals, on ports **8130** and **4330**. They share the test database with the main browser tests, so the two suites run one after the other
 
 **About the browser tests:**
 - They use the Microsoft Edge already installed and start their own API and web app on ports **8120** and **4320**. Those ports must be free; your development app on 4310/8110 can keep running.
