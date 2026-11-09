@@ -2,10 +2,11 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
+from app.booth import not_in_booth
 from app.config import Settings, environment_problems, get_settings
 from app.routes import health, n1, sessions
 from app.security import LocalWriteGuard
@@ -60,7 +61,8 @@ def create_app(settings: Settings | None = None, *, enforce_environment: bool = 
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.allowed_host_list)
     app.include_router(health.router, prefix="/api")
     app.include_router(sessions.router, prefix="/api")
-    app.include_router(n1.router, prefix="/api")
+    # The experiment never runs in the booth (M1).
+    app.include_router(n1.router, prefix="/api", dependencies=[Depends(not_in_booth)])
     if settings.app_env == "production":
         # Registered last, so every /api route matches first.
         serve_web(app, settings.web_dist_dir)

@@ -97,7 +97,7 @@ describe('AreaPage', () => {
       expect(card?.textContent).toContain('About 6 minutes');
       expect(sections[1].textContent).toContain('without anything you write');
       expect(sections[1].textContent).not.toContain('Open My experiment');
-      expect(sections[0].textContent).not.toContain('without anything you write');
+      expect(sections[0].textContent).toContain('without anything you write or choose'); // every practice note says what Try it keeps
     });
 
     it('leaves no empty section in the production build', async () => {

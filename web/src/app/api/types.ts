@@ -65,6 +65,10 @@ export interface Health {
   status: 'ok';
   database: 'ok';
   environment: 'development' | 'production';
+  /** standard: this computer. booth: a Try it deployment for visitors (M1). */
+  profile?: 'standard' | 'booth';
+  /** Only in the booth profile. */
+  booth?: { support_line: string; idle_seconds: number; exercises: ExerciseId[] } | null;
 }
 
 // Mirrors api/app/n1.py today_view().

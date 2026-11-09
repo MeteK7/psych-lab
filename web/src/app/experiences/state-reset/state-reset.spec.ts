@@ -176,6 +176,25 @@ describe('StateReset', () => {
     fixture.destroy();
   });
 
+  // Was checked in the browser through the saved Try it record, which keeps no game data since M1.
+  it('records half speed when reduced motion is on, and full speed otherwise', async () => {
+    for (const [reduce, speed] of [
+      [true, STATE_RESET.game.reduced_motion_speed],
+      [false, STATE_RESET.game.speed],
+    ] as const) {
+      vi.stubGlobal('matchMedia', (query: string) => ({ matches: reduce && query.includes('reduce') }) as MediaQueryList);
+      const fixture = create('game_only');
+      let outcome: StepOutcome | null = null;
+      fixture.componentInstance.completed.subscribe((o) => (outcome = o));
+      await fixture.whenStable();
+      (fixture.componentInstance as unknown as { finish(): void }).finish();
+      expect(outcome!.result['speed'], `reduced motion ${reduce}`).toBe(speed);
+      fixture.destroy();
+      vi.unstubAllGlobals();
+    }
+    expect(STATE_RESET.game.reduced_motion_speed).toBe(0.5);
+  });
+
   it('emits stopped when the user stops', async () => {
     const fixture = create('image');
     let stopped = false;

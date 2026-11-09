@@ -33,6 +33,8 @@ Invoke-Check 'web: unit tests'  "$root\web" { npx ng test --watch=false }
 Invoke-Check 'web: build'       "$root\web" { npx ng build }
 # Keyboard-only paths, axe scans, reduced motion; installed Edge, test database (~3 min).
 Invoke-Check 'web: browser tests' "$root\web" { npx playwright test }
+# The booth profile (M1): leakage between visitors, idle reset, refusals. Same test database, so after the main suite.
+Invoke-Check 'web: booth browser tests' "$root\web" { npx playwright test -c playwright.booth.config.ts }
 
 Write-Host ''
 $results | Format-Table -AutoSize

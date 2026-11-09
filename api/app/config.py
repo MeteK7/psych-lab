@@ -19,6 +19,8 @@ DEVELOPMENT_SCHEDULE_DIR = PLATFORM_DIR / "data" / "schedules-dev"
 DEVELOPMENT_STUDY_LOG_DIR = PLATFORM_DIR / "data" / "study-log-dev"
 
 Environment = Literal["development", "production"]
+# standard: this computer. booth: a Try it deployment for visitors (docs/product-model.md §6).
+Profile = Literal["standard", "booth"]
 
 
 class Settings(BaseSettings):
@@ -40,6 +42,12 @@ class Settings(BaseSettings):
     n1_study_log_dir: Path = DEVELOPMENT_STUDY_LOG_DIR
     # All n-of-1 dates and day boundaries use this local time zone, not UTC.
     study_timezone: str = "Europe/Istanbul"
+    # The booth profile (M1): Try it only, rated exercises only, no records, an idle reset, and a
+    # support line on screen. The support line is set by the operator; a booth refuses to start
+    # without one.
+    app_profile: Profile = "standard"
+    booth_idle_seconds: int = Field(default=180, ge=30, le=3600)
+    booth_support_line: str = ""
     # Production serves the built web app itself (no dev server).
     web_dist_dir: Path = PLATFORM_DIR / "web" / "dist" / "web" / "browser"
 
@@ -95,6 +103,8 @@ def environment_problems(settings: Settings) -> list[str]:
             problems.append("development runs Test mode only: set N1_PHASE=0 (or remove it)")
         if _same_dir(settings.n1_study_log_dir, PRODUCTION_STUDY_LOG_DIR):
             problems.append("development must not write to the experiment's study log")
+    if settings.app_profile == "booth" and not settings.booth_support_line.strip():
+        problems.append("a booth shows a local support line: set BOOTH_SUPPORT_LINE")
     if test_database == PRODUCTION_DATABASE:
         problems.append(f"TEST_DATABASE_URL must not point to {PRODUCTION_DATABASE}")
     return problems

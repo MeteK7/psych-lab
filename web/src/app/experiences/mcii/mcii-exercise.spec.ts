@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 
 import { SessionUpsert } from '../../api/types';
+import { CHOOSE_SINK, KEEP_EVERYTHING, sinkFor } from '../../flow/result-sink';
 import { SessionPage } from '../../flow/session-page';
 import { VISUAL_SOURCE, VisualRequest, VisualSource } from '../../shared/visual/visual';
 import { Mcii } from './mcii';
@@ -17,13 +18,16 @@ interface Run {
   bodies: SessionUpsert[];
 }
 
-function start(mode = 'try', source?: VisualSource): Run {
+function start(mode = 'try', source?: VisualSource, sink = KEEP_EVERYTHING): Run {
   TestBed.configureTestingModule({
     imports: [SessionPage],
     providers: [
       provideRouter([]),
       provideHttpClient(),
       provideHttpClientTesting(),
+      // These tests check the record each exercise makes; Try it then keeps only its metadata
+      // (flow/result-sink.ts), which the last test here checks with the real sink.
+      { provide: CHOOSE_SINK, useValue: () => sink },
       {
         provide: ActivatedRoute,
         useValue: { snapshot: { queryParamMap: convertToParamMap({ mode, condition: 'mcii' }) } },
@@ -496,4 +500,21 @@ describe('MCII exercise', () => {
       expect(JSON.stringify(requests)).not.toContain('PRIVATE');
     });
   });
+
+  it('in Try it, sends only that it ran: no choices, ratings or plan, and the picture it drew', async () => {
+    const run = start('try', undefined, sinkFor('try'));
+    await toDecide(run);
+    await decide(run, 'keep');
+    await finishWithPlan(run);
+    for (const body of run.bodies) {
+      expect(body.plan).toBeNull();
+      expect(body.ratings).toBeNull();
+      for (const step of body.steps ?? []) expect(Object.keys(step.result ?? {})).toEqual(
+        step.step === 'mcii_wish' ? ['visual_source'] : [],
+      );
+    }
+    expect(last(run).status).toBe('completed');
+    expect(JSON.stringify(run.bodies)).not.toMatch(/PRIVATE|tired|five_minutes|"work"/);
+  });
 });
+

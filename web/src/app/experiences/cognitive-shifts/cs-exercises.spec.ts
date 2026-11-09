@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 
 import { SessionUpsert } from '../../api/types';
+import { CHOOSE_SINK, KEEP_EVERYTHING, sinkFor } from '../../flow/result-sink';
 import { SessionPage } from '../../flow/session-page';
 
 // The three Cognitive shifts exercises, run through the session page as a person would.
@@ -15,13 +16,16 @@ interface Run {
   bodies: SessionUpsert[];
 }
 
-function start(condition: string, mode = 'try', reveal?: string): Run {
+function start(condition: string, mode = 'try', reveal?: string, sink = KEEP_EVERYTHING): Run {
   TestBed.configureTestingModule({
     imports: [SessionPage],
     providers: [
       provideRouter([]),
       provideHttpClient(),
       provideHttpClientTesting(),
+      // These tests check the record each exercise makes; Try it then keeps only its metadata
+      // (flow/result-sink.ts), which the last test here checks with the real sink.
+      { provide: CHOOSE_SINK, useValue: () => sink },
       {
         provide: ActivatedRoute,
         useValue: { snapshot: { queryParamMap: convertToParamMap({ mode, condition, ...(reveal ? { reveal } : {}) }) } },
@@ -441,4 +445,34 @@ describe('Cognitive shifts exercises', () => {
       TestBed.resetTestingModule();
     }
   });
+
+  it('in Try it, sends only that each exercise ran: no cards, places or ratings', async () => {
+    for (const condition of ['cs_other_readings', 'cs_why_it_happened', 'cs_not_enough_to_go_on']) {
+      TestBed.resetTestingModule();
+      const run = start(condition, 'try', undefined, sinkFor('try'));
+      await run.fixture.whenStable();
+      await press(run, 'Begin');
+      const first = root(run).querySelector<HTMLInputElement>('input[type="radio"]');
+      if (first) await check(run, first);
+      const field = root(run).querySelector<HTMLInputElement>('input[type="text"], textarea');
+      if (field) await type(run, field as HTMLInputElement, 'PRIVATE words');
+      if (Array.from(root(run).querySelectorAll('button')).some((b) => b.textContent?.trim() === 'Next' && !b.disabled)) {
+        await press(run, 'Next');
+      }
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      await press(run, 'Stop the exercise');
+      expect(run.bodies.length, condition).toBeGreaterThan(1);
+      for (const body of run.bodies) {
+        expect(body.plan, condition).toBeNull();
+        expect(body.ratings, condition).toBeNull();
+        for (const step of body.steps ?? []) {
+          expect(Object.keys(step.result ?? {}).every((k) => k === 'during'), condition).toBe(true);
+        }
+      }
+      expect(run.bodies.at(-1)?.status, condition).toBe('aborted');
+      expect(JSON.stringify(run.bodies), condition).not.toContain('PRIVATE');
+      vi.restoreAllMocks();
+    }
+  });
 });
+
