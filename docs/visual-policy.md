@@ -324,7 +324,7 @@ The aim is visuals that are **simple to read and sophisticated to look at.** The
 4. **No reward:** no celebration, achievement imagery, badges, confetti, stars, trophies or summits after completing a step.
 5. **No judgement:** nothing marks a reading, cause, feeling or decision as good or bad, through colour or any other means.
 6. **Valence balance:** when an exercise contrasts a desired future with an obstacle, they get equal visual weight. That supports contrasting rather than indulging [F: `mcii-design.md` §5].
-7. **Consistency where it matters:** visuals that differ between conditions of a comparison need a protocol decision. Experiment exercises aren't changed during the n-of-1 study.
+7. **Consistency where it matters:** once participant data collection starts, visuals that differ between conditions of a comparison need a protocol decision, and experiment exercises aren't changed during a study. Until then they can change freely (`plan.md`, "Development stage").
 8. **Privacy:** visuals are chosen only from closed-vocabulary requests. Typed text never reaches a visual.
 9. **Stimuli** follow their protocol (`visual-system.md` §7); this policy can't override it.
 

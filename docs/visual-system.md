@@ -365,7 +365,7 @@ A custom element can't become a whole scene, so a bespoke renderer can't come in
 | `MciiPathScene` (`mcii-path-scene.ts`) and its source `builtin.v1` | Removed | Replaced in MCII step 4d (2026-11-08) by scene `mcii.path`. Production keeps it until you merge |
 | CS2 cause chart (`cs-why-it-happened.ts`) | Migrated (2026-11-08) | The instrument `cs2.cause-map@1` (v0.2); the inline chart is removed. Production keeps it until you merge |
 | CS1 and CS3 | Audited 2026-11-08: no figure. CS1's fit board is an HTML control; CS3 has no visual element (`cs1-cs3-visual-audit.md`) | Nothing to migrate (decision A1, 2026-11-09) |
-| `GamePreview`, `TrackingGame`, `ToneGame` | Experiment exercises: frozen | Only after the n-of-1 study, as a new protocol phase through the stimulus lane |
+| `GamePreview`, `TrackingGame`, `ToneGame` | Legacy | When their visuals are improved (development stage: no freeze before participant data collection, `plan.md`) |
 | `icon.ts` | Outside scope | Unchanged |
 
 ---

@@ -28,7 +28,9 @@ import { STATE_RESET } from '../../../content';
     figure { margin: 0 0 1rem; max-width: 480px; }
     svg { display: block; width: 100%; height: auto; }
     .box { fill: none; stroke: var(--border); }
-    .ring { fill: none; stroke: var(--accent); stroke-width: 3; }
+    /* The ring as the game draws it with the pointer inside: accent colour and heavier (tracking.ts, RING). */
+    .ring { fill: none; stroke: var(--accent); stroke-width: 5; }
+    @media (forced-colors: active) { .ring { stroke: Highlight; } .dot { fill: CanvasText; } }
     .dot { fill: var(--text); }
     .pointer { fill: var(--bg); stroke: var(--text); stroke-width: 1.5; }
     .leader { stroke: var(--muted); stroke-width: 1; }

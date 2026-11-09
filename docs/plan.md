@@ -520,6 +520,10 @@ The test database resets itself on each test run (migrate once; roll back a tran
 
 **Future research candidates** (not in any phase): **Memory update** (memory reconsolidation, §3.2). It passes gates 1–5 in §3.2 before any build, and it depends on M2 for return visits. Its area (provisionally Emotional regulation) is re-decided after the evidence review.
 
+**Development stage (2026-11-09).** There are no research participants yet: you and your psychologist friend develop and evaluate the app.
+- **Now:** every exercise, its visuals and its texts can change, including the four Action and growth exercises. The golden tests are ordinary regression tests, re-pinned in the same change when a change is intended.
+- **When participant data collection approaches:** experiment exercises are frozen, golden tests become a gate that is never re-pinned, and changes need protocol amendments and release logging. Earlier rows in §12 that say "unchanged" or "frozen" describe this later stage.
+
 ## 10. Assumptions, risks, open questions, deferred decisions
 - **Assumptions:**
   - Whatever you study, you remember to press "I'm starting now" on My experiment when you begin (§4.2).

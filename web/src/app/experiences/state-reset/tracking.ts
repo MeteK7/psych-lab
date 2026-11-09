@@ -69,3 +69,16 @@ export class TrackingScore {
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
+
+/**
+ * How the ring shows that the pointer is inside it: heavier as well as in the accent colour, so
+ * the feedback never rests on colour alone (visual-policy.md §6). Widths in canvas px.
+ */
+export const RING = {
+  inside: { width: 5, colour: 'accent' },
+  outside: { width: 2, colour: 'muted' },
+} as const;
+
+export function ringStyle(onTarget: boolean): (typeof RING)[keyof typeof RING] {
+  return onTarget ? RING.inside : RING.outside;
+}
