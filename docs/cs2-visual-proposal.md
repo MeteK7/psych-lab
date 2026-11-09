@@ -183,7 +183,7 @@ The cause texts the person wrote never enter the Visual System. The figure gets 
 
 ### 5.5 As built: the rebuild (2026-11-08)
 - **The instrument:** `shared/visual/instruments/cause-map/cause-map.ts` builds the frame from the answers (pure, no Angular). `cause-map.policy.spec.ts` asserts every Must and Must not of §5.3 for six answer sets, each while reading and while placing the first or last cause.
-- **In the exercise:** `CauseMapSlot` (S9) loads the instrument and the renderer on demand and holds the map's space meanwhile. The figure keeps its text alternative and the list under it. The exercise passes places only (`positions()`), never the cause texts.
+- **In the exercise:** `CauseMapSlot` (S9; since 2026-11-10 the shared `InstrumentSlot`) loads the instrument and the renderer on demand and holds the map's space meanwhile. The figure keeps its text alternative and the list under it. The exercise passes places only (`positions()`), never the cause texts.
 - **Change 1 moved into the instrument:** the grouping is `groupByPlace` there, so `mapMarks` left `cs-logic.ts`.
 - **Size:** the map is drawn at 416 × 284, its usual width, so labels and numbers render at the S1 sizes (13 and 14 px). The vertical labels have their own margin, so "Lasting" and "Just this time" show in full; the old shortening to "This time" is gone.
 - **For your review:** the solid midlines are firmer than the old light dashes. They meet the S1 line contrast (the old ones were about 1.4:1 against the page); if they compete with the marks, the next step is a lighter S1 role for reference lines, not dashes. **Settled in R2 (2026-11-09): the solid midlines stay** (`visual-reviews.md`, entry 3).

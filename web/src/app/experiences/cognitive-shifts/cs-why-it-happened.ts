@@ -3,7 +3,7 @@ import { Component, computed, inject, input, output, signal } from '@angular/cor
 
 import { CS_WHY_IT_HAPPENED, fill } from '../../../content';
 import { StepId } from '../../flow/conditions';
-import { CauseMapSlot } from '../../shared/visual/integration/cause-map-slot';
+import { InstrumentSlot } from '../../shared/visual/integration/instrument-slot';
 import { Experience, StepOutcome } from '../../flow/step-outcome';
 import { CardPick } from './card-pick';
 import { CausePosition, Reflection, changeOrder, reflections } from './cs-logic';
@@ -22,7 +22,7 @@ const MIN_CAUSES = 3;
  */
 @Component({
   selector: 'app-cs-why-it-happened',
-  imports: [CardPick, NgTemplateOutlet, CauseMapSlot],
+  imports: [CardPick, NgTemplateOutlet, InstrumentSlot],
   template: `
     @switch (stage()) {
       @case ('cs2_setback') {
@@ -140,7 +140,8 @@ const MIN_CAUSES = 3;
     <ng-template #chart>
       <figure class="chart">
         <!-- The map loads on demand, holding its space meanwhile. The list below carries the same information. -->
-        <app-vis-cause-map-slot role="img" [attr.aria-label]="c.map.chart_label" [causes]="positions()" [placing]="placing()" [axes]="axes" />
+        <app-vis-instrument-slot role="img" [attr.aria-label]="c.map.chart_label" instrument="cause-map"
+                                 [inputs]="{ causes: positions(), placing: placing(), axes: axes }" />
         <figcaption>
           <p class="list-heading">{{ c.map.list_heading }}</p>
           <ol class="map-list">

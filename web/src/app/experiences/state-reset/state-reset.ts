@@ -3,6 +3,7 @@ import { Component, OnDestroy, computed, input, output, signal } from '@angular/
 import { RATINGS, STATE_RESET, STATE_RESET_SOUND, fill } from '../../../content';
 import { Experience, StepOutcome } from '../../flow/step-outcome';
 import { RatingScale } from '../../shared/rating-scale';
+import { InstrumentSlot } from '../../shared/visual/integration/instrument-slot';
 import { GamePreview } from './game-preview';
 import { Phase, Variant, buildSchedule } from './schedule';
 import { playTone, unlockAudio } from './tone-audio';
@@ -22,7 +23,7 @@ export type Task = 'dot' | 'sound';
  */
 @Component({
   selector: 'app-state-reset',
-  imports: [GamePreview, RatingScale, ToneGame, TrackingGame],
+  imports: [GamePreview, InstrumentSlot, RatingScale, ToneGame, TrackingGame],
   template: `
     @switch (phase().kind) {
       @case ('intro') {
@@ -132,15 +133,19 @@ export type Task = 'dot' | 'sound';
         }
       }
       @case ('hold') {
+        <!-- Where you are in the rounds, at the top of every game screen, so it stays in one place. -->
+        <app-vis-instrument-slot class="rounds" instrument="rounds" [inputs]="{ total: content.timing.sets, current: 1 }" />
         <p class="cue" role="status">{{ say(texts().hold) }}</p>
         <p class="countdown" aria-hidden="true">{{ say(texts().hold_countdown, { seconds: remaining() }) }}</p>
       }
       @case ('rest') {
+        <app-vis-instrument-slot class="rounds" instrument="rounds" [inputs]="{ total: content.timing.sets, current: restNext() }" />
         <!-- The visible text counts down; screen readers hear it once, not every second. -->
         <p class="cue" aria-hidden="true">{{ say(texts().rest, { next: restNext(), seconds: remaining() }) }}</p>
         <p class="sr-only" role="status">{{ say(texts().rest, { next: restNext(), seconds: content.timing.rest_seconds }) }}</p>
       }
       @case ('play') {
+        <app-vis-instrument-slot class="rounds" instrument="rounds" [inputs]="{ total: content.timing.sets, current: setNumber() }" />
         <h3>{{ say(texts().round_heading, { round: setNumber(), seconds: content.timing.set_seconds }) }}</h3>
         <p class="cue" role="status">{{ say(roundText()) }}</p>
         <!-- Rest phases sit between sets, so each set gets a fresh game instance. -->
@@ -159,6 +164,8 @@ export type Task = 'dot' | 'sound';
     <button type="button" class="stop" (click)="stopped.emit()">{{ content.stop_label }}</button>
   `,
   styles: `
+    /* The rounds line up with the game box under them. */
+    .rounds { max-width: 480px; margin: 0 0 0.75rem; }
     .cue { font-size: 1.2rem; font-weight: 600; }
     .countdown { font-size: 1.5rem; font-variant-numeric: tabular-nums; margin: 0.5rem 0 1rem; }
     .stop { display: block; margin-top: 1.5rem; }
