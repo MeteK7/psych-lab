@@ -1,15 +1,20 @@
 import { Component, inject, signal } from '@angular/core';
 
-import { CS_WHY_IT_HAPPENED } from '../../../content';
+import { CS_WHY_IT_HAPPENED, STATE_RESET } from '../../../content';
 import { AppEnvironment } from '../../shared/app-environment';
 import { PURPOSE_LABELS, SceneDefinition, elementsOf } from '../../shared/visual/composition/scene';
 import { validateScene } from '../../shared/visual/composition/validate';
 import { CAUSE_MAP, CAUSE_MAP_PURPOSES, CauseMapInput } from '../../shared/visual/instruments/cause-map/cause-map';
+import { ROUNDS, ROUNDS_PURPOSES } from '../../shared/visual/instruments/rounds/rounds';
+import { TRACKING, TRACKING_PURPOSES, TrackingInput } from '../../shared/visual/instruments/tracking/tracking';
 import { CauseMap } from '../../shared/visual/integration/cause-map';
+import { Rounds } from '../../shared/visual/integration/rounds';
+import { TrackingPreview } from '../../shared/visual/integration/tracking';
 import { QualityTier, SceneFigure, SurfaceScheme } from '../../shared/visual/integration/scene-figure';
 import { Mover, motionProblems, movers } from '../../shared/visual/motion/plan-motion';
 import { SCENES } from '../../shared/visual/scenes';
 import { EMPHASIS_CHANGE, MOTION, MOTION_EFFECTS, THEMES } from '../../shared/visual/styling/vocabulary';
+import { LabTrackingStill } from './lab-tracking-still';
 
 /**
  * The Visual Lab (S10, docs/visual-system.md §5.3), development build only. Every composition in
@@ -19,7 +24,7 @@ import { EMPHASIS_CHANGE, MOTION, MOTION_EFFECTS, THEMES } from '../../shared/vi
  */
 @Component({
   selector: 'app-lab-page',
-  imports: [SceneFigure, CauseMap],
+  imports: [SceneFigure, CauseMap, Rounds, TrackingPreview, LabTrackingStill],
   template: `
     <h1>Visual Lab</h1>
     @if (env.showsDevelopment()) {
@@ -142,6 +147,75 @@ import { EMPHASIS_CHANGE, MOTION, MOTION_EFFECTS, THEMES } from '../../shared/vi
           </tbody>
         </table>
       </section>
+      <section class="scene" aria-labelledby="lab-rounds">
+        <h2 id="lab-rounds">
+          {{ rounds.id }}<span class="meta">&#64;{{ rounds.version }} · theme {{ rounds.theme }}&#64;{{ themeVersion(rounds.theme) }} · instrument</span>
+        </h2>
+        <p class="note muted">
+          The dot game's rounds, above the game on the hold, round and pause screens. The heading and the cue say the round in
+          words; the marks show how much is done and left at a glance.
+        </p>
+        @for (set of roundSets; track set.current) {
+          <h3>{{ set.name }}</h3>
+          <div class="grid">
+            @for (scheme of schemes; track scheme) {
+              <div class="panel" [class]="scheme">
+                <span class="tag">{{ rounds.id }}&#64;{{ rounds.version }} · {{ scheme }}</span>
+                <figure role="img" [attr.aria-label]="'Round ' + set.current + ' of 8'" [attr.data-instrument]="rounds.id + '-' + set.current + '-' + scheme">
+                  <app-vis-rounds [total]="8" [current]="set.current" [scheme]="scheme" />
+                </figure>
+              </div>
+            }
+          </div>
+        }
+        <h3>Why each element is there</h3>
+        <table>
+          <caption>Every element serves at least one purpose (visual-policy §2).</caption>
+          <thead><tr><th scope="col">Element</th><th scope="col">Serves</th><th scope="col">Why</th></tr></thead>
+          <tbody>
+            @for (row of roundsPurposes; track row.id) {
+              <tr><th scope="row"><code>{{ row.id }}</code></th><td>{{ row.serves }}</td><td>{{ row.why }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </section>
+
+      <section class="scene" aria-labelledby="lab-tracking">
+        <h2 id="lab-tracking">
+          {{ tracking.id }}<span class="meta">&#64;{{ tracking.version }} · theme {{ tracking.theme }}&#64;{{ themeVersion(tracking.theme) }} · instrument</span>
+        </h2>
+        <p class="note muted">
+          The dot game, drawn every frame by the canvas backend, and its preview, drawn from the same parts by the SVG backend.
+          Here, still frames: the pointer outside the ring, inside it, and the preview.
+        </p>
+        @for (set of trackingSets; track set.key) {
+          <h3>{{ set.name }}</h3>
+          <div class="grid">
+            @for (scheme of schemes; track scheme) {
+              <div class="panel" [class]="scheme">
+                <span class="tag">{{ tracking.id }}&#64;{{ tracking.version }} · {{ scheme }}</span>
+                <figure role="img" [attr.aria-label]="set.alt" [attr.data-instrument]="tracking.id + '-' + set.key + '-' + scheme">
+                  @if (set.state; as state) {
+                    <app-lab-tracking-still [state]="state" [scheme]="scheme" />
+                  } @else {
+                    <app-vis-tracking-preview [ringRadius]="ringRadius" [labels]="previewLabels" [scheme]="scheme" />
+                  }
+                </figure>
+              </div>
+            }
+          </div>
+        }
+        <h3>Why each element is there</h3>
+        <table>
+          <caption>Every element serves at least one purpose (visual-policy §2).</caption>
+          <thead><tr><th scope="col">Element</th><th scope="col">Serves</th><th scope="col">Why</th></tr></thead>
+          <tbody>
+            @for (row of trackingPurposes; track row.id) {
+              <tr><th scope="row"><code>{{ row.id }}</code></th><td>{{ row.serves }}</td><td>{{ row.why }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </section>
     } @else {
       <p>The Visual Lab is available in the development build only.</p>
     }
@@ -181,6 +255,29 @@ export class LabPage {
   protected readonly schemes: SurfaceScheme[] = ['light', 'dark'];
   protected readonly tier = signal<QualityTier | 'auto'>('auto');
   protected readonly causeMap = CAUSE_MAP;
+  protected readonly rounds = ROUNDS;
+  protected readonly roundSets = [
+    { current: 1, name: 'Before the first round, and during it' },
+    { current: 4, name: 'Round 4: three done' },
+    { current: 8, name: 'The last round' },
+  ];
+  protected readonly roundsPurposes = ROUNDS_PURPOSES.map(({ id, purpose }) => ({ id, serves: purpose.serves.map((k) => PURPOSE_LABELS[k]).join('; '), why: purpose.why }));
+  protected readonly tracking = TRACKING;
+  protected readonly ringRadius = STATE_RESET.game.ring_radius;
+  protected readonly previewLabels = STATE_RESET.how_it_works.labels;
+  private readonly still = (onTarget: boolean): TrackingInput => ({
+    size: { width: 480, height: 320 },
+    target: { x: 170, y: 140 },
+    cursor: onTarget ? { x: 178, y: 148 } : { x: 300, y: 220 },
+    ringRadius: STATE_RESET.game.ring_radius,
+    onTarget,
+  });
+  protected readonly trackingSets: { key: string; name: string; alt: string; state: TrackingInput | null }[] = [
+    { key: 'outside', name: 'The game: pointer outside the ring', alt: 'The dot game, pointer outside the ring', state: this.still(false) },
+    { key: 'inside', name: 'The game: pointer inside the ring', alt: 'The dot game, pointer inside the ring', state: this.still(true) },
+    { key: 'preview', name: '"How the game works"', alt: STATE_RESET.how_it_works.illustration_alt, state: null },
+  ];
+  protected readonly trackingPurposes = TRACKING_PURPOSES.map(({ id, purpose }) => ({ id, serves: purpose.serves.map((k) => PURPOSE_LABELS[k]).join('; '), why: purpose.why }));
   protected readonly chartLabel = CS_WHY_IT_HAPPENED.map.chart_label;
   private readonly axisWords = CS_WHY_IT_HAPPENED.map.axes;
   protected readonly axes: CauseMapInput['axes'] = {
