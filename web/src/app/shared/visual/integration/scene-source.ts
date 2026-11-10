@@ -1,4 +1,4 @@
-import { Provider } from '@angular/core';
+import { InjectionToken, Provider, inject } from '@angular/core';
 
 import { VISUAL_SOURCE, Visual, VisualRequest, VisualSource } from '../visual';
 
@@ -37,7 +37,16 @@ export class SceneSpecSource implements VisualSource {
   }
 }
 
+/**
+ * A source that replaces an exercise's scenes, provided above the exercise. Tests use it: an
+ * exercise loads on demand, so its own component providers can't be overridden from outside.
+ */
+export const SCENE_SOURCE_OVERRIDE = new InjectionToken<VisualSource>('SCENE_SOURCE_OVERRIDE');
+
 /** Binds an exercise's visual source to a registered scene, in its `providers`: `provideSceneVisuals('mcii.path', 'mcii')`. */
 export function provideSceneVisuals(sceneId: string, prefix: string): Provider {
-  return { provide: VISUAL_SOURCE, useFactory: () => new SceneSpecSource(sceneId, prefix) };
+  return {
+    provide: VISUAL_SOURCE,
+    useFactory: () => inject(SCENE_SOURCE_OVERRIDE, { optional: true }) ?? new SceneSpecSource(sceneId, prefix),
+  };
 }

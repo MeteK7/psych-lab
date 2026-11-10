@@ -131,18 +131,25 @@ type SaveState = 'idle' | 'saving' | 'error';
         @if (saveState() === 'error') {
           <p role="alert">{{ text().failedDuring }}</p>
         }
+        <!-- Each exercise loads when its step first shows (@defer), so the first download carries none of them. -->
         <!-- Cognitive shifts: one component per exercise, recreated for each step. -->
         @if (csGroup(); as group) {
           @for (s of [step()]; track s) {
             @switch (group) {
               @case ('cs1') {
-                <app-cs-other-readings [stage]="s" (completed)="onCompleted($event)" />
+                @defer (on immediate) {
+                  <app-cs-other-readings [stage]="s" (completed)="onCompleted($event)" />
+                }
               }
               @case ('cs2') {
-                <app-cs-why-it-happened [stage]="s" (completed)="onCompleted($event)" />
+                @defer (on immediate) {
+                  <app-cs-why-it-happened [stage]="s" (completed)="onCompleted($event)" />
+                }
               }
               @case ('cs3') {
-                <app-cs-not-enough [stage]="s" (completed)="onCompleted($event)" />
+                @defer (on immediate) {
+                  <app-cs-not-enough [stage]="s" (completed)="onCompleted($event)" />
+                }
               }
             }
           }
@@ -150,29 +157,43 @@ type SaveState = 'idle' | 'saving' | 'error';
         <!-- MCII: one component, recreated for each step. -->
         @if (mciiStage(); as stage) {
           @for (s of [stage]; track s) {
-            <app-mcii [stage]="s" (completed)="onCompleted($event)" />
+            @defer (on immediate) {
+              <app-mcii [stage]="s" (completed)="onCompleted($event)" />
+            }
           }
         }
         @switch (step()) {
           @case ('pre_rating') {
-            <app-rating-step phase="pre" (completed)="onCompleted($event)" />
+            @defer (on immediate) {
+              <app-rating-step phase="pre" (completed)="onCompleted($event)" />
+            }
           }
           @case ('post_rating') {
-            <app-rating-step phase="post" (completed)="onCompleted($event)" />
+            @defer (on immediate) {
+              <app-rating-step phase="post" (completed)="onCompleted($event)" />
+            }
           }
           @case ('state_reset') {
-            <app-state-reset variant="image" [assigned]="assigned()"
-                             (completed)="onCompleted($event)" (stopped)="stop()" />
+            @defer (on immediate) {
+              <app-state-reset variant="image" [assigned]="assigned()"
+                               (completed)="onCompleted($event)" (stopped)="stop()" />
+            }
           }
           @case ('game_only') {
-            <app-state-reset variant="game_only" [assigned]="assigned()"
-                             (completed)="onCompleted($event)" (stopped)="stop()" />
+            @defer (on immediate) {
+              <app-state-reset variant="game_only" [assigned]="assigned()"
+                               (completed)="onCompleted($event)" (stopped)="stop()" />
+            }
           }
           @case ('action_bridge') {
-            <app-action-bridge (completed)="onCompleted($event)" />
+            @defer (on immediate) {
+              <app-action-bridge (completed)="onCompleted($event)" />
+            }
           }
           @case ('goal_restatement') {
-            <app-goal-restatement (completed)="onCompleted($event)" />
+            @defer (on immediate) {
+              <app-goal-restatement (completed)="onCompleted($event)" />
+            }
           }
         }
         @if (step() !== 'state_reset' && step() !== 'game_only') {

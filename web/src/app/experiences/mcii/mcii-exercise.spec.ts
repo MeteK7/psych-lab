@@ -6,8 +6,8 @@ import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/route
 import { SessionUpsert } from '../../api/types';
 import { CHOOSE_SINK, KEEP_EVERYTHING, sinkFor } from '../../flow/result-sink';
 import { SessionPage } from '../../flow/session-page';
-import { VISUAL_SOURCE, VisualRequest, VisualSource } from '../../shared/visual/visual';
-import { Mcii } from './mcii';
+import { SCENE_SOURCE_OVERRIDE } from '../../shared/visual/integration/scene-source';
+import { VisualRequest, VisualSource } from '../../shared/visual/visual';
 
 // The MCII exercise, run through the session page as a person would. Everything a person writes
 // is marked PRIVATE and must never appear in a saved record, or reach a visual source.
@@ -28,15 +28,14 @@ function start(mode = 'try', source?: VisualSource, sink = KEEP_EVERYTHING): Run
       // These tests check the record each exercise makes; Try it then keeps only its metadata
       // (flow/result-sink.ts), which the last test here checks with the real sink.
       { provide: CHOOSE_SINK, useValue: () => sink },
+      // MCII loads on demand, so its picture source is replaced from above, not by overriding it.
+      ...(source ? [{ provide: SCENE_SOURCE_OVERRIDE, useValue: source }] : []),
       {
         provide: ActivatedRoute,
         useValue: { snapshot: { queryParamMap: convertToParamMap({ mode, condition: 'mcii' }) } },
       },
     ],
   });
-  if (source) {
-    TestBed.overrideComponent(Mcii, { set: { providers: [{ provide: VISUAL_SOURCE, useValue: source }] } });
-  }
   const fixture = TestBed.createComponent(SessionPage);
   return { fixture, backend: TestBed.inject(HttpTestingController), bodies: [] };
 }
