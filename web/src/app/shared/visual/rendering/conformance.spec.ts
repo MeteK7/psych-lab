@@ -1,11 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { causeMapFrame } from '../instruments/cause-map/cause-map';
-import { buildFrame, buildTimeline } from '../integration/pipeline';
+import { composeCauseMap } from '../instruments/cause-map/cause-map';
+import { buildComposedFrame, buildFrame, buildTimeline } from '../integration/pipeline';
 import { SCENES } from '../scenes';
 import { readSource } from '../testing/source-files';
 import { ResolvedFrame, ResolvedTimeline } from './frame';
 import { SvgBackend, pathData } from './svg/svg-backend';
+
+const causeMapFrame = (input: Parameters<typeof composeCauseMap>[0]) => buildComposedFrame(composeCauseMap(input));
 
 /**
  * The backend conformance suite (docs/visual-system.md §6.2), run for every backend. With one

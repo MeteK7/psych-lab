@@ -85,7 +85,7 @@ describe('StateReset', () => {
     const text = root(fixture).textContent!;
     expect(text).toContain(STATE_RESET.how_it_works.heading);
     // Drawn by the Visual System from the game's own parts; the exercise gives the text alternative.
-    expect(root(fixture).querySelector('figure[role="img"] app-vis-tracking-preview svg')).not.toBeNull();
+    expect(root(fixture).querySelector('figure[role="img"] app-vis-instrument svg')).not.toBeNull();
     expect(root(fixture).querySelector('figure[role="img"]')?.getAttribute('aria-label')).toBe(
       STATE_RESET.how_it_works.illustration_alt,
     );
@@ -135,7 +135,7 @@ describe('StateReset', () => {
     click(fixture, STATE_RESET_SOUND.offer.use_sound);
     await fixture.whenStable();
     expect(root(fixture).textContent).toContain(STATE_RESET_SOUND.how_it_works.heading);
-    expect(root(fixture).querySelector('app-vis-tracking-preview')).toBeNull();
+    expect(root(fixture).querySelector('app-vis-instrument')).toBeNull();
     click(fixture, STATE_RESET.how_it_works.start_practice);
     await fixture.whenStable();
     expect(root(fixture).querySelector('app-tone-game')).not.toBeNull();
@@ -155,7 +155,7 @@ describe('StateReset', () => {
     await fixture.whenStable();
     click(fixture, STATE_RESET_SOUND.offer.use_dot);
     await fixture.whenStable();
-    expect(root(fixture).querySelector('app-vis-tracking-preview')).not.toBeNull();
+    expect(root(fixture).querySelector('app-vis-instrument')).not.toBeNull();
     fixture.destroy();
   });
 

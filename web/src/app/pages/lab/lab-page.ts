@@ -7,9 +7,7 @@ import { validateScene } from '../../shared/visual/composition/validate';
 import { CAUSE_MAP, CAUSE_MAP_PURPOSES, CauseMapInput } from '../../shared/visual/instruments/cause-map/cause-map';
 import { ROUNDS, ROUNDS_PURPOSES } from '../../shared/visual/instruments/rounds/rounds';
 import { TRACKING, TRACKING_PURPOSES, TrackingInput } from '../../shared/visual/instruments/tracking/tracking';
-import { CauseMap } from '../../shared/visual/integration/cause-map';
-import { Rounds } from '../../shared/visual/integration/rounds';
-import { TrackingPreview } from '../../shared/visual/integration/tracking';
+import { InstrumentFigure } from '../../shared/visual/integration/instruments';
 import { QualityTier, SceneFigure, SurfaceScheme } from '../../shared/visual/integration/scene-figure';
 import { Mover, motionProblems, movers } from '../../shared/visual/motion/plan-motion';
 import { SCENES } from '../../shared/visual/scenes';
@@ -24,7 +22,7 @@ import { LabTrackingStill } from './lab-tracking-still';
  */
 @Component({
   selector: 'app-lab-page',
-  imports: [SceneFigure, CauseMap, Rounds, TrackingPreview, LabTrackingStill],
+  imports: [SceneFigure, InstrumentFigure, LabTrackingStill],
   template: `
     <h1>Visual Lab</h1>
     @if (env.showsDevelopment()) {
@@ -130,7 +128,7 @@ import { LabTrackingStill } from './lab-tracking-still';
               <div class="panel" [class]="scheme">
                 <span class="tag">{{ causeMap.id }}&#64;{{ causeMap.version }} · {{ scheme }}</span>
                 <figure role="img" [attr.aria-label]="chartLabel" [attr.data-instrument]="causeMap.id + '-' + set.key + '-' + scheme">
-                  <app-vis-cause-map [causes]="set.causes" [placing]="set.placing" [axes]="axes" [scheme]="scheme" />
+                  <app-vis-instrument instrument="cause-map" [inputs]="{ causes: set.causes, placing: set.placing, axes: axes }" [scheme]="scheme" />
                 </figure>
               </div>
             }
@@ -162,7 +160,7 @@ import { LabTrackingStill } from './lab-tracking-still';
               <div class="panel" [class]="scheme">
                 <span class="tag">{{ rounds.id }}&#64;{{ rounds.version }} · {{ scheme }}</span>
                 <figure role="img" [attr.aria-label]="'Round ' + set.current + ' of 8'" [attr.data-instrument]="rounds.id + '-' + set.current + '-' + scheme">
-                  <app-vis-rounds [total]="8" [current]="set.current" [scheme]="scheme" />
+                  <app-vis-instrument instrument="rounds" [inputs]="{ total: 8, current: set.current }" [scheme]="scheme" />
                 </figure>
               </div>
             }
@@ -198,7 +196,7 @@ import { LabTrackingStill } from './lab-tracking-still';
                   @if (set.state; as state) {
                     <app-lab-tracking-still [state]="state" [scheme]="scheme" />
                   } @else {
-                    <app-vis-tracking-preview [ringRadius]="ringRadius" [labels]="previewLabels" [scheme]="scheme" />
+                    <app-vis-instrument instrument="tracking-preview" [inputs]="{ ringRadius: ringRadius, labels: previewLabels }" [scheme]="scheme" />
                   }
                 </figure>
               </div>

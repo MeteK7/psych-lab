@@ -94,7 +94,7 @@ export function resolveStyle(style: StyleRef, emphasis: Emphasis = 'normal'): Pa
   return {
     fill,
     stroke: line,
-    width: line === NONE ? 0 : LINE_WEIGHTS[weight],
+    width: line === NONE ? 0 : (style.width ?? LINE_WEIGHTS[weight]),
     dash: style.dash ? DASHES[style.dash] : null,
   };
 }

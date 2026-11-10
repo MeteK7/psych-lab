@@ -1,4 +1,4 @@
-import type { Emphasis, FrameRatio, LabelTone, MotionEffect, StyleRef, ThemeId } from '../styling/vocabulary';
+import type { Emphasis, FrameRatio, FrameSize, LabelTone, MotionEffect, StyleRef, ThemeId } from '../styling/vocabulary';
 
 /**
  * S3 Composition: the Scene Specification, version 0 (docs/visual-system.md §4). A scene is typed
@@ -61,6 +61,8 @@ export type SceneElement =
       at: Point;
       align: 'start' | 'middle' | 'end';
       tone?: LabelTone;
+      /** Bold marks the one item a person is working on (an instrument's current value). */
+      weight?: 'bold';
       purpose: Purpose;
       enter?: Entrance;
     };
@@ -88,7 +90,8 @@ export interface SceneDefinition {
   /** Bumped on any visible change; recorded with a shown visual. */
   version: number;
   theme: ThemeId;
-  frame: FrameRatio;
+  /** A named frame, or an explicit size for a composition built from data (composition/compose.ts). */
+  frame: FrameRatio | FrameSize;
   layers: readonly Layer[];
   states: StateModel;
   /** The text alternative for each state. */

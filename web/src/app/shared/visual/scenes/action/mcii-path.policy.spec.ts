@@ -5,7 +5,7 @@ import { Geometry } from '../../composition/scene';
 import { buildFrame, buildTimeline, contentText } from '../../integration/pipeline';
 import { movers } from '../../motion/plan-motion';
 import { resolveState } from '../../state/resolve-state';
-import { FRAMES } from '../../styling/vocabulary';
+import { frameSize } from '../../styling/vocabulary';
 import { MCII_PATH } from './mcii-path.scene';
 
 /**
@@ -51,7 +51,7 @@ describe('mcii.path scene policy', () => {
   it('keeps the wall low: at most a third of the frame height', () => {
     const wall = geometry('wall');
     if (wall.type !== 'rect') throw new Error('unexpected geometry');
-    expect(wall.height).toBeLessThanOrEqual(FRAMES[MCII_PATH.frame].height / 3);
+    expect(wall.height).toBeLessThanOrEqual(frameSize(MCII_PATH.frame).height / 3);
   });
 
   it('draws the bridge dashed in every state that shows it, because a plan is not an achievement', () => {

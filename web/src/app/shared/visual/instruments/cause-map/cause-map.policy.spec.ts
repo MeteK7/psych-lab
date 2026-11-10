@@ -1,5 +1,11 @@
+import { lookupOf } from '../../composition/compose';
+import { validateScene } from '../../composition/validate';
+import { buildComposedFrame } from '../../integration/pipeline';
 import type { FrameItem } from '../../rendering/frame';
-import { CAUSE_MAP, CauseMapInput, PLOT, causeMapFrame, groupByPlace, pointOf } from './cause-map';
+import { CAUSE_MAP, CauseMapInput, PLOT, composeCauseMap, groupByPlace, pointOf } from './cause-map';
+
+/** The frame the pipeline draws from the composition (milestone M1: instruments are compositions). */
+const causeMapFrame = (input: CauseMapInput) => buildComposedFrame(composeCauseMap(input));
 
 /**
  * Policy for the CS2 cause map (docs/cs2-visual-proposal.md §5.3), as assertions on the frame it
@@ -107,5 +113,14 @@ describe('CS2 cause map policy', () => {
     const h = shapes(items).find((i) => i.id === 'mid-time')!.shape;
     expect(v.type === 'line' && v.x1).toBe(mid.x);
     expect(h.type === 'line' && h.y1).toBe(mid.y);
+  });
+
+  it('is a valid composition in every case: purposes, at most one focal element, known styles', () => {
+    for (const causes of Object.values(CASES)) {
+      for (const placing of [0, 1, causes.length]) {
+        const composed = composeCauseMap({ causes, placing, axes: AXES });
+        expect(validateScene(composed.scene, lookupOf(composed))).toEqual([]);
+      }
+    }
   });
 });

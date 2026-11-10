@@ -75,13 +75,8 @@ describe('Visual System dependency rules', () => {
     expect(outside(inFolder('motion'), ['motion', 'state', 'composition', 'styling'])).toEqual([]);
   });
 
-  it('4c. instruments import only composition types, styling and the resolved-frame types: no Angular, no backend', () => {
-    const files = inFolder('instruments');
-    expect(outside(files, ['instruments', 'composition', 'styling', 'rendering'])).toEqual([]);
-    const reaches = files.flatMap(({ path, imports }) =>
-      imports.filter((i) => area(i) === 'rendering' && i !== `${ROOT}/rendering/frame`).map((i) => `${path} imports ${i}`),
-    );
-    expect(reaches).toEqual([]);
+  it('4c. instruments are compositions built from data: they import only composition and styling (no Angular, no rendering)', () => {
+    expect(outside(inFolder('instruments'), ['instruments', 'composition', 'styling'])).toEqual([]);
   });
 
   it('5. rendering imports only itself and Angular, and only integration imports a backend', () => {

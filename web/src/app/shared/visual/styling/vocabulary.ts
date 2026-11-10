@@ -50,6 +50,16 @@ export const FRAMES = {
   square: { width: 400, height: 400 },
 } as const;
 export type FrameRatio = keyof typeof FRAMES;
+/** An explicit design size, for compositions built from data (an instrument, a game). */
+export interface FrameSize {
+  width: number;
+  height: number;
+}
+
+/** A frame's design size, named or explicit. */
+export function frameSize(frame: FrameRatio | FrameSize): FrameSize {
+  return typeof frame === 'string' ? FRAMES[frame] : frame;
+}
 
 /** What an element is, semantically. S1 decides how it looks. */
 export interface StyleRef {
@@ -59,6 +69,11 @@ export interface StyleRef {
   dash?: DashPattern;
   /** Defaults to `line`. */
   material?: MaterialId;
+  /**
+   * An exact line width in scene units, instead of a weight. Only for interaction targets that
+   * must read while they move (the dot game's ring); figures use `line`. Emphasis doesn't change it.
+   */
+  width?: number;
 }
 
 /**

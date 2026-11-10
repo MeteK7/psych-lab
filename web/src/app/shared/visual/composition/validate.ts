@@ -22,6 +22,7 @@ function styleProblems(where: string, style: StyleRef): string[] {
   if (style.dash && !Object.hasOwn(DASHES, style.dash)) problems.push(`${where}: unknown dash '${style.dash}'`);
   if (style.material && !(MATERIALS as readonly string[]).includes(style.material))
     problems.push(`${where}: unknown material '${style.material}'`);
+  if (style.width !== undefined && !(style.width > 0)) problems.push(`${where}: a line width must be positive`);
   return problems;
 }
 
@@ -67,7 +68,9 @@ function strings(value: unknown): string[] {
 export function validateScene(scene: SceneDefinition, text: TextLookup): string[] {
   const problems: string[] = [];
   if (!Object.hasOwn(THEMES, scene.theme)) problems.push(`unknown theme '${scene.theme}'`);
-  if (!Object.hasOwn(FRAMES, scene.frame)) problems.push(`unknown frame '${scene.frame}'`);
+  if (typeof scene.frame === 'string') {
+    if (!Object.hasOwn(FRAMES, scene.frame)) problems.push(`unknown frame '${scene.frame}'`);
+  } else if (!(scene.frame.width > 0 && scene.frame.height > 0)) problems.push('a frame size must be positive');
 
   const ids = new Map<string, { role?: string; label: boolean }>();
   for (const { layer, element } of elementsOf(scene)) {

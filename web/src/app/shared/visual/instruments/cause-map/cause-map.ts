@@ -1,7 +1,6 @@
-import type { Purpose } from '../../composition/scene';
-import type { Drawable, FrameItem, ResolvedFrame } from '../../rendering/frame';
-import { resolveLabel, resolveStyle } from '../../styling/resolve';
-import type { ThemeId } from '../../styling/vocabulary';
+import { Composed, composeScene } from '../../composition/compose';
+import type { Geometry, Layer, Purpose, SceneElement } from '../../composition/scene';
+import type { StyleRef, ThemeId } from '../../styling/vocabulary';
 
 /**
  * The CS2 cause map (docs/cs2-visual-proposal.md), the Visual System's first instrument
@@ -10,7 +9,8 @@ import type { ThemeId } from '../../styling/vocabulary';
  * from the exercise's data, because the number of causes and their places come from the person.
  *
  * It gets numbers and places only, never the cause texts: those stay in the page list under the
- * figure. Policy assertions: `cause-map.policy.spec.ts`.
+ * figure. It is a composition built from data (composition/compose.ts), drawn through the same
+ * pipeline as every scene. Policy assertions: `cause-map.policy.spec.ts`.
  */
 export const CAUSE_MAP = { id: 'cs2.cause-map', version: 1, theme: 'cognitive' as ThemeId } as const;
 
@@ -60,47 +60,85 @@ export function pointOf(who: number, time: number): { x: number; y: number } {
 }
 
 /** A shared mark grows sideways; it stays inside the map and always covers its place. */
-function markShape(x: number, y: number, count: number): { shape: Drawable; left: number } {
+function markShape(x: number, y: number, count: number): { shape: Geometry; left: number } {
   if (count === 1) return { shape: { type: 'circle', cx: x, cy: y, r: R }, left: x - R };
   const width = 2 * R + (count - 1) * SPACING;
   const left = Math.min(Math.max(x - width / 2, PLOT.left + 3), PLOT.right - 3 - width);
   return { shape: { type: 'rect', x: left, y: y - R, width, height: 2 * R, rx: R }, left };
 }
 
-export function causeMapFrame({ causes, placing, axes }: CauseMapInput): ResolvedFrame {
-  const items: FrameItem[] = [];
-  const shape = (id: string, layer: string, s: Drawable, paint: ReturnType<typeof resolveStyle>) =>
-    items.push({ kind: 'shape', id, layer, shape: s, paint });
-  const text = (id: string, layer: string, value: string, x: number, y: number, anchor: 'start' | 'middle' | 'end', tone: 'label' | 'label-soft', bold = false) => {
-    const paint = resolveLabel(tone);
-    items.push({ kind: 'text', id, layer, text: value, x, y, anchor, fill: paint.fill, size: paint.size, ...(bold ? { weight: 'bold' as const } : {}) });
-  };
+const PURPOSE = (id: string): Purpose => CAUSE_MAP_PURPOSES.find((p) => p.id === id)!.purpose;
 
-  const line = resolveStyle({ role: 'context', line: 'hair' });
+export function composeCauseMap({ causes, placing, axes }: CauseMapInput): Composed {
+  const text: Record<string, string> = {
+    'axis.left': axes.left,
+    'axis.right': axes.right,
+    'axis.top': axes.top,
+    'axis.bottom': axes.bottom,
+  };
+  const shape = (id: string, geometry: Geometry, style: StyleRef, purpose: Purpose): SceneElement => ({
+    kind: 'shape',
+    id,
+    geometry,
+    style,
+    purpose,
+  });
+  const label = (id: string, key: string, x: number, y: number, align: 'start' | 'middle' | 'end', tone: 'label' | 'label-soft', purpose: Purpose, bold = false): SceneElement => ({
+    kind: 'label',
+    id,
+    text: key,
+    at: [x, y],
+    align,
+    tone,
+    purpose,
+    ...(bold ? { weight: 'bold' as const } : {}),
+  });
+
+  const line: StyleRef = { role: 'context', line: 'hair' };
   const { left, top, right, bottom } = PLOT;
   const mid = pointOf(3, 3);
-  shape('frame', 'scale', { type: 'rect', x: left, y: top, width: right - left, height: bottom - top, rx: 6 }, line);
-  shape('mid-who', 'scale', { type: 'line', x1: mid.x, y1: top, x2: mid.x, y2: bottom }, line);
-  shape('mid-time', 'scale', { type: 'line', x1: left, y1: mid.y, x2: right, y2: mid.y }, line);
-  text('axis-left', 'scale', axes.left, left, bottom + 24, 'start', 'label-soft');
-  text('axis-right', 'scale', axes.right, right, bottom + 24, 'end', 'label-soft');
-  text('axis-top', 'scale', axes.top, left - 10, top + 14, 'end', 'label-soft');
-  text('axis-bottom', 'scale', axes.bottom, left - 10, bottom - 4, 'end', 'label-soft');
+  const scale: SceneElement[] = [
+    shape('frame', { type: 'rect', x: left, y: top, width: right - left, height: bottom - top, rx: 6 }, line, PURPOSE('frame')),
+    shape('mid-who', { type: 'line', x1: mid.x, y1: top, x2: mid.x, y2: bottom }, line, PURPOSE('mid-who, mid-time')),
+    shape('mid-time', { type: 'line', x1: left, y1: mid.y, x2: right, y2: mid.y }, line, PURPOSE('mid-who, mid-time')),
+    label('axis-left', 'axis.left', left, bottom + 24, 'start', 'label-soft', PURPOSE('axis-*')),
+    label('axis-right', 'axis.right', right, bottom + 24, 'end', 'label-soft', PURPOSE('axis-*')),
+    label('axis-top', 'axis.top', left - 10, top + 14, 'end', 'label-soft', PURPOSE('axis-*')),
+    label('axis-bottom', 'axis.bottom', left - 10, bottom - 4, 'end', 'label-soft', PURPOSE('axis-*')),
+  ];
 
-  const backing = resolveStyle({ role: 'ground', material: 'tonal' });
-  const other = resolveStyle({ role: 'context' });
-  const current = resolveStyle({ role: 'subject' }, 'focal');
+  const marks: SceneElement[] = [];
+  let focal: string | null = null;
   for (const place of groupByPlace(causes)) {
     const { x, y } = pointOf(place.who, place.time);
-    const { shape: s, left: from } = markShape(x, y, place.numbers.length);
+    const { shape: geometry, left: from } = markShape(x, y, place.numbers.length);
     const id = `mark-${place.numbers[0]}`;
-    shape(`${id}-back`, 'causes', s, backing);
-    shape(id, 'causes', s, place.numbers.includes(placing) ? current : other);
-    place.numbers.forEach((n, j) =>
-      text(`${id}-num-${n}`, 'causes', String(n), from + R + j * SPACING, y + 5, 'middle', 'label', n === placing),
-    );
+    const current = place.numbers.includes(placing);
+    if (current) focal = id;
+    marks.push(shape(`${id}-back`, geometry, { role: 'ground', material: 'tonal' }, PURPOSE('mark-*-back')));
+    marks.push(shape(id, geometry, { role: current ? 'subject' : 'context' }, current ? PURPOSE('placing') : PURPOSE('mark-*')));
+    place.numbers.forEach((n, j) => {
+      text[`num.${n}`] = String(n);
+      marks.push(label(`${id}-num-${n}`, `num.${n}`, from + R + j * SPACING, y + 5, 'middle', 'label', PURPOSE('mark-*-num-*'), n === placing));
+    });
   }
-  return { width: WIDTH, height: HEIGHT, theme: CAUSE_MAP.theme, items };
+
+  const layers: Layer[] = [
+    { id: 'scale', plane: 'annotation', elements: scale },
+    { id: 'causes', plane: 'subject', elements: marks },
+  ];
+  return composeScene(
+    {
+      id: CAUSE_MAP.id,
+      version: CAUSE_MAP.version,
+      theme: CAUSE_MAP.theme,
+      size: { width: WIDTH, height: HEIGHT },
+      layers,
+      ...(focal ? { emphasis: { [focal]: 'focal' as const } } : {}),
+      alt: 'A map of the causes on two scales: about me or the situation, and lasting or just this time.',
+    },
+    text,
+  );
 }
 
 /** Why each element is there (docs/visual-policy.md principle 6), for reviewers and the Visual Lab. */

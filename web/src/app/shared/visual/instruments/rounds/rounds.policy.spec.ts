@@ -1,4 +1,9 @@
-import { ROUNDS, ROUNDS_SIZE, roundsFrame } from './rounds';
+import { lookupOf } from '../../composition/compose';
+import { validateScene } from '../../composition/validate';
+import { buildComposedFrame } from '../../integration/pipeline';
+import { ROUNDS, ROUNDS_SIZE, RoundsInput, composeRounds } from './rounds';
+
+const roundsFrame = (input: RoundsInput) => buildComposedFrame(composeRounds(input));
 
 const marks = (current: number) => roundsFrame({ total: 8, current }).items;
 
@@ -40,6 +45,13 @@ describe('state-reset.rounds (policy)', () => {
       if (item.kind === 'shape') {
         for (const value of [item.paint.fill, item.paint.stroke]) expect(value === 'none' || value.includes('var(--vis-')).toBe(true);
       }
+    }
+  });
+
+  it('is a valid composition for every round', () => {
+    for (let current = 1; current <= 8; current++) {
+      const composed = composeRounds({ total: 8, current });
+      expect(validateScene(composed.scene, lookupOf(composed))).toEqual([]);
     }
   });
 });

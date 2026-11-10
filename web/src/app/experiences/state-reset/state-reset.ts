@@ -4,7 +4,7 @@ import { RATINGS, STATE_RESET, STATE_RESET_SOUND, fill } from '../../../content'
 import { Experience, StepOutcome } from '../../flow/step-outcome';
 import { RatingScale } from '../../shared/rating-scale';
 import { InstrumentSlot } from '../../shared/visual/integration/instrument-slot';
-import { TrackingPreview } from '../../shared/visual/integration/tracking';
+import { InstrumentFigure } from '../../shared/visual/integration/instruments';
 import { Phase, Variant, buildSchedule } from './schedule';
 import { playTone, unlockAudio } from './tone-audio';
 import { ToneGame } from './tone-game';
@@ -23,7 +23,7 @@ export type Task = 'dot' | 'sound';
  */
 @Component({
   selector: 'app-state-reset',
-  imports: [InstrumentSlot, RatingScale, ToneGame, TrackingGame, TrackingPreview],
+  imports: [InstrumentFigure, InstrumentSlot, RatingScale, ToneGame, TrackingGame],
   template: `
     @switch (phase().kind) {
       @case ('intro') {
@@ -100,7 +100,8 @@ export type Task = 'dot' | 'sound';
             </div>
           } @else {
             <figure class="preview" role="img" [attr.aria-label]="content.how_it_works.illustration_alt">
-              <app-vis-tracking-preview [ringRadius]="content.game.ring_radius" [labels]="content.how_it_works.labels" />
+              <app-vis-instrument instrument="tracking-preview"
+                                  [inputs]="{ ringRadius: content.game.ring_radius, labels: content.how_it_works.labels }" />
             </figure>
             <p>{{ content.how_it_works.text }}</p>
             <ul>
