@@ -32,14 +32,14 @@ const MIN_CAUSES = 3;
           <span>{{ c.setback.label }}</span>
           <input type="text" maxlength="120" [value]="store.setback()" (input)="store.setback.set(value($event))" />
         </label>
-        <button type="button" [disabled]="!store.setback().trim()" (click)="done({ described: true })">
+        <button class="primary" type="button" [disabled]="!store.setback().trim()" (click)="done({ described: true })">
           {{ c.next_label }}
         </button>
       }
       @case ('cs2_first') {
         <app-card-pick [legend]="c.first.ask" [cards]="c.first.cards" [ownChoice]="c.first.own_choice"
                        [ownLabel]="c.first.own_label" [(value)]="pick" />
-        <button type="button" [disabled]="!pick()" (click)="submitFirst()">{{ c.next_label }}</button>
+        <button class="primary" type="button" [disabled]="!pick()" (click)="submitFirst()">{{ c.next_label }}</button>
       }
       @case ('cs2_more') {
         <fieldset class="choice">
@@ -66,7 +66,7 @@ const MIN_CAUSES = 3;
             <li>{{ cause.text }}</li>
           }
         </ul>
-        <button type="button" [disabled]="store.causes().length < minCauses" (click)="submitMore()">{{ c.next_label }}</button>
+        <button class="primary" type="button" [disabled]="store.causes().length < minCauses" (click)="submitMore()">{{ c.next_label }}</button>
       }
       @case ('cs2_map') {
         @if (current(); as cause) {
@@ -85,7 +85,7 @@ const MIN_CAUSES = 3;
             </div>
             <ng-container *ngTemplateOutlet="chart" />
           </div>
-          <button type="button" (click)="nextCause()">
+          <button class="primary" type="button" (click)="nextCause()">
             {{ mapIndex() + 1 < store.causes().length ? c.map.next_cause : c.next_label }}
           </button>
         }
@@ -114,7 +114,7 @@ const MIN_CAUSES = 3;
             }
           </section>
         }
-        <button type="button" class="next" (click)="submitReflect()">{{ c.next_label }}</button>
+        <button type="button" class="primary next" (click)="submitReflect()">{{ c.next_label }}</button>
       }
       @case ('cs2_change') {
         <fieldset class="choice">
@@ -133,7 +133,7 @@ const MIN_CAUSES = 3;
         @if (chosen() && chosen() !== 'none') {
           <p class="note">{{ c.change.plan_prompt }}</p>
         }
-        <button type="button" [disabled]="!chosen()" (click)="finish()">{{ c.finish_label }}</button>
+        <button class="primary" type="button" [disabled]="!chosen()" (click)="finish()">{{ c.finish_label }}</button>
       }
     }
 

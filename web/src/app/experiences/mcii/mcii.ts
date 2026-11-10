@@ -68,7 +68,7 @@ import { MciiStore } from './mcii-store';
         </fieldset>
         <app-rating-scale [item]="c.wish.matter" [(value)]="matter" />
         <app-rating-scale [item]="c.wish.likely" [(value)]="likely" />
-        <button type="button" [disabled]="!wishReady()" (click)="submitWish()">{{ c.next_label }}</button>
+        <button class="primary" type="button" [disabled]="!wishReady()" (click)="submitWish()">{{ c.next_label }}</button>
       }
       @case ('mcii_outcome') {
         <p class="quote">{{ say(c.outcome.your_wish, { wish: store.wish() }) }}</p>
@@ -81,7 +81,7 @@ import { MciiStore } from './mcii-store';
         @if (shown() && outcome().trim()) {
           <p class="note" role="status">{{ c.outcome.picture }}</p>
         }
-        <button type="button" [disabled]="!outcome().trim()" (click)="shown() ? submitOutcome() : shown.set(true)">
+        <button class="primary" type="button" [disabled]="!outcome().trim()" (click)="shown() ? submitOutcome() : shown.set(true)">
           {{ shown() ? c.next_label : c.done_label }}
         </button>
       }
@@ -123,7 +123,7 @@ import { MciiStore } from './mcii-store';
         @if (shown() && obstacle()) {
           <p class="note" role="status">{{ c.obstacle.picture }}</p>
         }
-        <button type="button" [disabled]="!obstacle()" (click)="shown() ? submitObstacle() : shown.set(true)">
+        <button class="primary" type="button" [disabled]="!obstacle()" (click)="shown() ? submitObstacle() : shown.set(true)">
           {{ shown() ? c.next_label : c.done_label }}
         </button>
       }
@@ -167,14 +167,14 @@ import { MciiStore } from './mcii-store';
           </label>
         }
         <p class="any">{{ c.decide.any_answer }}</p>
-        <button type="button" [disabled]="!decideReady()" (click)="submitDecide()">{{ c.next_label }}</button>
+        <button class="primary" type="button" [disabled]="!decideReady()" (click)="submitDecide()">{{ c.next_label }}</button>
       }
       @case ('mcii_plan') {
         @if (setAside()) {
           <p>{{ c.plan.set_aside[0] }}</p>
           <app-visual-slot [request]="scene()" />
           <p>{{ c.plan.set_aside[1] }}</p>
-          <button type="button" (click)="completed.emit(noPlan())">{{ c.next_label }}</button>
+          <button class="primary" type="button" (click)="completed.emit(noPlan())">{{ c.next_label }}</button>
         } @else {
           <p class="quote">{{ say(c.plan.your_wish, { wish: store.wish() }) }}</p>
           <p>{{ c.plan.lead }}</p>
@@ -191,7 +191,7 @@ import { MciiStore } from './mcii-store';
               <p>{{ c.plan.rehearse }}</p>
             </div>
           }
-          <button type="button" [disabled]="!planReady()" (click)="shown() ? submitPlan() : shown.set(true)">
+          <button class="primary" type="button" [disabled]="!planReady()" (click)="shown() ? submitPlan() : shown.set(true)">
             {{ shown() ? c.next_label : c.done_label }}
           </button>
         }
@@ -226,7 +226,7 @@ import { MciiStore } from './mcii-store';
         @if (feeling() === 'discouraged') {
           <p class="note" role="status">{{ c.close.discouraged_note }}</p>
         }
-        <button type="button" [disabled]="!closeReady()" (click)="submitClose()">{{ c.finish_label }}</button>
+        <button class="primary" type="button" [disabled]="!closeReady()" (click)="submitClose()">{{ c.finish_label }}</button>
       }
     }
   `,

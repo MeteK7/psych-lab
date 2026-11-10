@@ -21,7 +21,7 @@ import { Experience, StepOutcome } from '../../flow/step-outcome';
           <input type="text" [placeholder]="content.topic.placeholder" [value]="topic()"
                  (input)="topic.set(value($event))" required />
         </label>
-        <button type="submit" [disabled]="!complete()">Continue</button>
+        <button class="primary" type="submit" [disabled]="!complete()">Continue</button>
       </form>
     } @else {
       <h3>{{ content.read_back.heading }}</h3>
@@ -36,7 +36,7 @@ import { Experience, StepOutcome } from '../../flow/step-outcome';
       </label>
       <div class="actions">
         <button type="button" (click)="stage.set('write')">{{ content.read_back.change }}</button>
-        <button type="button" [disabled]="!readBack()" (click)="finish()">Continue</button>
+        <button class="primary" type="button" [disabled]="!readBack()" (click)="finish()">Continue</button>
       </div>
     }
   `,
