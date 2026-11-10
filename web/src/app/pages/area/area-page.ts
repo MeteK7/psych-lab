@@ -19,6 +19,8 @@ import { Icon } from '../../shared/icon';
     @if (area(); as a) {
       <h1>{{ a.title }}</h1>
       <p class="lead">{{ a.intro }}</p>
+      <!-- Once per area, before any "Try it": what practice keeps (flow/result-sink.ts). -->
+      <p class="muted">{{ practiceNote() }}</p>
 
       @for (topic of shownTopics(); track topic.title; let t = $index) {
         <section [attr.aria-labelledby]="'topic-heading-' + t">
@@ -38,12 +40,11 @@ import { Icon } from '../../shared/icon';
                   @if (e.experimental) {
                     <p><span class="badge">Experimental</span> This idea is still being tested.</p>
                   }
-                  <button type="button" class="try" (click)="tryIt(e.value)">Try it</button>
+                  <button type="button" class="try primary" (click)="tryIt(e.value)">Try it</button>
                 </li>
               }
             }
           </ul>
-          <p class="muted">{{ practiceNote() }}</p>
 
           @if (topic.hasExperiment && !environment.booth()) {
             <section class="card prominent" aria-labelledby="experiment-heading">

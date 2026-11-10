@@ -10,7 +10,9 @@ import { expectNoSeriousA11yIssues } from './helpers';
 const STATES = 4; // mcii.path
 const TRANSITIONS = 3; // mcii.path: future → contrast, contrast → plan, contrast → aside
 const CAUSE_SETS = 5; // cs2.cause-map: the answer sets in the Lab
-const PANELS = (STATES + TRANSITIONS + CAUSE_SETS) * 2; // light and dark
+const ROUND_SETS = 3; // state-reset.rounds: first, middle, last
+const TRACKING_SETS = 3; // state-reset.tracking: outside, inside, the preview
+const PANELS = (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS) * 2; // light and dark
 
 for (const [name, media] of [
   ['light', { colorScheme: 'light' }],
@@ -30,10 +32,23 @@ for (const [name, media] of [
     // The purpose of every element is explained.
     await expect(page.getByRole('table').first().getByRole('row')).toHaveCount(1 + 11); // mcii.path
     await expect(page.getByRole('table').nth(1).getByRole('row')).toHaveCount(1 + 7); // cs2.cause-map
+    await expect(page.getByRole('table').nth(2).getByRole('row')).toHaveCount(1 + 1); // state-reset.rounds
+    await expect(page.getByRole('table').nth(3).getByRole('row')).toHaveCount(1 + 4); // state-reset.tracking
     // Every figure draws something.
     for (const count of await page.locator('app-vis-svg svg').evaluateAll((els) => els.map((e) => e.childElementCount))) {
       expect(count).toBeGreaterThan(0);
     }
+    // The game's stills are drawn on a canvas: each has painted pixels.
+    const painted = await page.locator('app-lab-tracking-still canvas').evaluateAll((els) =>
+      (els as HTMLCanvasElement[]).map((c) => {
+        const { data } = c.getContext('2d')!.getImageData(0, 0, c.width, c.height);
+        let n = 0;
+        for (let i = 3; i < data.length; i += 4) if (data[i] > 0) n++;
+        return n;
+      }),
+    );
+    expect(painted).toHaveLength(4);
+    for (const n of painted) expect(n).toBeGreaterThan(100);
     await expectNoSeriousA11yIssues(page, `Visual Lab, ${name}`);
   });
 }
@@ -81,7 +96,12 @@ const drawing = (page: Page, figure: string) =>
   page
     .locator(`${figure} svg`)
     .evaluate((svg) => svg.outerHTML.replace(/<defs[^>]*>.*?<\/defs>/s, '').replace(/ mask="[^"]*"/g, ''));
-const idle = (page: Page) => expect.poll(() => page.evaluate(() => document.getAnimations().length), { timeout: 5_000 }).toBe(0);
+/** Animations in the figures only: the page's own controls (a button's hover colour) aren't the figure moving. */
+const figureAnimations = (page: Page) =>
+  page.evaluate(
+    () => document.getAnimations().filter((a) => ((a.effect as KeyframeEffect | null)?.target as Element | null)?.closest('app-vis-svg')).length,
+  );
+const idle = (page: Page) => expect.poll(() => figureAnimations(page), { timeout: 5_000 }).toBe(0);
 
 test('Visual Lab: each transition plays and ends on the approved state', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'no-preference' });
@@ -90,7 +110,7 @@ test('Visual Lab: each transition plays and ends on the approved state', async (
   await page.addStyleTag({ content: CAPTURE });
   for (const [from, to] of [['future', 'contrast'], ['contrast', 'plan'], ['contrast', 'aside']]) {
     await page.getByRole('button', { name: `Replay ${from} → ${to}` }).click();
-    await expect.poll(() => page.evaluate(() => document.getAnimations().length)).toBeGreaterThan(0);
+    await expect.poll(() => figureAnimations(page)).toBeGreaterThan(0);
     await idle(page);
     for (const scheme of ['light', 'dark'])
       expect(await drawing(page, `figure[data-transition="${from}-${to}-${scheme}"]`), `${from} → ${to}, ${scheme}`).toBe(
@@ -107,7 +127,7 @@ test('Visual Lab: nothing moves under reduced motion', async ({ page }) => {
   await expect(page.locator('figure[data-transition]')).toHaveCount(TRANSITIONS * 2);
   for (const [from, to] of [['future', 'contrast'], ['contrast', 'plan'], ['contrast', 'aside']]) {
     await page.getByRole('button', { name: `Replay ${from} → ${to}` }).click();
-    expect(await page.evaluate(() => document.getAnimations().length), `${from} → ${to}`).toBe(0);
+    expect(await figureAnimations(page), `${from} → ${to}`).toBe(0);
     expect(await drawing(page, `figure[data-transition="${from}-${to}-light"]`)).toBe(await drawing(page, `figure[data-baseline="mcii.path-${to}-light"]`));
   }
 });
