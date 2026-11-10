@@ -365,7 +365,8 @@ A custom element can't become a whole scene, so a bespoke renderer can't come in
 | `MciiPathScene` (`mcii-path-scene.ts`) and its source `builtin.v1` | Removed | Replaced in MCII step 4d (2026-11-08) by scene `mcii.path`. Production keeps it until you merge |
 | CS2 cause chart (`cs-why-it-happened.ts`) | Migrated (2026-11-08) | The instrument `cs2.cause-map@1` (v0.2); the inline chart is removed. Production keeps it until you merge |
 | CS1 and CS3 | Audited 2026-11-08: no figure. CS1's fit board is an HTML control; CS3 has no visual element (`cs1-cs3-visual-audit.md`) | Nothing to migrate (decision A1, 2026-11-09) |
-| `GamePreview`, `TrackingGame`, `ToneGame` | Legacy | When their visuals are improved (development stage: no freeze before participant data collection, `plan.md`) |
+| `GamePreview`, `TrackingGame` | Migrated (2026-11-10) | `state-reset.tracking@1`, drawn by the canvas backend (the game) and the SVG backend (the preview) |
+| `ToneGame` | Outside scope | The sound version has no figure: a box with a "High tone" button |
 | `icon.ts` | Outside scope | Unchanged |
 
 ---
@@ -548,6 +549,8 @@ One row per capability added to code, naming the composition that pulled it.
 | 2026-11-08 | Dependency rules 4c and 5 refined: instruments import composition types, S1 and the resolved-frame types only; only S9 imports a backend | Rules | `cs2.cause-map@1` | — |
 | 2026-11-10 | The dot game's ring: heavier as well as coloured while the pointer is inside it, and system colours in high contrast (in the game's own canvas code; the game isn't on the Visual System yet) | — | `state-reset` (development stage) | Pending your look |
 | 2026-11-10 | Second instrument, `state-reset.rounds@1`: one mark per round above the dot game (done filled, current in the Action colour and heavier, coming thin), still during a round; its policy spec. One `InstrumentSlot` (S9) now loads any instrument on demand and replaces the cause map's own slot | S3, S9 | `state-reset.rounds@1` | Pending your look |
+| 2026-11-10 | The dot game on the Visual System: instrument `state-reset.tracking@1` (ring, dot and marker, and the labelled preview from the same parts; its policy spec), the **canvas backend** (S7: paints a resolved frame each animation frame, reading S1 token colours inside its own token scope, so light, dark and high contrast follow the page), and the game's surface and preview in S9. The game keeps its timing, scoring and input. Pulled ahead of v0.4: no stimulus lane, frame clock or timing log yet, which a measurement task still needs | S7, S9 | `state-reset.tracking@1` | Pending your look |
+| 2026-11-10 | The Lab shows `state-reset.rounds` (first, middle and last round) and `state-reset.tracking` (the game as still canvas frames, outside and inside the ring, and the preview), light and dark, with their purpose tables; a browser test checks that the canvas stills paint | S10 | `state-reset.rounds@1`, `state-reset.tracking@1` | For your R2 |
 | 2026-11-08 | The Lab's instrument section: five answer sets (start, placing, spread, heavy, six in one place) in light and dark, with the purpose table | S10 | `cs2.cause-map@1` | — |
 | 2026-11-08 | The Lab's "Transitions" section: each declared change, replayable, in full or reduced motion, with what moves and why; browser tests that each change ends on the approved state and that nothing moves under reduced motion | S10 | `mcii.path@4` | — |
 

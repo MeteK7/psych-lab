@@ -4,7 +4,7 @@ import { RATINGS, STATE_RESET, STATE_RESET_SOUND, fill } from '../../../content'
 import { Experience, StepOutcome } from '../../flow/step-outcome';
 import { RatingScale } from '../../shared/rating-scale';
 import { InstrumentSlot } from '../../shared/visual/integration/instrument-slot';
-import { GamePreview } from './game-preview';
+import { TrackingPreview } from '../../shared/visual/integration/tracking';
 import { Phase, Variant, buildSchedule } from './schedule';
 import { playTone, unlockAudio } from './tone-audio';
 import { ToneGame } from './tone-game';
@@ -23,7 +23,7 @@ export type Task = 'dot' | 'sound';
  */
 @Component({
   selector: 'app-state-reset',
-  imports: [GamePreview, InstrumentSlot, RatingScale, ToneGame, TrackingGame],
+  imports: [InstrumentSlot, RatingScale, ToneGame, TrackingGame, TrackingPreview],
   template: `
     @switch (phase().kind) {
       @case ('intro') {
@@ -34,7 +34,7 @@ export type Task = 'dot' | 'sound';
           }
         </ol>
         <p>{{ texts().about_duration }}</p>
-        <button type="button" (click)="next()">{{ content.next_label }}</button>
+        <button class="primary" type="button" (click)="next()">{{ content.next_label }}</button>
       }
       @case ('picture') {
         <h3>{{ content.picture.heading }}</h3>
@@ -56,7 +56,7 @@ export type Task = 'dot' | 'sound';
                    aria-describedby="picture-hint" required />
           </label>
           <p id="picture-hint" class="hint">{{ content.picture.field_hint }}</p>
-          <button type="submit" [disabled]="!picture().trim()">{{ content.next_label }}</button>
+          <button class="primary" type="submit" [disabled]="!picture().trim()">{{ content.next_label }}</button>
         </form>
       }
       @case ('rating') {
@@ -68,7 +68,7 @@ export type Task = 'dot' | 'sound';
         }
         <app-rating-scale [item]="ratingItems.image_vividness" [(value)]="vividness" />
         <app-rating-scale [item]="ratingItems.image_emotionality" [(value)]="emotionality" />
-        <button type="button" [disabled]="vividness() === null || emotionality() === null" (click)="saveRating()">
+        <button class="primary" type="button" [disabled]="vividness() === null || emotionality() === null" (click)="saveRating()">
           {{ ratingWhen() === 'pre' ? content.next_label : content.continue_label }}
         </button>
       }
@@ -99,7 +99,9 @@ export type Task = 'dot' | 'sound';
               <button type="button" (click)="playSample('high')">{{ sound.how_it_works.high }}</button>
             </div>
           } @else {
-            <app-game-preview [ringRadius]="content.game.ring_radius" />
+            <figure class="preview" role="img" [attr.aria-label]="content.how_it_works.illustration_alt">
+              <app-vis-tracking-preview [ringRadius]="content.game.ring_radius" [labels]="content.how_it_works.labels" />
+            </figure>
             <p>{{ content.how_it_works.text }}</p>
             <ul>
               <li>{{ content.how_it_works.mouse }}</li>
@@ -108,7 +110,7 @@ export type Task = 'dot' | 'sound';
           }
           <p>{{ texts().practice }}</p>
           @if (practice() === 'preview') {
-            <button type="button" (click)="startPractice()">{{ content.how_it_works.start_practice }}</button>
+            <button class="primary" type="button" (click)="startPractice()">{{ content.how_it_works.start_practice }}</button>
             <!-- Offered in Try it only: an experiment exercise keeps the dot game (protocol). -->
             @if (!assigned()) {
               <section class="alternative" aria-label="Sound version">
@@ -127,7 +129,7 @@ export type Task = 'dot' | 'sound';
             <p role="status">{{ content.how_it_works.practice_done }}</p>
             <div class="actions">
               <button type="button" (click)="startPractice()">{{ content.how_it_works.practise_again }}</button>
-              <button type="button" (click)="next()">{{ content.how_it_works.ready }}</button>
+              <button class="primary" type="button" (click)="next()">{{ content.how_it_works.ready }}</button>
             </div>
           }
         }
@@ -166,6 +168,7 @@ export type Task = 'dot' | 'sound';
   styles: `
     /* The rounds line up with the game box under them. */
     .rounds { max-width: 480px; margin: 0 0 0.75rem; }
+    .preview { margin: 0 0 1rem; max-width: 480px; }
     .cue { font-size: 1.2rem; font-weight: 600; }
     .countdown { font-size: 1.5rem; font-variant-numeric: tabular-nums; margin: 0.5rem 0 1rem; }
     .stop { display: block; margin-top: 1.5rem; }

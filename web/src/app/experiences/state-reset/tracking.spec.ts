@@ -1,4 +1,4 @@
-import { Direction, RING, TrackingScore, isOnTarget, moveCursor, ringStyle, targetAt } from './tracking';
+import { Direction, TrackingScore, isOnTarget, moveCursor, targetAt } from './tracking';
 
 const size = { width: 480, height: 320 };
 
@@ -43,10 +43,4 @@ describe('tracking', () => {
     expect(score.measuredMs).toBe(40);
   });
 
-  it('shows the pointer inside the ring by weight as well as colour', () => {
-    expect(ringStyle(true)).toBe(RING.inside);
-    expect(ringStyle(false)).toBe(RING.outside);
-    expect(RING.inside.colour).not.toBe(RING.outside.colour);
-    expect(RING.inside.width).toBeGreaterThanOrEqual(2 * RING.outside.width);
-  });
 });

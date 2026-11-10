@@ -9,7 +9,8 @@ import {
   viewChild,
 } from '@angular/core';
 
-import { Direction, Point, TrackingScore, isDirection, isOnTarget, moveCursor, ringStyle, targetAt } from './tracking';
+import { TrackingSurface } from '../../shared/visual/integration/tracking';
+import { Direction, Point, TrackingScore, isDirection, isOnTarget, moveCursor, targetAt } from './tracking';
 
 export interface SetResult {
   on_target_ratio: number;
@@ -26,25 +27,30 @@ const MAX_FRAME_MS = 100;
 /** One timed set of the dot-following game, drawn on a canvas. */
 @Component({
   selector: 'app-tracking-game',
+  imports: [TrackingSurface],
   template: `
-    <canvas
-      #canvas
-      tabindex="0"
-      role="application"
-      aria-roledescription="dot-following game"
-      [attr.aria-label]="'Keep your pointer, or your marker with the arrow keys, inside the ring around the moving dot. ' + remaining() + ' seconds left.'"
-      [width]="size.width"
-      [height]="size.height"
-      (pointermove)="onPointer($event)"
-      (keydown)="onKeyDown($event)"
-      (keyup)="onKeyUp($event)"
-      (blur)="held.clear()"
-    ></canvas>
+    <!-- Drawn by the Visual System (instruments/tracking); the game's timing, scoring and input stay here. -->
+    <app-vis-tracking-surface>
+      <canvas
+        #canvas
+        tabindex="0"
+        role="application"
+        aria-roledescription="dot-following game"
+        [attr.aria-label]="'Keep your pointer, or your marker with the arrow keys, inside the ring around the moving dot. ' + remaining() + ' seconds left.'"
+        [width]="size.width"
+        [height]="size.height"
+        (pointermove)="onPointer($event)"
+        (keydown)="onKeyDown($event)"
+        (keyup)="onKeyUp($event)"
+        (blur)="held.clear()"
+      ></canvas>
+    </app-vis-tracking-surface>
     <p class="timer" aria-live="off">{{ remaining() }} s</p>
   `,
   styles: `
     canvas { display: block; width: 100%; max-width: 480px; aspect-ratio: 3 / 2;
              border: 1px solid var(--border); border-radius: 8px; touch-action: none; cursor: crosshair; }
+    @media (forced-colors: active) { canvas { border-color: CanvasText; } }
     .timer { color: var(--muted); margin: 0.25rem 0 0; font-variant-numeric: tabular-nums; }
   `,
 })
@@ -59,14 +65,13 @@ export class TrackingGame implements AfterViewInit, OnDestroy {
   protected readonly held = new Set<Direction>();
 
   private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
+  private readonly surface = viewChild.required(TrackingSurface);
   private readonly score = new TrackingScore();
   private cursor: Point = { x: SIZE.width / 2, y: SIZE.height / 2 };
   private elapsedMs = 0;
   private lastFrame: number | null = null;
   private frameHandle: number | null = null;
   private done = false;
-  /** Resolved once a second at most: colours only change with the theme. */
-  private paletteCache: { at: number; value: ReturnType<typeof currentPalette> } | null = null;
 
   ngAfterViewInit(): void {
     this.remaining.set(this.seconds());
@@ -125,64 +130,15 @@ export class TrackingGame implements AfterViewInit, OnDestroy {
     this.frameHandle = requestAnimationFrame((t) => this.frame(t));
   }
 
-  private palette(): ReturnType<typeof currentPalette> {
-    const now = performance.now();
-    if (!this.paletteCache || now - this.paletteCache.at > 1000) {
-      this.paletteCache = { at: now, value: currentPalette() };
-    }
-    return this.paletteCache.value;
-  }
-
   private draw(target: Point, onTarget: boolean): void {
-    const ctx = this.canvas().nativeElement.getContext('2d');
-    if (!ctx) return; // e.g. test environments without canvas support
-    const palette = this.palette();
-    const ring = ringStyle(onTarget);
-
-    ctx.clearRect(0, 0, SIZE.width, SIZE.height);
-    ctx.lineWidth = ring.width;
-    ctx.strokeStyle = palette[ring.colour];
-    ctx.beginPath();
-    ctx.arc(target.x, target.y, this.ringRadius(), 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.fillStyle = palette.text;
-    ctx.beginPath();
-    ctx.arc(target.x, target.y, 7, 0, Math.PI * 2);
-    ctx.fill();
-    // Keyboard cursor (pointer users see their own cursor too).
-    ctx.strokeStyle = palette.text;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(this.cursor.x - 6, this.cursor.y);
-    ctx.lineTo(this.cursor.x + 6, this.cursor.y);
-    ctx.moveTo(this.cursor.x, this.cursor.y - 6);
-    ctx.lineTo(this.cursor.x, this.cursor.y + 6);
-    ctx.stroke();
+    this.surface().draw(this.canvas().nativeElement, {
+      size: SIZE,
+      target,
+      cursor: this.cursor,
+      ringRadius: this.ringRadius(),
+      onTarget,
+    });
   }
-}
-
-/**
- * The game's colours: the page's own, or the system's in a high-contrast theme, which a canvas
- * doesn't follow by itself (the ring inside then takes the highlight colour, as in figures).
- */
-function currentPalette(): { accent: string; muted: string; text: string } {
-  if (typeof matchMedia === 'function' && matchMedia('(forced-colors: active)').matches) {
-    return { accent: systemColour('Highlight'), muted: systemColour('GrayText'), text: systemColour('CanvasText') };
-  }
-  const css = getComputedStyle(document.documentElement);
-  const colour = (name: string, fallback: string) => css.getPropertyValue(name).trim() || fallback;
-  return { accent: colour('--accent', '#2457c5'), muted: colour('--muted', '#777'), text: colour('--text', '#222') };
-}
-
-/** A system colour as the browser resolves it, in a form a canvas accepts. */
-function systemColour(name: string): string {
-  const probe = document.createElement('span');
-  probe.style.color = name;
-  probe.style.display = 'none';
-  document.body.append(probe);
-  const resolved = getComputedStyle(probe).color;
-  probe.remove();
-  return resolved;
 }
 
 function round(value: number): number {
