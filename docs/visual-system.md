@@ -1,6 +1,8 @@
 # The Visual System: architecture and foundations (revision 3)
 
-> **Status:** v0.1 in progress, branch `test-visual-system`.
+> **Status (2026-11-10):** v0.1 and v0.2 built and integrated (MCII scene, CS2 cause map), and the dot game drawn by the Visual System. **Direction revised 2026-11-10:** the system is shared infrastructure, completed through milestones M1–M8 (§14), built ahead of need and validated by reference compositions in the Visual Lab; what an exercise shows stays purpose-gated (§5.2). Where each subsystem stands: §3.0.
+>
+> **Earlier status:** v0.1 in progress, branch `test-visual-system`.
 > - **Built so far:** S1 tokens and resolver, S3 types and validator, S4 visibility and emphasis, S5 motion for state changes, the SVG backend, the pipeline and a scene figure (S9), and the Visual Lab (development build, `/lab`). See the capability log (§15).
 > - **Reviewed:** `mcii.path`'s states and transitions, accepted by you (`visual-reviews.md`, entries 1 and 2), with 12 screenshot baselines.
 > - **Integrated (MCII step 4d):** the MCII exercise draws `mcii.path` on the development branch; the old built-in picture is removed.
@@ -75,6 +77,21 @@ Exercises use it; they don't contain their own visual machinery. It should make 
 
 ## 3. Architecture
 
+### 3.0 Where each subsystem stands (2026-11-10)
+| # | Subsystem | Status | Built | Outstanding (milestone, §14) |
+|---|---|---|---|---|
+| S1 | Styling | Partial | Tokens: neutral and five area ramps; roles for light, dark and forced colours; emphasis; line weights; dashes; `line`, `tonal`, `solid`; motion tokens; label sizes | `lit`, `translucent`, gradients, patterns and textures, depth planes, typography in figures; R1 of the sheet (M3) |
+| S2 | Generation | Outstanding | Nothing (built for v0.1, retired 2026-11-08) | Seeded, deterministic generators: curves, organic forms, ridges, fields, distributions, layouts (M2) |
+| S3 | Composition | Partial | Scene Specification v0, validator, `mcii.path`; **compositions built from data** (`composition/compose.ts`, M1): the cause map, the rounds, the dot game and its preview are scenes, validated like `mcii.path` | Generator references, groups (M2); value transitions between data states (M5) |
+| S4 | State | Partial | Visibility and emphasis per state | Parameter targets (M1, M5) |
+| S5 | Motion | Partial | Entrances, emphasis changes, reduced motion, budget, SVG playback | Value transitions, departures, layout transitions, canvas playback (M5, M6) |
+| S6 | Interaction | Outstanding | Nothing: native controls take input | Scales, regions, bindings, accessible drag (M4) |
+| S7 | Rendering | Partial | SVG backend (frames, timelines); canvas backend (frames); SVG conformance suite | Canvas timelines, cross-backend conformance, frame clock, timing log (M6); GPU stays a trigger |
+| S8 | Assets | Outstanding | Nothing | Manifest, provenance, pipeline, offline export, optional AI adapter (M7) |
+| S9 | Integration | Partial | Illustration tier (scene sources, the slot, provenance); instrument tier: one registry and one figure (`integration/instruments.ts`) drawn through the scene figure, `InstrumentSlot` for on-demand loading (M1) | Stimulus tier (M6) |
+| S10 | Tooling | Partial | Visual Lab (scenes, transitions, instruments), screenshot baselines, purpose tables | Capability catalog, performance overlay, export script (M6–M8) |
+| S11 | Governance | Built | Policy, visual language, review log, dependency rules, capability log | The authoring guide for new exercises (M8) |
+
 ### 3.1 Six core capabilities, five supporting subsystems
 The six core capabilities are independent: each has its own input and output types, its own folder and its own tests, and **none of them knows how another does its work.** Revision 3 combined state and motion in one subsystem (S4); they are now separate (S4, S5), and the later numbers move up by one.
 
@@ -139,8 +156,8 @@ Each boundary carries an example of the independence it buys:
 2. **S1 Styling** is data plus a resolver. It imports only its own types.
 3. **S3 Composition** imports type definitions only: S1's style-reference vocabulary and S2's generator ids. Its validator also reads S1's vocabulary lists and S2's parameter checks (revision 2), and nothing else.
 4. **S4 State** imports S3 types. **S5 Motion** imports S3 and S4 (the scene's entrances and the state targets) and S1 motion tokens.
-5. **S7 Rendering** imports the resolved-frame and timeline types, and **nothing imports a backend except S9 Integration.** Instruments may import the resolved-frame *types* (`rendering/frame`), because they build frames (revision 3, v0.2).
-5b. **Instruments** (`instruments/`) are pure: they import composition types, S1 and the resolved-frame types, and nothing else (no Angular, no backend). Their components live in S9.
+5. **S7 Rendering** imports the resolved-frame and timeline types, and **nothing imports a backend except S9 Integration.**
+5b. **Instruments** (`instruments/`) are compositions built from data (M1, 2026-11-10): pure functions that import S3 composition and S1 styling only (no Angular, no rendering types). They go through the same pipeline as scenes; one figure in S9 (`integration/instruments.ts`) draws them all.
 6. **Exercises import only S9:** a visual source, the slot, an instrument component. They never import a backend, a generator or a rendering library.
 7. **`*-logic.ts` and `*-store.ts` import nothing from the Visual System.**
 8. **Heavy libraries load lazily,** through dynamic `import()` or `@defer` inside the backend that uses them.
@@ -263,8 +280,12 @@ Every capability is built **from a composition, not ahead of one**:
 4. **Add generators** only where generation earns its place: seeded variation, reuse across scenes, or geometry that is easier to compute than to draw. A hand-placed shape stays a `shape` element.
 5. **Add states and motion** only once the static states are approved.
 
-### 5.2 The pull rule and the capability log
-- **The pull rule:** a field, element kind, generator, material or motion effect enters the system only when a composition under review needs it.
+### 5.2 Building capabilities, and the capability log
+- **Revised 2026-11-10: two rules, kept apart.**
+  - **Capabilities are infrastructure, built ahead of need.** The system is completed through milestones M1–M8 (§14). Each capability is built and tested in the Visual System and shown in the Visual Lab by reference compositions, in light, dark and forced colours, for review. A reference composition exists to show and test a capability; participants never see it.
+  - **What an exercise shows is purpose-gated** (`visual-policy.md` principle 6): an exercise uses a capability only where every element it adds serves a named purpose.
+  - Why: the pull rule below kept the infrastructure only as large as the exercises' immediate needs, and retired the generation layer. Your direction is a shared visual generation and interaction system for the whole application (2026-11-10).
+- **The pull rule (2026-11-08 to 2026-11-10, superseded):** a field, element kind, generator, material or motion effect entered the system only when a composition under review needed it.
 - **The capability log:** every addition gets one row in a log in `docs/visual-system.md` (§15), naming the composition that pulled it. A capability no composition has pulled doesn't exist in code, even if an interface for it is described here.
 - **The rule of two** still applies to *utilities*. A helper written for one composition becomes shared when a second composition needs it. Because it's written against the shared interfaces from the start, sharing it is a move, not a rewrite.
 
@@ -502,11 +523,22 @@ docs/visual-system.md · visual-policy.md · visual-language.md · visual-review
 | **Phase 2 (this)** | These three documents; the S1 review sheet | — | R1 of the S1 proposal |
 | **v0.1** | §5.3 scope | MCII 4a–4d (revision 3: the area studies were removed) | R1 on the S1 sheet; R2 each MCII state next to the original, then the transitions (done); R3 MCII and the psychology-trained reviewer, in the test environment, before your merge |
 | **v0.2** (revised 2026-11-08 by the pull rule, decision C5) | The instrument tier: frames built from an exercise's data, an instrument component and its on-demand slot, instruments in the Lab; bold text items. Not S6, S4 parameter targets or value transitions: CS2 doesn't need them | CS2 (`cs2.cause-map@1`) | R2 in the Lab; R3 and the psychology-trained reviewer in the test environment; CS2 usability |
-| **v0.3** (revised 2026-11-09 by the pull rule, decision A2) | **Unassigned until a composition pulls it.** It was planned as the layout generators and layout transitions for CS1 and CS3, but the audit found no figure in either (`cs1-cs3-visual-audit.md`). Layout generators and layout transitions stay designed, not built | The first composition that needs them | R2, R3 |
-| **v0.4** | Canvas backend; stimulus lane; frame clock; timing log; watchdog | The first approved Attention task | R2; a timing validation report |
-| **v0.5** | GPU backend (trigger) | Its first scene | R2; conformance |
-| **v0.6** | Asset manifest, pipeline, offline export | The first conventional asset or exported fallback | R1 for each asset |
-| **v0.7** | AI assets, stage A (trigger) | Its first scene | R1 and R2, with provenance |
+| **v0.3–v0.7** (superseded 2026-11-10) | Replaced by milestones M1–M8 below, with nothing dropped: v0.3's layout generators go into M2, v0.4's canvas backend and stimulus lane into M6, v0.5's GPU trigger into M6, v0.6's assets and export and v0.7's AI stage A into M7 | — | — |
+
+**Milestones to completion (2026-11-10).** Each delivers a capability, tested in the Visual System, with Lab reference compositions for review; exercise integrations follow only where they serve a purpose. From M2 on, each starts with a short scope note before code.
+
+| # | Milestone | Delivers | Why in this order |
+|---|---|---|---|
+| **M1** | One composition pipeline | Data-driven compositions in S3: built from data, then through S4 state, S5 motion and S1 styling like a scene. The instruments move onto it; one figure component and one slot for scenes and instruments | Every later capability plugs in once, not twice |
+| **M2** | Generation (S2) | Seeded, deterministic, pure generators (curves and paths, organic forms, ridges, noise fields, point distributions, layouts: grid, radial, flow, packing), generator references in the scene spec, validator rules; stable across runs and safe for a Web Worker | The core of non-AI visual generation |
+| **M3** | Styling depth (S1) | `lit` and `translucent` materials, gradients, patterns and textures from generators, depth planes, typography in figures; R1 of the full sheet | Sophistication from materials and light on generated forms |
+| **M4** | Interaction (S6) | Scales, regions, pointer, keyboard and single-pointer bindings, accessible drag, input mapped to domain values; native controls stay the main path | A generation **and interaction** system |
+| **M5** | Motion completion (S5) | Value and parameter transitions, departures, layout transitions, motion for interactive figures, one timing core for both backends | Data-driven and interactive figures need motion that follows values |
+| **M6** | Rendering parity and the stimulus lane (S7, S9) | Canvas timelines, the conformance suite on SVG and canvas, frame clock, timing log, watchdog, performance overlay; GPU stays a trigger | Measurement tasks need validated timing |
+| **M7** | Assets and export (S8) | Manifest and provenance, offline export of any composition (PNG, SVG), the optional AI adapter behind the same asset interface, off by default | AI stays optional: an adapter, never a dependency |
+| **M8** | Catalog and authoring guide (S10, S11) | The Lab as a catalog of every capability; "Giving a new exercise its visuals"; a generic baseline harness | The system becomes the default foundation for future exercises |
+
+**Done:** M1–M8 built, tested and reviewed in the Lab, the authoring guide in place, and every exercise figure drawn through the one pipeline.
 
 **Technology triggers (each its own approval, with a licence note and a lazy entry point):**
 
@@ -551,6 +583,7 @@ One row per capability added to code, naming the composition that pulled it.
 | 2026-11-10 | Second instrument, `state-reset.rounds@1`: one mark per round above the dot game (done filled, current in the Action colour and heavier, coming thin), still during a round; its policy spec. One `InstrumentSlot` (S9) now loads any instrument on demand and replaces the cause map's own slot | S3, S9 | `state-reset.rounds@1` | Pending your look |
 | 2026-11-10 | The dot game on the Visual System: instrument `state-reset.tracking@1` (ring, dot and marker, and the labelled preview from the same parts; its policy spec), the **canvas backend** (S7: paints a resolved frame each animation frame, reading S1 token colours inside its own token scope, so light, dark and high contrast follow the page), and the game's surface and preview in S9. The game keeps its timing, scoring and input. Pulled ahead of v0.4: no stimulus lane, frame clock or timing log yet, which a measurement task still needs | S7, S9 | `state-reset.tracking@1` | Pending your look |
 | 2026-11-10 | The Lab shows `state-reset.rounds` (first, middle and last round) and `state-reset.tracking` (the game as still canvas frames, outside and inside the ring, and the preview), light and dark, with their purpose tables; a browser test checks that the canvas stills paint | S10 | `state-reset.rounds@1`, `state-reset.tracking@1` | For your R2 |
+| 2026-11-10 | **M1, one composition pipeline:** compositions built from data (`composeScene`: one state, an explicit size, words by key); S1 `width` for a line that must read while moving; bold labels in scenes; `buildComposedFrame`. The cause map, the rounds and the dot game (game and preview) are compositions now, each validated by `validateScene` in its policy spec; one instrument registry and figure (`integration/instruments.ts`) replaces the per-instrument components; rule 5b tightened (instruments import composition and S1 only). Drawn output unchanged: the 15 CS2 baselines pass pixel for pixel | S1, S3, S9 | M1 | For your look |
 | 2026-11-08 | The Lab's instrument section: five answer sets (start, placing, spread, heavy, six in one place) in light and dark, with the purpose table | S10 | `cs2.cause-map@1` | — |
 | 2026-11-08 | The Lab's "Transitions" section: each declared change, replayable, in full or reduced motion, with what moves and why; browser tests that each change ends on the approved state and that nothing moves under reduced motion | S10 | `mcii.path@4` | — |
 
