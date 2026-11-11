@@ -13,7 +13,7 @@ import type { StyleRef, ThemeId } from '../../styling/vocabulary';
  * in high contrast it takes the system highlight, like every focal element. Policy assertions:
  * `tracking.policy.spec.ts`.
  */
-export const TRACKING = { id: 'state-reset.tracking', version: 1, theme: 'action' as ThemeId } as const;
+export const TRACKING = { id: 'state-reset.tracking', version: 2, theme: 'action' as ThemeId } as const;
 
 /** The ring's widths in game px: the game's own, heavier than S1's figure lines, so it reads while moving. */
 export const RING_WIDTH = { inside: 5, outside: 2 } as const;
@@ -112,13 +112,16 @@ export function composeTrackingPreview({ ringRadius, labels }: PreviewInput): Co
   const parts = PURPOSE('box, leader-*, label-*, pointer');
   const hair: StyleRef = { role: 'context', line: 'hair' };
   const pointer = 'M160 116 l0 22 l6 -6 l5 11 l4 -2 l-5 -11 l8 0 z';
-  const label = (id: string, key: string, x: number, y: number): SceneElement => ({
+  // A label wraps within the frame, 8 units clear of its edge (visual-language.md §9), whatever its words.
+  const label = (id: string, key: string, x: number, y: number, names: readonly string[]): SceneElement => ({
     kind: 'label',
     id,
     text: key,
     at: [x, y] as ScenePoint,
     align: 'start',
+    width: 480 - 8 - 8 - x,
     purpose: parts,
+    names,
   });
   const leader = (id: string, x1: number, y1: number, x2: number, y2: number): SceneElement => ({
     kind: 'shape',
@@ -154,11 +157,11 @@ export function composeTrackingPreview({ ringRadius, labels }: PreviewInput): Co
           plane: 'annotation',
           elements: [
             leader('leader-dot', at.x, at.y - DOT_RADIUS, at.x, 40),
-            label('label-dot', 'label.dot', 158, 36),
+            label('label-dot', 'label.dot', 158, 36, ['leader-dot', 'dot']),
             leader('leader-ring', at.x + ringRadius, 104, 250, 88),
-            label('label-ring', 'label.ring', 256, 92),
+            label('label-ring', 'label.ring', 256, 92, ['leader-ring', 'ring']),
             leader('leader-pointer', 176, 146, 250, 160),
-            label('label-pointer', 'label.pointer', 256, 164),
+            label('label-pointer', 'label.pointer', 256, 164, ['leader-pointer', 'pointer']),
           ],
         },
       ],

@@ -89,7 +89,8 @@ describe('StateReset', () => {
     expect(root(fixture).querySelector('figure[role="img"]')?.getAttribute('aria-label')).toBe(
       STATE_RESET.how_it_works.illustration_alt,
     );
-    expect(text).toContain(STATE_RESET.how_it_works.labels.ring);
+    // The figure wraps a long label into lines (its own text elements), so compare without the breaks.
+    expect(text.replace(/\s+/g, '')).toContain(STATE_RESET.how_it_works.labels.ring.replace(/\s+/g, ''));
     expect(root(fixture).querySelector('canvas')).toBeNull(); // nothing moves until practice starts
     click(fixture, STATE_RESET.how_it_works.start_practice);
     await fixture.whenStable();

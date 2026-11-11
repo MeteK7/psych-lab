@@ -15,7 +15,8 @@ const TRACKING_SETS = 3; // state-reset.tracking: outside, inside, the preview
 const GENERATOR_SETS = 21; // S2: the reference compositions, 2 or 3 per generator
 const LAYOUT_SETS = 4; // S2: grid, radial, flow, packing
 const MATERIAL_SETS = 5; // S1 (M3): the material set, a grounded lit form, depth, depth with grain, a translucent overlap
-const PANELS = (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS + GENERATOR_SETS + LAYOUT_SETS + MATERIAL_SETS) * 2; // light and dark
+const SHEET_SETS = 12; // the review sheet (M3 stage C): lines, type, and materials and depth in each of the five areas
+const PANELS = (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS + GENERATOR_SETS + LAYOUT_SETS + MATERIAL_SETS + SHEET_SETS) * 2; // light and dark
 
 for (const [name, media] of [
   ['light', { colorScheme: 'light' }],
@@ -133,4 +134,37 @@ test('Visual Lab: nothing moves under reduced motion', async ({ page }) => {
     expect(await figureAnimations(page), `${from} → ${to}`).toBe(0);
     expect(await drawing(page, `figure[data-transition="${from}-${to}-light"]`)).toBe(await drawing(page, `figure[data-baseline="mcii.path-${to}-light"]`));
   }
+});
+
+// The visual-language review sheet (M3 stage C): every colour shows the value it takes, wrapped
+// labels fit their width in the real face (the widths S1 measures with are a little generous), and
+// the spacing check lists only the known cases.
+test('Visual Lab: the review sheet', async ({ page }) => {
+  await page.goto('/lab');
+  for (const scheme of ['light', 'dark']) {
+    const values = page.locator(`[data-sheet="roles-${scheme}"] .value`);
+    await expect(values).toHaveCount(21 * 5);
+    // Read from the surface once it has rendered: every colour names its value.
+    await expect.poll(async () => (await values.allInnerTexts()).filter((v) => !v.trim()).length, { message: scheme }).toBe(0);
+    // The ramps: six ranges of eleven steps, the area ranges' 500 not used.
+    await expect(page.locator(`[data-sheet="ramps-${scheme}"] .chip`)).toHaveCount(66);
+    await expect(page.locator(`[data-sheet="ramps-${scheme}"] .chip.unused`)).toHaveCount(5);
+  }
+  // A far plane takes a lighter step in light and a darker one in dark.
+  await expect(page.locator('[data-sheet="roles-light"] [data-token="far"] .value').first()).toHaveText('a-050');
+  await expect(page.locator('[data-sheet="roles-dark"] [data-token="far"] .value').first()).toHaveText('a-950');
+
+  const wrapped = page.locator('figure[data-sheet="type-light"] text[data-vis-id="wrapped"] tspan');
+  await expect(wrapped).toHaveCount(3);
+  for (const width of await wrapped.evaluateAll((spans) => spans.map((s) => (s as SVGTextContentElement).getComputedTextLength())))
+    expect(width).toBeLessThanOrEqual(200);
+  const halo = page.locator('figure[data-sheet="type-light"] text[data-vis-id="halo"]');
+  await expect(halo).toHaveCSS('stroke-width', '4px');
+  await expect(halo).toHaveCSS('paint-order', 'stroke');
+
+  // Only the type figure's example: every figure in use keeps its labels clear.
+  await expect(page.locator('ul[aria-label^="Spacing warnings"]')).toHaveCount(1);
+  await expect(page.getByRole('list', { name: 'Spacing warnings: type' })).toContainText("'no-halo'");
+  // The preview's long label wraps within the frame.
+  await expect(page.locator('figure[data-instrument="state-reset.tracking-preview-light"] text[data-vis-id="label-ring"] tspan')).toHaveCount(2);
 });
