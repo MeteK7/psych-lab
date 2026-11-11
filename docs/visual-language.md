@@ -192,9 +192,10 @@ Figures set `forced-color-adjust: none` and map every role to a system colour ex
 | `line` | A stroke only; the ground shows through | NOW |
 | `tonal` | A flat fill from the role, optionally with a stroke | NOW |
 | `solid` | A small mark filled in the role's line colour, with no stroke (dots, the centre of a marker) | NOW (pulled by `mcii.path@2`) |
-| `lit` | A gradient along the platform light (§6): base step −1 on the lit side, base step +1 on the shaded side | DESIGNED (added when a study pulls it) |
-| `translucent` | Area 400 at 35% opacity (light), area 600 at 40% (dark). An overlap is drawn as its own shape with a defined tone, never left to blending, so it stays predictable in forced colours | DESIGNED |
-| Ground texture | A pre-generated grain tile, at most 6% opacity, on the ground and large planes only | DESIGNED; leaving it out of v0.1 is recommended |
+| `lit` | A gradient along the platform light (§6): base step −1 on the lit side, base step +1 on the shaded side. The subject's only | Built (M3, 2026-11-11) |
+| `translucent` | Area 400 at 35% opacity (light), area 600 at 40% (dark). An overlap is drawn as its own shape with a defined tone (`overlap`: area 400 at 58%, 600 at 64%), never left to blending, so it stays predictable in forced colours | Built (M3, 2026-11-11) |
+| `shadow` | The contact shadow of §6, as a material on an ellipse under its object: the tone held across the middle, fading to nothing at the edge | Built (M3, 2026-11-11) |
+| Ground texture | A pre-generated grain tile, at most 6% opacity, on the ground and large planes only | Built (M3, 2026-11-11): fine seeded dots at 5%, off unless a figure asks for it (`grain`) |
 
 ## 6. Light
 | Token | Value | Notes |
