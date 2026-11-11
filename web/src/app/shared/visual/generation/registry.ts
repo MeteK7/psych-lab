@@ -1,4 +1,5 @@
-import { arc } from './curves';
+import { arc, lens } from './curves';
+import { dotsPath, jitteredGrid, poissonDisc } from './distributions';
 import { contours, flowLines } from './fields';
 import { blob, ridge, rhythm } from './forms';
 
@@ -27,6 +28,8 @@ export interface GeneratorDef {
   seeded: boolean;
   params: Readonly<Record<string, ParamSpec>>;
   run(params: Readonly<Record<string, number>>, seed: string): string;
+  /** A plane's top silhouette, for drawing only its top edge (M3): the same line its fill is closed from. */
+  edge?(params: Readonly<Record<string, number>>, seed: string): string;
 }
 
 const X = { min: -2000, max: 4000, about: 'A position in scene units' };
@@ -74,6 +77,7 @@ export const GENERATORS = {
       octaves: { min: 1, max: 3, default: 2, integer: true, about: 'Layers of detail; at most 3' },
     },
     run: (p, seed) => ridge({ ...(p as Omit<Parameters<typeof ridge>[0], 'band'>), band: true }, seed),
+    edge: (p, seed) => ridge({ ...(p as Omit<Parameters<typeof ridge>[0], 'band'>), band: false }, seed),
   },
   'curve.rhythm': {
     about: 'A regular, calm wave that can settle to a line: a rhythm, a breath',
@@ -137,6 +141,53 @@ export const GENERATORS = {
     },
     run: (p, seed) => contours(p as unknown as Parameters<typeof contours>[0], seed),
   },
+  'dots.scatter': {
+    about: 'Evenly spread dots, never closer than a spacing and without regular rows: a quiet texture, a crowd',
+    closed: true,
+    seeded: true,
+    params: {
+      x: X,
+      y: X,
+      width: SIZE,
+      height: SIZE,
+      spacing: { min: 4, max: 400, default: 16, about: 'The closest two dots come, in scene units' },
+      radius: { min: 0.5, max: 40, default: 2, about: 'Each dot’s radius, in scene units' },
+      max: { min: 1, max: 2000, default: 400, integer: true, about: 'The most dots' },
+      round: { min: 0, max: 1, default: 0, integer: true, about: '1 keeps the dots inside the ellipse that fits the area' },
+    },
+    run: (p, seed) =>
+      dotsPath(poissonDisc({ x: p['x'], y: p['y'], width: p['width'], height: p['height'], spacing: p['spacing'], max: p['max'], round: p['round'] === 1 }, seed), p['radius']),
+  },
+  'dots.grid': {
+    about: 'Dots on a grid, each moved a little at random within its cell: order with a human touch',
+    closed: true,
+    seeded: true,
+    params: {
+      x: X,
+      y: X,
+      width: SIZE,
+      height: SIZE,
+      spacing: { min: 4, max: 400, default: 20, about: 'The size of a grid cell, in scene units' },
+      jitter: { min: 0, max: 0.5, default: 0.2, about: 'How far a dot can move within its cell, as a share of the cell; 0 is a strict grid' },
+      radius: { min: 0.5, max: 40, default: 2, about: 'Each dot’s radius, in scene units' },
+    },
+    run: (p, seed) =>
+      dotsPath(jitteredGrid({ x: p['x'], y: p['y'], width: p['width'], height: p['height'], spacing: p['spacing'], jitter: p['jitter'] }, seed), p['radius']),
+  },
+  'curve.lens': {
+    about: 'Where two circles overlap: the shared part of two translucent forms, drawn as its own shape',
+    closed: true,
+    seeded: false,
+    params: {
+      x1: X,
+      y1: X,
+      r1: SIZE,
+      x2: X,
+      y2: X,
+      r2: SIZE,
+    },
+    run: ({ x1, y1, r1, x2, y2, r2 }) => lens([x1, y1], r1, [x2, y2], r2),
+  },
 } as const satisfies Record<string, GeneratorDef>;
 
 export type GeneratorId = keyof typeof GENERATORS;
@@ -161,10 +212,20 @@ export function generatorProblems(id: string, params: Readonly<Record<string, nu
   return problems;
 }
 
+function withDefaults(def: GeneratorDef, params: Readonly<Record<string, number>>): Record<string, number> {
+  const full: Record<string, number> = {};
+  for (const [name, spec] of Object.entries(def.params)) full[name] = params[name] ?? spec.default ?? 0;
+  return full;
+}
+
 /** Runs a generator with its defaults filled in. */
 export function generate(id: GeneratorId, params: Readonly<Record<string, number>>, seed: string): string {
   const def: GeneratorDef = GENERATORS[id];
-  const full: Record<string, number> = {};
-  for (const [name, spec] of Object.entries(def.params)) full[name] = params[name] ?? spec.default ?? 0;
-  return def.run(full, seed);
+  return def.run(withDefaults(def, params), seed);
+}
+
+/** A generated plane's top silhouette, or null when the generator doesn't make planes. */
+export function generateEdge(id: GeneratorId, params: Readonly<Record<string, number>>, seed: string): string | null {
+  const def: GeneratorDef = GENERATORS[id];
+  return def.edge ? def.edge(withDefaults(def, params), seed) : null;
 }

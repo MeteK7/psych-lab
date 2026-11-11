@@ -81,3 +81,87 @@ export function arc(cx: number, cy: number, r: number, from: number, to: number)
   const clockwise = sweep >= 0 ? 1 : 0;
   return `M${fmt(start[0])} ${fmt(start[1])}A${fmt(r)} ${fmt(r)} 0 ${large} ${clockwise} ${fmt(end[0])} ${fmt(end[1])}`;
 }
+
+/**
+ * The lens where two circles overlap, as a closed path: the arc of each circle that lies inside the
+ * other. Empty when they don't overlap; the smaller circle when one holds the other. Used for the
+ * `overlap` material: the shared part of two translucent forms, drawn as its own shape.
+ */
+export function lens(c1: Pt, r1: number, c2: Pt, r2: number): string {
+  const d = Math.hypot(c2[0] - c1[0], c2[1] - c1[1]);
+  if (d >= r1 + r2) return '';
+  if (d <= Math.abs(r1 - r2)) {
+    const [c, r] = r1 <= r2 ? [c1, r1] : [c2, r2];
+    return `M${fmt(c[0] - r)} ${fmt(c[1])}A${fmt(r)} ${fmt(r)} 0 1 0 ${fmt(c[0] + r)} ${fmt(c[1])}A${fmt(r)} ${fmt(r)} 0 1 0 ${fmt(c[0] - r)} ${fmt(c[1])}Z`;
+  }
+  const u: Pt = [(c2[0] - c1[0]) / d, (c2[1] - c1[1]) / d];
+  const n: Pt = [-u[1], u[0]];
+  const a = (r1 * r1 - r2 * r2 + d * d) / (2 * d);
+  const h = Math.sqrt(Math.max(0, r1 * r1 - a * a));
+  const m: Pt = [c1[0] + a * u[0], c1[1] + a * u[1]];
+  const p: Pt = [m[0] + h * n[0], m[1] + h * n[1]];
+  const q: Pt = [m[0] - h * n[0], m[1] - h * n[1]];
+  // Each arc bulges towards the other circle's centre; it is the long way round when that centre is
+  // on the far side of the chord.
+  const large1 = a < 0 ? 1 : 0;
+  const large2 = d - a < 0 ? 1 : 0;
+  return `M${fmt(p[0])} ${fmt(p[1])}A${fmt(r1)} ${fmt(r1)} 0 ${large1} 0 ${fmt(q[0])} ${fmt(q[1])}A${fmt(r2)} ${fmt(r2)} 0 ${large2} 0 ${fmt(p[0])} ${fmt(p[1])}Z`;
+}
+
+/**
+ * The bounding box of absolute path data as the generators and the backends write it (M, L, H, V,
+ * C, A, Z). Curves count their control points, which hold the curve; an arc counts its end point
+ * and, conservatively, its radius around it. So the box may be a little larger than the form,
+ * never smaller.
+ */
+export function pathBounds(d: string): { x: number; y: number; width: number; height: number } | null {
+  const tokens = d.match(/[MLHVCAZ]|-?\d*\.?\d+(?:e-?\d+)?/gi) ?? [];
+  const xs: number[] = [];
+  const ys: number[] = [];
+  let i = 0;
+  let command = '';
+  let at: Pt = [0, 0];
+  const num = () => Number(tokens[i++]);
+  while (i < tokens.length) {
+    if (/^[a-z]$/i.test(tokens[i])) command = tokens[i++].toUpperCase();
+    switch (command) {
+      case 'M':
+      case 'L':
+        at = [num(), num()];
+        xs.push(at[0]);
+        ys.push(at[1]);
+        break;
+      case 'H':
+        at = [num(), at[1]];
+        xs.push(at[0]);
+        break;
+      case 'V':
+        at = [at[0], num()];
+        ys.push(at[1]);
+        break;
+      case 'C':
+        for (let k = 0; k < 3; k++) {
+          const p: Pt = [num(), num()];
+          xs.push(p[0]);
+          ys.push(p[1]);
+          at = p;
+        }
+        break;
+      case 'A': {
+        const [rx, ry] = [num(), num()];
+        i += 3; // rotation, large-arc and sweep flags
+        at = [num(), num()];
+        xs.push(at[0] - rx, at[0] + rx);
+        ys.push(at[1] - ry, at[1] + ry);
+        break;
+      }
+      case 'Z':
+        break;
+      default:
+        i++;
+    }
+  }
+  if (!xs.length || !ys.length) return null;
+  const [x, y] = [Math.min(...xs), Math.min(...ys)];
+  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+}

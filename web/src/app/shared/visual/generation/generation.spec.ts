@@ -235,6 +235,9 @@ describe('S2 Generation', () => {
         'curve.arc': { cx: 50, cy: 50, r: 30, from: -90, to: 90 },
         'field.flow': { x: 0, y: 0, width: 300, height: 150 },
         'field.contours': { x: 0, y: 0, width: 300, height: 150 },
+        'dots.scatter': { x: 0, y: 0, width: 300, height: 150 },
+        'dots.grid': { x: 0, y: 0, width: 300, height: 150 },
+        'curve.lens': { x1: 100, y1: 80, r1: 50, x2: 150, y2: 80, r2: 40 },
       };
       for (const id of Object.keys(GENERATORS) as GeneratorId[]) {
         expect(GENERATORS[id].about.length).toBeGreaterThan(10);

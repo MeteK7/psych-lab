@@ -75,8 +75,8 @@ describe('Visual System dependency rules', () => {
     expect(outside(inFolder('motion'), ['motion', 'state', 'composition', 'styling'])).toEqual([]);
   });
 
-  it('4c. instruments are compositions built from data: they import only composition and styling (no Angular, no rendering)', () => {
-    expect(outside(inFolder('instruments'), ['instruments', 'composition', 'styling'])).toEqual([]);
+  it('4c. instruments are compositions built from data: they import only composition, styling and generation (no Angular, no rendering)', () => {
+    expect(outside(inFolder('instruments'), ['instruments', 'composition', 'styling', 'generation'])).toEqual([]);
   });
 
   it('5. rendering imports only itself and Angular, and only integration imports a backend', () => {
