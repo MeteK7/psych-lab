@@ -12,6 +12,7 @@ import { QualityTier, SceneFigure, SurfaceScheme } from '../../shared/visual/int
 import { Mover, motionProblems, movers } from '../../shared/visual/motion/plan-motion';
 import { SCENES } from '../../shared/visual/scenes';
 import { EMPHASIS_CHANGE, MOTION, MOTION_EFFECTS, THEMES } from '../../shared/visual/styling/vocabulary';
+import { LabGenerators } from './lab-generators';
 import { LabTrackingStill } from './lab-tracking-still';
 
 /**
@@ -22,7 +23,7 @@ import { LabTrackingStill } from './lab-tracking-still';
  */
 @Component({
   selector: 'app-lab-page',
-  imports: [SceneFigure, InstrumentFigure, LabTrackingStill],
+  imports: [SceneFigure, InstrumentFigure, LabGenerators, LabTrackingStill],
   template: `
     <h1>Visual Lab</h1>
     @if (env.showsDevelopment()) {
@@ -214,39 +215,13 @@ import { LabTrackingStill } from './lab-tracking-still';
           </tbody>
         </table>
       </section>
+
+      <app-lab-generators [schemes]="schemes" />
     } @else {
       <p>The Visual Lab is available in the development build only.</p>
     }
   `,
-  styles: `
-    .lead { font-size: 1.1rem; }
-    .notes { padding-left: 1.25rem; font-size: 0.9rem; }
-    .scene { margin: 0 0 2rem; }
-    h2 { font-size: 1.25rem; }
-    h3 { font-size: 1rem; margin: 1.25rem 0 0.4rem; }
-    h4 { font-size: 0.95rem; margin: 0; }
-    .note { font-size: 0.9rem; margin: 0 0 0.5rem; }
-    .tier { display: inline-flex; gap: 0.5rem; align-items: center; font-size: 0.9rem; margin-bottom: 0.25rem; }
-    .transition { display: flex; gap: 1rem; align-items: baseline; margin: 1rem 0 0.4rem; }
-    .replay { font-size: 0.85rem; }
-    .moves { font-size: 0.9rem; margin: 0.4rem 0 0; }
-    .meta { font-weight: 400; color: var(--muted); font-size: 0.95rem; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-    .panel { border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 0.75rem 0.75rem;
-             background: var(--bg); color: var(--text); }
-    /* The page's own token values (styles.css), pinned per panel so both schemes show side by side. */
-    .light { --bg: #ffffff; --text: #1c1c1e; --muted: #55575d; --border: #d6d7db; --accent: #2457c5; }
-    .dark { --bg: #17181b; --text: #ececef; --muted: #a9abb2; --border: #3a3c42; --accent: #8fb0ff; }
-    .tag { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.25rem; }
-    /* Forced colours replace the pinned panel backgrounds, so the tags follow the system colours too. */
-    @media (forced-colors: active) { .tag { color: CanvasText; } }
-    figure { margin: 0; }
-    .alt { margin: 0.4rem 0 0; font-size: 0.9rem; }
-    table { font-size: 0.9rem; }
-    th[scope='row'] { font-weight: 400; white-space: nowrap; vertical-align: top; }
-    td { vertical-align: top; }
-    .problems { border-left: 3px solid var(--accent); padding-left: 1.5rem; }
-  `,
+  styleUrl: './lab.css',
 })
 export class LabPage {
   protected readonly env = inject(AppEnvironment);
