@@ -12,8 +12,10 @@ const TRANSITIONS = 3; // mcii.path: future → contrast, contrast → plan, con
 const CAUSE_SETS = 5; // cs2.cause-map: the answer sets in the Lab
 const ROUND_SETS = 3; // state-reset.rounds: first, middle, last
 const TRACKING_SETS = 3; // state-reset.tracking: outside, inside, the preview
-const GENERATOR_SETS = 15; // S2: the reference compositions, 2 or 3 per generator
-const PANELS = (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS + GENERATOR_SETS) * 2; // light and dark
+const GENERATOR_SETS = 21; // S2: the reference compositions, 2 or 3 per generator
+const LAYOUT_SETS = 4; // S2: grid, radial, flow, packing
+const MATERIAL_SETS = 5; // S1 (M3): the material set, a grounded lit form, depth, depth with grain, a translucent overlap
+const PANELS = (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS + GENERATOR_SETS + LAYOUT_SETS + MATERIAL_SETS) * 2; // light and dark
 
 for (const [name, media] of [
   ['light', { colorScheme: 'light' }],
