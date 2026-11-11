@@ -40,6 +40,7 @@ export interface Purpose {
 export type Geometry =
   | { type: 'path'; d: string }
   | { type: 'circle'; cx: number; cy: number; r: number }
+  | { type: 'ellipse'; cx: number; cy: number; rx: number; ry: number }
   | { type: 'rect'; x: number; y: number; width: number; height: number; rx?: number }
   | { type: 'line'; x1: number; y1: number; x2: number; y2: number };
 
@@ -53,13 +54,23 @@ export type Entrance =
   /** Moves as part of another element (its courses, its label), at the same moment. Default effect: the lead's (`fade` for a label led by `draw`). */
   | { with: ElementId; effect?: MotionEffect; why?: undefined };
 
+/**
+ * Ties between elements that some materials need (milestone M3), checked by the validator:
+ * - `grounds`: a `shadow` names the object it sits under (drawn after it)
+ * - `overlapOf`: an `overlap` names the two `translucent` forms whose overlap it is
+ */
+export interface Ties {
+  grounds?: ElementId;
+  overlapOf?: readonly [ElementId, ElementId];
+}
+
 export type SceneElement =
-  | { kind: 'shape'; id: ElementId; geometry: Geometry; style: StyleRef; purpose: Purpose; enter?: Entrance }
+  | ({ kind: 'shape'; id: ElementId; geometry: Geometry; style: StyleRef; purpose: Purpose; enter?: Entrance } & Ties)
   /**
    * Geometry made by an S2 generator (milestone M2) from its parameters and the element's own seed,
    * derived from the scene's seed and the element's id. Drawn, styled and animated like a shape.
    */
-  | {
+  | ({
       kind: 'generated';
       id: ElementId;
       generator: GeneratorId;
@@ -67,7 +78,7 @@ export type SceneElement =
       style: StyleRef;
       purpose: Purpose;
       enter?: Entrance;
-    }
+    } & Ties)
   | {
       kind: 'label';
       id: ElementId;

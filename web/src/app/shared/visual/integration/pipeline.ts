@@ -1,12 +1,14 @@
+import { boundsOf } from '../composition/bounds';
 import { Composed, SHOWN, lookupOf } from '../composition/compose';
 import { SceneDefinition, StateName, TextLookup } from '../composition/scene';
-import { generate } from '../generation/registry';
+import { dotsPath, poissonDisc } from '../generation/distributions';
+import { generate, generateEdge } from '../generation/registry';
 import { deriveSeed } from '../generation/random';
 import { QualityTier, planMotion } from '../motion/plan-motion';
-import { FrameItem, ResolvedFrame, ResolvedTimeline, ResolvedTrack } from '../rendering/frame';
+import { DrawPaint, Drawable, FrameItem, ResolvedFrame, ResolvedTimeline, ResolvedTrack } from '../rendering/frame';
 import { resolveState } from '../state/resolve-state';
 import { resolveLabel, resolveStyle } from '../styling/resolve';
-import { frameSize } from '../styling/vocabulary';
+import { GRAIN, frameSize } from '../styling/vocabulary';
 
 /**
  * The pipeline (docs/visual-system.md §3.2), assembled outside every capability: S3 gives the
@@ -17,6 +19,13 @@ import { frameSize } from '../styling/vocabulary';
  * its own seed, and kept, so a scene that changes state doesn't recompute it.
  */
 const generated = new Map<string, string>();
+
+/** A gradient carries its shape's bounding box, so a canvas backend needn't work it out. */
+function withBox(scene: SceneDefinition, element: SceneDefinition['layers'][number]['elements'][number], paint: ReturnType<typeof resolveStyle>) {
+  if (!paint.gradient) return paint;
+  const box = boundsOf(scene, element);
+  return box ? { ...paint, gradient: { ...paint.gradient, box } } : paint;
+}
 function generatedPath(scene: SceneDefinition, element: Extract<SceneDefinition['layers'][number]['elements'][number], { kind: 'generated' }>): string {
   const seed = deriveSeed(scene.seed ?? scene.id, element.id);
   const key = `${element.generator}|${seed}|${JSON.stringify(element.params)}`;
@@ -54,21 +63,55 @@ export function buildFrame(scene: SceneDefinition, state: StateName, text: TextL
           break;
         }
         case 'shape':
-          items.push({ ...base, kind: 'shape', shape: element.geometry, paint: resolveStyle(element.style, target.emphasis) });
-          break;
-        case 'generated':
+        case 'generated': {
+          const shape = element.kind === 'shape' ? element.geometry : ({ type: 'path', d: generatedPath(scene, element) } as const);
+          let paint: DrawPaint = withBox(scene, element, resolveStyle(element.style, target.emphasis));
+          if (element.style.grain) paint = { ...paint, grain: GRAIN.opacity };
+          const edge = element.style.edge === 'top' ? topEdge(scene, element) : null;
+          if (!edge) {
+            items.push({ ...base, kind: 'shape', shape, paint });
+            break;
+          }
+          // Top edge only (visual-language.md §7): the plane filled without an outline, then its silhouette.
+          items.push({ ...base, kind: 'shape', shape, paint: { ...paint, stroke: 'none', width: 0 } });
           items.push({
-            ...base,
+            id: `${element.id}-edge`,
+            layer: layer.id,
             kind: 'shape',
-            shape: { type: 'path', d: generatedPath(scene, element) },
-            paint: resolveStyle(element.style, target.emphasis),
+            shape: edge,
+            paint: { fill: 'none', stroke: paint.stroke, width: paint.width, dash: paint.dash },
           });
           break;
+        }
       }
     }
   }
   const { width, height } = frameSize(scene.frame);
-  return { width, height, theme: scene.theme, items };
+  const grained = items.some((i) => i.kind === 'shape' && i.paint.grain);
+  return { width, height, theme: scene.theme, items, ...(grained ? { grain: grainTile() } : {}) };
+}
+
+/** A plane's top silhouette: the top side of a rect, or the generator's edge line. */
+function topEdge(scene: SceneDefinition, element: SceneDefinition['layers'][number]['elements'][number]): Drawable | null {
+  if (element.kind === 'generated') {
+    const d = generateEdge(element.generator, element.params, deriveSeed(scene.seed ?? scene.id, element.id));
+    return d ? { type: 'path', d } : null;
+  }
+  if (element.kind === 'shape' && element.geometry.type === 'rect') {
+    const { x, y, width } = element.geometry;
+    return { type: 'line', x1: x, y1: y, x2: x + width, y2: y };
+  }
+  return null;
+}
+
+let grain: { tile: number; d: string } | null = null;
+/** The platform's one grain tile, made once from its fixed seed. */
+function grainTile(): { tile: number; d: string } {
+  grain ??= {
+    tile: GRAIN.tile,
+    d: dotsPath(poissonDisc({ x: 0, y: 0, width: GRAIN.tile, height: GRAIN.tile, spacing: GRAIN.spacing, max: 400 }, GRAIN.seed), GRAIN.radius),
+  };
+  return grain;
 }
 
 /**

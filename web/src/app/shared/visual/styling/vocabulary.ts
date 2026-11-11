@@ -28,11 +28,19 @@ export const DASHES = { intended: '7 7', tentative: '0.1 6' } as const;
 export type DashPattern = keyof typeof DASHES;
 
 /**
- * Materials built so far (§5): `line` (stroke only), `tonal` (the role's fill with its line) and
- * `solid` (filled in the role's line colour, no stroke: dots and small marks). `lit` and
- * `translucent` are added when a composition pulls them.
+ * Materials (§5), all matte:
+ * - `line`: stroke only. `tonal`: the role's fill with its line. `solid`: filled in the role's line
+ *   colour, no stroke (dots and small marks).
+ * - `lit` (M3): the subject's fill shaded along the platform light (§6), lit side one step lighter,
+ *   shaded side one step darker; with its line.
+ * - `translucent` (M3): the area colour, partly see-through, with its line. Where two overlap, the
+ *   overlap is its own shape in the `overlap` material, with a defined tone, never left to blending.
+ * - `shadow` (M3): a contact shadow, a soft radial fade on an ellipse under an object; no line.
  */
-export const MATERIALS = ['line', 'tonal', 'solid'] as const;
+export const MATERIALS = ['line', 'tonal', 'solid', 'lit', 'translucent', 'overlap', 'shadow'] as const;
+
+/** The one platform light (§6): from the upper left, the same in every scene, area and scheme. */
+export const LIGHT = { azimuth: 315, elevation: 45 } as const;
 export type MaterialId = (typeof MATERIALS)[number];
 
 /** Emphasis levels, set by S4 and resolved here (§3.7). */
@@ -74,7 +82,17 @@ export interface StyleRef {
    * must read while they move (the dot game's ring); figures use `line`. Emphasis doesn't change it.
    */
   width?: number;
+  /**
+   * `top`: a plane is filled without an outline and only its top silhouette is drawn, two steps darker
+   * than its fill (§7). For planes (`far`, `mid`, `near`) in the `tonal` material.
+   */
+  edge?: 'top';
+  /** A faint grain over the fill (§5): the ground and planes only, never the subject or text. Off unless asked for. */
+  grain?: boolean;
 }
+
+/** The grain texture (§5): a tile of fine seeded dots, at most 6% opacity. */
+export const GRAIN = { opacity: 0.05, tile: 64, spacing: 6, radius: 0.6, seed: 'platform-grain' } as const;
 
 /**
  * Pairs that fail contrast in at least one theme (§3.5), so they aren't allowed: lines in the

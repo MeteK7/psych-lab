@@ -49,6 +49,15 @@
   --vis-context: var(--vis-n-500); --vis-ink: var(--text);
   --vis-label: var(--text); --vis-label-soft: var(--muted);
   --vis-receded: var(--vis-n-600); --vis-receded-fill: var(--vis-n-100);
+  /* Materials (M3, §5–§6): lit and shaded steps of the subject's fill, the translucent area tone and
+     its defined overlap, and the contact shadow (neutral 900 at 10%, fading to nothing). */
+  --vis-subject-lit: var(--vis-a-050); --vis-subject-shade: var(--vis-a-200);
+  --vis-translucent: color-mix(in srgb, var(--vis-a-400) 35%, transparent);
+  --vis-overlap: color-mix(in srgb, var(--vis-a-400) 58%, transparent);
+  --vis-shadow: color-mix(in srgb, var(--vis-n-900) 10%, transparent);
+  --vis-shadow-edge: color-mix(in srgb, var(--vis-n-900) 0%, transparent);
+  /* Grain (§5): the page's text tone, drawn at most 6% opaque, so it darkens in light and lifts in dark. */
+  --vis-grain: var(--text);
 }
 
 /* Roles, dark: farther planes move towards the dark ground, as they move towards white in light. */
@@ -60,6 +69,11 @@
     --vis-subject-fill: var(--vis-a-800); --vis-subject: var(--vis-a-300);
     --vis-context: var(--vis-n-400);
     --vis-receded: var(--vis-n-300); --vis-receded-fill: var(--vis-n-800);
+    --vis-subject-lit: var(--vis-a-700); --vis-subject-shade: var(--vis-a-900);
+    --vis-translucent: color-mix(in srgb, var(--vis-a-600) 40%, transparent);
+    --vis-overlap: color-mix(in srgb, var(--vis-a-600) 64%, transparent);
+    --vis-shadow: color-mix(in srgb, black 35%, transparent);
+    --vis-shadow-edge: color-mix(in srgb, black 0%, transparent);
   }
 }
 :host([data-vis-scheme='dark']) {
@@ -69,6 +83,11 @@
   --vis-subject-fill: var(--vis-a-800); --vis-subject: var(--vis-a-300);
   --vis-context: var(--vis-n-400);
   --vis-receded: var(--vis-n-300); --vis-receded-fill: var(--vis-n-800);
+  --vis-subject-lit: var(--vis-a-700); --vis-subject-shade: var(--vis-a-900);
+  --vis-translucent: color-mix(in srgb, var(--vis-a-600) 40%, transparent);
+  --vis-overlap: color-mix(in srgb, var(--vis-a-600) 64%, transparent);
+  --vis-shadow: color-mix(in srgb, black 35%, transparent);
+  --vis-shadow-edge: color-mix(in srgb, black 0%, transparent);
 }
 
 /* Forced colours (§3.6): every role mapped to a system colour, so weight and dashes keep their meaning. */
@@ -81,5 +100,9 @@
     --vis-subject: CanvasText; --vis-context: CanvasText; --vis-ink: CanvasText;
     --vis-label: CanvasText; --vis-label-soft: CanvasText;
     --vis-receded: GrayText; --vis-focal: Highlight;
+    /* Materials flatten: no shading, no see-through; an overlap stays distinct; a shadow disappears. */
+    --vis-subject-lit: Canvas; --vis-subject-shade: Canvas;
+    --vis-translucent: Canvas; --vis-overlap: GrayText;
+    --vis-shadow: Canvas; --vis-shadow-edge: Canvas; --vis-grain: Canvas;
   }
 }

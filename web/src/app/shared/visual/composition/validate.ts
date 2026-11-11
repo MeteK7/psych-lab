@@ -11,6 +11,7 @@ import {
   THEMES,
 } from '../styling/vocabulary';
 import { GENERATORS, generatorProblems } from '../generation/registry';
+import { boundsOf, boxesOverlap } from './bounds';
 import { PURPOSE_KINDS, Purpose, SceneDefinition, SceneElement, TextLookup, elementsOf } from './scene';
 
 /** Any raw colour value: scenes use roles only (docs/visual-system.md §4.3). */
@@ -55,6 +56,77 @@ function entranceProblems(element: SceneElement, all: Map<string, SceneElement>)
   else if (lead.enter?.with !== undefined) problems.push(`${where}: enters with '${enter.with}', which itself enters with another element`);
   else if (!enter.effect && lead.enter?.effect === 'draw' && element.kind !== 'label' && (element.style.material ?? 'line') !== 'line')
     problems.push(`${where}: would draw with '${enter.with}', but only line shapes can draw; give it its own effect`);
+  return problems;
+}
+
+/** Whether an element is a closed form that can be filled. */
+function closed(element: SceneElement): boolean {
+  if (element.kind === 'label') return false;
+  if (element.kind === 'generated') return (GENERATORS as Record<string, { closed: boolean | 'band' }>)[element.generator]?.closed !== false;
+  const g = element.geometry;
+  return g.type !== 'line' && (g.type !== 'path' || /z\s*$/i.test(g.d));
+}
+
+/**
+ * The materials' rules (milestone M3; visual-language.md §5–§6, visual-policy.md §3.7–§3.8):
+ * - `lit` is the subject's, on a closed form
+ * - a `shadow` is an ellipse or circle that names the object it sits under, drawn after it
+ * - an `overlap` names the two `translucent` forms it belongs to, and is drawn after them
+ * - two `translucent` forms that overlap need an `overlap` between them, never an accidental blend
+ * - `grounds` and `overlapOf` belong to shadows and overlaps only
+ */
+function materialProblems(scene: SceneDefinition): string[] {
+  const problems: string[] = [];
+  const order = elementsOf(scene).map(({ element }) => element);
+  const index = new Map(order.map((e, i) => [e.id, i]));
+  const material = (e: SceneElement | undefined) => (e && e.kind !== 'label' ? (e.style.material ?? 'line') : null);
+  const overlaps = new Set<string>();
+  for (const e of order) {
+    if (e.kind === 'label') continue;
+    const where = `element '${e.id}'`;
+    const m = material(e);
+    if ((m === 'lit' || m === 'translucent' || m === 'overlap' || m === 'shadow') && !closed(e))
+      problems.push(`${where}: '${m}' fills a form; this is an open line`);
+    if (m === 'lit' && e.style.role !== 'subject') problems.push(`${where}: 'lit' is for the subject; a plane or context stays flat`);
+    if (m === 'shadow') {
+      if (e.kind !== 'shape' || (e.geometry.type !== 'ellipse' && e.geometry.type !== 'circle'))
+        problems.push(`${where}: a shadow is an ellipse under its object`);
+      const target = e.grounds ? order[index.get(e.grounds) ?? -1] : undefined;
+      if (!e.grounds) problems.push(`${where}: a shadow names the object it sits under ('grounds')`);
+      else if (!target || target.kind === 'label') problems.push(`${where}: grounds unknown element '${e.grounds}'`);
+      else if ((index.get(e.grounds) ?? 0) < (index.get(e.id) ?? 0)) problems.push(`${where}: a shadow is drawn before its object`);
+    } else if (e.grounds) problems.push(`${where}: only a shadow grounds an object`);
+    if (m === 'overlap') {
+      if (!e.overlapOf) problems.push(`${where}: an overlap names its two translucent forms ('overlapOf')`);
+      else {
+        const [a, b] = e.overlapOf;
+        overlaps.add([a, b].sort().join('|'));
+        for (const id of [a, b]) {
+          if (material(order[index.get(id) ?? -1]) !== 'translucent') problems.push(`${where}: '${id}' isn't a translucent form`);
+          else if ((index.get(id) ?? 0) > (index.get(e.id) ?? 0)) problems.push(`${where}: an overlap is drawn after its forms`);
+        }
+      }
+    } else if (e.overlapOf) problems.push(`${where}: only an overlap names forms it overlaps`);
+    const plane = ['far', 'mid', 'near'].includes(e.style.role);
+    if (e.style.edge === 'top') {
+      if (!plane || m !== 'tonal') problems.push(`${where}: only a tonal plane (far, mid, near) is drawn by its top edge`);
+      const hasEdge =
+        e.kind === 'generated'
+          ? !!(GENERATORS as Record<string, { edge?: unknown }>)[e.generator]?.edge
+          : e.geometry.type === 'rect';
+      if (!hasEdge) problems.push(`${where}: this form has no top edge to draw (a rect or a generated plane has)`);
+    }
+    if (e.style.grain && !(plane || e.style.role === 'ground'))
+      problems.push(`${where}: grain is for the ground and planes, never the subject`);
+    if (e.style.grain && m !== 'tonal') problems.push(`${where}: grain lies over a fill (tonal)`);
+  }
+  const translucent = order.filter((e) => material(e) === 'translucent');
+  for (let i = 0; i < translucent.length; i++)
+    for (let j = i + 1; j < translucent.length; j++) {
+      const [a, b] = [boundsOf(scene, translucent[i]), boundsOf(scene, translucent[j])];
+      if (a && b && boxesOverlap(a, b) && !overlaps.has([translucent[i].id, translucent[j].id].sort().join('|')))
+        problems.push(`'${translucent[i].id}' and '${translucent[j].id}' overlap: draw the overlap as its own shape ('overlap')`);
+    }
   return problems;
 }
 
@@ -135,6 +207,7 @@ export function validateScene(scene: SceneDefinition, text: TextLookup): string[
   for (const name of Object.keys(scene.alt))
     if (!Object.hasOwn(states, name)) problems.push(`text alternative for unknown state '${name}'`);
 
+  problems.push(...materialProblems(scene));
   if (strings(scene).some((s) => RAW_COLOUR.test(s))) problems.push('raw colour values found; use roles');
   return problems;
 }

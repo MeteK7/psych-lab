@@ -78,4 +78,54 @@ describe('canvas backend (S7)', () => {
     paintFrame(ctx, { ...frame, items: [frame.items[1]] }, colour);
     expect(calls.some((c) => c.startsWith('stroke'))).toBe(false);
   });
+
+  it('fills a lit gradient across the shape’s box, and a radial shadow stretched to its ellipse', () => {
+    const calls: string[] = [];
+    const gradient = (kind: string) => ({ addColorStop: (o: number, c: string) => calls.push(`${kind} stop ${o} ${c}`) });
+    const state: Record<string, unknown> = {};
+    const ctx = new Proxy(state, {
+      get(target, key: string) {
+        if (key in target) return target[key];
+        if (key === 'createLinearGradient') return (...a: number[]) => (calls.push(`linear ${a.join(',')}`), gradient('linear'));
+        if (key === 'createRadialGradient') return (...a: number[]) => (calls.push(`radial ${a.join(',')}`), gradient('radial'));
+        return (...a: unknown[]) => calls.push(`${key}(${a.filter((x) => typeof x !== 'object').join(',')})`);
+      },
+      set(target, key: string, value) {
+        target[key] = value;
+        return true;
+      },
+    }) as unknown as CanvasRenderingContext2D;
+    paintFrame(
+      ctx,
+      {
+        width: 200,
+        height: 200,
+        theme: 'action',
+        items: [
+          {
+            kind: 'shape',
+            id: 'shadow',
+            layer: 'x',
+            shape: { type: 'ellipse', cx: 100, cy: 150, rx: 40, ry: 5 },
+            paint: { fill: 'none', stroke: 'none', width: 0, dash: null, gradient: { type: 'radial', stops: [{ offset: 0, colour: 'var(--vis-shadow)' }, { offset: 1, colour: 'var(--vis-shadow-edge)' }] } },
+          },
+          {
+            kind: 'shape',
+            id: 'ball',
+            layer: 'x',
+            shape: { type: 'circle', cx: 100, cy: 100, r: 40 },
+            paint: { fill: 'var(--vis-subject-fill)', stroke: 'none', width: 0, dash: null, gradient: { type: 'linear', from: [0, 0], to: [1, 1], stops: [{ offset: 0, colour: 'var(--vis-subject-lit)' }, { offset: 1, colour: 'var(--vis-subject-shade)' }] } },
+          },
+        ],
+      },
+      colour,
+    );
+    expect(calls).toContain('radial 0,0,0,0,0,1');
+    expect(calls).toContain('translate(100,150)');
+    expect(calls).toContain('scale(40,5)');
+    expect(calls).toContain('radial stop 0 resolved(var(--vis-shadow))');
+    expect(calls).toContain('linear 60,60,140,140');
+    expect(calls).toContain('linear stop 1 resolved(var(--vis-subject-shade))');
+  });
 });
+

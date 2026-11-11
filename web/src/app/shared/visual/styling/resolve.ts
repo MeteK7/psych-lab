@@ -22,7 +22,18 @@ export interface Paint {
   /** Stroke width in CSS px. */
   width: number;
   dash: string | null;
+  /** A gradient fill (`lit`, `shadow`); `fill` stays the flat fallback. */
+  gradient?:
+    | { type: 'linear'; from: readonly [number, number]; to: readonly [number, number]; stops: readonly { offset: number; colour: string }[] }
+    | { type: 'radial'; stops: readonly { offset: number; colour: string }[] };
 }
+
+/**
+ * The lit gradient runs along the platform light (vocabulary LIGHT, azimuth 315°): from the upper
+ * left of a form (lit) to its lower right (shaded), with the base tone in the middle.
+ */
+const LIT_FROM = [0, 0] as const;
+const LIT_TO = [1, 1] as const;
 
 export interface TextPaint {
   fill: string;
@@ -90,6 +101,47 @@ export function resolveStyle(style: StyleRef, emphasis: Emphasis = 'normal'): Pa
 
   // Solid: a small mark filled in the line colour, with its emphasis (dots, the centre of a marker).
   if (material === 'solid') return { fill: line, stroke: NONE, width: 0, dash: null };
+  // Shadow: the shadow tone held across the middle (where the object stands, mostly hidden by it),
+  // then a soft fade to nothing at the edge; no line, no emphasis.
+  if (material === 'shadow')
+    return {
+      fill: NONE,
+      stroke: NONE,
+      width: 0,
+      dash: null,
+      gradient: {
+        type: 'radial',
+        stops: [
+          { offset: 0, colour: token('shadow') },
+          { offset: 0.5, colour: token('shadow') },
+          { offset: 1, colour: token('shadow-edge') },
+        ],
+      },
+    };
+  if (material === 'translucent') fill = emphasis === 'receded' ? token('receded-fill') : token('translucent');
+  if (material === 'overlap') fill = token('overlap');
+  if (material === 'lit') {
+    // Lit is the subject's: shaded along the light while it has its colour; a receded form is flat.
+    fill = emphasis === 'receded' ? token('receded-fill') : token(FILL[role]);
+    if (emphasis !== 'receded' && role === 'subject') {
+      return {
+        fill,
+        stroke: line,
+        width: line === NONE ? 0 : (style.width ?? LINE_WEIGHTS[weight]),
+        dash: style.dash ? DASHES[style.dash] : null,
+        gradient: {
+          type: 'linear',
+          from: LIT_FROM,
+          to: LIT_TO,
+          stops: [
+            { offset: 0, colour: token('subject-lit') },
+            { offset: 0.5, colour: token('subject-fill') },
+            { offset: 1, colour: token('subject-shade') },
+          ],
+        },
+      };
+    }
+  }
 
   return {
     fill,

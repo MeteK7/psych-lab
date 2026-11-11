@@ -8,11 +8,38 @@ export interface DrawPaint {
   stroke: string;
   width: number;
   dash: string | null;
+  /**
+   * Fills the shape with a gradient instead (`fill` stays the flat fallback). Positions are fractions
+   * of the shape's bounding box. Stops are token references, like every colour in a frame.
+   */
+  gradient?: Gradient;
+  /** Grain over the fill, at this opacity, from the frame's grain tile (M3). */
+  grain?: number;
+}
+
+export type Gradient =
+  /** From one point of the bounding box to another, e.g. the platform light's upper left to lower right. */
+  | { type: 'linear'; from: readonly [number, number]; to: readonly [number, number]; stops: readonly GradientStop[]; box?: Box }
+  /** From the centre of the bounding box out to its edge, as an ellipse that fills it. */
+  | { type: 'radial'; stops: readonly GradientStop[]; box?: Box };
+
+/** The shape's bounding box, set by the pipeline for backends that need it (canvas); SVG uses its own. */
+export interface Box {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface GradientStop {
+  offset: number;
+  colour: string;
 }
 
 export type Drawable =
   | { type: 'path'; d: string }
   | { type: 'circle'; cx: number; cy: number; r: number }
+  | { type: 'ellipse'; cx: number; cy: number; rx: number; ry: number }
   | { type: 'rect'; x: number; y: number; width: number; height: number; rx?: number }
   | { type: 'line'; x1: number; y1: number; x2: number; y2: number };
 
@@ -39,6 +66,8 @@ export interface ResolvedFrame {
   theme: string;
   /** Visible items, in drawing order. */
   items: readonly FrameItem[];
+  /** The grain tile, when any item has grain: path data of fine dots in a square `tile` units wide, in the `grain` token. */
+  grain?: { tile: number; d: string };
 }
 
 /**

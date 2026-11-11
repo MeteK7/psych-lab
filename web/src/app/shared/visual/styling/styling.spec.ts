@@ -91,7 +91,7 @@ const contrast = (a: string, b: string) => {
 
 /** Pairs a scene may use, with their minimum (3:1 graphics, 4.5:1 labels). */
 const PAIRS: [fg: string, bg: string, min: number][] = [
-  ...['ground', 'far', 'mid', 'near', 'subject-fill'].map((bg) => ['subject', bg, 3] as [string, string, number]),
+  ...['ground', 'far', 'mid', 'near', 'subject-fill', 'subject-lit', 'subject-shade'].map((bg) => ['subject', bg, 3] as [string, string, number]),
   ...['ground', 'near'].map((bg) => ['ink', bg, 3] as [string, string, number]),
   ...['ground', 'far', 'mid'].map((bg) => ['context', bg, 3] as [string, string, number]),
   ...['ground', 'far', 'mid', 'near'].map((bg) => ['receded', bg, 3] as [string, string, number]),

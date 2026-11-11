@@ -52,6 +52,64 @@ describe('SVG backend conformance', () => {
     expect(weights['axis-left']).toBe('');
   });
 
+  it('fills a gradient through its own definition, unique on the page, with token stops', async () => {
+    const frame: ResolvedFrame = {
+      width: 100,
+      height: 100,
+      theme: 'action',
+      items: [
+        {
+          kind: 'shape',
+          id: 'ball',
+          layer: 'x',
+          shape: { type: 'ellipse', cx: 50, cy: 50, rx: 30, ry: 20 },
+          paint: {
+            fill: 'var(--vis-subject-fill)',
+            stroke: 'var(--vis-subject)',
+            width: 2,
+            dash: null,
+            gradient: { type: 'linear', from: [0, 0], to: [1, 1], stops: [{ offset: 0, colour: 'var(--vis-subject-lit)' }, { offset: 1, colour: 'var(--vis-subject-shade)' }] },
+          },
+        },
+      ],
+    };
+    const host = (await render(frame)).nativeElement as HTMLElement;
+    const gradient = host.querySelector('linearGradient')!;
+    expect(gradient).not.toBeNull();
+    expect(host.querySelector('[data-vis-id="ball"]')?.getAttribute('style')).toContain(`url("#${gradient.id}")`);
+    expect([...gradient.querySelectorAll('stop')].map((s) => s.getAttribute('style'))).toEqual([
+      'stop-color: var(--vis-subject-lit);',
+      'stop-color: var(--vis-subject-shade);',
+    ]);
+    TestBed.resetTestingModule();
+    const second = (await render(frame)).nativeElement as HTMLElement;
+    expect(second.querySelector('linearGradient')!.id).not.toBe(gradient.id);
+  });
+
+  it('lays grain over a fill as a repeating pattern of the frame’s tile, at its opacity', async () => {
+    const frame: ResolvedFrame = {
+      width: 100,
+      height: 100,
+      theme: 'action',
+      grain: { tile: 64, d: 'M1 1a1 1 0 1 0 2 0a1 1 0 1 0 -2 0' },
+      items: [
+        {
+          kind: 'shape',
+          id: 'ground',
+          layer: 'x',
+          shape: { type: 'rect', x: 0, y: 50, width: 100, height: 50 },
+          paint: { fill: 'var(--vis-near)', stroke: 'none', width: 0, dash: null, grain: 0.05 },
+        },
+      ],
+    };
+    const host = (await render(frame)).nativeElement as HTMLElement;
+    const pattern = host.querySelector('pattern')!;
+    expect(pattern.getAttribute('width')).toBe('64');
+    const overlay = host.querySelector('[data-vis-grain="ground"]')!;
+    expect(overlay.getAttribute('style')).toContain(`url("#${pattern.id}")`);
+    expect(overlay.getAttribute('style')).toContain('opacity: 0.05');
+  });
+
   it('hides the drawing from assistive technology; the slot carries the text alternative', async () => {
     const { scene, text } = SCENES[0];
     const host = (await render(buildFrame(scene, scene.states.initial, text))).nativeElement as HTMLElement;

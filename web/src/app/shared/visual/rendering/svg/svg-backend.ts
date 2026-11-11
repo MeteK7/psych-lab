@@ -16,6 +16,10 @@ export function pathData(shape: Drawable): string {
       const { cx, cy, r } = shape;
       return `M${cx - r} ${cy} A${r} ${r} 0 1 0 ${cx + r} ${cy} A${r} ${r} 0 1 0 ${cx - r} ${cy} Z`;
     }
+    case 'ellipse': {
+      const { cx, cy, rx, ry } = shape;
+      return `M${cx - rx} ${cy} A${rx} ${ry} 0 1 0 ${cx + rx} ${cy} A${rx} ${ry} 0 1 0 ${cx - rx} ${cy} Z`;
+    }
     case 'rect': {
       const { x, y, width: w, height: h } = shape;
       const r = Math.min(shape.rx ?? 0, w / 2, h / 2);
@@ -63,6 +67,35 @@ function keyframes(track: ResolvedTrack): Keyframe[] {
   host: { '[attr.data-vis-theme]': 'frame().theme', '[attr.data-vis-scheme]': 'scheme()' },
   template: `
     <svg [attr.viewBox]="viewBox()" aria-hidden="true" focusable="false">
+      @if (frame().grain; as grain) {
+        <!-- The grain tile (M3), repeated over any fill that asks for it. -->
+        <defs>
+          <pattern [attr.id]="grainId" patternUnits="userSpaceOnUse" [attr.width]="grain.tile" [attr.height]="grain.tile">
+            <path [attr.d]="grain.d" style="fill: var(--vis-grain)" />
+          </pattern>
+        </defs>
+      }
+      @if (gradients().length) {
+        <!-- Gradient fills (lit, shadow): in the shape's own bounding box, stops as token colours. -->
+        <defs>
+          @for (g of gradients(); track g.id) {
+            @if (g.gradient.type === 'linear') {
+              <linearGradient [attr.id]="g.id" [attr.x1]="g.gradient.from[0]" [attr.y1]="g.gradient.from[1]"
+                              [attr.x2]="g.gradient.to[0]" [attr.y2]="g.gradient.to[1]">
+                @for (s of g.gradient.stops; track s.offset) {
+                  <stop [attr.offset]="s.offset" [style.stop-color]="s.colour" />
+                }
+              </linearGradient>
+            } @else {
+              <radialGradient [attr.id]="g.id">
+                @for (s of g.gradient.stops; track s.offset) {
+                  <stop [attr.offset]="s.offset" [style.stop-color]="s.colour" />
+                }
+              </radialGradient>
+            }
+          }
+        </defs>
+      }
       @if (reveals().size) {
         <defs>
           @for (item of revealed(); track item.id) {
@@ -78,9 +111,12 @@ function keyframes(track: ResolvedTrack): Keyframe[] {
           <text [attr.data-vis-id]="item.id" [attr.x]="item.x" [attr.y]="item.y" [attr.text-anchor]="item.anchor"
                 [style.fill]="item.fill" [style.font-size.px]="item.size" [style.font-weight]="item.weight === 'bold' ? 700 : null">{{ item.text }}</text>
         } @else {
-          <path [attr.data-vis-id]="item.id" [attr.d]="item.d" [style.fill]="item.paint.fill" [style.stroke]="item.paint.stroke"
+          <path [attr.data-vis-id]="item.id" [attr.d]="item.d" [style.fill]="item.paint.gradient ? 'url(#' + gradientId(item.id) + ')' : item.paint.fill" [style.stroke]="item.paint.stroke"
                 [style.stroke-width.px]="item.paint.width" [style.stroke-dasharray]="item.paint.dash"
                 [attr.mask]="reveals().has(item.id) ? 'url(#' + maskId(item.id) + ')' : null" />
+          @if (item.paint.grain) {
+            <path [attr.data-vis-grain]="item.id" [attr.d]="item.d" [style.fill]="'url(#' + grainId + ')'" [style.opacity]="item.paint.grain" />
+          }
         }
       }
     </svg>
@@ -112,6 +148,11 @@ export class SvgBackend {
   protected readonly items = computed(() =>
     this.frame().items.map((item) => (item.kind === 'text' ? item : { ...item, d: pathData(item.shape) })),
   );
+  protected readonly gradients = computed(() =>
+    this.frame().items.flatMap((item) =>
+      item.kind === 'shape' && item.paint.gradient ? [{ id: this.gradientId(item.id), gradient: item.paint.gradient }] : [],
+    ),
+  );
   protected readonly reveals = computed(() => new Set(this.timeline().filter((t) => t.property === 'reveal').map((t) => t.id)));
   protected readonly revealed = computed(() => this.items().filter((i) => i.kind === 'shape' && this.reveals().has(i.id)) as { id: string; d: string }[]);
 
@@ -122,6 +163,13 @@ export class SvgBackend {
 
   protected maskId(id: string): string {
     return `${this.surface}-${id}`;
+  }
+
+  protected readonly grainId = `${this.surface}-grain`;
+
+  /** Unique on the page, like mask ids: several figures can show the same element ids. */
+  protected gradientId(id: string): string {
+    return `${this.surface}-g-${id}`;
   }
 
   private play(timeline: ResolvedTimeline): void {
