@@ -1,3 +1,4 @@
+import type { GeneratorId } from '../generation/registry';
 import type { Emphasis, FrameRatio, FrameSize, LabelTone, MotionEffect, StyleRef, ThemeId } from '../styling/vocabulary';
 
 /**
@@ -54,6 +55,19 @@ export type Entrance =
 
 export type SceneElement =
   | { kind: 'shape'; id: ElementId; geometry: Geometry; style: StyleRef; purpose: Purpose; enter?: Entrance }
+  /**
+   * Geometry made by an S2 generator (milestone M2) from its parameters and the element's own seed,
+   * derived from the scene's seed and the element's id. Drawn, styled and animated like a shape.
+   */
+  | {
+      kind: 'generated';
+      id: ElementId;
+      generator: GeneratorId;
+      params: Readonly<Record<string, number>>;
+      style: StyleRef;
+      purpose: Purpose;
+      enter?: Entrance;
+    }
   | {
       kind: 'label';
       id: ElementId;
@@ -90,6 +104,8 @@ export interface SceneDefinition {
   /** Bumped on any visible change; recorded with a shown visual. */
   version: number;
   theme: ThemeId;
+  /** Seeds every generated element (each derives its own from this and its id). Required when the scene has one. */
+  seed?: string;
   /** A named frame, or an explicit size for a composition built from data (composition/compose.ts). */
   frame: FrameRatio | FrameSize;
   layers: readonly Layer[];

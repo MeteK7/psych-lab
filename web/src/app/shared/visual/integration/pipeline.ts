@@ -1,5 +1,7 @@
 import { Composed, SHOWN, lookupOf } from '../composition/compose';
 import { SceneDefinition, StateName, TextLookup } from '../composition/scene';
+import { generate } from '../generation/registry';
+import { deriveSeed } from '../generation/random';
 import { QualityTier, planMotion } from '../motion/plan-motion';
 import { FrameItem, ResolvedFrame, ResolvedTimeline, ResolvedTrack } from '../rendering/frame';
 import { resolveState } from '../state/resolve-state';
@@ -11,8 +13,22 @@ import { frameSize } from '../styling/vocabulary';
  * elements and their geometry, S4 their targets for the state, S1 their paint. The result is a
  * resolved frame any backend can draw. It runs when a scene or state changes. Compositions built
  * from data (composition/compose.ts) go through it the same way; the dot game builds one per frame.
- * S2 Generation joins here in milestone M2.
+ * S2 Generation: a `generated` element's path is made here, from its generator, parameters and
+ * its own seed, and kept, so a scene that changes state doesn't recompute it.
  */
+const generated = new Map<string, string>();
+function generatedPath(scene: SceneDefinition, element: Extract<SceneDefinition['layers'][number]['elements'][number], { kind: 'generated' }>): string {
+  const seed = deriveSeed(scene.seed ?? scene.id, element.id);
+  const key = `${element.generator}|${seed}|${JSON.stringify(element.params)}`;
+  let d = generated.get(key);
+  if (d === undefined) {
+    d = generate(element.generator, element.params, seed);
+    if (generated.size > 500) generated.clear();
+    generated.set(key, d);
+  }
+  return d;
+}
+
 export function buildFrame(scene: SceneDefinition, state: StateName, text: TextLookup): ResolvedFrame {
   const targets = resolveState(scene, state);
   const items: FrameItem[] = [];
@@ -40,6 +56,14 @@ export function buildFrame(scene: SceneDefinition, state: StateName, text: TextL
         case 'shape':
           items.push({ ...base, kind: 'shape', shape: element.geometry, paint: resolveStyle(element.style, target.emphasis) });
           break;
+        case 'generated':
+          items.push({
+            ...base,
+            kind: 'shape',
+            shape: { type: 'path', d: generatedPath(scene, element) },
+            paint: resolveStyle(element.style, target.emphasis),
+          });
+          break;
       }
     }
   }
@@ -52,7 +76,7 @@ export function buildFrame(scene: SceneDefinition, state: StateName, text: TextL
  * S1, so a backend never sees an emphasis level. Labels take no emphasis, so only shapes get paint.
  */
 export function buildTimeline(scene: SceneDefinition, from: StateName | null, to: StateName, tier: QualityTier): ResolvedTimeline {
-  const shapes = new Map(scene.layers.flatMap((l) => l.elements).flatMap((e) => (e.kind === 'shape' ? [[e.id, e] as const] : [])));
+  const shapes = new Map(scene.layers.flatMap((l) => l.elements).flatMap((e) => (e.kind !== 'label' ? [[e.id, e] as const] : [])));
   return planMotion(scene, from, to, tier).flatMap((track): ResolvedTrack[] => {
     if (track.property !== 'emphasis') return [track];
     const shape = shapes.get(track.id);

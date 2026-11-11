@@ -1,4 +1,6 @@
 import { MCII } from '../../../../content';
+import { SceneDefinition, SceneElement } from '../composition/scene';
+import { validateScene } from '../composition/validate';
 import { MCII_PATH } from '../scenes/action/mcii-path.scene';
 import { buildFrame, buildTimeline, contentText } from './pipeline';
 
@@ -45,5 +47,68 @@ describe('contentText', () => {
     expect(text('mcii.scenes')).toBeUndefined();
     expect(text('mcii.nope.alt')).toBeUndefined();
     expect(text('constructor')).toBeUndefined();
+  });
+});
+
+describe('generated elements (S2, milestone M2)', () => {
+  const purpose = { serves: ['identity' as const], why: 'A test form.' };
+  type Generated = Extract<SceneElement, { kind: 'generated' }>;
+  const scene = (seed?: string, blob: Partial<Generated> = {}, line: Partial<Generated> = {}): SceneDefinition => ({
+    id: 'test.generated',
+    version: 1,
+    theme: 'action',
+    ...(seed ? { seed } : {}),
+    frame: { width: 300, height: 200 },
+    layers: [
+      {
+        id: 'forms',
+        plane: 'subject',
+        elements: [
+          { kind: 'generated', id: 'blob', generator: 'form.blob', params: { cx: 150, cy: 100, rx: 60, ry: 40 }, style: { role: 'subject', material: 'tonal' }, purpose, ...blob },
+          {
+            kind: 'generated',
+            id: 'line',
+            generator: 'form.ridge',
+            params: { x0: 0, x1: 300, baseline: 170 },
+            style: { role: 'context' },
+            purpose,
+            enter: { effect: 'draw', why: 'A test of drawing a generated line.' },
+            ...line,
+          },
+        ],
+      },
+    ],
+    states: { initial: 'a', states: { a: { visible: ['blob'] }, b: { visible: ['blob', 'line'], emphasis: { blob: 'focal' } } } },
+    alt: { a: 'alt', b: 'alt' },
+    transitions: [['a', 'b']],
+  });
+  const lookup = (key: string) => (key === 'alt' ? 'A test.' : undefined);
+
+  it('is valid with a seed, and the validator says when the seed or a parameter is missing', () => {
+    expect(validateScene(scene('s1'), lookup)).toEqual([]);
+    expect(validateScene(scene(), lookup)).toContain("element 'blob': 'form.blob' needs the scene's seed");
+    expect(validateScene(scene('s1', { params: { cx: 150, cy: 100, rx: 60 } }), lookup)).toContain("element 'blob': 'form.blob' needs 'ry'");
+  });
+
+  it('refuses to fill an open line', () => {
+    const filled = scene('s1', {}, { style: { role: 'context', material: 'tonal' }, enter: undefined });
+    expect(validateScene(filled, lookup)).toContain("element 'line': 'form.ridge' makes an open line, which can't be filled");
+  });
+
+  it('draws them as paths, the same for the same seed, and different for another seed', () => {
+    const frame = buildFrame(scene('s1'), 'b', lookup);
+    const blob = frame.items.find((i) => i.id === 'blob');
+    expect(blob?.kind === 'shape' && blob.shape.type).toBe('path');
+    expect(buildFrame(scene('s1'), 'b', lookup)).toEqual(frame);
+    const other = buildFrame(scene('s2'), 'b', lookup).items.find((i) => i.id === 'blob');
+    expect(other).not.toEqual(blob);
+  });
+
+  it('takes emphasis and draws on like any line', () => {
+    const blob = buildFrame(scene('s1'), 'b', lookup).items.find((i) => i.id === 'blob');
+    expect(blob).toMatchObject({ paint: { stroke: 'var(--vis-focal, var(--vis-subject))' } });
+    const tracks = buildTimeline(scene('s1'), 'a', 'b', 'full');
+    expect(tracks.find((t) => t.id === 'line')).toMatchObject({ property: 'reveal', from: 0, to: 1 });
+    expect(tracks.find((t) => t.id === 'blob')).toMatchObject({ property: 'paint' });
   });
 });

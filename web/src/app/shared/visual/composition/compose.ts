@@ -30,17 +30,20 @@ export interface ComposeOptions {
   alt: string;
   /** Default 1 (docs/visual-policy.md §8). */
   maxFocal?: number;
+  /** For generated elements (milestone M2). */
+  seed?: string;
 }
 
 /** A scene with one state that shows every element. */
 export function composeScene(options: ComposeOptions, text: Readonly<Record<ContentKey, string>> = {}): Composed {
-  const { id, version, theme, size, layers, emphasis, alt, maxFocal } = options;
+  const { id, version, theme, size, layers, emphasis, alt, maxFocal, seed } = options;
   const visible = layers.flatMap((l) => l.elements.map((e) => e.id));
   return {
     scene: {
       id,
       version,
       theme,
+      ...(seed ? { seed } : {}),
       frame: size,
       layers,
       states: { initial: SHOWN, states: { [SHOWN]: { visible, ...(emphasis ? { emphasis } : {}) } } },

@@ -10,6 +10,7 @@ import {
   StyleRef,
   THEMES,
 } from '../styling/vocabulary';
+import { GENERATORS, generatorProblems } from '../generation/registry';
 import { PURPOSE_KINDS, Purpose, SceneDefinition, SceneElement, TextLookup, elementsOf } from './scene';
 
 /** Any raw colour value: scenes use roles only (docs/visual-system.md §4.3). */
@@ -43,7 +44,7 @@ function entranceProblems(element: SceneElement, all: Map<string, SceneElement>)
   if (enter.effect && !Object.hasOwn(MOTION_EFFECTS, enter.effect)) problems.push(`${where}: unknown motion effect '${enter.effect}'`);
   if (enter.effect === 'draw' && element.kind === 'label') problems.push(`${where}: a label can't draw; it fades`);
   // Drawing reveals a band along the outline, so a filled shape's inside would stay hidden.
-  if (enter.effect === 'draw' && element.kind === 'shape' && (element.style.material ?? 'line') !== 'line')
+  if (enter.effect === 'draw' && element.kind !== 'label' && (element.style.material ?? 'line') !== 'line')
     problems.push(`${where}: only line shapes can draw`);
   if (enter.with === undefined) {
     if (!enter.why?.trim()) problems.push(`${where}: motion without a reason; an element that moves on its own says why`);
@@ -52,7 +53,7 @@ function entranceProblems(element: SceneElement, all: Map<string, SceneElement>)
   const lead = all.get(enter.with);
   if (!lead || enter.with === element.id) problems.push(`${where}: enters with unknown element '${enter.with}'`);
   else if (lead.enter?.with !== undefined) problems.push(`${where}: enters with '${enter.with}', which itself enters with another element`);
-  else if (!enter.effect && lead.enter?.effect === 'draw' && element.kind === 'shape' && (element.style.material ?? 'line') !== 'line')
+  else if (!enter.effect && lead.enter?.effect === 'draw' && element.kind !== 'label' && (element.style.material ?? 'line') !== 'line')
     problems.push(`${where}: would draw with '${enter.with}', but only line shapes can draw; give it its own effect`);
   return problems;
 }
@@ -86,6 +87,13 @@ export function validateScene(scene: SceneDefinition, text: TextLookup): string[
     }
     ids.set(element.id, { role: element.style.role, label: false });
     problems.push(...styleProblems(where, element.style));
+    if (element.kind === 'generated') {
+      problems.push(...generatorProblems(element.generator, element.params).map((p) => `${where}: ${p}`));
+      const def = (GENERATORS as Record<string, { seeded: boolean; closed: boolean | 'band' }>)[element.generator];
+      if (def?.seeded && !scene.seed) problems.push(`${where}: '${element.generator}' needs the scene's seed`);
+      if (def && def.closed === false && (element.style.material ?? 'line') !== 'line')
+        problems.push(`${where}: '${element.generator}' makes an open line, which can't be filled`);
+    }
     if (layer.plane === 'near' && NOT_ON_NEAR.roles.includes(element.style.role))
       problems.push(`${where}: the '${element.style.role}' role isn't allowed on the near plane`);
   }
