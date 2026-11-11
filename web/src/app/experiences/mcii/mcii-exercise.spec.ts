@@ -4,9 +4,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 
 import { SessionUpsert } from '../../api/types';
+import { CHOOSE_SINK, KEEP_EVERYTHING, sinkFor } from '../../flow/result-sink';
 import { SessionPage } from '../../flow/session-page';
-import { VISUAL_SOURCE, VisualRequest, VisualSource } from '../../shared/visual/visual';
-import { Mcii } from './mcii';
+import { SCENE_SOURCE_OVERRIDE } from '../../shared/visual/integration/scene-source';
+import { VisualRequest, VisualSource } from '../../shared/visual/visual';
 
 // The MCII exercise, run through the session page as a person would. Everything a person writes
 // is marked PRIVATE and must never appear in a saved record, or reach a visual source.
@@ -17,22 +18,24 @@ interface Run {
   bodies: SessionUpsert[];
 }
 
-function start(mode = 'try', source?: VisualSource): Run {
+function start(mode = 'try', source?: VisualSource, sink = KEEP_EVERYTHING): Run {
   TestBed.configureTestingModule({
     imports: [SessionPage],
     providers: [
       provideRouter([]),
       provideHttpClient(),
       provideHttpClientTesting(),
+      // These tests check the record each exercise makes; Try it then keeps only its metadata
+      // (flow/result-sink.ts), which the last test here checks with the real sink.
+      { provide: CHOOSE_SINK, useValue: () => sink },
+      // MCII loads on demand, so its picture source is replaced from above, not by overriding it.
+      ...(source ? [{ provide: SCENE_SOURCE_OVERRIDE, useValue: source }] : []),
       {
         provide: ActivatedRoute,
         useValue: { snapshot: { queryParamMap: convertToParamMap({ mode, condition: 'mcii' }) } },
       },
     ],
   });
-  if (source) {
-    TestBed.overrideComponent(Mcii, { set: { providers: [{ provide: VISUAL_SOURCE, useValue: source }] } });
-  }
   const fixture = TestBed.createComponent(SessionPage);
   return { fixture, backend: TestBed.inject(HttpTestingController), bodies: [] };
 }
@@ -151,7 +154,7 @@ describe('MCII exercise', () => {
       'mcii_close',
     ]);
     expect(body.steps.map((s) => s.result)).toEqual([
-      { category: 'work', visual_source: 'builtin.v1' },
+      { category: 'work', visual_source: expect.stringMatching(/^scene:mcii\.path@\d+;theme:action@\d+$/) },
       {},
       { obstacle: 'tired' },
       { choice: 'keep' },
@@ -407,32 +410,35 @@ describe('MCII exercise', () => {
     function shownAlt(run: Run): string | null | undefined {
       return root(run).querySelector('figure')?.getAttribute('aria-label');
     }
+    const drawn = (run: Run, id: string) => root(run).querySelector<SVGElement>(`figure [data-vis-id="${id}"]`);
 
     it('adds the wall with the obstacle, and the bridge only after the plan is made', async () => {
       const run = start();
       await settle(run);
       await press(run, 'Begin');
       expect(shownAlt(run)).toBe('A path leading to a far marker.');
-      expect(root(run).querySelector('.wall')).toBeNull();
+      expect(drawn(run, 'wish')).not.toBeNull();
+      expect(drawn(run, 'wall')).toBeNull();
       run.fixture.destroy();
 
       TestBed.resetTestingModule();
       const next = start();
       await toDecide(next);
       expect(shownAlt(next)).toBe('A path leading to a far marker, with a low wall across it.');
-      expect(root(next).querySelector('.wall')).not.toBeNull();
-      expect(root(next).querySelector('.bridge')).toBeNull();
+      expect(drawn(next, 'wall')).not.toBeNull();
+      expect(drawn(next, 'bridge')).toBeNull();
       await decide(next, 'keep');
-      expect(root(next).querySelector('.bridge')).not.toBeNull();
+      expect(drawn(next, 'bridge')).not.toBeNull();
     });
 
-    it('fades the path after setting aside, with no wall', async () => {
+    it('quietens the path after setting aside, with no wall, and the wish keeps its colour', async () => {
       const run = start();
       await toDecide(run);
       await decide(run, 'set_aside');
       expect(shownAlt(run)).toBe('A faded path leading to a far marker.');
-      expect(root(run).querySelector('svg.faded')).not.toBeNull();
-      expect(root(run).querySelector('.wall')).toBeNull();
+      expect(drawn(run, 'wall')).toBeNull();
+      expect(drawn(run, 'path')?.style.strokeWidth).toBe('1.5px');
+      expect(drawn(run, 'wish')?.style.stroke).toBe('var(--vis-subject)');
     });
 
     /** What a run saves, leaving out timings and the source's own id. */
@@ -493,4 +499,21 @@ describe('MCII exercise', () => {
       expect(JSON.stringify(requests)).not.toContain('PRIVATE');
     });
   });
+
+  it('in Try it, sends only that it ran: no choices, ratings or plan, and the picture it drew', async () => {
+    const run = start('try', undefined, sinkFor('try'));
+    await toDecide(run);
+    await decide(run, 'keep');
+    await finishWithPlan(run);
+    for (const body of run.bodies) {
+      expect(body.plan).toBeNull();
+      expect(body.ratings).toBeNull();
+      for (const step of body.steps ?? []) expect(Object.keys(step.result ?? {})).toEqual(
+        step.step === 'mcii_wish' ? ['visual_source'] : [],
+      );
+    }
+    expect(last(run).status).toBe('completed');
+    expect(JSON.stringify(run.bodies)).not.toMatch(/PRIVATE|tired|five_minutes|"work"/);
+  });
 });
+

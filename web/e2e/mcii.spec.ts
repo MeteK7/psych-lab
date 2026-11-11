@@ -96,19 +96,16 @@ test.describe('MCII, keyboard only', () => {
 
     await expect.poll(async () => (await savedSession(page, id)).status).toBe('completed');
     const saved = await savedSession(page, id);
-    expect(saved.ratings).toEqual({
-      mcii_matter_pre: 8,
-      mcii_likely_pre: 6,
-      mcii_likely_post: 3,
-      mcii_ready_post: 7,
-    });
+    // Try it keeps only that it ran, and which picture was drawn (M1); the choices and
+    // ratings are checked in mcii-exercise.spec.ts.
+    expect(saved.ratings).toBeNull();
     expect(saved.steps.map((s) => s.result)).toEqual([
-      { category: 'work', visual_source: 'builtin.v1' },
+      { visual_source: expect.stringMatching(/^scene:mcii\.path@\d+;theme:action@\d+$/) },
       {},
-      { obstacle: 'hard' },
-      { choice: 'keep' },
-      { then: 'five_minutes' },
-      { feeling: 'discouraged' },
+      {},
+      {},
+      {},
+      {},
     ]);
     expect(JSON.stringify(saved)).not.toContain('PRIVATE');
   });

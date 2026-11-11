@@ -50,7 +50,7 @@ import { ActionBridgeInput, isPlanComplete, planText } from './plan-text';
                  [value]="form().obstacleResponse" (input)="set('obstacleResponse', $event)" />
         </label>
 
-        <button type="submit" [disabled]="!complete()">Continue</button>
+        <button class="primary" type="submit" [disabled]="!complete()">Continue</button>
       </form>
     } @else {
       <h3>{{ content.rehearsal.heading }}</h3>
@@ -62,7 +62,7 @@ import { ActionBridgeInput, isPlanComplete, planText } from './plan-text';
       </label>
       <div class="actions">
         <button type="button" (click)="stage.set('write')">{{ content.rehearsal.change }}</button>
-        <button type="button" [disabled]="!rehearsed()" (click)="finish()">Continue</button>
+        <button class="primary" type="button" [disabled]="!rehearsed()" (click)="finish()">Continue</button>
       </div>
     }
   `,

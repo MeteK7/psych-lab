@@ -36,6 +36,17 @@ DEVELOPMENT_ONLY_EXERCISES = (
     "mcii",
 )
 Status = Literal["in_progress", "completed", "aborted"]
+# Try it keeps only that an exercise ran, and when (docs/product-model.md, M1; decision
+# 2026-11-09): no typed text, choices or ratings. Step results may carry only this metadata:
+# where a stopped run ended, which dot-game version ran, which picture was drawn. The row itself
+# stays, because the n-of-1 exposure analysis reads Try it runs on session days (n1.export).
+TRY_RESULT_KEYS = ("during", "task", "visual_source")
+# Exercises rated safe for unsupervised use; only these are offered in the booth profile
+# (docs/product-model.md §3, M1). A rating is a reviewed decision by the operator and the
+# psychology-trained reviewer; none is rated yet (decision 2026-11-09: unrated means excluded).
+# State Reset stays excluded until usability shows it is tolerable.
+SAFE_UNSUPERVISED_EXERCISES: tuple[str, ...] = ()
+EXCLUDED_FROM_BOOTH = ("state_reset+action_bridge",)
 
 
 class StepSummary(BaseModel):
@@ -74,6 +85,15 @@ class SessionUpsert(BaseModel):
             self.mode not in NON_EXPERIMENT_MODES or self.n1_reveal_id is not None
         ):
             raise ValueError("this exercise runs only in Try it, never in the experiment")
+        if self.mode == "try":
+            if self.plan is not None or self.ratings:
+                raise ValueError("Try it keeps no answers: plan and ratings must be empty")
+            for step in self.steps:
+                extra = set(step.result) - set(TRY_RESULT_KEYS)
+                if extra:
+                    raise ValueError(
+                        f"Try it keeps no answers: step {step.step!r} has {sorted(extra)}"
+                    )
         return self
 
 
@@ -104,7 +124,16 @@ class SessionOut(BaseModel):
     updated_at: datetime
 
 
+class Booth(BaseModel):
+    support_line: str
+    idle_seconds: int
+    exercises: list[str]
+
+
 class Health(BaseModel):
     status: Literal["ok"]
     database: Literal["ok"]
     environment: Literal["development", "production"]
+    profile: Literal["standard", "booth"]
+    # Only in the booth profile.
+    booth: Booth | None = None

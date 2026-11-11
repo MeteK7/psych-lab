@@ -28,6 +28,9 @@ import { experimentTodayLine } from '../experiment/experiment-texts';
     }
 
     <h2>Areas</h2>
+    @if (environment.booth() && !anyOffered()) {
+      <p>Nothing is offered here yet.</p>
+    }
     <ul class="areas">
       @for (area of areas; track area.id) {
         <li class="card" [class.planned]="!open(area)">
@@ -73,12 +76,17 @@ import { experimentTodayLine } from '../experiment/experiment-texts';
 })
 export class HomePage {
   protected readonly areas = AREAS;
-  private readonly environment = inject(AppEnvironment);
+  protected readonly environment = inject(AppEnvironment);
 
-  /** Development-only areas open in the development build only; elsewhere they show as planned. */
+  /**
+   * Development-only areas open in the development build only; elsewhere they show as planned.
+   * In a booth, an area opens only if it has an exercise rated safe for unsupervised use.
+   */
   protected open(area: Area): boolean {
-    return isOpen(area, this.environment.showsDevelopment());
+    const offered = (area.topics ?? []).some((t) => t.experiences.some((e) => this.environment.offers(e)));
+    return isOpen(area, this.environment.showsDevelopment()) && (!this.environment.booth() || offered);
   }
+  protected readonly anyOffered = computed(() => this.areas.some((a) => this.open(a)));
   protected readonly guide = PLANNED_GUIDE;
   protected readonly today = signal<N1Today | null>(null);
   protected readonly todayLine = computed(() => {
@@ -88,6 +96,7 @@ export class HomePage {
 
   constructor() {
     // The callout is optional: without the API, Home still shows the areas.
+    // In a booth the API refuses this (no experiment there), so the callout stays hidden.
     inject(ApiService).n1Today().subscribe({ next: (t) => this.today.set(t), error: () => undefined });
   }
 }

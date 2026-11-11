@@ -41,7 +41,7 @@ interface BoardCard {
         <p>{{ c.first.intro }}</p>
         <app-card-pick [legend]="c.first.ask" [cards]="c.first.cards" [ownChoice]="c.first.own_choice"
                        [ownLabel]="c.first.own_label" [(value)]="pick" />
-        <button type="button" [disabled]="!pick()" (click)="submitFirst()">{{ c.next_label }}</button>
+        <button class="primary" type="button" [disabled]="!pick()" (click)="submitFirst()">{{ c.next_label }}</button>
       }
       @case ('cs1_feel_before') {
         <p class="quote">{{ reading() }}</p>
@@ -57,7 +57,7 @@ interface BoardCard {
             </label>
           }
         </fieldset>
-        <button type="button" [disabled]="belief() === null || upset() === null || !control()" (click)="submitFeelBefore()">
+        <button class="primary" type="button" [disabled]="belief() === null || upset() === null || !control()" (click)="submitFeelBefore()">
           {{ c.next_label }}
         </button>
       }
@@ -71,6 +71,7 @@ interface BoardCard {
         <app-card-pick [legend]="lens().prompt" [cards]="lens().cards" [ownChoice]="c.lenses.own_choice"
                        [ownLabel]="c.lenses.own_label" [(value)]="pick" />
         <div class="actions">
+          <!-- Two equal answers: neither is filled, so neither is favoured ("every choice offers a way out"). -->
           <button type="button" [disabled]="!pick()" (click)="nextLens(pick())">
             {{ lensIndex() + 1 < c.lenses.items.length ? c.lenses.next_lens : c.next_label }}
           </button>
@@ -105,7 +106,7 @@ interface BoardCard {
           <button type="button" [attr.aria-pressed]="store.noneFit()" (click)="store.noneFit.set(!store.noneFit())">
             {{ c.sort.none_fit }}
           </button>
-          <button type="button" [disabled]="unplaced().length > 0 && !store.noneFit()" (click)="submitSort()">
+          <button class="primary" type="button" [disabled]="unplaced().length > 0 && !store.noneFit()" (click)="submitSort()">
             {{ c.next_label }}
           </button>
         </div>
@@ -141,7 +142,7 @@ interface BoardCard {
             <p>{{ c.after.compared_means }}</p>
           </div>
         }
-        <button type="button" [disabled]="belief() === null || upset() === null" (click)="submitFeelAfter()">
+        <button class="primary" type="button" [disabled]="belief() === null || upset() === null" (click)="submitFeelAfter()">
           {{ c.next_label }}
         </button>
       }
@@ -162,7 +163,7 @@ interface BoardCard {
         @if (actionable()) {
           <p class="note">{{ c.close.control }}</p>
         }
-        <button type="button" (click)="finish()">{{ c.finish_label }}</button>
+        <button class="primary" type="button" (click)="finish()">{{ c.finish_label }}</button>
       }
     }
   `,

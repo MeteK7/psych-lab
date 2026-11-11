@@ -39,7 +39,13 @@ def completed_body(**overrides: Any) -> dict[str, Any]:
 def test_health(client: TestClient) -> None:
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "database": "ok", "environment": "development"}
+    assert response.json() == {
+        "status": "ok",
+        "database": "ok",
+        "environment": "development",
+        "profile": "standard",
+        "booth": None,
+    }
 
 
 def test_put_creates_then_lists(client: TestClient) -> None:
@@ -217,3 +223,89 @@ def test_mcii_is_refused_in_production_until_released(client: TestClient, n1_set
         assert client.put(f"/api/sessions/{uuid.uuid4()}", json=body).status_code == 403
     finally:
         n1_settings.app_env = "development"
+
+
+# ---------- Try it keeps no answers (M1) ----------
+
+
+def try_step(**result: Any) -> dict[str, Any]:
+    return {
+        "step": "plan",
+        "content_id": "action-bridge",
+        "content_version": "1",
+        "started_at": "2026-10-29T18:00:00+00:00",
+        "ended_at": "2026-10-29T18:05:00+00:00",
+        "result": result,
+    }
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"plan": {"goal": "private words"}},
+        {"plan": {}},
+        {"ratings": {"pre": 5}},
+        {"steps": [try_step(category="habits")]},
+        {"steps": [try_step(completed=True)]},
+    ],
+    ids=["typed plan", "empty plan", "ratings", "a choice", "any other step result"],
+)
+def test_try_it_refuses_answers(client: TestClient, overrides: dict[str, Any]) -> None:
+    body = session_body(mode="try", **overrides)
+    response = client.put(f"/api/sessions/{uuid.uuid4()}", json=body)
+    assert response.status_code == 422
+    assert "Try it keeps no answers" in response.text
+
+
+def test_the_experiment_still_keeps_its_answers(client: TestClient) -> None:
+    body = completed_body(plan={"goal": "my goal"}, ratings={"pre": 5})
+    response = client.put(f"/api/sessions/{uuid.uuid4()}", json=body)
+    assert response.status_code == 201
+    saved = response.json()
+    assert (saved["plan"], saved["ratings"]) == ({"goal": "my goal"}, {"pre": 5})
+
+
+EXERCISES = [
+    "action_bridge",
+    "goal_restatement",
+    "state_reset+action_bridge",
+    "game_only+action_bridge",
+    "cs_other_readings",
+    "cs_why_it_happened",
+    "cs_not_enough_to_go_on",
+    "mcii",
+]
+
+
+def test_a_database_with_try_it_runs_holds_no_answers(client: TestClient, connection: Any) -> None:
+    """M1: with Try it runs of every exercise saved, the database holds nothing they answered."""
+    from sqlalchemy import text
+
+    metadata = [
+        try_step(during="plan"),
+        try_step(task="sound"),
+        try_step(visual_source="scene:x@1"),
+    ]
+    for exercise in EXERCISES:
+        for status, ended in [("in_progress", None), ("completed", "2026-10-29T18:05:00+00:00")]:
+            body = session_body(
+                mode="try", condition=exercise, status=status, ended_at=ended, steps=metadata
+            )
+            assert client.put(f"/api/sessions/{uuid.uuid4()}", json=body).status_code in (200, 201)
+
+    rows = connection.execute(
+        text("SELECT plan, ratings, followup, steps FROM sessions WHERE mode = 'try'")
+    ).all()
+    assert len(rows) == 2 * len(EXERCISES)
+    for plan, ratings, followup, steps in rows:
+        assert (plan, ratings, followup) == (None, None, None)
+        for step in steps:
+            assert set(step["result"]) <= {"during", "task", "visual_source"}
+
+
+def test_try_it_runs_have_no_follow_up(client: TestClient) -> None:
+    session_id = str(uuid.uuid4())
+    body = session_body(mode="try", status="completed", ended_at="2026-10-29T18:05:00+00:00")
+    client.put(f"/api/sessions/{session_id}", json=body)
+    response = client.patch(f"/api/sessions/{session_id}/follow-up", json={"note": "private"})
+    assert response.status_code == 409

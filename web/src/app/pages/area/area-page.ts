@@ -7,6 +7,7 @@ import { map } from 'rxjs';
 import { ExerciseId } from '../../api/types';
 import { AREAS, areaById } from '../../areas';
 import { exerciseInfo } from '../../experiences/registry';
+import { BOOTH_NOTE, PRACTICE_NOTE } from '../../flow/result-sink';
 import { AppEnvironment } from '../../shared/app-environment';
 import { Icon } from '../../shared/icon';
 
@@ -18,6 +19,8 @@ import { Icon } from '../../shared/icon';
     @if (area(); as a) {
       <h1>{{ a.title }}</h1>
       <p class="lead">{{ a.intro }}</p>
+      <!-- Once per area, before any "Try it": what practice keeps (flow/result-sink.ts). -->
+      <p class="muted">{{ practiceNote() }}</p>
 
       @for (topic of shownTopics(); track topic.title; let t = $index) {
         <section [attr.aria-labelledby]="'topic-heading-' + t">
@@ -37,14 +40,13 @@ import { Icon } from '../../shared/icon';
                   @if (e.experimental) {
                     <p><span class="badge">Experimental</span> This idea is still being tested.</p>
                   }
-                  <button type="button" class="try" (click)="tryIt(e.value)">Try it</button>
+                  <button type="button" class="try primary" (click)="tryIt(e.value)">Try it</button>
                 </li>
               }
             }
           </ul>
-          <p class="muted">{{ topic.practiceNote ?? a.practiceNote ?? defaultNote }}</p>
 
-          @if (topic.hasExperiment) {
+          @if (topic.hasExperiment && !environment.booth()) {
             <section class="card prominent" aria-labelledby="experiment-heading">
               <h3 id="experiment-heading">Want to know what works for you?</h3>
               <p>My experiment compares two of these exercises over several weeks.</p>
@@ -78,13 +80,14 @@ import { Icon } from '../../shared/icon';
 export class AreaPage {
   private readonly router = inject(Router);
   private readonly id = toSignal(inject(ActivatedRoute).paramMap.pipe(map((p) => p.get('id'))));
-  private readonly environment = inject(AppEnvironment);
+  protected readonly environment = inject(AppEnvironment);
   protected readonly area = computed(() => areaById(this.id() ?? null, this.environment.showsDevelopment()));
   /** A development-only area is unknown until the build is known; show nothing meanwhile. */
   protected readonly waiting = computed(
     () => this.environment.value() === null && AREAS.some((a) => a.id === this.id() && a.status === 'development'),
   );
-  protected readonly defaultNote = 'Practice exercises are saved in My records but are never part of your experiment.';
+  /** Practice runs Try it; the note describes what its sink keeps (flow/result-sink.ts). */
+  protected readonly practiceNote = computed(() => (this.environment.booth() ? BOOTH_NOTE : PRACTICE_NOTE));
   /** A topic whose exercises are all hidden in this build would be an empty section. */
   protected readonly shownTopics = computed(() =>
     (this.area()?.topics ?? []).filter((topic) => topic.experiences.some((value) => this.visible(value))),
@@ -93,7 +96,8 @@ export class AreaPage {
   /** Released exercises everywhere; development-only ones in the development build only. */
   protected visible(value: ExerciseId) {
     const e = exerciseInfo(value);
-    return e && (e.release === 'released' || this.environment.showsDevelopment()) ? e : undefined;
+    const shown = e && (e.release === 'released' || this.environment.showsDevelopment()) && this.environment.offers(value);
+    return shown ? e : undefined;
   }
 
   constructor() {

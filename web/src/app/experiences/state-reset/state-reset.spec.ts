@@ -84,7 +84,9 @@ describe('StateReset', () => {
 
     const text = root(fixture).textContent!;
     expect(text).toContain(STATE_RESET.how_it_works.heading);
-    expect(root(fixture).querySelector('svg[role="img"]')?.getAttribute('aria-label')).toBe(
+    // Drawn by the Visual System from the game's own parts; the exercise gives the text alternative.
+    expect(root(fixture).querySelector('figure[role="img"] app-vis-instrument svg')).not.toBeNull();
+    expect(root(fixture).querySelector('figure[role="img"]')?.getAttribute('aria-label')).toBe(
       STATE_RESET.how_it_works.illustration_alt,
     );
     expect(text).toContain(STATE_RESET.how_it_works.labels.ring);
@@ -133,7 +135,7 @@ describe('StateReset', () => {
     click(fixture, STATE_RESET_SOUND.offer.use_sound);
     await fixture.whenStable();
     expect(root(fixture).textContent).toContain(STATE_RESET_SOUND.how_it_works.heading);
-    expect(root(fixture).querySelector('app-game-preview')).toBeNull();
+    expect(root(fixture).querySelector('app-vis-instrument')).toBeNull();
     click(fixture, STATE_RESET.how_it_works.start_practice);
     await fixture.whenStable();
     expect(root(fixture).querySelector('app-tone-game')).not.toBeNull();
@@ -153,7 +155,7 @@ describe('StateReset', () => {
     await fixture.whenStable();
     click(fixture, STATE_RESET_SOUND.offer.use_dot);
     await fixture.whenStable();
-    expect(root(fixture).querySelector('app-game-preview')).not.toBeNull();
+    expect(root(fixture).querySelector('app-vis-instrument')).not.toBeNull();
     fixture.destroy();
   });
 
@@ -174,6 +176,25 @@ describe('StateReset', () => {
     (fixture.componentInstance as unknown as { finish(): void }).finish();
     expect(outcome!.result['task']).toBe('dot');
     fixture.destroy();
+  });
+
+  // Was checked in the browser through the saved Try it record, which keeps no game data since M1.
+  it('records half speed when reduced motion is on, and full speed otherwise', async () => {
+    for (const [reduce, speed] of [
+      [true, STATE_RESET.game.reduced_motion_speed],
+      [false, STATE_RESET.game.speed],
+    ] as const) {
+      vi.stubGlobal('matchMedia', (query: string) => ({ matches: reduce && query.includes('reduce') }) as MediaQueryList);
+      const fixture = create('game_only');
+      let outcome: StepOutcome | null = null;
+      fixture.componentInstance.completed.subscribe((o) => (outcome = o));
+      await fixture.whenStable();
+      (fixture.componentInstance as unknown as { finish(): void }).finish();
+      expect(outcome!.result['speed'], `reduced motion ${reduce}`).toBe(speed);
+      fixture.destroy();
+      vi.unstubAllGlobals();
+    }
+    expect(STATE_RESET.game.reduced_motion_speed).toBe(0.5);
   });
 
   it('emits stopped when the user stops', async () => {

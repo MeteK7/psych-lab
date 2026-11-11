@@ -2,6 +2,10 @@
 
 uv run python -m app.e2e_server --port 8120 --origin http://localhost:4320
 
+The booth's browser tests (web/playwright.booth.config.ts) add --booth: the booth profile, a
+test support line, a short idle time, and one exercise rated safe for the tests only (no
+exercise is rated yet; app/schemas.py SAFE_UNSUPERVISED_EXERCISES stays empty in the code).
+
 Before anything connects, every setting is pointed at TEST_DATABASE_URL, whose schema is
 then recreated, so the browser tests never touch app_dev or app_prod. The server runs Test
 mode (phase 0) with a fixed schedule and a study log in a temporary folder.
@@ -25,6 +29,10 @@ E2E_SCHEDULE = [
     (3, 2, "goal_restatement"),
     (4, 2, "action_bridge"),
 ]
+
+
+# Rated safe for the booth's browser tests only, so a visit can run end to end.
+BOOTH_TEST_EXERCISES = ("goal_restatement",)
 
 
 def e2e_environment(settings: Settings, folder: Path, origin: str) -> dict[str, str]:
@@ -59,11 +67,23 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="python -m app.e2e_server")
     parser.add_argument("--port", type=int, default=8120)
     parser.add_argument("--origin", default="http://localhost:4320")
+    parser.add_argument("--booth", action="store_true", help="run the booth profile")
     args = parser.parse_args(argv)
 
     folder = Path(tempfile.mkdtemp(prefix="e2e-"))
     os.environ.update(e2e_environment(Settings(), folder, args.origin))  # type: ignore[call-arg]
     write_schedule(folder / "schedules")
+    if args.booth:
+        os.environ.update(
+            {
+                "APP_PROFILE": "booth",
+                "BOOTH_SUPPORT_LINE": "Test support line: 0000",
+                "BOOTH_IDLE_SECONDS": "30",
+            }
+        )
+        from app import schemas
+
+        schemas.SAFE_UNSUPERVISED_EXERCISES = BOOTH_TEST_EXERCISES
 
     # Imported only now, so cached settings and engines see the test database.
     import uvicorn
@@ -75,7 +95,8 @@ def main(argv: list[str] | None = None) -> None:
     get_settings.cache_clear()
     settings = get_settings()
     recreate_schema(settings.database_url)
-    print(f"e2e API on port {args.port}, test database, Test mode", file=sys.stderr)
+    profile = "booth" if args.booth else "standard"
+    print(f"e2e API on port {args.port}, test database, Test mode, {profile}", file=sys.stderr)
     uvicorn.run(create_app(settings, enforce_environment=True), host="127.0.0.1", port=args.port)
 
 

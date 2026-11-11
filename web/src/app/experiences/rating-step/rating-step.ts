@@ -13,7 +13,7 @@ import { RatingScale } from '../../shared/rating-scale';
       <p>{{ item.intro }}</p>
     }
     <app-rating-scale [item]="item" [(value)]="value" />
-    <button type="button" [disabled]="value() === null" (click)="submit()">Continue</button>
+    <button class="primary" type="button" [disabled]="value() === null" (click)="submit()">Continue</button>
   `,
 })
 export class RatingStep {

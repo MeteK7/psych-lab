@@ -155,14 +155,14 @@ The picture doesn't react to the choice here, so it can't steer it.
 ---
 
 ## 5. Visual layer and scene policy
-The contract is in plan §5, and is built in `web/src/app/shared/visual/`. The path, wall and bridge illustrate the process. **They aren't part of the method, no research tested them, and the science text doesn't cite them.**
+The contract is in plan §5, and is built in `web/src/app/shared/visual/`. Since MCII step 4d (2026-11-08) the picture is the Visual System scene `mcii.path` (`shared/visual/scenes/action/mcii-path.scene.ts`; reviews in `visual-reviews.md`), bound in `mcii.ts` with `provideSceneVisuals('mcii.path', 'mcii')`. It replaces the built-in `builtin.v1` picture, which production keeps until the merge. `visual_source` now reads like `scene:mcii.path@4;theme:action@1`. When a step shows a different scene from the step before, the change plays (the wall rises; the bridge is drawn; the path to a wish set aside gets quieter), except under reduced motion. The path, wall and bridge illustrate the process. **They aren't part of the method, no research tested them, and the science text doesn't cite them.**
 
 | Scene | Used at | Shows | Must not show | Alt text |
 |---|---|---|---|---|
 | `mcii.future` | Wish, best part | Path to a far marker | The wish achieved; reward or celebration; the person | A path leading to a far marker. |
 | `mcii.contrast` | What's in the way, Look at both | Path, marker and a low wall, with equal weight for marker and wall | A towering or threatening wall; shame; a verdict on the wish | A path leading to a far marker, with a low wall across it. |
 | `mcii.plan` | What you'll do, Keeping it (with a plan) | The same, plus a **dashed** bridge over the wall | A solid bridge or a completed crossing, which would suggest it's already solved | A path leading to a far marker, with a low wall across it and a dashed bridge over the wall. |
-| `mcii.aside` | What you'll do, Keeping it (set aside) | The same path, faded | Failure, loss or a blocked sign | A faded path leading to a far marker. |
+| `mcii.aside` | What you'll do, Keeping it (set aside) | The same path, quieter (lighter line); the marker keeps its colour | Failure, loss or a blocked sign; the wish greyed out | A faded path leading to a far marker. |
 
 **Rules for any future source:**
 - It doesn't depict the person's own wish achieved. Whether such pictures help or harm is unknown; my inference is that they risk the indulging the method warns against.

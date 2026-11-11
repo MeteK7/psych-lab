@@ -31,15 +31,11 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 6
-            }
+            "result": {}
           }
         ],
         "plan": null,
-        "ratings": {
-          "unpleasant_pre": 6
-        },
+        "ratings": null,
         "started_at": "2026-11-02T10:00:00.000Z",
         "ended_at": null,
         "n1_reveal_id": null
@@ -59,9 +55,7 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 6
-            }
+            "result": {}
           },
           {
             "step": "action_bridge",
@@ -69,26 +63,11 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "rehearsed": true,
-              "has_obstacle_plan": false
-            }
+            "result": {}
           }
         ],
-        "plan": {
-          "type": "action_bridge",
-          "goal": "linear algebra",
-          "cue_type": "time",
-          "cue": "7 pm",
-          "first_step": "open chapter 3",
-          "obstacle": null,
-          "obstacle_response": null,
-          "plan_text": "When it is 7 pm, then I will open chapter 3.",
-          "rehearsed": true
-        },
-        "ratings": {
-          "unpleasant_pre": 6
-        },
+        "plan": null,
+        "ratings": null,
         "started_at": "2026-11-02T10:00:00.000Z",
         "ended_at": null,
         "n1_reveal_id": null
@@ -108,9 +87,7 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 6
-            }
+            "result": {}
           },
           {
             "step": "action_bridge",
@@ -118,10 +95,7 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "rehearsed": true,
-              "has_obstacle_plan": false
-            }
+            "result": {}
           },
           {
             "step": "post_rating",
@@ -129,38 +103,23 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 3
-            }
+            "result": {}
           }
         ],
-        "plan": {
-          "type": "action_bridge",
-          "goal": "linear algebra",
-          "cue_type": "time",
-          "cue": "7 pm",
-          "first_step": "open chapter 3",
-          "obstacle": null,
-          "obstacle_response": null,
-          "plan_text": "When it is 7 pm, then I will open chapter 3.",
-          "rehearsed": true
-        },
-        "ratings": {
-          "unpleasant_pre": 6,
-          "unpleasant_post": 3
-        },
+        "plan": null,
+        "ratings": null,
         "started_at": "2026-11-02T10:00:00.000Z",
         "ended_at": "2026-11-02T10:00:00.000Z",
         "n1_reveal_id": null
       }
     ],
     "screens": [
-      "Plan your first step Practice: not part of your experiment. What happensRate how starting feels.Write a short when-then plan and read it twice.Rate again.About 3 minutes. Your answers are saved after each step. You can stop at any time.Why this exercise?The science behind it: Implementation intentions What you doYou write down what you want to start, when you'll start, a tiny first step, and what you'll do if something gets in the way. Then you read your plan twice. The method: If-then planning (implementation intentions)Instead of only deciding what you want to do, you link a specific moment to a specific action: “When it's 7 pm and I'm at my desk, I'll open chapter 3.” The idea is that the moment itself then prompts you, so starting needs less deciding on the spot. What research says about this methodResearch found that people who made if-then plans reached their goals more often than people who only set the goal, across 94 experiments. Gollwitzer & Sheeran, 2006 Full text checkedA larger review of 642 experiments found that, after allowing for experiments that were never published, the benefit is small. It was larger when people strongly wanted the goal, and close to zero when they didn't. Sheeran, Listrom & Gollwitzer, 2025 Full text checked About this exerciseThis exercise follows the if-then planning method, but this version hasn't been tested itself. The research above tested if-then plans in its own forms and settings, not in this app. LimitsExpect a small effect at most, and only for goals you genuinely want.Effects were smaller online and in everyday settings than in the lab. Sources Gollwitzer & Sheeran, 2006. Implementation intentions and goal achievement: A meta-analysis of effects and processes. Advances in Experimental Social Psychology, 38, 69–119 (opens in a new tab) Sheeran, Listrom & Gollwitzer, 2025. The when and how of planning: Meta-analysis of the scope and components of implementation intentions in 642 tests. European Review of Social Psychology, 36(1), 162–194 (opens in a new tab)BeginBack",
+      "Plan your first step Practice: not part of your experiment. What happensRate how starting feels.Write a short when-then plan and read it twice.Rate again.About 3 minutes. Nothing you write or choose is saved. Only that you did this exercise, and when, is kept on this computer. You can stop at any time.Why this exercise?The science behind it: Implementation intentions What you doYou write down what you want to start, when you'll start, a tiny first step, and what you'll do if something gets in the way. Then you read your plan twice. The method: If-then planning (implementation intentions)Instead of only deciding what you want to do, you link a specific moment to a specific action: “When it's 7 pm and I'm at my desk, I'll open chapter 3.” The idea is that the moment itself then prompts you, so starting needs less deciding on the spot. What research says about this methodResearch found that people who made if-then plans reached their goals more often than people who only set the goal, across 94 experiments. Gollwitzer & Sheeran, 2006 Full text checkedA larger review of 642 experiments found that, after allowing for experiments that were never published, the benefit is small. It was larger when people strongly wanted the goal, and close to zero when they didn't. Sheeran, Listrom & Gollwitzer, 2025 Full text checked About this exerciseThis exercise follows the if-then planning method, but this version hasn't been tested itself. The research above tested if-then plans in its own forms and settings, not in this app. LimitsExpect a small effect at most, and only for goals you genuinely want.Effects were smaller online and in everyday settings than in the lab. Sources Gollwitzer & Sheeran, 2006. Implementation intentions and goal achievement: A meta-analysis of effects and processes. Advances in Experimental Social Psychology, 38, 69–119 (opens in a new tab) Sheeran, Listrom & Gollwitzer, 2025. The when and how of planning: Meta-analysis of the scope and components of implementation intentions in 642 tests. European Review of Social Psychology, 36(1), 162–194 (opens in a new tab)BeginBack",
       "Plan your first step Step 1 of 3: How starting feels Think of what you want to start next.Right now, how unpleasant does starting it feel?0123456789100 = not at all unpleasant10 = extremely unpleasantContinueStop the exercise",
       "Plan your first step Step 2 of 3: Plan your first step You'll write a short plan: when you'll start, and the first small thing you'll do. Then you'll read it twice.What do you want to start?When will you start? Pick the kind of moment that suits you: At a set time When I'm at a certain place Right after something I already do When it is…Then I will… (one tiny first action, under two minutes)Optional: what might get in the way?If that happens, then I will…ContinueStop the exercise",
       "Plan your first step Step 2 of 3: Plan your first step You'll write a short plan: when you'll start, and the first small thing you'll do. Then you'll read it twice.Your planWhen it is 7 pm, then I will open chapter 3.Read your plan to yourself twice, slowly. Picture yourself at that moment, doing the first action. I've read my plan twice Change planContinueStop the exercise",
       "Plan your first step Step 3 of 3: How starting feels Think of what you want to start next.Right now, how unpleasant does starting it feel?0123456789100 = not at all unpleasant10 = extremely unpleasantContinueStop the exercise",
-      "Plan your first step Exercise complete Saved at 13:00. Back to Action and growth · My recordsWhy this exercise?The science behind it: Implementation intentions What you doYou write down what you want to start, when you'll start, a tiny first step, and what you'll do if something gets in the way. Then you read your plan twice. The method: If-then planning (implementation intentions)Instead of only deciding what you want to do, you link a specific moment to a specific action: “When it's 7 pm and I'm at my desk, I'll open chapter 3.” The idea is that the moment itself then prompts you, so starting needs less deciding on the spot. What research says about this methodResearch found that people who made if-then plans reached their goals more often than people who only set the goal, across 94 experiments. Gollwitzer & Sheeran, 2006 Full text checkedA larger review of 642 experiments found that, after allowing for experiments that were never published, the benefit is small. It was larger when people strongly wanted the goal, and close to zero when they didn't. Sheeran, Listrom & Gollwitzer, 2025 Full text checked About this exerciseThis exercise follows the if-then planning method, but this version hasn't been tested itself. The research above tested if-then plans in its own forms and settings, not in this app. LimitsExpect a small effect at most, and only for goals you genuinely want.Effects were smaller online and in everyday settings than in the lab. Sources Gollwitzer & Sheeran, 2006. Implementation intentions and goal achievement: A meta-analysis of effects and processes. Advances in Experimental Social Psychology, 38, 69–119 (opens in a new tab) Sheeran, Listrom & Gollwitzer, 2025. The when and how of planning: Meta-analysis of the scope and components of implementation intentions in 642 tests. European Review of Social Psychology, 36(1), 162–194 (opens in a new tab)"
+      "Plan your first step Exercise complete Finished at 13:00. Only that you did this exercise, and when, is kept. Take it with youWhen it is 7 pm, then I will open chapter 3.It isn't kept here. Copy it, or save it as a file, if you want it.CopySave as a fileDoneBack to Action and growth · My recordsWhy this exercise?The science behind it: Implementation intentions What you doYou write down what you want to start, when you'll start, a tiny first step, and what you'll do if something gets in the way. Then you read your plan twice. The method: If-then planning (implementation intentions)Instead of only deciding what you want to do, you link a specific moment to a specific action: “When it's 7 pm and I'm at my desk, I'll open chapter 3.” The idea is that the moment itself then prompts you, so starting needs less deciding on the spot. What research says about this methodResearch found that people who made if-then plans reached their goals more often than people who only set the goal, across 94 experiments. Gollwitzer & Sheeran, 2006 Full text checkedA larger review of 642 experiments found that, after allowing for experiments that were never published, the benefit is small. It was larger when people strongly wanted the goal, and close to zero when they didn't. Sheeran, Listrom & Gollwitzer, 2025 Full text checked About this exerciseThis exercise follows the if-then planning method, but this version hasn't been tested itself. The research above tested if-then plans in its own forms and settings, not in this app. LimitsExpect a small effect at most, and only for goals you genuinely want.Effects were smaller online and in everyday settings than in the lab. Sources Gollwitzer & Sheeran, 2006. Implementation intentions and goal achievement: A meta-analysis of effects and processes. Advances in Experimental Social Psychology, 38, 69–119 (opens in a new tab) Sheeran, Listrom & Gollwitzer, 2025. The when and how of planning: Meta-analysis of the scope and components of implementation intentions in 642 tests. European Review of Social Psychology, 36(1), 162–194 (opens in a new tab)"
     ]
   },
   "goal, Try it": {
@@ -195,15 +154,11 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 6
-            }
+            "result": {}
           }
         ],
         "plan": null,
-        "ratings": {
-          "unpleasant_pre": 6
-        },
+        "ratings": null,
         "started_at": "2026-11-02T10:00:00.000Z",
         "ended_at": null,
         "n1_reveal_id": null
@@ -223,9 +178,7 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 6
-            }
+            "result": {}
           },
           {
             "step": "goal_restatement",
@@ -233,20 +186,11 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "read_back": true
-            }
+            "result": {}
           }
         ],
-        "plan": {
-          "type": "goal_restatement",
-          "goal": "learn linear algebra",
-          "topic": "eigenvectors",
-          "read_back": true
-        },
-        "ratings": {
-          "unpleasant_pre": 6
-        },
+        "plan": null,
+        "ratings": null,
         "started_at": "2026-11-02T10:00:00.000Z",
         "ended_at": null,
         "n1_reveal_id": null
@@ -266,9 +210,7 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 6
-            }
+            "result": {}
           },
           {
             "step": "goal_restatement",
@@ -276,9 +218,7 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "read_back": true
-            }
+            "result": {}
           },
           {
             "step": "post_rating",
@@ -286,33 +226,23 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 3
-            }
+            "result": {}
           }
         ],
-        "plan": {
-          "type": "goal_restatement",
-          "goal": "learn linear algebra",
-          "topic": "eigenvectors",
-          "read_back": true
-        },
-        "ratings": {
-          "unpleasant_pre": 6,
-          "unpleasant_post": 3
-        },
+        "plan": null,
+        "ratings": null,
         "started_at": "2026-11-02T10:00:00.000Z",
         "ended_at": "2026-11-02T10:00:00.000Z",
         "n1_reveal_id": null
       }
     ],
     "screens": [
-      "Write down your goal Practice: not part of your experiment. What happensRate how starting feels.Write your goal and today's topic and read them twice.Rate again.About 3 minutes. Your answers are saved after each step. You can stop at any time.Why this exercise?The science behind it: Goal intentions What you doYou write down what you want to start and what you'll work on today, then read both twice. The method: Stating your goal (the comparison exercise)Research on if-then planning compares people who make a plan with people who only state their goal. This exercise is that plain version: no “when”, no if-then plan and no plan for obstacles. You can try it next to “Plan your first step” and compare. What research says about this methodResearch found that adding an if-then plan led to more goal progress than stating the goal alone. Stating the goal was the point of comparison in that research, not a method tested on its own. Gollwitzer & Sheeran, 2006 Full text checked Sheeran, Listrom & Gollwitzer, 2025 Full text checked About this exerciseThis exercise hasn't been tested itself. It is offered so that you can try the plain version and compare it with the planning one. LimitsDon't expect this exercise to change much by itself: it is the comparison version. Sources Gollwitzer & Sheeran, 2006. Implementation intentions and goal achievement: A meta-analysis of effects and processes. Advances in Experimental Social Psychology, 38, 69–119 (opens in a new tab) Sheeran, Listrom & Gollwitzer, 2025. The when and how of planning: Meta-analysis of the scope and components of implementation intentions in 642 tests. European Review of Social Psychology, 36(1), 162–194 (opens in a new tab)BeginBack",
+      "Write down your goal Practice: not part of your experiment. What happensRate how starting feels.Write your goal and today's topic and read them twice.Rate again.About 3 minutes. Nothing you write or choose is saved. Only that you did this exercise, and when, is kept on this computer. You can stop at any time.Why this exercise?The science behind it: Goal intentions What you doYou write down what you want to start and what you'll work on today, then read both twice. The method: Stating your goal (the comparison exercise)Research on if-then planning compares people who make a plan with people who only state their goal. This exercise is that plain version: no “when”, no if-then plan and no plan for obstacles. You can try it next to “Plan your first step” and compare. What research says about this methodResearch found that adding an if-then plan led to more goal progress than stating the goal alone. Stating the goal was the point of comparison in that research, not a method tested on its own. Gollwitzer & Sheeran, 2006 Full text checked Sheeran, Listrom & Gollwitzer, 2025 Full text checked About this exerciseThis exercise hasn't been tested itself. It is offered so that you can try the plain version and compare it with the planning one. LimitsDon't expect this exercise to change much by itself: it is the comparison version. Sources Gollwitzer & Sheeran, 2006. Implementation intentions and goal achievement: A meta-analysis of effects and processes. Advances in Experimental Social Psychology, 38, 69–119 (opens in a new tab) Sheeran, Listrom & Gollwitzer, 2025. The when and how of planning: Meta-analysis of the scope and components of implementation intentions in 642 tests. European Review of Social Psychology, 36(1), 162–194 (opens in a new tab)BeginBack",
       "Write down your goal Step 1 of 3: How starting feels Think of what you want to start next.Right now, how unpleasant does starting it feel?0123456789100 = not at all unpleasant10 = extremely unpleasantContinueStop the exercise",
       "Write down your goal Step 2 of 3: Write down your goal You'll write down your goal and what you'll work on today. Then you'll read them twice.What is your goal?What will you work on today?ContinueStop the exercise",
       "Write down your goal Step 2 of 3: Write down your goal You'll write down your goal and what you'll work on today. Then you'll read them twice.Your goal Goal: learn linear algebra Today: eigenvectors Read your goal and today's topic to yourself twice, slowly. I've read them twice ChangeContinueStop the exercise",
       "Write down your goal Step 3 of 3: How starting feels Think of what you want to start next.Right now, how unpleasant does starting it feel?0123456789100 = not at all unpleasant10 = extremely unpleasantContinueStop the exercise",
-      "Write down your goal Exercise complete Saved at 13:00. Back to Action and growth · My recordsWhy this exercise?The science behind it: Goal intentions What you doYou write down what you want to start and what you'll work on today, then read both twice. The method: Stating your goal (the comparison exercise)Research on if-then planning compares people who make a plan with people who only state their goal. This exercise is that plain version: no “when”, no if-then plan and no plan for obstacles. You can try it next to “Plan your first step” and compare. What research says about this methodResearch found that adding an if-then plan led to more goal progress than stating the goal alone. Stating the goal was the point of comparison in that research, not a method tested on its own. Gollwitzer & Sheeran, 2006 Full text checked Sheeran, Listrom & Gollwitzer, 2025 Full text checked About this exerciseThis exercise hasn't been tested itself. It is offered so that you can try the plain version and compare it with the planning one. LimitsDon't expect this exercise to change much by itself: it is the comparison version. Sources Gollwitzer & Sheeran, 2006. Implementation intentions and goal achievement: A meta-analysis of effects and processes. Advances in Experimental Social Psychology, 38, 69–119 (opens in a new tab) Sheeran, Listrom & Gollwitzer, 2025. The when and how of planning: Meta-analysis of the scope and components of implementation intentions in 642 tests. European Review of Social Psychology, 36(1), 162–194 (opens in a new tab)"
+      "Write down your goal Exercise complete Finished at 13:00. Only that you did this exercise, and when, is kept. Take it with youlearn linear algebraIt isn't kept here. Copy it, or save it as a file, if you want it.CopySave as a fileDoneBack to Action and growth · My recordsWhy this exercise?The science behind it: Goal intentions What you doYou write down what you want to start and what you'll work on today, then read both twice. The method: Stating your goal (the comparison exercise)Research on if-then planning compares people who make a plan with people who only state their goal. This exercise is that plain version: no “when”, no if-then plan and no plan for obstacles. You can try it next to “Plan your first step” and compare. What research says about this methodResearch found that adding an if-then plan led to more goal progress than stating the goal alone. Stating the goal was the point of comparison in that research, not a method tested on its own. Gollwitzer & Sheeran, 2006 Full text checked Sheeran, Listrom & Gollwitzer, 2025 Full text checked About this exerciseThis exercise hasn't been tested itself. It is offered so that you can try the plain version and compare it with the planning one. LimitsDon't expect this exercise to change much by itself: it is the comparison version. Sources Gollwitzer & Sheeran, 2006. Implementation intentions and goal achievement: A meta-analysis of effects and processes. Advances in Experimental Social Psychology, 38, 69–119 (opens in a new tab) Sheeran, Listrom & Gollwitzer, 2025. The when and how of planning: Meta-analysis of the scope and components of implementation intentions in 642 tests. European Review of Social Psychology, 36(1), 162–194 (opens in a new tab)"
     ]
   },
   "picture, Try it": {
@@ -349,15 +279,11 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 6
-            }
+            "result": {}
           }
         ],
         "plan": null,
-        "ratings": {
-          "unpleasant_pre": 6
-        },
+        "ratings": null,
         "started_at": "2026-11-02T10:00:00.000Z",
         "ended_at": null,
         "n1_reveal_id": null
@@ -378,9 +304,7 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 6
-            }
+            "result": {}
           },
           {
             "step": "state_reset",
@@ -389,29 +313,12 @@
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
             "result": {
-              "variant": "image",
-              "task": "dot",
-              "timing": {
-                "practice_seconds": 15,
-                "hold_seconds": 10,
-                "sets": 8,
-                "set_seconds": 24,
-                "rest_seconds": 10
-              },
-              "speed": 1,
-              "practice_runs": 0,
-              "practice": [],
-              "sets": [],
-              "mean_on_target": 0
+              "task": "dot"
             }
           }
         ],
         "plan": null,
-        "ratings": {
-          "unpleasant_pre": 6,
-          "image_vividness_pre": 5,
-          "image_emotionality_pre": 5
-        },
+        "ratings": null,
         "started_at": "2026-11-02T10:00:00.000Z",
         "ended_at": null,
         "n1_reveal_id": null
@@ -432,9 +339,7 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 6
-            }
+            "result": {}
           },
           {
             "step": "state_reset",
@@ -443,20 +348,7 @@
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
             "result": {
-              "variant": "image",
-              "task": "dot",
-              "timing": {
-                "practice_seconds": 15,
-                "hold_seconds": 10,
-                "sets": 8,
-                "set_seconds": 24,
-                "rest_seconds": 10
-              },
-              "speed": 1,
-              "practice_runs": 0,
-              "practice": [],
-              "sets": [],
-              "mean_on_target": 0
+              "task": "dot"
             }
           },
           {
@@ -465,28 +357,11 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "rehearsed": true,
-              "has_obstacle_plan": false
-            }
+            "result": {}
           }
         ],
-        "plan": {
-          "type": "action_bridge",
-          "goal": "linear algebra",
-          "cue_type": "time",
-          "cue": "7 pm",
-          "first_step": "open chapter 3",
-          "obstacle": null,
-          "obstacle_response": null,
-          "plan_text": "When it is 7 pm, then I will open chapter 3.",
-          "rehearsed": true
-        },
-        "ratings": {
-          "unpleasant_pre": 6,
-          "image_vividness_pre": 5,
-          "image_emotionality_pre": 5
-        },
+        "plan": null,
+        "ratings": null,
         "started_at": "2026-11-02T10:00:00.000Z",
         "ended_at": null,
         "n1_reveal_id": null
@@ -507,9 +382,7 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 6
-            }
+            "result": {}
           },
           {
             "step": "state_reset",
@@ -518,20 +391,7 @@
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
             "result": {
-              "variant": "image",
-              "task": "dot",
-              "timing": {
-                "practice_seconds": 15,
-                "hold_seconds": 10,
-                "sets": 8,
-                "set_seconds": 24,
-                "rest_seconds": 10
-              },
-              "speed": 1,
-              "practice_runs": 0,
-              "practice": [],
-              "sets": [],
-              "mean_on_target": 0
+              "task": "dot"
             }
           },
           {
@@ -540,10 +400,7 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "rehearsed": true,
-              "has_obstacle_plan": false
-            }
+            "result": {}
           },
           {
             "step": "post_rating",
@@ -551,44 +408,27 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 3
-            }
+            "result": {}
           }
         ],
-        "plan": {
-          "type": "action_bridge",
-          "goal": "linear algebra",
-          "cue_type": "time",
-          "cue": "7 pm",
-          "first_step": "open chapter 3",
-          "obstacle": null,
-          "obstacle_response": null,
-          "plan_text": "When it is 7 pm, then I will open chapter 3.",
-          "rehearsed": true
-        },
-        "ratings": {
-          "unpleasant_pre": 6,
-          "image_vividness_pre": 5,
-          "image_emotionality_pre": 5,
-          "unpleasant_post": 3
-        },
+        "plan": null,
+        "ratings": null,
         "started_at": "2026-11-02T10:00:00.000Z",
         "ended_at": "2026-11-02T10:00:00.000Z",
         "n1_reveal_id": null
       }
     ],
     "screens": [
-      "Picture it, then follow the dot Practice: not part of your experiment. What happensRate how starting feels.Choose a picture, try the game, then play 8 short rounds while holding the picture.Plan your first step.Rate again.About 10 minutes. Your answers are saved after each step. You can stop at any time.Why this exercise?The science behind it: Working-memory taxation What you doYou hold a picture of something you feel stuck on in mind while following a moving dot for 8 short rounds, then plan your first step. The method: Holding a picture in mind during a demanding task (working-memory taxation)Working-memory taxation involves deliberately placing demands on working memory, the limited mental resources we use to hold and process information in the moment. Researchers use this approach in different ways to investigate cognitive processes such as working-memory performance, attention and mental imagery.In this exercise, the technique is used for a specific purpose: you hold a negative mental image in mind while tracking a moving target. Because both tasks compete for limited cognitive resources, the image may become less vivid and its associated emotional intensity may decrease temporarily.This is one application of the broader approach, not the only purpose of working-memory taxation. What research says about this methodA lab experiment with 37 students found that recalling a recurring, unpleasant image of a feared future event during an eye-movement task made it less vivid straight afterwards than recall alone. The drop in how upsetting it felt was smaller and unclear. Engelhard et al., 2011 Full text checkedThe kind of task matters: in two lab experiments, a visual game played after a distressing film reduced later intrusive images; a word quiz did not, and once increased them. Holmes, James, Kilford & Deeprose, 2010 Full text checked About this exerciseThis is an experimental exercise, and this version hasn't been tested itself. The lab experiment used eye movements, not a moving dot. The planning step uses the method of “Plan your first step”. LimitsEffects were modest and immediate; how long they last is unknown.It hasn't been shown that a less vivid picture helps anyone start.Choose an everyday situation, never a painful personal memory. Sources Engelhard et al., 2011. Reducing vividness and emotional intensity of recurrent “flashforwards” by taxing working memory: An analogue study. Journal of Anxiety Disorders, 25, 599–603 (opens in a new tab) Holmes, James, Kilford & Deeprose, 2010. Key steps in developing a cognitive vaccine against traumatic flashbacks: Visuospatial Tetris versus verbal Pub Quiz. PLoS ONE, 5(11), e13706 (opens in a new tab)BeginBack",
+      "Picture it, then follow the dot Practice: not part of your experiment. What happensRate how starting feels.Choose a picture, try the game, then play 8 short rounds while holding the picture.Plan your first step.Rate again.About 10 minutes. Nothing you write or choose is saved. Only that you did this exercise, and when, is kept on this computer. You can stop at any time.Why this exercise?The science behind it: Working-memory taxation What you doYou hold a picture of something you feel stuck on in mind while following a moving dot for 8 short rounds, then plan your first step. The method: Holding a picture in mind during a demanding task (working-memory taxation)Working-memory taxation involves deliberately placing demands on working memory, the limited mental resources we use to hold and process information in the moment. Researchers use this approach in different ways to investigate cognitive processes such as working-memory performance, attention and mental imagery.In this exercise, the technique is used for a specific purpose: you hold a negative mental image in mind while tracking a moving target. Because both tasks compete for limited cognitive resources, the image may become less vivid and its associated emotional intensity may decrease temporarily.This is one application of the broader approach, not the only purpose of working-memory taxation. What research says about this methodA lab experiment with 37 students found that recalling a recurring, unpleasant image of a feared future event during an eye-movement task made it less vivid straight afterwards than recall alone. The drop in how upsetting it felt was smaller and unclear. Engelhard et al., 2011 Full text checkedThe kind of task matters: in two lab experiments, a visual game played after a distressing film reduced later intrusive images; a word quiz did not, and once increased them. Holmes, James, Kilford & Deeprose, 2010 Full text checked About this exerciseThis is an experimental exercise, and this version hasn't been tested itself. The lab experiment used eye movements, not a moving dot. The planning step uses the method of “Plan your first step”. LimitsEffects were modest and immediate; how long they last is unknown.It hasn't been shown that a less vivid picture helps anyone start.Choose an everyday situation, never a painful personal memory. Sources Engelhard et al., 2011. Reducing vividness and emotional intensity of recurrent “flashforwards” by taxing working memory: An analogue study. Journal of Anxiety Disorders, 25, 599–603 (opens in a new tab) Holmes, James, Kilford & Deeprose, 2010. Key steps in developing a cognitive vaccine against traumatic flashbacks: Visuospatial Tetris versus verbal Pub Quiz. PLoS ONE, 5(11), e13706 (opens in a new tab)BeginBack",
       "Picture it, then follow the dot Step 1 of 4: How starting feels Think of what you want to start next.Right now, how unpleasant does starting it feel?0123456789100 = not at all unpleasant10 = extremely unpleasantContinueStop the exercise",
       "Picture it, then follow the dot Step 2 of 4: Picture it, then follow the dot In this exercise you hold a picture in mind while following a moving dot on the screen. There are three parts:Choose a picture.Try the game for 15 seconds.Play 8 rounds of 24 seconds, with short pauses, while keeping your picture in mind.About 7 minutes. You can stop at any time with “Stop the exercise”.NextStop the exercise",
       "Picture it, then follow the dot Step 2 of 4: Picture it, then follow the dot Choose a pictureBring to mind a picture of something you feel stuck on or reluctant to start. For example:starting a task you've been putting offa part of your learning that feels hardsitting down and not knowing where to beginChoose an everyday situation, not a painful personal memory. If something painful comes up, stop. You can stop at any time.Describe your picture in a few wordsOnly you see this, as a reminder during the exercise. It isn't saved.NextStop the exercise",
       "Picture it, then follow the dot Step 2 of 4: Picture it, then follow the dot Your picture: “opening chapter 3”Bring your picture to mind now.How vivid is your picture right now?0123456789100 = not vivid at all10 = extremely vividHow unpleasant does your picture feel right now?0123456789100 = not at all10 = extremely Next Stop the exercise",
-      "Picture it, then follow the dot Step 2 of 4: Picture it, then follow the dot How the game worksthe dot moves slowlythe ring: keep your pointer inside ityour pointerA dot moves slowly around the box, with a ring around it. Keep your pointer inside the ring as the dot moves. The ring changes colour while you're inside it.Mouse or touchpad: just move the pointer; no clicking needed.Keyboard: press Tab to select the box, then move your marker (a small cross) with the arrow keys.Try it now for 15 seconds. This practice doesn't count, and you don't need your picture yet.Start practice Can't follow a moving dot? Use the sound versionThe sound version is an alternative for people who can't follow a moving dot. Like the dot version, it hasn't been tested itself; the lab research used eye movements.Stop the exercise",
+      "Picture it, then follow the dot Step 2 of 4: Picture it, then follow the dot How the game worksthe dot moves slowlythe ring: keep your pointer inside ityour pointerA dot moves slowly around the box, with a ring around it. Keep your pointer inside the ring as the dot moves. The ring changes colour and gets thicker while you're inside it.Mouse or touchpad: just move the pointer; no clicking needed.Keyboard: press Tab to select the box, then move your marker (a small cross) with the arrow keys.Try it now for 15 seconds. This practice doesn't count, and you don't need your picture yet.Start practice Can't follow a moving dot? Use the sound versionThe sound version is an alternative for people who can't follow a moving dot. Like the dot version, it hasn't been tested itself; the lab research used eye movements.Stop the exercise",
       "Picture it, then follow the dot Step 3 of 4: Plan your first step You'll write a short plan: when you'll start, and the first small thing you'll do. Then you'll read it twice.What do you want to start?When will you start? Pick the kind of moment that suits you: At a set time When I'm at a certain place Right after something I already do When it is…Then I will… (one tiny first action, under two minutes)Optional: what might get in the way?If that happens, then I will…ContinueStop the exercise",
       "Picture it, then follow the dot Step 3 of 4: Plan your first step You'll write a short plan: when you'll start, and the first small thing you'll do. Then you'll read it twice.Your planWhen it is 7 pm, then I will open chapter 3.Read your plan to yourself twice, slowly. Picture yourself at that moment, doing the first action. I've read my plan twice Change planContinueStop the exercise",
       "Picture it, then follow the dot Step 4 of 4: How starting feels Think of what you want to start next.Right now, how unpleasant does starting it feel?0123456789100 = not at all unpleasant10 = extremely unpleasantContinueStop the exercise",
-      "Picture it, then follow the dot Exercise complete Saved at 13:00. Back to Action and growth · My recordsWhy this exercise?The science behind it: Working-memory taxation What you doYou hold a picture of something you feel stuck on in mind while following a moving dot for 8 short rounds, then plan your first step. The method: Holding a picture in mind during a demanding task (working-memory taxation)Working-memory taxation involves deliberately placing demands on working memory, the limited mental resources we use to hold and process information in the moment. Researchers use this approach in different ways to investigate cognitive processes such as working-memory performance, attention and mental imagery.In this exercise, the technique is used for a specific purpose: you hold a negative mental image in mind while tracking a moving target. Because both tasks compete for limited cognitive resources, the image may become less vivid and its associated emotional intensity may decrease temporarily.This is one application of the broader approach, not the only purpose of working-memory taxation. What research says about this methodA lab experiment with 37 students found that recalling a recurring, unpleasant image of a feared future event during an eye-movement task made it less vivid straight afterwards than recall alone. The drop in how upsetting it felt was smaller and unclear. Engelhard et al., 2011 Full text checkedThe kind of task matters: in two lab experiments, a visual game played after a distressing film reduced later intrusive images; a word quiz did not, and once increased them. Holmes, James, Kilford & Deeprose, 2010 Full text checked About this exerciseThis is an experimental exercise, and this version hasn't been tested itself. The lab experiment used eye movements, not a moving dot. The planning step uses the method of “Plan your first step”. LimitsEffects were modest and immediate; how long they last is unknown.It hasn't been shown that a less vivid picture helps anyone start.Choose an everyday situation, never a painful personal memory. Sources Engelhard et al., 2011. Reducing vividness and emotional intensity of recurrent “flashforwards” by taxing working memory: An analogue study. Journal of Anxiety Disorders, 25, 599–603 (opens in a new tab) Holmes, James, Kilford & Deeprose, 2010. Key steps in developing a cognitive vaccine against traumatic flashbacks: Visuospatial Tetris versus verbal Pub Quiz. PLoS ONE, 5(11), e13706 (opens in a new tab)"
+      "Picture it, then follow the dot Exercise complete Finished at 13:00. Only that you did this exercise, and when, is kept. Take it with youWhen it is 7 pm, then I will open chapter 3.It isn't kept here. Copy it, or save it as a file, if you want it.CopySave as a fileDoneBack to Action and growth · My recordsWhy this exercise?The science behind it: Working-memory taxation What you doYou hold a picture of something you feel stuck on in mind while following a moving dot for 8 short rounds, then plan your first step. The method: Holding a picture in mind during a demanding task (working-memory taxation)Working-memory taxation involves deliberately placing demands on working memory, the limited mental resources we use to hold and process information in the moment. Researchers use this approach in different ways to investigate cognitive processes such as working-memory performance, attention and mental imagery.In this exercise, the technique is used for a specific purpose: you hold a negative mental image in mind while tracking a moving target. Because both tasks compete for limited cognitive resources, the image may become less vivid and its associated emotional intensity may decrease temporarily.This is one application of the broader approach, not the only purpose of working-memory taxation. What research says about this methodA lab experiment with 37 students found that recalling a recurring, unpleasant image of a feared future event during an eye-movement task made it less vivid straight afterwards than recall alone. The drop in how upsetting it felt was smaller and unclear. Engelhard et al., 2011 Full text checkedThe kind of task matters: in two lab experiments, a visual game played after a distressing film reduced later intrusive images; a word quiz did not, and once increased them. Holmes, James, Kilford & Deeprose, 2010 Full text checked About this exerciseThis is an experimental exercise, and this version hasn't been tested itself. The lab experiment used eye movements, not a moving dot. The planning step uses the method of “Plan your first step”. LimitsEffects were modest and immediate; how long they last is unknown.It hasn't been shown that a less vivid picture helps anyone start.Choose an everyday situation, never a painful personal memory. Sources Engelhard et al., 2011. Reducing vividness and emotional intensity of recurrent “flashforwards” by taxing working memory: An analogue study. Journal of Anxiety Disorders, 25, 599–603 (opens in a new tab) Holmes, James, Kilford & Deeprose, 2010. Key steps in developing a cognitive vaccine against traumatic flashbacks: Visuospatial Tetris versus verbal Pub Quiz. PLoS ONE, 5(11), e13706 (opens in a new tab)"
     ]
   },
   "game, Try it": {
@@ -625,15 +465,11 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 6
-            }
+            "result": {}
           }
         ],
         "plan": null,
-        "ratings": {
-          "unpleasant_pre": 6
-        },
+        "ratings": null,
         "started_at": "2026-11-02T10:00:00.000Z",
         "ended_at": null,
         "n1_reveal_id": null
@@ -654,9 +490,7 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 6
-            }
+            "result": {}
           },
           {
             "step": "game_only",
@@ -665,27 +499,12 @@
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
             "result": {
-              "variant": "game_only",
-              "task": "dot",
-              "timing": {
-                "practice_seconds": 15,
-                "hold_seconds": 10,
-                "sets": 8,
-                "set_seconds": 24,
-                "rest_seconds": 10
-              },
-              "speed": 1,
-              "practice_runs": 0,
-              "practice": [],
-              "sets": [],
-              "mean_on_target": 0
+              "task": "dot"
             }
           }
         ],
         "plan": null,
-        "ratings": {
-          "unpleasant_pre": 6
-        },
+        "ratings": null,
         "started_at": "2026-11-02T10:00:00.000Z",
         "ended_at": null,
         "n1_reveal_id": null
@@ -706,9 +525,7 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 6
-            }
+            "result": {}
           },
           {
             "step": "game_only",
@@ -717,20 +534,7 @@
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
             "result": {
-              "variant": "game_only",
-              "task": "dot",
-              "timing": {
-                "practice_seconds": 15,
-                "hold_seconds": 10,
-                "sets": 8,
-                "set_seconds": 24,
-                "rest_seconds": 10
-              },
-              "speed": 1,
-              "practice_runs": 0,
-              "practice": [],
-              "sets": [],
-              "mean_on_target": 0
+              "task": "dot"
             }
           },
           {
@@ -739,26 +543,11 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "rehearsed": true,
-              "has_obstacle_plan": false
-            }
+            "result": {}
           }
         ],
-        "plan": {
-          "type": "action_bridge",
-          "goal": "linear algebra",
-          "cue_type": "time",
-          "cue": "7 pm",
-          "first_step": "open chapter 3",
-          "obstacle": null,
-          "obstacle_response": null,
-          "plan_text": "When it is 7 pm, then I will open chapter 3.",
-          "rehearsed": true
-        },
-        "ratings": {
-          "unpleasant_pre": 6
-        },
+        "plan": null,
+        "ratings": null,
         "started_at": "2026-11-02T10:00:00.000Z",
         "ended_at": null,
         "n1_reveal_id": null
@@ -779,9 +568,7 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 6
-            }
+            "result": {}
           },
           {
             "step": "game_only",
@@ -790,20 +577,7 @@
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
             "result": {
-              "variant": "game_only",
-              "task": "dot",
-              "timing": {
-                "practice_seconds": 15,
-                "hold_seconds": 10,
-                "sets": 8,
-                "set_seconds": 24,
-                "rest_seconds": 10
-              },
-              "speed": 1,
-              "practice_runs": 0,
-              "practice": [],
-              "sets": [],
-              "mean_on_target": 0
+              "task": "dot"
             }
           },
           {
@@ -812,10 +586,7 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "rehearsed": true,
-              "has_obstacle_plan": false
-            }
+            "result": {}
           },
           {
             "step": "post_rating",
@@ -823,40 +594,25 @@
             "content_version": "2",
             "started_at": "2026-11-02T10:00:00.000Z",
             "ended_at": "2026-11-02T10:00:00.000Z",
-            "result": {
-              "unpleasant": 3
-            }
+            "result": {}
           }
         ],
-        "plan": {
-          "type": "action_bridge",
-          "goal": "linear algebra",
-          "cue_type": "time",
-          "cue": "7 pm",
-          "first_step": "open chapter 3",
-          "obstacle": null,
-          "obstacle_response": null,
-          "plan_text": "When it is 7 pm, then I will open chapter 3.",
-          "rehearsed": true
-        },
-        "ratings": {
-          "unpleasant_pre": 6,
-          "unpleasant_post": 3
-        },
+        "plan": null,
+        "ratings": null,
         "started_at": "2026-11-02T10:00:00.000Z",
         "ended_at": "2026-11-02T10:00:00.000Z",
         "n1_reveal_id": null
       }
     ],
     "screens": [
-      "Follow the dot, then plan Practice: not part of your experiment. What happensRate how starting feels.Try the game, then play 8 short rounds.Plan your first step.Rate again.About 9 minutes. Your answers are saved after each step. You can stop at any time.Why this exercise?The science behind it: Distraction What you doYou follow a moving dot for 8 short rounds without holding any picture in mind. Afterwards you plan your first step. The method: A short, focused game (the comparison exercise)This is the same game as “Picture it, then follow the dot”, with the same rounds and pauses, but without the picture. Comparing the two shows whether holding the picture adds anything beyond a short break or a distraction. What research says about this methodResearch suggests that turning your attention to something else can ease difficult feelings for a while: a review of emotion-regulation experiments reported a small benefit of distraction. Webb, Miles & Sheeran, 2012 Summary checked; full text not yet About this exerciseThis exercise hasn't been tested itself. The game and its timing match the picture exercise exactly, so the two can be compared fairly. The planning step at the end uses the same method as “Plan your first step”. LimitsHow long any effect of a break or distraction lasts is unknown.A game on its own isn't expected to make starting easier. Sources Webb, Miles & Sheeran, 2012. Dealing with feeling: A meta-analysis of the effectiveness of strategies derived from the process model of emotion regulation. Psychological Bulletin, 138(4), 775–808 (opens in a new tab) (summary checked; full text not yet)BeginBack",
+      "Follow the dot, then plan Practice: not part of your experiment. What happensRate how starting feels.Try the game, then play 8 short rounds.Plan your first step.Rate again.About 9 minutes. Nothing you write or choose is saved. Only that you did this exercise, and when, is kept on this computer. You can stop at any time.Why this exercise?The science behind it: Distraction What you doYou follow a moving dot for 8 short rounds without holding any picture in mind. Afterwards you plan your first step. The method: A short, focused game (the comparison exercise)This is the same game as “Picture it, then follow the dot”, with the same rounds and pauses, but without the picture. Comparing the two shows whether holding the picture adds anything beyond a short break or a distraction. What research says about this methodResearch suggests that turning your attention to something else can ease difficult feelings for a while: a review of emotion-regulation experiments reported a small benefit of distraction. Webb, Miles & Sheeran, 2012 Summary checked; full text not yet About this exerciseThis exercise hasn't been tested itself. The game and its timing match the picture exercise exactly, so the two can be compared fairly. The planning step at the end uses the same method as “Plan your first step”. LimitsHow long any effect of a break or distraction lasts is unknown.A game on its own isn't expected to make starting easier. Sources Webb, Miles & Sheeran, 2012. Dealing with feeling: A meta-analysis of the effectiveness of strategies derived from the process model of emotion regulation. Psychological Bulletin, 138(4), 775–808 (opens in a new tab) (summary checked; full text not yet)BeginBack",
       "Follow the dot, then plan Step 1 of 4: How starting feels Think of what you want to start next.Right now, how unpleasant does starting it feel?0123456789100 = not at all unpleasant10 = extremely unpleasantContinueStop the exercise",
       "Follow the dot, then plan Step 2 of 4: Follow the dot In this exercise you follow a moving dot on the screen. There are two parts:Try the game for 15 seconds.Play 8 rounds of 24 seconds, with short pauses.About 6 minutes. You can stop at any time with “Stop the exercise”.NextStop the exercise",
-      "Follow the dot, then plan Step 2 of 4: Follow the dot How the game worksthe dot moves slowlythe ring: keep your pointer inside ityour pointerA dot moves slowly around the box, with a ring around it. Keep your pointer inside the ring as the dot moves. The ring changes colour while you're inside it.Mouse or touchpad: just move the pointer; no clicking needed.Keyboard: press Tab to select the box, then move your marker (a small cross) with the arrow keys.Try it now for 15 seconds. This practice doesn't count.Start practice Can't follow a moving dot? Use the sound versionThe sound version is an alternative for people who can't follow a moving dot. Like the dot version, it hasn't been tested itself; the lab research used eye movements.Stop the exercise",
+      "Follow the dot, then plan Step 2 of 4: Follow the dot How the game worksthe dot moves slowlythe ring: keep your pointer inside ityour pointerA dot moves slowly around the box, with a ring around it. Keep your pointer inside the ring as the dot moves. The ring changes colour and gets thicker while you're inside it.Mouse or touchpad: just move the pointer; no clicking needed.Keyboard: press Tab to select the box, then move your marker (a small cross) with the arrow keys.Try it now for 15 seconds. This practice doesn't count.Start practice Can't follow a moving dot? Use the sound versionThe sound version is an alternative for people who can't follow a moving dot. Like the dot version, it hasn't been tested itself; the lab research used eye movements.Stop the exercise",
       "Follow the dot, then plan Step 3 of 4: Plan your first step You'll write a short plan: when you'll start, and the first small thing you'll do. Then you'll read it twice.What do you want to start?When will you start? Pick the kind of moment that suits you: At a set time When I'm at a certain place Right after something I already do When it is…Then I will… (one tiny first action, under two minutes)Optional: what might get in the way?If that happens, then I will…ContinueStop the exercise",
       "Follow the dot, then plan Step 3 of 4: Plan your first step You'll write a short plan: when you'll start, and the first small thing you'll do. Then you'll read it twice.Your planWhen it is 7 pm, then I will open chapter 3.Read your plan to yourself twice, slowly. Picture yourself at that moment, doing the first action. I've read my plan twice Change planContinueStop the exercise",
       "Follow the dot, then plan Step 4 of 4: How starting feels Think of what you want to start next.Right now, how unpleasant does starting it feel?0123456789100 = not at all unpleasant10 = extremely unpleasantContinueStop the exercise",
-      "Follow the dot, then plan Exercise complete Saved at 13:00. Back to Action and growth · My recordsWhy this exercise?The science behind it: Distraction What you doYou follow a moving dot for 8 short rounds without holding any picture in mind. Afterwards you plan your first step. The method: A short, focused game (the comparison exercise)This is the same game as “Picture it, then follow the dot”, with the same rounds and pauses, but without the picture. Comparing the two shows whether holding the picture adds anything beyond a short break or a distraction. What research says about this methodResearch suggests that turning your attention to something else can ease difficult feelings for a while: a review of emotion-regulation experiments reported a small benefit of distraction. Webb, Miles & Sheeran, 2012 Summary checked; full text not yet About this exerciseThis exercise hasn't been tested itself. The game and its timing match the picture exercise exactly, so the two can be compared fairly. The planning step at the end uses the same method as “Plan your first step”. LimitsHow long any effect of a break or distraction lasts is unknown.A game on its own isn't expected to make starting easier. Sources Webb, Miles & Sheeran, 2012. Dealing with feeling: A meta-analysis of the effectiveness of strategies derived from the process model of emotion regulation. Psychological Bulletin, 138(4), 775–808 (opens in a new tab) (summary checked; full text not yet)"
+      "Follow the dot, then plan Exercise complete Finished at 13:00. Only that you did this exercise, and when, is kept. Take it with youWhen it is 7 pm, then I will open chapter 3.It isn't kept here. Copy it, or save it as a file, if you want it.CopySave as a fileDoneBack to Action and growth · My recordsWhy this exercise?The science behind it: Distraction What you doYou follow a moving dot for 8 short rounds without holding any picture in mind. Afterwards you plan your first step. The method: A short, focused game (the comparison exercise)This is the same game as “Picture it, then follow the dot”, with the same rounds and pauses, but without the picture. Comparing the two shows whether holding the picture adds anything beyond a short break or a distraction. What research says about this methodResearch suggests that turning your attention to something else can ease difficult feelings for a while: a review of emotion-regulation experiments reported a small benefit of distraction. Webb, Miles & Sheeran, 2012 Summary checked; full text not yet About this exerciseThis exercise hasn't been tested itself. The game and its timing match the picture exercise exactly, so the two can be compared fairly. The planning step at the end uses the same method as “Plan your first step”. LimitsHow long any effect of a break or distraction lasts is unknown.A game on its own isn't expected to make starting easier. Sources Webb, Miles & Sheeran, 2012. Dealing with feeling: A meta-analysis of the effectiveness of strategies derived from the process model of emotion regulation. Psychological Bulletin, 138(4), 775–808 (opens in a new tab) (summary checked; full text not yet)"
     ]
   },
   "plan, experiment": {
@@ -1444,7 +1200,7 @@
       "Picture it, then follow the dot Step 2 of 4: Picture it, then follow the dot In this exercise you hold a picture in mind while following a moving dot on the screen. There are three parts:Choose a picture.Try the game for 15 seconds.Play 8 rounds of 24 seconds, with short pauses, while keeping your picture in mind.About 7 minutes. You can stop at any time with “Stop the exercise”.NextStop the exercise",
       "Picture it, then follow the dot Step 2 of 4: Picture it, then follow the dot Choose a pictureBring to mind a picture of something you feel stuck on or reluctant to start. For example:starting a task you've been putting offa part of your learning that feels hardsitting down and not knowing where to beginFor your experiment, choose something about what you plan to learn today.Choose an everyday situation, not a painful personal memory. If something painful comes up, stop. You can stop at any time.Describe your picture in a few wordsOnly you see this, as a reminder during the exercise. It isn't saved.NextStop the exercise",
       "Picture it, then follow the dot Step 2 of 4: Picture it, then follow the dot Your picture: “opening chapter 3”Bring your picture to mind now.How vivid is your picture right now?0123456789100 = not vivid at all10 = extremely vividHow unpleasant does your picture feel right now?0123456789100 = not at all10 = extremely Next Stop the exercise",
-      "Picture it, then follow the dot Step 2 of 4: Picture it, then follow the dot How the game worksthe dot moves slowlythe ring: keep your pointer inside ityour pointerA dot moves slowly around the box, with a ring around it. Keep your pointer inside the ring as the dot moves. The ring changes colour while you're inside it.Mouse or touchpad: just move the pointer; no clicking needed.Keyboard: press Tab to select the box, then move your marker (a small cross) with the arrow keys.Try it now for 15 seconds. This practice doesn't count, and you don't need your picture yet.Start practiceStop the exercise",
+      "Picture it, then follow the dot Step 2 of 4: Picture it, then follow the dot How the game worksthe dot moves slowlythe ring: keep your pointer inside ityour pointerA dot moves slowly around the box, with a ring around it. Keep your pointer inside the ring as the dot moves. The ring changes colour and gets thicker while you're inside it.Mouse or touchpad: just move the pointer; no clicking needed.Keyboard: press Tab to select the box, then move your marker (a small cross) with the arrow keys.Try it now for 15 seconds. This practice doesn't count, and you don't need your picture yet.Start practiceStop the exercise",
       "Picture it, then follow the dot Step 3 of 4: Plan your first step You'll write a short plan: when you'll start, and the first small thing you'll do. Then you'll read it twice.What do you want to start?When will you start? Pick the kind of moment that suits you: At a set time When I'm at a certain place Right after something I already do When it is…Then I will… (one tiny first action, under two minutes)Optional: what might get in the way?If that happens, then I will…ContinueStop the exercise",
       "Picture it, then follow the dot Step 3 of 4: Plan your first step You'll write a short plan: when you'll start, and the first small thing you'll do. Then you'll read it twice.Your planWhen it is 7 pm, then I will open chapter 3.Read your plan to yourself twice, slowly. Picture yourself at that moment, doing the first action. I've read my plan twice Change planContinueStop the exercise",
       "Picture it, then follow the dot Step 4 of 4: How starting feels Think of what you want to start next.Right now, how unpleasant does starting it feel?0123456789100 = not at all unpleasant10 = extremely unpleasantContinueStop the exercise",
@@ -1712,7 +1468,7 @@
       "Follow the dot, then plan Assigned for today by your experiment. What happensRate how starting feels.Try the game, then play 8 short rounds.Plan your first step.Rate again.About 9 minutes. Your answers are saved after each step. You can stop at any time.BeginBack",
       "Follow the dot, then plan Step 1 of 4: How starting feels Think of what you want to start next.Right now, how unpleasant does starting it feel?0123456789100 = not at all unpleasant10 = extremely unpleasantContinueStop the exercise",
       "Follow the dot, then plan Step 2 of 4: Follow the dot In this exercise you follow a moving dot on the screen. There are two parts:Try the game for 15 seconds.Play 8 rounds of 24 seconds, with short pauses.About 6 minutes. You can stop at any time with “Stop the exercise”.NextStop the exercise",
-      "Follow the dot, then plan Step 2 of 4: Follow the dot How the game worksthe dot moves slowlythe ring: keep your pointer inside ityour pointerA dot moves slowly around the box, with a ring around it. Keep your pointer inside the ring as the dot moves. The ring changes colour while you're inside it.Mouse or touchpad: just move the pointer; no clicking needed.Keyboard: press Tab to select the box, then move your marker (a small cross) with the arrow keys.Try it now for 15 seconds. This practice doesn't count.Start practiceStop the exercise",
+      "Follow the dot, then plan Step 2 of 4: Follow the dot How the game worksthe dot moves slowlythe ring: keep your pointer inside ityour pointerA dot moves slowly around the box, with a ring around it. Keep your pointer inside the ring as the dot moves. The ring changes colour and gets thicker while you're inside it.Mouse or touchpad: just move the pointer; no clicking needed.Keyboard: press Tab to select the box, then move your marker (a small cross) with the arrow keys.Try it now for 15 seconds. This practice doesn't count.Start practiceStop the exercise",
       "Follow the dot, then plan Step 3 of 4: Plan your first step You'll write a short plan: when you'll start, and the first small thing you'll do. Then you'll read it twice.What do you want to start?When will you start? Pick the kind of moment that suits you: At a set time When I'm at a certain place Right after something I already do When it is…Then I will… (one tiny first action, under two minutes)Optional: what might get in the way?If that happens, then I will…ContinueStop the exercise",
       "Follow the dot, then plan Step 3 of 4: Plan your first step You'll write a short plan: when you'll start, and the first small thing you'll do. Then you'll read it twice.Your planWhen it is 7 pm, then I will open chapter 3.Read your plan to yourself twice, slowly. Picture yourself at that moment, doing the first action. I've read my plan twice Change planContinueStop the exercise",
       "Follow the dot, then plan Step 4 of 4: How starting feels Think of what you want to start next.Right now, how unpleasant does starting it feel?0123456789100 = not at all unpleasant10 = extremely unpleasantContinueStop the exercise",
@@ -1914,9 +1670,9 @@
       }
     ],
     "screens": [
-      "Plan your first step Practice: not part of your experiment. What happensRate how starting feels.Write a short when-then plan and read it twice.Rate again.About 3 minutes. Your answers are saved after each step. You can stop at any time.Why this exercise?The science behind it: Implementation intentions What you doYou write down what you want to start, when you'll start, a tiny first step, and what you'll do if something gets in the way. Then you read your plan twice. The method: If-then planning (implementation intentions)Instead of only deciding what you want to do, you link a specific moment to a specific action: “When it's 7 pm and I'm at my desk, I'll open chapter 3.” The idea is that the moment itself then prompts you, so starting needs less deciding on the spot. What research says about this methodResearch found that people who made if-then plans reached their goals more often than people who only set the goal, across 94 experiments. Gollwitzer & Sheeran, 2006 Full text checkedA larger review of 642 experiments found that, after allowing for experiments that were never published, the benefit is small. It was larger when people strongly wanted the goal, and close to zero when they didn't. Sheeran, Listrom & Gollwitzer, 2025 Full text checked About this exerciseThis exercise follows the if-then planning method, but this version hasn't been tested itself. The research above tested if-then plans in its own forms and settings, not in this app. LimitsExpect a small effect at most, and only for goals you genuinely want.Effects were smaller online and in everyday settings than in the lab. Sources Gollwitzer & Sheeran, 2006. Implementation intentions and goal achievement: A meta-analysis of effects and processes. Advances in Experimental Social Psychology, 38, 69–119 (opens in a new tab) Sheeran, Listrom & Gollwitzer, 2025. The when and how of planning: Meta-analysis of the scope and components of implementation intentions in 642 tests. European Review of Social Psychology, 36(1), 162–194 (opens in a new tab)BeginBack",
+      "Plan your first step Practice: not part of your experiment. What happensRate how starting feels.Write a short when-then plan and read it twice.Rate again.About 3 minutes. Nothing you write or choose is saved. Only that you did this exercise, and when, is kept on this computer. You can stop at any time.Why this exercise?The science behind it: Implementation intentions What you doYou write down what you want to start, when you'll start, a tiny first step, and what you'll do if something gets in the way. Then you read your plan twice. The method: If-then planning (implementation intentions)Instead of only deciding what you want to do, you link a specific moment to a specific action: “When it's 7 pm and I'm at my desk, I'll open chapter 3.” The idea is that the moment itself then prompts you, so starting needs less deciding on the spot. What research says about this methodResearch found that people who made if-then plans reached their goals more often than people who only set the goal, across 94 experiments. Gollwitzer & Sheeran, 2006 Full text checkedA larger review of 642 experiments found that, after allowing for experiments that were never published, the benefit is small. It was larger when people strongly wanted the goal, and close to zero when they didn't. Sheeran, Listrom & Gollwitzer, 2025 Full text checked About this exerciseThis exercise follows the if-then planning method, but this version hasn't been tested itself. The research above tested if-then plans in its own forms and settings, not in this app. LimitsExpect a small effect at most, and only for goals you genuinely want.Effects were smaller online and in everyday settings than in the lab. Sources Gollwitzer & Sheeran, 2006. Implementation intentions and goal achievement: A meta-analysis of effects and processes. Advances in Experimental Social Psychology, 38, 69–119 (opens in a new tab) Sheeran, Listrom & Gollwitzer, 2025. The when and how of planning: Meta-analysis of the scope and components of implementation intentions in 642 tests. European Review of Social Psychology, 36(1), 162–194 (opens in a new tab)BeginBack",
       "Plan your first step Step 1 of 3: How starting feels Think of what you want to start next.Right now, how unpleasant does starting it feel?0123456789100 = not at all unpleasant10 = extremely unpleasantContinueStop the exercise",
-      "Plan your first step Exercise stopped What you did so far is saved. Back to Action and growth · My recordsWhy this exercise?The science behind it: Implementation intentions What you doYou write down what you want to start, when you'll start, a tiny first step, and what you'll do if something gets in the way. Then you read your plan twice. The method: If-then planning (implementation intentions)Instead of only deciding what you want to do, you link a specific moment to a specific action: “When it's 7 pm and I'm at my desk, I'll open chapter 3.” The idea is that the moment itself then prompts you, so starting needs less deciding on the spot. What research says about this methodResearch found that people who made if-then plans reached their goals more often than people who only set the goal, across 94 experiments. Gollwitzer & Sheeran, 2006 Full text checkedA larger review of 642 experiments found that, after allowing for experiments that were never published, the benefit is small. It was larger when people strongly wanted the goal, and close to zero when they didn't. Sheeran, Listrom & Gollwitzer, 2025 Full text checked About this exerciseThis exercise follows the if-then planning method, but this version hasn't been tested itself. The research above tested if-then plans in its own forms and settings, not in this app. LimitsExpect a small effect at most, and only for goals you genuinely want.Effects were smaller online and in everyday settings than in the lab. Sources Gollwitzer & Sheeran, 2006. Implementation intentions and goal achievement: A meta-analysis of effects and processes. Advances in Experimental Social Psychology, 38, 69–119 (opens in a new tab) Sheeran, Listrom & Gollwitzer, 2025. The when and how of planning: Meta-analysis of the scope and components of implementation intentions in 642 tests. European Review of Social Psychology, 36(1), 162–194 (opens in a new tab)"
+      "Plan your first step Exercise stopped Only that you started this exercise, and when, is kept. DoneBack to Action and growth · My recordsWhy this exercise?The science behind it: Implementation intentions What you doYou write down what you want to start, when you'll start, a tiny first step, and what you'll do if something gets in the way. Then you read your plan twice. The method: If-then planning (implementation intentions)Instead of only deciding what you want to do, you link a specific moment to a specific action: “When it's 7 pm and I'm at my desk, I'll open chapter 3.” The idea is that the moment itself then prompts you, so starting needs less deciding on the spot. What research says about this methodResearch found that people who made if-then plans reached their goals more often than people who only set the goal, across 94 experiments. Gollwitzer & Sheeran, 2006 Full text checkedA larger review of 642 experiments found that, after allowing for experiments that were never published, the benefit is small. It was larger when people strongly wanted the goal, and close to zero when they didn't. Sheeran, Listrom & Gollwitzer, 2025 Full text checked About this exerciseThis exercise follows the if-then planning method, but this version hasn't been tested itself. The research above tested if-then plans in its own forms and settings, not in this app. LimitsExpect a small effect at most, and only for goals you genuinely want.Effects were smaller online and in everyday settings than in the lab. Sources Gollwitzer & Sheeran, 2006. Implementation intentions and goal achievement: A meta-analysis of effects and processes. Advances in Experimental Social Psychology, 38, 69–119 (opens in a new tab) Sheeran, Listrom & Gollwitzer, 2025. The when and how of planning: Meta-analysis of the scope and components of implementation intentions in 642 tests. European Review of Social Psychology, 36(1), 162–194 (opens in a new tab)"
     ]
   }
 }

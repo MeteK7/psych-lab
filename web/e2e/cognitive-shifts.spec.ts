@@ -173,10 +173,9 @@ test.describe('Cognitive shifts, keyboard only', () => {
     await expect(page.getByRole('link', { name: 'Plan your first step' })).toBeVisible();
 
     await expect.poll(async () => (await savedSession(page, id)).status).toBe('completed');
-    expect((await savedSession(page, id)).ratings).toEqual({
-      cs3_certainty_pre: 8,
-      cs3_certainty_post: 5,
-    });
+    // Try it keeps only that the exercise ran, and when (M1); the ratings are checked in
+    // cs-exercises.spec.ts.
+    expect((await savedSession(page, id)).ratings).toBeNull();
   });
 });
 

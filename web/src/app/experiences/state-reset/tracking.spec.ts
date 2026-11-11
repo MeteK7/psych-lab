@@ -42,4 +42,5 @@ describe('tracking', () => {
     expect(score.ratio).toBeCloseTo(0.75);
     expect(score.measuredMs).toBe(40);
   });
+
 });

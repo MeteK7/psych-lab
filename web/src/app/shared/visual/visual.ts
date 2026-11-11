@@ -19,7 +19,7 @@ export type Visual =
   | { kind: 'none' };
 
 export interface VisualSource {
-  /** Recorded with the session, so visuals could be compared later, e.g. 'builtin.v1'. */
+  /** Recorded with the session, so visuals could be compared later, e.g. 'scene:mcii.path@4;theme:action@1'. */
   readonly id: string;
   resolve(request: VisualRequest): Promise<Visual>;
 }

@@ -3,6 +3,7 @@ import { Component, computed, inject, input, linkedSignal, output, signal } from
 import { MCII, fill } from '../../../content';
 import { Experience, StepOutcome } from '../../flow/step-outcome';
 import { RatingScale } from '../../shared/rating-scale';
+import { provideSceneVisuals } from '../../shared/visual/integration/scene-source';
 import { VISUAL_SOURCE } from '../../shared/visual/visual';
 import { VisualSlot } from '../../shared/visual/visual-slot';
 import { CardPick } from '../cognitive-shifts/card-pick';
@@ -30,7 +31,6 @@ import {
 } from './mcii-logic';
 import { sceneFor } from './mcii-scenes';
 import { MciiStore } from './mcii-store';
-import { MciiBuiltInVisuals } from './mcii-visual-source';
 
 /**
  * MCII · Your wish, and what's in the way (docs/mcii-design.md). Future first, then the obstacle,
@@ -41,8 +41,8 @@ import { MciiBuiltInVisuals } from './mcii-visual-source';
 @Component({
   selector: 'app-mcii',
   imports: [CardPick, RatingScale, VisualSlot],
-  // The one place this exercise's visual source is chosen.
-  providers: [{ provide: VISUAL_SOURCE, useClass: MciiBuiltInVisuals }],
+  // The one place this exercise's visual source is chosen: the path scene (docs/mcii-design.md §5).
+  providers: [provideSceneVisuals('mcii.path', 'mcii')],
   template: `
     @switch (stage()) {
       @case ('mcii_wish') {
@@ -68,7 +68,7 @@ import { MciiBuiltInVisuals } from './mcii-visual-source';
         </fieldset>
         <app-rating-scale [item]="c.wish.matter" [(value)]="matter" />
         <app-rating-scale [item]="c.wish.likely" [(value)]="likely" />
-        <button type="button" [disabled]="!wishReady()" (click)="submitWish()">{{ c.next_label }}</button>
+        <button class="primary" type="button" [disabled]="!wishReady()" (click)="submitWish()">{{ c.next_label }}</button>
       }
       @case ('mcii_outcome') {
         <p class="quote">{{ say(c.outcome.your_wish, { wish: store.wish() }) }}</p>
@@ -81,7 +81,7 @@ import { MciiBuiltInVisuals } from './mcii-visual-source';
         @if (shown() && outcome().trim()) {
           <p class="note" role="status">{{ c.outcome.picture }}</p>
         }
-        <button type="button" [disabled]="!outcome().trim()" (click)="shown() ? submitOutcome() : shown.set(true)">
+        <button class="primary" type="button" [disabled]="!outcome().trim()" (click)="shown() ? submitOutcome() : shown.set(true)">
           {{ shown() ? c.next_label : c.done_label }}
         </button>
       }
@@ -123,7 +123,7 @@ import { MciiBuiltInVisuals } from './mcii-visual-source';
         @if (shown() && obstacle()) {
           <p class="note" role="status">{{ c.obstacle.picture }}</p>
         }
-        <button type="button" [disabled]="!obstacle()" (click)="shown() ? submitObstacle() : shown.set(true)">
+        <button class="primary" type="button" [disabled]="!obstacle()" (click)="shown() ? submitObstacle() : shown.set(true)">
           {{ shown() ? c.next_label : c.done_label }}
         </button>
       }
@@ -167,14 +167,14 @@ import { MciiBuiltInVisuals } from './mcii-visual-source';
           </label>
         }
         <p class="any">{{ c.decide.any_answer }}</p>
-        <button type="button" [disabled]="!decideReady()" (click)="submitDecide()">{{ c.next_label }}</button>
+        <button class="primary" type="button" [disabled]="!decideReady()" (click)="submitDecide()">{{ c.next_label }}</button>
       }
       @case ('mcii_plan') {
         @if (setAside()) {
           <p>{{ c.plan.set_aside[0] }}</p>
           <app-visual-slot [request]="scene()" />
           <p>{{ c.plan.set_aside[1] }}</p>
-          <button type="button" (click)="completed.emit(noPlan())">{{ c.next_label }}</button>
+          <button class="primary" type="button" (click)="completed.emit(noPlan())">{{ c.next_label }}</button>
         } @else {
           <p class="quote">{{ say(c.plan.your_wish, { wish: store.wish() }) }}</p>
           <p>{{ c.plan.lead }}</p>
@@ -191,7 +191,7 @@ import { MciiBuiltInVisuals } from './mcii-visual-source';
               <p>{{ c.plan.rehearse }}</p>
             </div>
           }
-          <button type="button" [disabled]="!planReady()" (click)="shown() ? submitPlan() : shown.set(true)">
+          <button class="primary" type="button" [disabled]="!planReady()" (click)="shown() ? submitPlan() : shown.set(true)">
             {{ shown() ? c.next_label : c.done_label }}
           </button>
         }
@@ -226,7 +226,7 @@ import { MciiBuiltInVisuals } from './mcii-visual-source';
         @if (feeling() === 'discouraged') {
           <p class="note" role="status">{{ c.close.discouraged_note }}</p>
         }
-        <button type="button" [disabled]="!closeReady()" (click)="submitClose()">{{ c.finish_label }}</button>
+        <button class="primary" type="button" [disabled]="!closeReady()" (click)="submitClose()">{{ c.finish_label }}</button>
       }
     }
   `,

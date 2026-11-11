@@ -1,4 +1,8 @@
+import { TestBed } from '@angular/core/testing';
+
 import { MCII } from '../../../content';
+import { provideSceneVisuals } from '../../shared/visual/integration/scene-source';
+import { VISUAL_SOURCE } from '../../shared/visual/visual';
 import {
   canLeaveClose,
   canLeaveDecide,
@@ -14,7 +18,6 @@ import {
   wishOutcome,
 } from './mcii-logic';
 import { sceneFor } from './mcii-scenes';
-import { MciiBuiltInVisuals } from './mcii-visual-source';
 
 // The rules and scenes, with no screens. The screens are run in mcii-exercise.spec.ts.
 const PRIVATE = 'PRIVATE';
@@ -38,8 +41,8 @@ describe('MCII rules', () => {
     });
 
     it('reports ids, ratings and the visual source, never the wish', () => {
-      expect(wishOutcome(answers, 'builtin.v1')).toEqual({
-        result: { category: 'work', visual_source: 'builtin.v1' },
+      expect(wishOutcome(answers, 'scene:mcii.path@4;theme:action@1')).toEqual({
+        result: { category: 'work', visual_source: 'scene:mcii.path@4;theme:action@1' },
         ratings: { mcii_matter_pre: 7, mcii_likely_pre: 2 },
       });
     });
@@ -167,7 +170,17 @@ describe('MCII scenes', () => {
     }
   });
 
-  it('shows the bridge after a plan, and a faded path after setting aside', () => {
+  it('names the scene the step before showed, only when it was a different one', () => {
+    expect(sceneFor('mcii_wish', null)).toEqual({ scene: 'mcii.future' });
+    expect(sceneFor('mcii_outcome', null)).toEqual({ scene: 'mcii.future' });
+    expect(sceneFor('mcii_obstacle', null)).toEqual({ scene: 'mcii.contrast', facets: { from: 'mcii.future' } });
+    expect(sceneFor('mcii_decide', 'keep')).toEqual({ scene: 'mcii.contrast' });
+    expect(sceneFor('mcii_plan', 'keep')).toEqual({ scene: 'mcii.plan', facets: { from: 'mcii.contrast' } });
+    expect(sceneFor('mcii_plan', 'set_aside')).toEqual({ scene: 'mcii.aside', facets: { from: 'mcii.contrast' } });
+    expect(sceneFor('mcii_close', 'set_aside')).toEqual({ scene: 'mcii.aside' });
+  });
+
+  it('shows the bridge after a plan, and a quieter path after setting aside', () => {
     expect(sceneFor('mcii_plan', 'keep').scene).toBe('mcii.plan');
     expect(sceneFor('mcii_plan', 'change').scene).toBe('mcii.plan');
     expect(sceneFor('mcii_plan', 'set_aside').scene).toBe('mcii.aside');
@@ -175,13 +188,17 @@ describe('MCII scenes', () => {
     expect(sceneFor('mcii_close', 'set_aside').scene).toBe('mcii.aside');
   });
 
-  it('has a built-in picture with a text alternative for every scene', async () => {
-    const source = new MciiBuiltInVisuals();
-    for (const scene of ['mcii.future', 'mcii.contrast', 'mcii.plan', 'mcii.aside']) {
-      const visual = await source.resolve({ scene });
-      expect(visual.kind).toBe('component');
-      expect(visual.kind === 'component' && visual.alt).toBeTruthy();
+  it('draws every scene with the path scene, with its text alternative', async () => {
+    TestBed.configureTestingModule({ providers: [provideSceneVisuals('mcii.path', 'mcii')] });
+    const source = TestBed.inject(VISUAL_SOURCE);
+    expect(source.id).toBe('scene:mcii.path'); // nothing drawn yet
+    for (const name of ['future', 'contrast', 'plan', 'aside'] as const) {
+      const visual = await source.resolve({ scene: `mcii.${name}` });
+      expect(visual).toMatchObject({ kind: 'component', alt: MCII.scenes[name].alt, inputs: { state: name, from: null } });
     }
+    expect(await source.resolve({ scene: 'mcii.contrast', facets: { from: 'mcii.future' } })).toMatchObject({ inputs: { from: 'future' } });
+    expect(source.id).toMatch(/^scene:mcii\.path@\d+;theme:action@\d+$/);
     expect(await source.resolve({ scene: 'unknown' })).toEqual({ kind: 'none' });
+    expect(await source.resolve({ scene: 'mcii.unknown' })).toEqual({ kind: 'none' });
   });
 });

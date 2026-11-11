@@ -69,6 +69,7 @@ export interface SavedSession {
   status: string;
   steps: { step: string; result: Record<string, unknown> }[];
   ratings: Record<string, number> | null;
+  plan: Record<string, unknown> | null;
   content_versions: Record<string, string>;
 }
 
