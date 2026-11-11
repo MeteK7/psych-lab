@@ -165,3 +165,170 @@ export function pathBounds(d: string): { x: number; y: number; width: number; he
   const [x, y] = [Math.min(...xs), Math.min(...ys)];
   return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
 }
+
+/** A path as polylines, one per subpath, with curves and arcs flattened. */
+export interface Polyline {
+  points: Pt[];
+  closed: boolean;
+}
+
+/**
+ * Path data flattened to polylines (every SVG command, absolute or relative): curves and arcs into
+ * segments about `step` units long. Used to measure how far a label is from a form (milestone M3).
+ */
+export function flattenPath(d: string, step = 2): Polyline[] {
+  const tokens = d.match(/[MLHVCSQTAZ]|[-+]?(?:\d*\.\d+|\d+\.?)(?:e[-+]?\d+)?/gi) ?? [];
+  const out: Polyline[] = [];
+  let line: Polyline | null = null;
+  let at: Pt = [0, 0];
+  let start: Pt = [0, 0];
+  let lastControl: Pt | null = null;
+  let lastQuad: Pt | null = null;
+  let command = '';
+  let i = 0;
+  const num = () => Number(tokens[i++]);
+  const isCommand = (t: string | undefined) => !!t && /^[a-z]$/i.test(t);
+  const segments = (length: number) => Math.max(2, Math.min(64, Math.ceil(length / step)));
+  const push = (p: Pt) => {
+    line ??= { points: [at], closed: false };
+    if (!out.includes(line)) out.push(line);
+    line.points.push(p);
+    at = p;
+  };
+  const cubic = (c1: Pt, c2: Pt, end: Pt) => {
+    const p0 = at;
+    const n = segments(dist(p0, c1) + dist(c1, c2) + dist(c2, end));
+    for (let k = 1; k <= n; k++) {
+      const t = k / n;
+      const u = 1 - t;
+      push([
+        u * u * u * p0[0] + 3 * u * u * t * c1[0] + 3 * u * t * t * c2[0] + t * t * t * end[0],
+        u * u * u * p0[1] + 3 * u * u * t * c1[1] + 3 * u * t * t * c2[1] + t * t * t * end[1],
+      ]);
+    }
+  };
+  const quad = (c: Pt, end: Pt) => {
+    const p0 = at;
+    const n = segments(dist(p0, c) + dist(c, end));
+    for (let k = 1; k <= n; k++) {
+      const t = k / n;
+      const u = 1 - t;
+      push([u * u * p0[0] + 2 * u * t * c[0] + t * t * end[0], u * u * p0[1] + 2 * u * t * c[1] + t * t * end[1]]);
+    }
+  };
+  // SVG's endpoint-to-centre conversion (SVG 1.1, appendix F.6.5).
+  const arcTo = (rx: number, ry: number, rotation: number, large: boolean, sweep: boolean, end: Pt) => {
+    if (!rx || !ry) return push(end);
+    const phi = (rotation * Math.PI) / 180;
+    const [cos, sin] = [Math.cos(phi), Math.sin(phi)];
+    const dx = (at[0] - end[0]) / 2;
+    const dy = (at[1] - end[1]) / 2;
+    const x1 = cos * dx + sin * dy;
+    const y1 = -sin * dx + cos * dy;
+    rx = Math.abs(rx);
+    ry = Math.abs(ry);
+    const scale = (x1 * x1) / (rx * rx) + (y1 * y1) / (ry * ry);
+    if (scale > 1) {
+      rx *= Math.sqrt(scale);
+      ry *= Math.sqrt(scale);
+    }
+    const num2 = rx * rx * ry * ry - rx * rx * y1 * y1 - ry * ry * x1 * x1;
+    const den = rx * rx * y1 * y1 + ry * ry * x1 * x1;
+    const k = (large === sweep ? -1 : 1) * Math.sqrt(Math.max(0, num2 / den));
+    const cx1 = (k * rx * y1) / ry;
+    const cy1 = (-k * ry * x1) / rx;
+    const cx = cos * cx1 - sin * cy1 + (at[0] + end[0]) / 2;
+    const cy = sin * cx1 + cos * cy1 + (at[1] + end[1]) / 2;
+    const angle = (ux: number, uy: number, vx: number, vy: number) => Math.atan2(ux * vy - uy * vx, ux * vx + uy * vy);
+    const theta = angle(1, 0, (x1 - cx1) / rx, (y1 - cy1) / ry);
+    let delta = angle((x1 - cx1) / rx, (y1 - cy1) / ry, (-x1 - cx1) / rx, (-y1 - cy1) / ry);
+    if (!sweep && delta > 0) delta -= 2 * Math.PI;
+    if (sweep && delta < 0) delta += 2 * Math.PI;
+    const n = segments(Math.abs(delta) * Math.max(rx, ry));
+    for (let s = 1; s <= n; s++) {
+      const a = theta + (delta * s) / n;
+      const [ex, ey] = [rx * Math.cos(a), ry * Math.sin(a)];
+      push(s === n ? end : [cos * ex - sin * ey + cx, sin * ex + cos * ey + cy]);
+    }
+  };
+  while (i < tokens.length) {
+    if (isCommand(tokens[i])) command = tokens[i++];
+    else if (!command) {
+      i++;
+      continue;
+    }
+    const rel = command === command.toLowerCase();
+    const o: Pt = rel ? at : [0, 0];
+    const pt = (): Pt => [o[0] + num(), o[1] + num()];
+    const upper = command.toUpperCase();
+    let control: Pt | null = null;
+    let quadControl: Pt | null = null;
+    switch (upper) {
+      case 'M':
+        at = pt();
+        start = at;
+        line = { points: [at], closed: false };
+        // Further pairs after a move are lines.
+        command = rel ? 'l' : 'L';
+        break;
+      case 'L':
+        push(pt());
+        break;
+      case 'H':
+        push([(rel ? at[0] : 0) + num(), at[1]]);
+        break;
+      case 'V':
+        push([at[0], (rel ? at[1] : 0) + num()]);
+        break;
+      case 'C': {
+        const c1 = pt();
+        const c2 = pt();
+        const end = pt();
+        cubic(c1, c2, end);
+        control = c2;
+        break;
+      }
+      case 'S': {
+        const c1: Pt = lastControl ? [2 * at[0] - lastControl[0], 2 * at[1] - lastControl[1]] : at;
+        const c2 = pt();
+        const end = pt();
+        cubic(c1, c2, end);
+        control = c2;
+        break;
+      }
+      case 'Q': {
+        const c = pt();
+        const end = pt();
+        quad(c, end);
+        quadControl = c;
+        break;
+      }
+      case 'T': {
+        const c: Pt = lastQuad ? [2 * at[0] - lastQuad[0], 2 * at[1] - lastQuad[1]] : at;
+        quad(c, pt());
+        quadControl = c;
+        break;
+      }
+      case 'A': {
+        const [rx, ry, rotation, large, sweep] = [num(), num(), num(), num(), num()];
+        arcTo(rx, ry, rotation, !!large, !!sweep, pt());
+        break;
+      }
+      case 'Z':
+        if (line) {
+          line.closed = true;
+          if (!out.includes(line)) out.push(line);
+        }
+        at = start;
+        line = null;
+        break;
+      default:
+        i++;
+    }
+    lastControl = control;
+    lastQuad = quadControl;
+    // A closing command takes no numbers: don't repeat it on the next number.
+    if (upper === 'Z' && !isCommand(tokens[i])) command = '';
+  }
+  return out.filter((l) => l.points.length > 1 || l.closed);
+}

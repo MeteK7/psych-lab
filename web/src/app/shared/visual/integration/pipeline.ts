@@ -7,7 +7,8 @@ import { deriveSeed } from '../generation/random';
 import { QualityTier, planMotion } from '../motion/plan-motion';
 import { DrawPaint, Drawable, FrameItem, ResolvedFrame, ResolvedTimeline, ResolvedTrack } from '../rendering/frame';
 import { resolveState } from '../state/resolve-state';
-import { resolveLabel, resolveStyle } from '../styling/resolve';
+import { resolveHalo, resolveLabel, resolveStyle } from '../styling/resolve';
+import { LINE_HEIGHT, wrapText } from '../styling/type';
 import { GRAIN, frameSize } from '../styling/vocabulary';
 
 /**
@@ -49,16 +50,22 @@ export function buildFrame(scene: SceneDefinition, state: StateName, text: TextL
       switch (element.kind) {
         case 'label': {
           const paint = resolveLabel(element.tone);
+          const words = text(element.text) ?? '';
           items.push({
             ...base,
             kind: 'text',
-            text: text(element.text) ?? '',
+            text: words,
             x: element.at[0],
             y: element.at[1],
             anchor: element.align,
             fill: paint.fill,
             size: paint.size,
             ...(element.weight ? { weight: element.weight } : {}),
+            // Wrapped here (S1 type), so every backend draws the same lines.
+            ...(element.width !== undefined
+              ? { lines: wrapText(words, paint.size, element.width, element.weight), lineHeight: paint.size * LINE_HEIGHT }
+              : {}),
+            ...(element.halo ? { halo: resolveHalo() } : {}),
           });
           break;
         }

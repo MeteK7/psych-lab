@@ -113,7 +113,14 @@ export function paintFrame(ctx: CanvasRenderingContext2D, frame: ResolvedFrame, 
       ctx.fillStyle = colour(item.fill);
       ctx.font = `${item.weight === 'bold' ? 700 : 400} ${item.size}px system-ui, -apple-system, 'Segoe UI', sans-serif`;
       ctx.textAlign = item.anchor === 'middle' ? 'center' : item.anchor === 'end' ? 'right' : 'left';
-      ctx.fillText(item.text, item.x, item.y);
+      const lines = item.lines ?? [item.text];
+      if (item.halo) {
+        ctx.strokeStyle = colour(item.halo.colour);
+        ctx.lineWidth = item.halo.width;
+        ctx.setLineDash([]);
+        lines.forEach((line, i) => ctx.strokeText(line, item.x, item.y + i * (item.lineHeight ?? 0)));
+      }
+      lines.forEach((line, i) => ctx.fillText(line, item.x, item.y + i * (item.lineHeight ?? 0)));
       continue;
     }
     const { paint } = item;

@@ -57,6 +57,11 @@ export type FrameItem =
       size: number;
       /** Bold marks the one item a person is working on (an instrument's current value). Default normal. */
       weight?: 'bold';
+      /** Wrapped text, already broken (M3): each line drawn `lineHeight` below the one before, the first at `y`. */
+      lines?: readonly string[];
+      lineHeight?: number;
+      /** A stroke behind the glyphs, in this colour and width, so the text reads over a plane. */
+      halo?: { colour: string; width: number };
     };
 
 export interface ResolvedFrame {

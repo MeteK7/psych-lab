@@ -83,7 +83,17 @@ export function composeCauseMap({ causes, placing, axes }: CauseMapInput): Compo
     style,
     purpose,
   });
-  const label = (id: string, key: string, x: number, y: number, align: 'start' | 'middle' | 'end', tone: 'label' | 'label-soft', purpose: Purpose, bold = false): SceneElement => ({
+  const label = (
+    id: string,
+    key: string,
+    x: number,
+    y: number,
+    align: 'start' | 'middle' | 'end',
+    tone: 'label' | 'label-soft',
+    purpose: Purpose,
+    bold = false,
+    names: readonly string[] = [],
+  ): SceneElement => ({
     kind: 'label',
     id,
     text: key,
@@ -92,6 +102,7 @@ export function composeCauseMap({ causes, placing, axes }: CauseMapInput): Compo
     tone,
     purpose,
     ...(bold ? { weight: 'bold' as const } : {}),
+    ...(names.length ? { names } : {}),
   });
 
   const line: StyleRef = { role: 'context', line: 'hair' };
@@ -119,7 +130,7 @@ export function composeCauseMap({ causes, placing, axes }: CauseMapInput): Compo
     marks.push(shape(id, geometry, { role: current ? 'subject' : 'context' }, current ? PURPOSE('placing') : PURPOSE('mark-*')));
     place.numbers.forEach((n, j) => {
       text[`num.${n}`] = String(n);
-      marks.push(label(`${id}-num-${n}`, `num.${n}`, from + R + j * SPACING, y + 5, 'middle', 'label', PURPOSE('mark-*-num-*'), n === placing));
+      marks.push(label(`${id}-num-${n}`, `num.${n}`, from + R + j * SPACING, y + 5, 'middle', 'label', PURPOSE('mark-*-num-*'), n === placing, [id, `${id}-back`]));
     });
   }
 

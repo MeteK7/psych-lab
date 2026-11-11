@@ -127,5 +127,42 @@ describe('canvas backend (S7)', () => {
     expect(calls).toContain('linear 60,60,140,140');
     expect(calls).toContain('linear stop 1 resolved(var(--vis-subject-shade))');
   });
-});
 
+  it('strokes a halo behind each wrapped line, then fills each line a line height lower', () => {
+    const { ctx, calls } = recorder();
+    paintFrame(
+      ctx,
+      {
+        width: 200,
+        height: 100,
+        theme: 'action',
+        items: [
+          {
+            kind: 'text',
+            id: 't',
+            layer: 'l',
+            text: 'one two three',
+            x: 10,
+            y: 20,
+            anchor: 'start',
+            fill: 'var(--vis-label)',
+            size: 14,
+            lines: ['one two', 'three'],
+            lineHeight: 16.8,
+            halo: { colour: 'var(--vis-ground)', width: 4 },
+          },
+        ],
+      },
+      colour,
+    );
+    expect(calls.filter((c) => /Text/.test(c))).toEqual([
+      'strokeText(one two,10,20)',
+      'strokeText(three,10,36.8)',
+      'fillText(one two,10,20)',
+      'fillText(three,10,36.8)',
+    ]);
+    expect(ctx.strokeStyle).toBe('resolved(var(--vis-ground))');
+    expect(ctx.lineWidth).toBe(4);
+    expect(ctx.fillStyle).toBe('resolved(var(--vis-label))');
+  });
+});

@@ -3,7 +3,7 @@ import { Component, input } from '@angular/core';
 import { Composed, composeScene, lookupOf } from '../../shared/visual/composition/compose';
 import { SceneElement, TextLookup } from '../../shared/visual/composition/scene';
 import { SceneFigure, SurfaceScheme } from '../../shared/visual/integration/scene-figure';
-import { MaterialId } from '../../shared/visual/styling/vocabulary';
+import { MaterialId, ThemeId } from '../../shared/visual/styling/vocabulary';
 
 /** A reference composition shows a capability for review; participants never see it (docs/visual-system.md §5.2). */
 const REFERENCE = { serves: ['identity' as const], why: 'Reference composition: shows a material for review; participants never see it.' };
@@ -23,7 +23,7 @@ function reference(id: string, about: string, elements: SceneElement[]): Compose
  * Depth (§7): far, middle and near planes, each drawn by its top edge, and a lit subject standing on
  * the near plane with its contact shadow. With `grain`, the planes carry the faint grain (§5).
  */
-function depth(id: string, about: string, grain: boolean): Composed {
+export function depth(id: string, about: string, grain: boolean, theme: ThemeId = 'action'): Composed {
   const plane = (role: 'far' | 'mid' | 'near', baseline: number, amplitude: number): SceneElement => ({
     kind: 'generated',
     id: role,
@@ -35,7 +35,7 @@ function depth(id: string, about: string, grain: boolean): Composed {
   return composeScene({
     id: `reference.material.${id}`,
     version: 1,
-    theme: 'action',
+    theme,
     size: { width: 480, height: 200 },
     seed: 'lab-depth',
     layers: [

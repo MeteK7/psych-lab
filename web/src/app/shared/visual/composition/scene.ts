@@ -88,6 +88,15 @@ export type SceneElement =
       tone?: LabelTone;
       /** Bold marks the one item a person is working on (an instrument's current value). */
       weight?: 'bold';
+      /**
+       * Wraps the text within this width, in scene units, at spaces, lines 1.2 apart (M3). `at` is
+       * then the first line's baseline. Without it, the label is one line.
+       */
+      width?: number;
+      /** A halo in the ground colour behind the glyphs, so the label stays readable over a plane and across its edge (M3). */
+      halo?: boolean;
+      /** The forms the label names: it may sit closer to them than the 8-unit clearance (§9), e.g. a number inside its mark. */
+      names?: readonly ElementId[];
       purpose: Purpose;
       enter?: Entrance;
     };

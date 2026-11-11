@@ -3,10 +3,12 @@ import { Component, inject, signal } from '@angular/core';
 import { CS_WHY_IT_HAPPENED, STATE_RESET } from '../../../content';
 import { AppEnvironment } from '../../shared/app-environment';
 import { PURPOSE_LABELS, SceneDefinition, elementsOf } from '../../shared/visual/composition/scene';
+import { lookupOf } from '../../shared/visual/composition/compose';
+import { spacingWarnings } from '../../shared/visual/composition/spacing';
 import { validateScene } from '../../shared/visual/composition/validate';
-import { CAUSE_MAP, CAUSE_MAP_PURPOSES, CauseMapInput } from '../../shared/visual/instruments/cause-map/cause-map';
+import { CAUSE_MAP, CAUSE_MAP_PURPOSES, CauseMapInput, composeCauseMap } from '../../shared/visual/instruments/cause-map/cause-map';
 import { ROUNDS, ROUNDS_PURPOSES } from '../../shared/visual/instruments/rounds/rounds';
-import { TRACKING, TRACKING_PURPOSES, TrackingInput } from '../../shared/visual/instruments/tracking/tracking';
+import { TRACKING, TRACKING_PURPOSES, TrackingInput, composeTrackingPreview } from '../../shared/visual/instruments/tracking/tracking';
 import { InstrumentFigure } from '../../shared/visual/integration/instruments';
 import { QualityTier, SceneFigure, SurfaceScheme } from '../../shared/visual/integration/scene-figure';
 import { Mover, motionProblems, movers } from '../../shared/visual/motion/plan-motion';
@@ -14,6 +16,7 @@ import { SCENES } from '../../shared/visual/scenes';
 import { EMPHASIS_CHANGE, MOTION, MOTION_EFFECTS, THEMES } from '../../shared/visual/styling/vocabulary';
 import { LabGenerators } from './lab-generators';
 import { LabMaterials } from './lab-materials';
+import { LabSheet } from './lab-sheet';
 import { LabTrackingStill } from './lab-tracking-still';
 
 /**
@@ -24,7 +27,7 @@ import { LabTrackingStill } from './lab-tracking-still';
  */
 @Component({
   selector: 'app-lab-page',
-  imports: [SceneFigure, InstrumentFigure, LabGenerators, LabMaterials, LabTrackingStill],
+  imports: [SceneFigure, InstrumentFigure, LabGenerators, LabMaterials, LabSheet, LabTrackingStill],
   template: `
     <h1>Visual Lab</h1>
     @if (env.showsDevelopment()) {
@@ -101,6 +104,13 @@ import { LabTrackingStill } from './lab-tracking-still';
               </ul>
             }
 
+            @if (entry.spacing.length) {
+              <h3>Spacing check</h3>
+              <ul class="moves" [attr.aria-label]="'Spacing warnings: ' + entry.scene.id">
+                @for (w of entry.spacing; track w) { <li>{{ w }}</li> }
+              </ul>
+            }
+
             <h3>Why each element is there</h3>
             <table>
               <caption>Every element serves at least one purpose (visual-policy §2).</caption>
@@ -135,6 +145,12 @@ import { LabTrackingStill } from './lab-tracking-still';
               </div>
             }
           </div>
+        }
+        @if (causeSpacing.length) {
+          <h3>Spacing check</h3>
+          <ul class="moves" [attr.aria-label]="'Spacing warnings: ' + causeMap.id">
+            @for (w of causeSpacing; track w) { <li>{{ w }}</li> }
+          </ul>
         }
         <h3>Why each element is there</h3>
         <table>
@@ -205,6 +221,12 @@ import { LabTrackingStill } from './lab-tracking-still';
             }
           </div>
         }
+        @if (previewSpacing.length) {
+          <h3>Spacing check: the preview</h3>
+          <ul class="moves" [attr.aria-label]="'Spacing warnings: ' + tracking.id">
+            @for (w of previewSpacing; track w) { <li>{{ w }}</li> }
+          </ul>
+        }
         <h3>Why each element is there</h3>
         <table>
           <caption>Every element serves at least one purpose (visual-policy §2).</caption>
@@ -219,6 +241,7 @@ import { LabTrackingStill } from './lab-tracking-still';
 
       <app-lab-generators [schemes]="schemes" />
       <app-lab-materials [schemes]="schemes" />
+      <app-lab-sheet [schemes]="schemes" />
     } @else {
       <p>The Visual Lab is available in the development build only.</p>
     }
@@ -269,6 +292,19 @@ export class LabPage {
     { key: 'heavy', name: 'Step 5: a heavy map, every cause in one corner', placing: 0, causes: [{ who: 1, time: 1 }, { who: 1, time: 1 }, { who: 1, time: 1 }] },
     { key: 'six', name: 'Step 5: six causes in one place, at the edge', placing: 0, causes: Array.from({ length: 6 }, () => ({ who: 5, time: 1 })) },
   ];
+  /** Labels closer than 8 units to a form they don't name (visual-language.md §9), across every answer set. */
+  protected readonly causeSpacing = [
+    ...new Set(
+      this.causeSets.flatMap((set) => {
+        const composed = composeCauseMap({ causes: set.causes, placing: set.placing, axes: this.axes });
+        return spacingWarnings(composed.scene, lookupOf(composed)).map((w) => `${set.name}: ${w}`);
+      }),
+    ),
+  ];
+  protected readonly previewSpacing = (() => {
+    const composed = composeTrackingPreview({ ringRadius: this.ringRadius, labels: this.previewLabels });
+    return spacingWarnings(composed.scene, lookupOf(composed));
+  })();
   protected readonly causeMapPurposes = CAUSE_MAP_PURPOSES.map(({ id, purpose }) => ({
     id,
     serves: purpose.serves.map((k) => PURPOSE_LABELS[k]).join('; '),
@@ -282,6 +318,7 @@ export class LabPage {
     text,
     headingId: `lab-${scene.id.replace(/\W/g, '-')}`,
     problems: [...validateScene(scene, text), ...motionProblems(scene)],
+    spacing: spacingWarnings(scene, text),
     states: Object.keys(scene.states.states).map((name) => ({ name, alt: text(scene.alt[name]) ?? '' })),
     purposes: this.purposes(scene),
     transitions: (scene.transitions ?? []).map(([from, to]) => ({

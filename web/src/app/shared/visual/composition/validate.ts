@@ -146,6 +146,7 @@ export function validateScene(scene: SceneDefinition, text: TextLookup): string[
   } else if (!(scene.frame.width > 0 && scene.frame.height > 0)) problems.push('a frame size must be positive');
 
   const ids = new Map<string, { role?: string; label: boolean }>();
+  const everything = new Map(elementsOf(scene).map(({ element }) => [element.id, element]));
   for (const { layer, element } of elementsOf(scene)) {
     const where = `element '${element.id}'`;
     if (ids.has(element.id)) problems.push(`${where}: duplicate id`);
@@ -155,6 +156,11 @@ export function validateScene(scene: SceneDefinition, text: TextLookup): string[
       if (text(element.text) === undefined) problems.push(`${where}: no content for '${element.text}'`);
       if (layer.plane === 'near' && NOT_ON_NEAR.tones.includes(element.tone ?? 'label'))
         problems.push(`${where}: soft labels aren't allowed on the near plane`);
+      if (element.width !== undefined && !(element.width > 0)) problems.push(`${where}: a wrap width must be positive`);
+      for (const id of element.names ?? []) {
+        const named = everything.get(id);
+        if (!named || named.kind === 'label') problems.push(`${where}: names unknown form '${id}'`);
+      }
       continue;
     }
     ids.set(element.id, { role: element.style.role, label: false });
@@ -170,7 +176,7 @@ export function validateScene(scene: SceneDefinition, text: TextLookup): string[
       problems.push(`${where}: the '${element.style.role}' role isn't allowed on the near plane`);
   }
 
-  const all = new Map(elementsOf(scene).map(({ element }) => [element.id, element]));
+  const all = everything;
   for (const element of all.values()) problems.push(...entranceProblems(element, all));
 
   const { initial, states } = scene.states;

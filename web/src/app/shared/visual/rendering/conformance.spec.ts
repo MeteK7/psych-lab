@@ -149,6 +149,33 @@ describe('SVG backend conformance', () => {
   });
 });
 
+describe('SVG backend conformance: type (M3 stage C)', () => {
+  const text = (extra: object) =>
+    ({ kind: 'text', id: 't', layer: 'l', text: 'one two three', x: 10, y: 20, anchor: 'start', fill: 'var(--vis-label)', size: 14, ...extra }) as const;
+  const frame = (item: ReturnType<typeof text>): ResolvedFrame => ({ width: 200, height: 100, theme: 'action', items: [item] });
+
+  it('draws wrapped lines as their own lines, each a line height below the one before', async () => {
+    const host = (await render(frame(text({ lines: ['one two', 'three'], lineHeight: 16.8 })))).nativeElement as HTMLElement;
+    const spans = [...host.querySelectorAll('text tspan')];
+    expect(spans.map((s) => s.textContent)).toEqual(['one two', 'three']);
+    expect(spans.map((s) => [s.getAttribute('x'), s.getAttribute('y')])).toEqual([['10', '20'], ['10', '36.8']]);
+  });
+
+  it('draws a single line as plain text, without a stroke', async () => {
+    const plain = (await render(frame(text({})))).nativeElement as HTMLElement;
+    expect(plain.querySelector('text')!.textContent).toBe('one two three');
+    expect(plain.querySelectorAll('tspan')).toHaveLength(0);
+    expect((plain.querySelector('text') as SVGElement).style.stroke).toBe('');
+  });
+
+  it('draws a halo as the text’s own stroke, in the given colour and width', async () => {
+    const haloed = (await render(frame(text({ halo: { colour: 'var(--vis-ground)', width: 4 } })))).nativeElement as HTMLElement;
+    const t = haloed.querySelector('text') as SVGElement;
+    expect(t.style.stroke).toBe('var(--vis-ground)');
+    expect(t.style.strokeWidth).toBe('4px');
+  });
+});
+
 describe('SVG backend conformance: motion', () => {
   // jsdom has no Web Animations API, so the backend's calls are recorded instead.
   let calls: { target: Element; keyframes: Keyframe[]; options: KeyframeAnimationOptions; cancel: ReturnType<typeof vi.fn> }[] = [];

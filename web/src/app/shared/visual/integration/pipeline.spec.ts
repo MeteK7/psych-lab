@@ -112,3 +112,37 @@ describe('generated elements (S2, milestone M2)', () => {
     expect(tracks.find((t) => t.id === 'blob')).toMatchObject({ property: 'paint' });
   });
 });
+
+describe('buildFrame: type in figures (M3 stage C)', () => {
+  const P = { serves: ['understanding'], why: 'Test label.' } as const;
+  const words = 'A label can wrap within a set width, at spaces.';
+  const scene = (extra: Partial<Extract<SceneElement, { kind: 'label' }>>): SceneDefinition => ({
+    id: 'test.type',
+    version: 1,
+    theme: 'action',
+    frame: 'wide',
+    layers: [{ id: 'l', plane: 'annotation', elements: [{ kind: 'label', id: 'x', text: 'x', at: [20, 40], align: 'start', purpose: P, ...extra }] }],
+    states: { initial: 'a', states: { a: { visible: ['x'] } } },
+    alt: { a: 'alt' },
+  });
+  const lookup = (key: string) => (key === 'x' ? words : 'A test.');
+  const item = (extra: Partial<Extract<SceneElement, { kind: 'label' }>>) => buildFrame(scene(extra), 'a', lookup).items[0];
+
+  it('breaks a label with a width into lines 1.2 apart, keeping the whole text', () => {
+    const text = item({ width: 120 });
+    expect(text).toMatchObject({ kind: 'text', text: words, lineHeight: 14 * 1.2 });
+    const lines = text.kind === 'text' ? text.lines! : [];
+    expect(lines.length).toBeGreaterThan(1);
+    expect(lines.join(' ')).toBe(words);
+  });
+
+  it('keeps a label without a width as one line, without a halo', () => {
+    const text = item({});
+    expect(text).not.toHaveProperty('lines');
+    expect(text).not.toHaveProperty('halo');
+  });
+
+  it('gives a label with a halo the ground colour behind its glyphs', () => {
+    expect(item({ halo: true })).toMatchObject({ halo: { colour: 'var(--vis-ground)', width: 4 } });
+  });
+});

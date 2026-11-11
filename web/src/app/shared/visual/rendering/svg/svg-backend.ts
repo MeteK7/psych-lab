@@ -109,7 +109,9 @@ function keyframes(track: ResolvedTrack): Keyframe[] {
       @for (item of items(); track item.id) {
         @if (item.kind === 'text') {
           <text [attr.data-vis-id]="item.id" [attr.x]="item.x" [attr.y]="item.y" [attr.text-anchor]="item.anchor"
-                [style.fill]="item.fill" [style.font-size.px]="item.size" [style.font-weight]="item.weight === 'bold' ? 700 : null">{{ item.text }}</text>
+                [style.fill]="item.fill" [style.font-size.px]="item.size" [style.font-weight]="item.weight === 'bold' ? 700 : null"
+                [style.stroke]="item.halo?.colour ?? null" [style.stroke-width.px]="item.halo?.width ?? null"
+                >@if (item.lines; as lines) {@for (line of lines; track $index) {<tspan [attr.x]="item.x" [attr.y]="item.y + $index * item.lineHeight!">{{ line }}</tspan>}} @else {<ng-container>{{ item.text }}</ng-container>}</text>
         } @else {
           <path [attr.data-vis-id]="item.id" [attr.d]="item.d" [style.fill]="item.paint.gradient ? 'url(#' + gradientId(item.id) + ')' : item.paint.fill" [style.stroke]="item.paint.stroke"
                 [style.stroke-width.px]="item.paint.width" [style.stroke-dasharray]="item.paint.dash"
@@ -128,7 +130,8 @@ function keyframes(track: ResolvedTrack): Keyframe[] {
     path { vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
     /* The mask's own stroke is a plain band along the path: square ends, so nothing shows early. */
     path.reveal { vector-effect: none; stroke-linecap: butt; }
-    text { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; }
+    /* A halo is the text's own stroke, painted behind its fill (M3). */
+    text { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; paint-order: stroke; stroke-linejoin: round; }
   `,
 })
 export class SvgBackend {

@@ -3,7 +3,7 @@
 > **Status:** in code since 2026-11-07 (`web/src/app/shared/visual/styling/`), with the values below unchanged; **review R1 still open.**
 > - The values entered code when v0.1 started, so the area studies could be reviewed in the Visual Lab (`/lab`, development build). Review changes go into `tokens.css` and this document together; a spec checks every contrast pair in §3.5 on `tokens.css`.
 > - **Revision 2:** token names in §2 match the code; the `500` area step isn't written because no role uses it yet; §5 adds the `solid` material; §11 makes the area forms optional, after your review of `mcii.path@1`.
-> - **Visual review sheet:** <https://claude.ai/artifact/U6pbq8LDPgeqUGejrWE9Pm> (private). It shows every value in this document in light and dark, with replayable motion and a small specimen per area. The sheet isn't stored in the repository.
+> - **Visual review sheet:** in the Visual Lab (`/lab`, development build), at the end: "Visual language review sheet" (M3 stage C, 2026-11-11). It's drawn from the tokens the figures use, so a token change shows there at once: the ranges and every role per area with the value each takes, in light and dark; line weights and dashes; every material, the light and the depth planes in each area; type. Motion is replayed in the Lab's Transitions sections. The earlier sheet (<https://claude.ai/artifact/U6pbq8LDPgeqUGejrWE9Pm>, private, outside the repository) is superseded.
 > - **Companions:**
 >   - `visual-system.md`: S1's place in the architecture
 >   - `visual-policy.md`: the criteria these values serve
@@ -237,6 +237,9 @@ Figures set `forced-color-adjust: none` and map every role to a system colour ex
 | `label-soft` | 13 px, weight 400, colour `label-soft` |
 | Line height | 1.2 |
 | Placement | Horizontal only; at least 8 units from any form it doesn't name |
+| Wrapping | Built (M3, 2026-11-11): a label with a `width` wraps at spaces, never inside a word. Lines are measured with the face's advance widths (Segoe UI) plus 8% for wider system faces, so a line may break a little early but never runs past its width [J] |
+| Halo | Built (M3): a 4-unit stroke of the ground colour behind the glyphs (2 units show around them), for a label over a plane or across its edge [J] |
+| Clearance check | Built (M3): the validator lists a label closer than 8 units to a form it doesn't `names` as a warning in the Lab. A plane counts by its lines, a label with a halo may cross a plane's edge, and a form hidden under an opaque form that holds the label doesn't count |
 
 ## 10. Motion
 | Token | Value | Use |
