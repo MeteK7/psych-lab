@@ -16,7 +16,9 @@ const GENERATOR_SETS = 21; // S2: the reference compositions, 2 or 3 per generat
 const LAYOUT_SETS = 4; // S2: grid, radial, flow, packing
 const MATERIAL_SETS = 5; // S1 (M3): the material set, a grounded lit form, depth, depth with grain, a translucent overlap
 const SHEET_SETS = 12; // the review sheet (M3 stage C): lines, type, and materials and depth in each of the five areas
-const PANELS = (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS + GENERATOR_SETS + LAYOUT_SETS + MATERIAL_SETS + SHEET_SETS) * 2; // light and dark
+const INTERACTION_SETS = 3; // S6 (M4): a rating scale, a field with two axes, a choice of three
+const PANELS =
+  (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS + GENERATOR_SETS + LAYOUT_SETS + MATERIAL_SETS + SHEET_SETS + INTERACTION_SETS) * 2; // light and dark
 
 for (const [name, media] of [
   ['light', { colorScheme: 'light' }],
@@ -167,4 +169,31 @@ test('Visual Lab: the review sheet', async ({ page }) => {
   await expect(page.getByRole('list', { name: 'Spacing warnings: type' })).toContainText("'no-halo'");
   // The preview's long label wraps within the frame.
   await expect(page.locator('figure[data-instrument="state-reset.tracking-preview-light"] text[data-vis-id="label-ring"] tspan')).toHaveCount(2);
+});
+
+// Interaction (M4 stage A): the Lab says which target is under the pointer, from the figure's own
+// geometry, at the size the figure is drawn, and the value a click there would set.
+test('Visual Lab: interaction targets under the pointer', async ({ page }) => {
+  await page.goto('/lab');
+  const at = async (figure: string, x: number, y: number) => {
+    const svg = page.locator(`figure[data-interaction="${figure}"] app-vis-svg svg`);
+    await svg.scrollIntoViewIfNeeded();
+    const box = (await svg.boundingBox())!;
+    const s = box.width / 480;
+    await page.mouse.move(box.x + x * s, box.y + y * s, { steps: 2 });
+  };
+  await at('rating-light', 240, 44);
+  await expect(page.locator('[data-under="rating"]')).toContainText("handle 'mark' (Rating)");
+  await at('rating-dark', 400, 50);
+  await expect(page.locator('[data-under="rating"]')).toContainText('a click places it at rating 5');
+  await at('field-light', 345, 85);
+  await expect(page.locator('[data-under="field"]')).toContainText('across 4, up 4');
+  await at('choice-light', 390, 60);
+  await expect(page.locator('[data-under="choice"]')).toContainText('choice = third');
+  await at('choice-light', 165, 60);
+  await expect(page.locator('[data-under="choice"]')).toContainText('nothing');
+  // The target view can be turned off.
+  await expect(page.locator('svg.targets')).toHaveCount(6);
+  await page.getByLabel('Show targets').uncheck();
+  await expect(page.locator('svg.targets')).toHaveCount(0);
 });

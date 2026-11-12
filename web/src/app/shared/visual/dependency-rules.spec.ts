@@ -79,6 +79,10 @@ describe('Visual System dependency rules', () => {
     expect(outside(inFolder('instruments'), ['instruments', 'composition', 'styling', 'generation'])).toEqual([]);
   });
 
+  it('4d. interaction maps input to values, purely: it imports only composition, styling and generation (no Angular, no DOM, no rendering)', () => {
+    expect(outside(inFolder('interaction'), ['interaction', 'composition', 'styling', 'generation'])).toEqual([]);
+  });
+
   it('5. rendering imports only itself and Angular, and only integration imports a backend', () => {
     expect(outside(inFolder('rendering'), ['rendering', '@angular/core'])).toEqual([]);
     const users = app

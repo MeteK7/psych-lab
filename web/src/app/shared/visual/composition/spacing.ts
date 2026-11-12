@@ -1,15 +1,11 @@
-import { Polyline, flattenPath } from '../generation/curves';
-import { deriveSeed } from '../generation/random';
-import { generate, generateEdge } from '../generation/registry';
 import { resolveLabel, resolveStyle } from '../styling/resolve';
 import { LABEL_CLEARANCE, LINE_HEIGHT, TYPE_EXTENT, textWidth, wrapText } from '../styling/type';
 import { PLANE_ROLES } from '../styling/vocabulary';
 import type { Box } from './bounds';
+import { Form, Pt, formOutline, insideOutline, pointToBox, pointToSegment } from './outline';
 import { SceneDefinition, SceneElement, TextLookup } from './scene';
 
 type Label = Extract<SceneElement, { kind: 'label' }>;
-type Form = Exclude<SceneElement, { kind: 'label' }>;
-type Pt = readonly [number, number];
 
 /**
  * The box a label's glyphs take: its lines as wrapped by S1 (styling/type.ts), from the capitals of
@@ -24,55 +20,6 @@ export function labelBox(label: Label, text: TextLookup): Box {
   const top = y - TYPE_EXTENT.ascent * size;
   const height = (TYPE_EXTENT.ascent + TYPE_EXTENT.descent) * size + (lines.length - 1) * size * LINE_HEIGHT;
   return { x: left, y: top, width, height };
-}
-
-/** A form's outline as polylines, as drawn: a plane drawn by its top edge counts only that edge. */
-function outline(scene: SceneDefinition, form: Form): Polyline[] {
-  const seed = deriveSeed(scene.seed ?? scene.id, form.id);
-  if (form.style.edge === 'top') {
-    if (form.kind === 'generated') {
-      const edge = generateEdge(form.generator, form.params, seed);
-      return edge ? flattenPath(edge) : [];
-    }
-    if (form.geometry.type === 'rect') {
-      const { x, y, width } = form.geometry;
-      return [{ points: [[x, y], [x + width, y]], closed: false }];
-    }
-  }
-  if (form.kind === 'generated') return flattenPath(generate(form.generator, form.params, seed));
-  const g = form.geometry;
-  switch (g.type) {
-    case 'line':
-      return [{ points: [[g.x1, g.y1], [g.x2, g.y2]], closed: false }];
-    case 'rect': {
-      const r = Math.min(g.rx ?? 0, g.width / 2, g.height / 2);
-      if (!r) return [{ points: [[g.x, g.y], [g.x + g.width, g.y], [g.x + g.width, g.y + g.height], [g.x, g.y + g.height]], closed: true }];
-      const { x, y, width: w, height: h } = g;
-      return flattenPath(
-        `M${x + r} ${y} H${x + w - r} A${r} ${r} 0 0 1 ${x + w} ${y + r} V${y + h - r} A${r} ${r} 0 0 1 ${x + w - r} ${y + h} ` +
-          `H${x + r} A${r} ${r} 0 0 1 ${x} ${y + h - r} V${y + r} A${r} ${r} 0 0 1 ${x + r} ${y} Z`,
-      );
-    }
-    case 'circle':
-      return flattenPath(`M${g.cx - g.r} ${g.cy} A${g.r} ${g.r} 0 1 0 ${g.cx + g.r} ${g.cy} A${g.r} ${g.r} 0 1 0 ${g.cx - g.r} ${g.cy} Z`);
-    case 'ellipse':
-      return flattenPath(`M${g.cx - g.rx} ${g.cy} A${g.rx} ${g.ry} 0 1 0 ${g.cx + g.rx} ${g.cy} A${g.rx} ${g.ry} 0 1 0 ${g.cx - g.rx} ${g.cy} Z`);
-    case 'path':
-      return flattenPath(g.d);
-  }
-}
-
-function pointToSegment(p: Pt, a: Pt, b: Pt): number {
-  const [dx, dy] = [b[0] - a[0], b[1] - a[1]];
-  const length = dx * dx + dy * dy;
-  const t = length ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / length)) : 0;
-  return Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
-}
-
-function pointToBox(p: Pt, b: Box): number {
-  const dx = Math.max(b.x - p[0], 0, p[0] - (b.x + b.width));
-  const dy = Math.max(b.y - p[1], 0, p[1] - (b.y + b.height));
-  return Math.hypot(dx, dy);
 }
 
 /** Whether two segments properly cross. Touching (an end on the other, or collinear overlap) is caught by the distances. */
@@ -93,19 +40,6 @@ function segmentToBox(a: Pt, b: Pt, box: Box): number {
   return Math.min(pointToBox(a, box), pointToBox(b, box), ...corners.map((c) => pointToSegment(c, a, b)));
 }
 
-/** Even-odd: whether a point lies inside the closed polylines. */
-function inside(p: Pt, lines: Polyline[]): boolean {
-  let hit = false;
-  for (const { points, closed } of lines) {
-    if (!closed) continue;
-    for (let k = 0, j = points.length - 1; k < points.length; j = k++) {
-      const [a, b] = [points[k], points[j]];
-      if (a[1] > p[1] !== b[1] > p[1] && p[0] < ((b[0] - a[0]) * (p[1] - a[1])) / (b[1] - a[1]) + a[0]) hit = !hit;
-    }
-  }
-  return hit;
-}
-
 /**
  * How far a label's glyphs are from a form, in scene units: from the edge of its line (half the
  * line's width), or 0 when they touch or the label lies on a filled form. Planes are surfaces a
@@ -113,7 +47,7 @@ function inside(p: Pt, lines: Polyline[]): boolean {
  */
 export function labelDistance(scene: SceneDefinition, label: Label, form: Form, text: TextLookup): number {
   const box = labelBox(label, text);
-  const lines = outline(scene, form);
+  const lines = formOutline(scene, form);
   const paint = resolveStyle(form.style);
   let d = Infinity;
   for (const { points, closed } of lines) {
@@ -122,7 +56,7 @@ export function labelDistance(scene: SceneDefinition, label: Label, form: Form, 
   }
   const filled = paint.fill !== 'none' || !!paint.gradient;
   const plane = PLANE_ROLES.includes(form.style.role);
-  if (filled && !plane && inside([box.x + box.width / 2, box.y + box.height / 2], lines)) return 0;
+  if (filled && !plane && insideOutline([box.x + box.width / 2, box.y + box.height / 2], lines)) return 0;
   return Math.max(0, d - paint.width / 2);
 }
 
@@ -145,8 +79,8 @@ function hidden(scene: SceneDefinition, label: Label, form: Form, forms: Form[],
   return forms.some((cover) => {
     const at = order.get(cover.id)!;
     if (at <= from || at >= to || !OPAQUE.has(cover.style.material ?? 'line')) return false;
-    const lines = outline(scene, { ...cover, style: { ...cover.style, edge: undefined } } as Form);
-    return corners.every((c) => inside(c, lines));
+    const lines = formOutline(scene, cover, false);
+    return corners.every((c) => insideOutline(c, lines));
   });
 }
 

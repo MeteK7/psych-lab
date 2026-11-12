@@ -64,8 +64,39 @@ export interface Ties {
   overlapOf?: readonly [ElementId, ElementId];
 }
 
+/**
+ * Scales (milestone M4, S6 Interaction): map a value the exercise holds to a position along one axis
+ * of the figure, in scene units, and a position back to a value.
+ * - `linear`: numbers from `domain[0]` to `domain[1]`, at `range[0]` to `range[1]`; with a `step`,
+ *   only whole steps from `domain[0]` (a 1–5 rating has step 1).
+ * - `points`: a few values, evenly spaced from `range[0]` to `range[1]` (categories, in order).
+ * A range may run either way: a vertical scale often runs upwards.
+ */
+export type ScaleId = string;
+export type ScaleDef =
+  | { kind: 'linear'; domain: readonly [number, number]; range: readonly [number, number]; step?: number }
+  | { kind: 'points'; values: readonly (string | number)[]; range: readonly [number, number] };
+export type ScaleValue = string | number;
+
+/** One axis of a handle: the scale it moves along, and the name of the exercise's value it sets. */
+export interface Axis {
+  scale: ScaleId;
+  value: string;
+}
+
+/**
+ * What a pointer can do with an element (M4). A target's purpose serves `interaction`.
+ * - `handle`: moved along one scale (`x` or `y`) or two; a click on its `track` (the line or area
+ *   it moves in) places it there, so no drag is ever needed.
+ * - `region`: chosen as a whole; choosing it sets `value` to `option`.
+ * `label` names the target in words, for the exercise's controls and for assistive technology.
+ */
+export type Target =
+  | { kind: 'handle'; x?: Axis; y?: Axis; track?: ElementId; label: ContentKey }
+  | { kind: 'region'; value: string; option: ScaleValue; label: ContentKey };
+
 export type SceneElement =
-  | ({ kind: 'shape'; id: ElementId; geometry: Geometry; style: StyleRef; purpose: Purpose; enter?: Entrance } & Ties)
+  | ({ kind: 'shape'; id: ElementId; geometry: Geometry; style: StyleRef; purpose: Purpose; enter?: Entrance; target?: Target } & Ties)
   /**
    * Geometry made by an S2 generator (milestone M2) from its parameters and the element's own seed,
    * derived from the scene's seed and the element's id. Drawn, styled and animated like a shape.
@@ -78,6 +109,7 @@ export type SceneElement =
       style: StyleRef;
       purpose: Purpose;
       enter?: Entrance;
+      target?: Target;
     } & Ties)
   | {
       kind: 'label';
@@ -137,6 +169,8 @@ export interface SceneDefinition {
    * Visual Lab replays each for review. Other changes still work; they just aren't reviewed.
    */
   transitions?: readonly (readonly [StateName, StateName])[];
+  /** The scales its handles move along (M4). */
+  scales?: Readonly<Record<ScaleId, ScaleDef>>;
   /** Scene policy settings the validator reads (docs/visual-policy.md §8). */
   policy?: { maxFocal?: number };
   /**

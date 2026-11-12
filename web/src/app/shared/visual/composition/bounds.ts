@@ -36,3 +36,10 @@ export function boundsOf(scene: SceneDefinition, element: SceneElement): Box | n
 export function boxesOverlap(a: Box, b: Box): boolean {
   return a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 }
+
+/** A box grown to at least `size` each way, around its centre: a target's least area (M4). */
+export function atLeast(box: Box, size: number): Box {
+  const width = Math.max(box.width, size);
+  const height = Math.max(box.height, size);
+  return { x: box.x + (box.width - width) / 2, y: box.y + (box.height - height) / 2, width, height };
+}

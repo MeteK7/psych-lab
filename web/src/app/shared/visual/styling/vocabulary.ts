@@ -91,6 +91,9 @@ export interface StyleRef {
   grain?: boolean;
 }
 
+/** The smallest pointer target in scene units (1 unit = 1 CSS px at design width), WCAG 2.5.8 (M4). */
+export const MIN_TARGET = 24;
+
 /** The grain texture (§5): a tile of fine seeded dots, at most 6% opacity. */
 export const GRAIN = { opacity: 0.05, tile: 64, spacing: 6, radius: 0.6, seed: 'platform-grain' } as const;
 
