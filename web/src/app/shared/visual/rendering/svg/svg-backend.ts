@@ -2,8 +2,9 @@ import { Component, DestroyRef, ElementRef, afterRenderEffect, computed, inject,
 
 import { DrawPaint, Drawable, FrameItem, ResolvedFrame, ResolvedTimeline, ResolvedTrack } from '../frame';
 import { FRAME_CLOCK } from '../frame-clock';
-import { done, lerp, progress } from '../timing';
-import { canMorph, tweenShape } from '../tween';
+import { carryOn } from '../playback';
+import { done, progress } from '../timing';
+import { tweenShape } from '../tween';
 
 /** How the surface picks light or dark: from the page, or pinned (the Visual Lab shows both side by side). */
 export type SurfaceScheme = 'auto' | 'light' | 'dark';
@@ -39,7 +40,6 @@ export function pathData(shape: Drawable): string {
 let surfaces = 0;
 
 type ShapeTrack = Extract<ResolvedTrack, { property: 'shape' }>;
-type TranslateTrack = Extract<ResolvedTrack, { property: 'translate' }>;
 type ExitTrack = Extract<ResolvedTrack, { property: 'exit' }>;
 type CssTrack = Exclude<ResolvedTrack, ShapeTrack | ExitTrack>;
 const SVG = 'http://www.w3.org/2000/svg';
@@ -166,7 +166,8 @@ export class SvgBackend {
   private running: Animation[] = [];
   /** Glides and moves under way (M5), with when they started, so a new timeline can pick them up. */
   private shapes: { track: ShapeTrack; start: number }[] = [];
-  private moves: { track: TranslateTrack; start: number }[] = [];
+  /** The timeline playing and when it started, so a new one can pick its glides up. */
+  private playing: { timeline: ResolvedTimeline; start: number } | null = null;
   private ghosts: Element[] = [];
   private loop: number | null = null;
   private readonly clock = inject(FRAME_CLOCK);
@@ -203,32 +204,12 @@ export class SvgBackend {
     return [...this.host.querySelectorAll<SVGElement>(`[${attr}]`)].find((e) => e.getAttribute(attr) === id);
   }
 
-  /** A new timeline's glides and moves, picked up from where the running ones have got to. */
-  private carryOn(timeline: ResolvedTimeline, now: number): ResolvedTimeline {
-    return timeline.map((track) => {
-      if (track.property === 'shape') {
-        const running = this.shapes.find((r) => r.track.id === track.id);
-        if (!running) return track;
-        const { from, to, morph } = running.track;
-        const f = progress(running.track, now - running.start);
-        const here = morph ? tweenShape(from, to, f) : f < 0.5 ? from : to;
-        return { ...track, from: here, morph: canMorph(here, track.to) };
-      }
-      if (track.property === 'translate') {
-        const running = this.moves.find((r) => r.track.id === track.id);
-        if (!running) return track;
-        const f = progress(running.track, now - running.start);
-        const left = [0, 1].map((i) => lerp(running.track.from[i], running.track.to[i], f));
-        return { ...track, from: [track.from[0] + left[0], track.from[1] + left[1]] as const };
-      }
-      return track;
-    });
-  }
-
   private play(timeline: ResolvedTimeline): void {
     const now = this.clock.now();
-    const tracks = this.carryOn(timeline, now);
+    // Picked up from where the previous change has got to (rendering/playback.ts, shared with canvas).
+    const tracks = carryOn(this.playing, timeline, now);
     this.stop();
+    this.playing = { timeline: tracks, start: now };
     for (const track of tracks) {
       if (track.property === 'shape') {
         this.startShape(track, now);
@@ -243,7 +224,6 @@ export class SvgBackend {
       const { delay, duration, easing } = track;
       // `backwards`: the start value holds during the delay; afterwards the frame's own state shows.
       this.running.push(target.animate(keyframes(track), { delay, duration, easing, fill: 'backwards' }));
-      if (track.property === 'translate') this.moves.push({ track, start: now });
     }
     if (this.shapes.some((r) => r.track.morph)) {
       this.loop = this.clock.request((t) => this.tick(t));
@@ -398,6 +378,5 @@ export class SvgBackend {
     this.shapes = [];
     for (const ghost of this.ghosts) ghost.remove();
     this.ghosts = [];
-    this.moves = [];
   }
 }

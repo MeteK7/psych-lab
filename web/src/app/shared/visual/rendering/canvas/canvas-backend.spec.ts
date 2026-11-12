@@ -124,7 +124,9 @@ describe('canvas backend (S7)', () => {
     expect(calls).toContain('translate(100,150)');
     expect(calls).toContain('scale(40,5)');
     expect(calls).toContain('radial stop 0 resolved(var(--vis-shadow))');
-    expect(calls).toContain('linear 60,60,140,140');
+    // The linear gradient runs in the shape's box units (0,0 → 1,1), the box mapped in by a transform, as SVG's objectBoundingBox.
+    expect(calls).toContain('linear 0,0,1,1');
+    expect(calls).toContain('transform(80,0,0,80,60,60)');
     expect(calls).toContain('linear stop 1 resolved(var(--vis-subject-shade))');
   });
 

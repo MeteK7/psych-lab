@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { CS_WHY_IT_HAPPENED, STATE_RESET } from '../../../content';
 import { AppEnvironment } from '../../shared/app-environment';
@@ -17,6 +18,7 @@ import { THEMES } from '../../shared/visual/styling/vocabulary';
 import { LabGenerators } from './lab-generators';
 import { LabInteraction } from './lab-interaction';
 import { LabMotion } from './lab-motion';
+import { CAUSE_AXES, CAUSE_SETS, PREVIEW_LABELS, RING_RADIUS, ROUND_SETS, trackingStill } from './lab-instrument-sets';
 import { LabMaterials } from './lab-materials';
 import { describeMover } from './lab-movers';
 import { LabSheet } from './lab-sheet';
@@ -30,7 +32,7 @@ import { LabTrackingStill } from './lab-tracking-still';
  */
 @Component({
   selector: 'app-lab-page',
-  imports: [SceneFigure, InstrumentFigure, LabGenerators, LabInteraction, LabMaterials, LabMotion, LabSheet, LabTrackingStill],
+  imports: [RouterLink, SceneFigure, InstrumentFigure, LabGenerators, LabInteraction, LabMaterials, LabMotion, LabSheet, LabTrackingStill],
   template: `
     <h1>Visual Lab</h1>
     @if (env.showsDevelopment()) {
@@ -38,6 +40,7 @@ import { LabTrackingStill } from './lab-tracking-still';
       <ul class="notes muted">
         <li>The states are drawn without motion. Each change between them is replayed under "Transitions", in full or reduced motion.</li>
         <li>For forced colours, turn on a Windows contrast theme: every panel then shows system colours.</li>
+        <li><a routerLink="/lab/parity">Rendering parity</a>: every composition drawn by the SVG and the canvas backend side by side.</li>
       </ul>
 
       @for (entry of entries; track entry.scene.id) {
@@ -259,44 +262,21 @@ export class LabPage {
   protected readonly tier = signal<QualityTier | 'auto'>('auto');
   protected readonly causeMap = CAUSE_MAP;
   protected readonly rounds = ROUNDS;
-  protected readonly roundSets = [
-    { current: 1, name: 'Before the first round, and during it' },
-    { current: 4, name: 'Round 4: three done' },
-    { current: 8, name: 'The last round' },
-  ];
+  protected readonly roundSets = ROUND_SETS;
   protected readonly roundsPurposes = ROUNDS_PURPOSES.map(({ id, purpose }) => ({ id, serves: purpose.serves.map((k) => PURPOSE_LABELS[k]).join('; '), why: purpose.why }));
   protected readonly tracking = TRACKING;
-  protected readonly ringRadius = STATE_RESET.game.ring_radius;
-  protected readonly previewLabels = STATE_RESET.how_it_works.labels;
-  private readonly still = (onTarget: boolean): TrackingInput => ({
-    size: { width: 480, height: 320 },
-    target: { x: 170, y: 140 },
-    cursor: onTarget ? { x: 178, y: 148 } : { x: 300, y: 220 },
-    ringRadius: STATE_RESET.game.ring_radius,
-    onTarget,
-  });
+  protected readonly ringRadius = RING_RADIUS;
+  protected readonly previewLabels = PREVIEW_LABELS;
   protected readonly trackingSets: { key: string; name: string; alt: string; state: TrackingInput | null }[] = [
-    { key: 'outside', name: 'The game: pointer outside the ring', alt: 'The dot game, pointer outside the ring', state: this.still(false) },
-    { key: 'inside', name: 'The game: pointer inside the ring', alt: 'The dot game, pointer inside the ring', state: this.still(true) },
+    { key: 'outside', name: 'The game: pointer outside the ring', alt: 'The dot game, pointer outside the ring', state: trackingStill(false) },
+    { key: 'inside', name: 'The game: pointer inside the ring', alt: 'The dot game, pointer inside the ring', state: trackingStill(true) },
     { key: 'preview', name: '"How the game works"', alt: STATE_RESET.how_it_works.illustration_alt, state: null },
   ];
   protected readonly trackingPurposes = TRACKING_PURPOSES.map(({ id, purpose }) => ({ id, serves: purpose.serves.map((k) => PURPOSE_LABELS[k]).join('; '), why: purpose.why }));
   protected readonly chartLabel = CS_WHY_IT_HAPPENED.map.chart_label;
-  private readonly axisWords = CS_WHY_IT_HAPPENED.map.axes;
-  protected readonly axes: CauseMapInput['axes'] = {
-    left: this.axisWords[0].low,
-    right: this.axisWords[0].high,
-    top: this.axisWords[1].low,
-    bottom: this.axisWords[1].high,
-  };
+  protected readonly axes = CAUSE_AXES;
   /** Answer sets covering every case the map has to draw. */
-  protected readonly causeSets: { key: string; name: string; placing: number; causes: CauseMapInput['causes'] }[] = [
-    { key: 'start', name: 'Step 4, the start: every cause in the middle, cause 1 being placed', placing: 1, causes: [{ who: 3, time: 3 }, { who: 3, time: 3 }, { who: 3, time: 3 }] },
-    { key: 'placing', name: 'Step 4: cause 2 being placed', placing: 2, causes: [{ who: 1, time: 2 }, { who: 3, time: 3 }, { who: 3, time: 3 }] },
-    { key: 'spread', name: 'Step 5: causes spread out', placing: 0, causes: [{ who: 1, time: 2 }, { who: 5, time: 5 }, { who: 2, time: 5 }] },
-    { key: 'heavy', name: 'Step 5: a heavy map, every cause in one corner', placing: 0, causes: [{ who: 1, time: 1 }, { who: 1, time: 1 }, { who: 1, time: 1 }] },
-    { key: 'six', name: 'Step 5: six causes in one place, at the edge', placing: 0, causes: Array.from({ length: 6 }, () => ({ who: 5, time: 1 })) },
-  ];
+  protected readonly causeSets = CAUSE_SETS;
   /** Labels closer than 8 units to a form they don't name (visual-language.md §9), across every answer set. */
   protected readonly causeSpacing = [
     ...new Set(

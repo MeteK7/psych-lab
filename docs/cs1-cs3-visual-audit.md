@@ -89,7 +89,7 @@ Every figure in the application, from a search of the code:
 |---|---|---|
 | MCII path | `experiences/mcii/mcii.ts` | Visual System scene `mcii.path@4` (development branch) |
 | CS2 cause map | `experiences/cognitive-shifts/cs-why-it-happened.ts` | Visual System instrument `cs2.cause-map@1` (development branch; R2 pending) |
-| Game preview, tracking game | `experiences/state-reset/` | Experiment exercises: frozen until after the n-of-1 study |
+| Game preview, tracking game | `experiences/state-reset/` | Experiment exercises: they can change now, during the development stage; they're frozen again only when participant data collection approaches (`plan.md` §9, "Development stage (2026-11-09)"). Corrected 2026-11-12: this row first said they were frozen until after the n-of-1 study, which is postponed |
 | Icons | `shared/icon.ts` | Outside scope |
 | The Visual Lab | `pages/lab/lab-page.ts` | The review tool itself |
 
@@ -100,7 +100,7 @@ Action Bridge, goal restatement and the rating step have no figures. Once MCII a
 - **§14, v0.3:** its validators were CS1 and CS3, so by the pull rule nothing pulls it. Layout generators and layout transitions stay designed and unbuilt, like S6 and value transitions after the v0.2 rescope. By decision A2, v0.3 stays unassigned until a composition pulls it; v0.4 onwards keep their numbers.
 - **What could pull next** (none is in hand today):
   - a new exercise, or a reviewed change to an existing one, that needs a figure to communicate (Tier 1 or Tier 2)
-  - the first approved Attention task, which pulls the stimulus lane (v0.4); it waits for the n-of-1 study
+  - the first approved Attention task, which pulls the stimulus lane (now M6); it waits for its evidence review (`plan.md` §2.2 rates generic visual search and attention-bias modification as weak, so an Attention exercise first needs a supported method) and its design. Corrected 2026-11-12: this line first said it waited for the n-of-1 study, which is postponed
 
 ## 6. Decisions
 | # | Decision | Outcome |
