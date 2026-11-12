@@ -654,3 +654,46 @@ test('Visual Lab: changes keep to the motion budget', async ({ page }) => {
     for (const ref of ['bars', 'set', 'route']) expect(await page.locator(`[data-moved="${ref}"] > li`).count()).toBeLessThanOrEqual(3);
   }
 });
+
+// The stimulus lane (M6 stage B): the check before a run, a run and its timing log. Timing in a
+// test browser isn't the display's own, so these check what the Lab says, not how stable it is.
+test('Visual Lab: the stimulus lane checks the display, runs, and logs every event with a verdict', async ({ page }) => {
+  await page.goto('/lab');
+  const section = page.locator('section[aria-labelledby="lab-stimulus"]');
+  await section.scrollIntoViewIfNeeded();
+  await expect(section).toContainText('browser frame time (estimated, not display time)');
+  await expect(section.getByRole('button', { name: 'Run the reference stimulus' })).toBeDisabled();
+  await section.getByRole('button', { name: 'Check this display (2 s)' }).click();
+  await expect(section.locator('[data-check] [data-verdict]')).toHaveText(/^(stable|not stable: .+)$/, { timeout: 15_000 });
+  await expect(section.locator('[data-units="frames"]')).toHaveText(/^(run|refused): .+/);
+  await expect(section.locator('[data-units="ms"]')).toHaveText(/^(run|refused): .+/);
+  await section.getByRole('button', { name: 'Run the reference stimulus' }).click();
+  await expect(section.locator('[data-summary]')).toContainText('Frames produced', { timeout: 15_000 });
+  const verdicts = await section.locator('tr[data-event] [data-verdict]').allInnerTexts();
+  expect(verdicts).toHaveLength(4);
+  for (const v of verdicts) expect(v).toMatch(/^(as specified|late onset|too long|unstable|interrupted|refused):/);
+  await expectNoSeriousA11yIssues(page, 'Visual Lab, stimulus lane');
+});
+
+test('Visual Lab: losing focus refuses a check and interrupts a run', async ({ page }) => {
+  await page.goto('/lab');
+  const section = page.locator('section[aria-labelledby="lab-stimulus"]');
+  await section.scrollIntoViewIfNeeded();
+  // Test browsers keep a page focused even when it isn't in front, so focus is lost by an event here.
+  await section.getByRole('button', { name: 'Check this display (2 s)' }).click();
+  await page.evaluate(() => window.dispatchEvent(new Event('blur')));
+  await expect(section.locator('[data-check] [data-verdict]')).toContainText('not stable: the page lost focus during the check', { timeout: 15_000 });
+  await expect(section.locator('[data-units="ms"]')).toContainText('refused');
+  await section.getByRole('button', { name: 'Run the reference stimulus' }).click();
+  await expect(section.locator('[data-summary]')).toContainText('Frames produced', { timeout: 15_000 });
+  for (const v of await section.locator('tr[data-event] [data-verdict]').allInnerTexts()) expect(v).toMatch(/^refused:/);
+  // Checked again, then a run that loses focus part-way is interrupted.
+  await section.getByRole('button', { name: 'Check this display (2 s)' }).click();
+  await expect(section.locator('[data-check] [data-verdict]')).not.toContainText('lost focus', { timeout: 15_000 });
+  if (await section.locator('[data-units="ms"]').innerText().then((t) => t.startsWith('run'))) {
+    await section.getByRole('button', { name: 'Run the reference stimulus' }).click();
+    await page.waitForTimeout(800);
+    await page.evaluate(() => window.dispatchEvent(new Event('blur')));
+    await expect(section.locator('[data-interrupted]')).toHaveText('Interrupted: the page lost focus', { timeout: 15_000 });
+  }
+});

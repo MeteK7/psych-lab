@@ -83,6 +83,14 @@ describe('Visual System dependency rules', () => {
     expect(outside(inFolder('interaction'), ['interaction', 'composition', 'styling', 'generation'])).toEqual([]);
   });
 
+  it('4e. stimuli are pure: they import only S1 colours, S2 seeded randomness and the frame types (no Angular, no DOM, no backend)', () => {
+    const files = inFolder('stimulus');
+    const bad = files.flatMap(({ path, imports }) =>
+      imports.filter((i) => !['stimulus', 'styling', 'generation'].includes(area(i)) && i !== `${ROOT}/rendering/frame`).map((i) => `${path} imports ${i}`),
+    );
+    expect(bad).toEqual([]);
+  });
+
   it('5. rendering imports only itself and Angular, and only integration imports a backend', () => {
     expect(outside(inFolder('rendering'), ['rendering', '@angular/core'])).toEqual([]);
     const users = app

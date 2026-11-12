@@ -4,7 +4,7 @@ import type { ResolvedFrame, ResolvedTimeline } from '../frame';
 import { FRAME_CLOCK } from '../frame-clock';
 import { SampledItem, carryOn, sampleTimeline, timelineEnd } from '../playback';
 import type { SurfaceScheme } from '../svg/svg-backend';
-import { paintItems } from './canvas-backend';
+import { paintOnCanvas } from './canvas-backend';
 import { tokenColours } from './colour';
 
 /**
@@ -114,24 +114,13 @@ export class CanvasFigure {
     this.paint(this.playing ? this.clock.now() - this.playing.start : Infinity);
   }
 
-  /** Sizes the backing store to the canvas's CSS size × the device pixel ratio, and paints `ms` into the change. */
+  /** Paints `ms` into the change, on a backing store sized to the canvas's CSS size × the device pixel ratio. */
   private paint(ms: number): void {
-    const canvas = this.canvas().nativeElement;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return; // e.g. test environments without canvas support
     const frame = this.frame();
-    const css = canvas.clientWidth || frame.width;
-    const ratio = globalThis.devicePixelRatio || 1;
-    const width = Math.max(1, Math.round(css * ratio));
-    const height = Math.max(1, Math.round(((css * frame.height) / frame.width) * ratio));
-    if (canvas.width !== width || canvas.height !== height) Object.assign(canvas, { width, height });
     const items: SampledItem[] =
       this.playing && ms < this.playing.end
         ? sampleTimeline(frame, this.playing.timeline, ms)
         : frame.items.map((item) => ({ item, opacity: 1, offset: [0, 0], reveal: null, paint: null }));
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, width, height);
-    ctx.setTransform(width / frame.width, 0, 0, height / frame.height, 0, 0);
-    paintItems(ctx, frame, items, this.colour, css / frame.width);
+    paintOnCanvas(this.canvas().nativeElement, frame, items, this.colour);
   }
 }

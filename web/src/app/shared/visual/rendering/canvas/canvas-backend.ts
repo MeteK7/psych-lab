@@ -270,6 +270,25 @@ export function paintItems(ctx: CanvasRenderingContext2D, frame: ResolvedFrame, 
 }
 
 /**
+ * Paints items on a canvas at its CSS width, with a backing store of that size × the device pixel
+ * ratio (resized when either changes), the frame mapped to fill it. Used by the canvas figure and
+ * the stimulus surface (M6), so both draw the same way.
+ */
+export function paintOnCanvas(canvas: HTMLCanvasElement, frame: ResolvedFrame, items: readonly SampledItem[], colour: ColourOf): void {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return; // e.g. test environments without canvas support
+  const css = canvas.clientWidth || frame.width;
+  const ratio = globalThis.devicePixelRatio || 1;
+  const width = Math.max(1, Math.round(css * ratio));
+  const height = Math.max(1, Math.round(((css * frame.height) / frame.width) * ratio));
+  if (canvas.width !== width || canvas.height !== height) Object.assign(canvas, { width, height });
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+  ctx.setTransform(width / frame.width, 0, 0, height / frame.height, 0, 0);
+  paintItems(ctx, frame, items, colour, css / frame.width);
+}
+
+/**
  * Paints a resolved frame on a 2D context. Decides nothing (docs/visual-system.md §6.2): geometry,
  * paint and text all come in the frame; `colour` turns its token references into colours.
  */
