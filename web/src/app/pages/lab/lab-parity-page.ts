@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 
 import { AppEnvironment } from '../../shared/app-environment';
 import { FRAME_CLOCK, FrameClock, FrameFigure, FrameItem, ResolvedFrame, ResolvedTimeline } from '../../shared/visual/integration/frame-figure';
+import { LabOverlay } from './lab-overlay';
 import { ParityCase, parityCases } from './lab-parity-cases';
 
 type Scheme = 'light' | 'dark';
@@ -66,7 +67,7 @@ interface Checked {
  */
 @Component({
   selector: 'app-lab-parity-page',
-  imports: [FrameFigure],
+  imports: [FrameFigure, LabOverlay],
   providers: [{ provide: FRAME_CLOCK, useValue: PARITY_CLOCK }],
   styleUrls: ['./lab.css'],
   styles: `
@@ -91,6 +92,7 @@ interface Checked {
       } @else {
         <h1>Rendering parity</h1>
         <p class="lead">Every composition drawn by the SVG backend (left) and the canvas backend (right), in light and dark.</p>
+        <app-lab-overlay />
         <ul class="notes muted">
           <li>The parity suite compares them in the browser at device pixel ratios 1, 1.5 and 2: no difference inside fills, lines and the
             ground beyond the measured rendering noise; differences only at edges, on at most 0.5% of the pixels; each label in the same

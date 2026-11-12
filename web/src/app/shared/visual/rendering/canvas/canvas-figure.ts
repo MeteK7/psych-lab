@@ -2,6 +2,7 @@ import { Component, DestroyRef, ElementRef, afterNextRender, afterRenderEffect, 
 
 import type { ResolvedFrame, ResolvedTimeline } from '../frame';
 import { FRAME_CLOCK } from '../frame-clock';
+import type { FrameObserver } from '../frame-stats';
 import { SampledItem, carryOn, sampleTimeline, timelineEnd } from '../playback';
 import type { SurfaceScheme } from '../svg/svg-backend';
 import { paintOnCanvas } from './canvas-backend';
@@ -31,6 +32,8 @@ export class CanvasFigure {
   readonly scheme = input<SurfaceScheme>('auto');
   /** Tracks towards the frame's state; empty means show the frame as it is. */
   readonly timeline = input<ResolvedTimeline>([]);
+  /** Told about each frame while a change plays (M6: the watchdog and the Lab's overlay). */
+  readonly observer = input<FrameObserver | null>(null);
 
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;
   private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
@@ -88,6 +91,7 @@ export class CanvasFigure {
     this.playing = tracks.length ? { timeline: tracks, start: now, end: timelineEnd(tracks) } : null;
     this.paintNow();
     if (!this.playing) return;
+    this.observer()?.begin(now);
     this.loop = this.clock.request((t) => this.tick(t));
     // No frames to draw on: the final picture at once.
     if (this.loop === null) {
@@ -100,7 +104,9 @@ export class CanvasFigure {
     this.loop = null;
     if (!this.playing) return;
     const ms = time - this.playing.start;
+    const began = performance.now();
     this.paint(ms);
+    this.observer()?.frame(time, performance.now() - began);
     if (ms < this.playing.end) this.loop = this.clock.request((t) => this.tick(t));
     if (this.loop === null) this.playing = null;
   }

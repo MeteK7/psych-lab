@@ -1,4 +1,4 @@
-import { Component, ElementRef, computed, inject, input, linkedSignal, output, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, ElementRef, computed, inject, input, linkedSignal, output, signal, untracked } from '@angular/core';
 
 import { Composed, SHOWN, lookupOf } from '../composition/compose';
 import type { Box } from '../composition/bounds';
@@ -11,6 +11,7 @@ import { Hit, hitTest, targetsOf, toScenePoint } from '../interaction/regions';
 import { SurfaceScheme, SvgBackend } from '../rendering/svg/svg-backend';
 import { INPUT_CHANGE, frameSize } from '../styling/vocabulary';
 import { LiveInput, buildChangeTimeline, buildFrame } from './pipeline';
+import { FrameStats, FrameWatch } from './frame-watch';
 import { reducedMotion } from './reduced-motion';
 
 export type { Values };
@@ -56,7 +57,7 @@ export type ControlledBy = 'figure' | 'native';
     '(document:pointerdown)': 'onOutside($event)',
   },
   template: `
-    <app-vis-svg [frame]="frame()" [timeline]="timeline()" [scheme]="scheme()" />
+    <app-vis-svg [frame]="frame()" [timeline]="timeline()" [scheme]="scheme()" [observer]="stats" />
     @if (controlledBy() === 'figure') {
       @for (c of controls(); track c.key) {
         @if (c.kind === 'slider') {
@@ -118,6 +119,10 @@ export class InteractiveFigure {
   protected readonly frame = computed(() => buildFrame(this.composed().scene, SHOWN, this.lookup(), this.live()));
 
   private readonly reduce = reducedMotion();
+  /** How this figure's motion is drawn: the watchdog's measure (M6), and the Lab overlay's. */
+  protected readonly stats = new FrameStats();
+  private readonly unwatch = inject(FrameWatch).watch({ label: () => this.composed().scene.id, backend: 'svg', stats: this.stats });
+  private readonly unwatched = inject(DestroyRef).onDestroy(this.unwatch);
   /** The figure before and after each change of values (a new scene drawn by the exercise). */
   private readonly change = linkedSignal<SceneDefinition, { before: SceneDefinition | null; now: SceneDefinition }>({
     source: computed(() => this.composed().scene),
@@ -126,7 +131,7 @@ export class InteractiveFigure {
   protected readonly timeline = computed(() => {
     const { before, now } = this.change();
     const tier = this.tier();
-    const effective: QualityTier = tier !== 'auto' ? tier : this.reduce() ? 'reduced' : 'full';
+    const effective: QualityTier = tier !== 'auto' ? tier : this.reduce() || this.stats.dropped ? 'reduced' : 'full';
     // Words and focus as they are; a change of focus alone moves nothing.
     return untracked(() => buildChangeTimeline(before, now, SHOWN, this.lookup(), effective, { pace: INPUT_CHANGE, live: this.live() }));
   });

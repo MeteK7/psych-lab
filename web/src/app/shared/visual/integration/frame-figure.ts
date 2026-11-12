@@ -1,8 +1,9 @@
-import { Component, input } from '@angular/core';
+import { Component, DestroyRef, inject, input } from '@angular/core';
 
 import { CanvasFigure } from '../rendering/canvas/canvas-figure';
 import type { ResolvedFrame, ResolvedTimeline } from '../rendering/frame';
 import { SurfaceScheme, SvgBackend } from '../rendering/svg/svg-backend';
+import { FrameStats, FrameWatch } from './frame-watch';
 
 /** The frame clock both backends draw on, and the frame types, for pages that draw frames (the Lab's parity page). */
 export { FRAME_CLOCK } from '../rendering/frame-clock';
@@ -22,9 +23,9 @@ export type BackendId = 'svg' | 'canvas';
   imports: [SvgBackend, CanvasFigure],
   template: `
     @if (backend() === 'svg') {
-      <app-vis-svg [frame]="frame()" [timeline]="timeline()" [scheme]="scheme()" />
+      <app-vis-svg [frame]="frame()" [timeline]="timeline()" [scheme]="scheme()" [observer]="stats" />
     } @else {
-      <app-vis-canvas-figure [frame]="frame()" [timeline]="timeline()" [scheme]="scheme()" />
+      <app-vis-canvas-figure [frame]="frame()" [timeline]="timeline()" [scheme]="scheme()" [observer]="stats" />
     }
   `,
   styles: `:host { display: block; }`,
@@ -34,4 +35,19 @@ export class FrameFigure {
   readonly frame = input.required<ResolvedFrame>();
   readonly timeline = input<ResolvedTimeline>([]);
   readonly scheme = input<SurfaceScheme>('auto');
+  /** How its changes are drawn, for the Lab's overlay (M6); this component plays what it's given, at any tier. */
+  protected readonly stats = new FrameStats();
+
+  constructor() {
+    const backend = () => this.backend();
+    const theme = () => this.frame().theme;
+    const stop = inject(FrameWatch).watch({
+      label: () => `parity frame, ${theme()}`,
+      get backend() {
+        return backend();
+      },
+      stats: this.stats,
+    });
+    inject(DestroyRef).onDestroy(stop);
+  }
 }

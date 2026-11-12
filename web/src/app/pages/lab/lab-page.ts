@@ -18,6 +18,7 @@ import { THEMES } from '../../shared/visual/styling/vocabulary';
 import { LabGenerators } from './lab-generators';
 import { LabInteraction } from './lab-interaction';
 import { LabMotion } from './lab-motion';
+import { LabOverlay } from './lab-overlay';
 import { LabStimulus } from './lab-stimulus';
 import { CAUSE_AXES, CAUSE_SETS, PREVIEW_LABELS, RING_RADIUS, ROUND_SETS, trackingStill } from './lab-instrument-sets';
 import { LabMaterials } from './lab-materials';
@@ -33,7 +34,7 @@ import { LabTrackingStill } from './lab-tracking-still';
  */
 @Component({
   selector: 'app-lab-page',
-  imports: [RouterLink, SceneFigure, InstrumentFigure, LabGenerators, LabInteraction, LabMaterials, LabMotion, LabSheet, LabStimulus, LabTrackingStill],
+  imports: [RouterLink, SceneFigure, InstrumentFigure, LabGenerators, LabInteraction, LabMaterials, LabMotion, LabOverlay, LabSheet, LabStimulus, LabTrackingStill],
   template: `
     <h1>Visual Lab</h1>
     @if (env.showsDevelopment()) {
@@ -43,6 +44,7 @@ import { LabTrackingStill } from './lab-tracking-still';
         <li>For forced colours, turn on a Windows contrast theme: every panel then shows system colours.</li>
         <li><a routerLink="/lab/parity">Rendering parity</a>: every composition drawn by the SVG and the canvas backend side by side.</li>
       </ul>
+      <app-lab-overlay />
 
       @for (entry of entries; track entry.scene.id) {
         <section class="scene" [attr.aria-labelledby]="entry.headingId">

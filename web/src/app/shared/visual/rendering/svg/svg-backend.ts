@@ -2,7 +2,8 @@ import { Component, DestroyRef, ElementRef, afterRenderEffect, computed, inject,
 
 import { DrawPaint, Drawable, FrameItem, ResolvedFrame, ResolvedTimeline, ResolvedTrack } from '../frame';
 import { FRAME_CLOCK } from '../frame-clock';
-import { carryOn } from '../playback';
+import type { FrameObserver } from '../frame-stats';
+import { carryOn, timelineEnd } from '../playback';
 import { done, progress } from '../timing';
 import { tweenShape } from '../tween';
 
@@ -160,6 +161,11 @@ export class SvgBackend {
   readonly scheme = input<SurfaceScheme>('auto');
   /** Tracks towards the frame's state; empty means show the frame as it is. */
   readonly timeline = input<ResolvedTimeline>([]);
+  /**
+   * Told about each frame while a change plays (M6: the watchdog and the Lab's overlay). With one,
+   * a frame loop samples the change to its end, even where only the Web Animations API moves things.
+   */
+  readonly observer = input<FrameObserver | null>(null);
 
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;
   private readonly surface = `vis-${++surfaces}`;
@@ -170,6 +176,8 @@ export class SvgBackend {
   private playing: { timeline: ResolvedTimeline; start: number } | null = null;
   private ghosts: Element[] = [];
   private loop: number | null = null;
+  /** With an observer, frames are sampled until this time. */
+  private sampleUntil: number | null = null;
   private readonly clock = inject(FRAME_CLOCK);
 
   protected readonly viewBox = computed(() => `0 0 ${this.frame().width} ${this.frame().height}`);
@@ -225,7 +233,10 @@ export class SvgBackend {
       // `backwards`: the start value holds during the delay; afterwards the frame's own state shows.
       this.running.push(target.animate(keyframes(track), { delay, duration, easing, fill: 'backwards' }));
     }
-    if (this.shapes.some((r) => r.track.morph)) {
+    const observer = this.observer();
+    this.sampleUntil = observer && tracks.length ? now + timelineEnd(tracks) : null;
+    if (this.sampleUntil !== null) observer!.begin(now);
+    if (this.shapes.some((r) => r.track.morph) || this.sampleUntil !== null) {
       this.loop = this.clock.request((t) => this.tick(t));
       // No frames to draw on: the final drawing shows at once.
       if (this.loop === null) this.settle();
@@ -341,12 +352,16 @@ export class SvgBackend {
   /** One frame of every glide; the loop ends when they're all done. */
   private tick(time: number): void {
     this.loop = null;
+    const began = performance.now();
     let going = false;
     for (const { track, start } of this.shapes) {
       if (!track.morph) continue;
       this.draw(track, progress(track, time - start));
       going ||= !done(track, time - start);
     }
+    // Our own work in this frame; the browser's styling and painting come after and show in the frame rate.
+    this.observer()?.frame(time, performance.now() - began);
+    going ||= this.sampleUntil !== null && time < this.sampleUntil;
     if (going) this.loop = this.clock.request((t) => this.tick(t));
     if (this.loop === null) this.settle();
   }

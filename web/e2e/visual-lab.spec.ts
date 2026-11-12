@@ -697,3 +697,42 @@ test('Visual Lab: losing focus refuses a check and interrupts a run', async ({ p
     await expect(section.locator('[data-interrupted]')).toHaveText('Interrupted: the page lost focus', { timeout: 15_000 });
   }
 });
+
+// The watchdog (M6 stage C): a figure whose own motion runs below 50 fps for a second of motion
+// shows its next changes at once; other figures keep their motion; the overlay says so.
+test('Visual Lab: the watchdog moves a slow figure to the reduced tier', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/lab');
+  const section = page.locator('section[aria-labelledby="lab-motion"]');
+  await section.scrollIntoViewIfNeeded();
+  await expect(section.getByLabel('Motion in these figures')).toHaveValue('auto');
+  // Busy for 30 ms in every frame: the page draws about 30 frames a second.
+  await page.evaluate(() => {
+    (globalThis as Record<string, unknown>)['busy'] = true;
+    const busy = () => {
+      const start = performance.now();
+      while (performance.now() - start < 30) {
+        /* busy */
+      }
+      if ((globalThis as Record<string, unknown>)['busy']) requestAnimationFrame(busy);
+    };
+    requestAnimationFrame(busy);
+  });
+  for (let i = 0; i < 8; i++) {
+    await page.getByRole('button', { name: 'New values' }).click();
+    await page.waitForTimeout(450);
+  }
+  await page.evaluate(() => ((globalThis as Record<string, unknown>)['busy'] = false));
+  await page.getByLabel('Performance overlay').check();
+  await expect(page.locator('[data-overlay-row="reference.motion.bars"] [data-tier]').first()).toHaveAttribute('data-tier', 'reduced');
+  // The next change shows at once: no drawing between the two.
+  const bar = '[data-motion="bars-light"] [data-vis-id="bar-1"]';
+  const before = await page.locator(bar).getAttribute('d');
+  const drawings = await drawingsDuring(page, bar, () => page.getByRole('button', { name: 'New values' }).click(), 400);
+  const after = await page.locator(bar).getAttribute('d');
+  expect(after).not.toBe(before);
+  expect(drawings.filter((d) => d !== before && d !== after)).toEqual([]);
+  // Another figure, never slow, still moves.
+  await page.getByRole('button', { name: 'Add a member' }).click();
+  await expect(page.locator('[data-overlay-row="reference.motion.set"] [data-tier]').first()).toHaveAttribute('data-tier', 'full');
+});
