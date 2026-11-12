@@ -1,10 +1,10 @@
-import { BAR_SETS, barsFigure, setFigure } from '../../../pages/lab/lab-motion-figures';
+import { BAR_SETS, barsFigure, routeFigure, setFigure } from '../../../pages/lab/lab-motion-figures';
 import { composeScene, lookupOf } from '../composition/compose';
 import { SceneElement } from '../composition/scene';
 import { validateScene } from '../composition/validate';
 import { composeCauseMap } from '../instruments/cause-map/cause-map';
 import { buildChangeTimeline } from '../integration/pipeline';
-import { MOTION, MOVE_CHANGE } from '../styling/vocabulary';
+import { INPUT_CHANGE, MOTION, MOVE_CHANGE } from '../styling/vocabulary';
 import { changeMovers, planChange } from './plan-motion';
 
 const AXES = { left: 'a', right: 'b', top: 'c', bottom: 'd' };
@@ -35,8 +35,11 @@ describe('S5 changes in figures built from data (M5)', () => {
     ]);
     const timeline = planChange(setFigure(4).scene, setFigure(5).scene, 'full');
     expect(timeline.filter((t) => t.id === 'member-5')).toMatchObject([{ property: 'opacity', from: 0, to: 1 }]);
-    // Removing one: it goes at once, the others make the room smaller.
-    expect(changeMovers(setFigure(5).scene, setFigure(4).scene).map((m) => m.change.kind)).toEqual(['moves']);
+    // Removing one: it fades where it was, as the others close up.
+    expect(changeMovers(setFigure(5).scene, setFigure(4).scene).map((m) => [m.id, m.change.kind])).toEqual([
+      ['outline', 'moves'],
+      ['member-5', 'exit'],
+    ]);
   });
 
   it('moves nothing below the full tier, on a first appearance, or between different figures', () => {
@@ -81,7 +84,7 @@ describe('S5 changes in figures built from data (M5)', () => {
   });
 
   it('are valid for every data set, with labels clear of what they don’t name', () => {
-    for (const composed of [...BAR_SETS.map((v) => barsFigure(v)), ...[3, 4, 5, 6, 7, 8].map((n) => setFigure(n))])
+    for (const composed of [...BAR_SETS.map((v) => barsFigure(v)), ...[3, 4, 5, 6, 7, 8].map((n) => setFigure(n)), ...[2, 3, 4, 5, 6].map((n) => routeFigure(n))])
       expect(validateScene(composed.scene, lookupOf(composed)), composed.text['alt']).toEqual([]);
   });
 });
@@ -108,4 +111,37 @@ describe('the pipeline resolves a change for a backend (M5)', () => {
     expect(timeline.find((t) => t.id === 'outline')).toMatchObject({ property: 'shape', morph: false });
     expect(timeline.find((t) => t.id === 'member-2')).toMatchObject({ property: 'shape', morph: true });
   });
+
+  it('takes a leg back and fades its stop with it, and draws a new one', () => {
+    expect(changeMovers(routeFigure(4).scene, routeFigure(3).scene)).toEqual([
+      { id: 'leg-3', change: { kind: 'exit', effect: 'undraw', why: 'A leg that goes is taken back to the stop it came from.' }, with: ['stop-3'] },
+    ]);
+    expect(planChange(routeFigure(4).scene, routeFigure(3).scene, 'full').map((t) => [t.id, t.property, t.property === 'exit' && t.effect])).toEqual([
+      ['leg-3', 'exit', 'undraw'],
+      ['stop-3', 'exit', 'fade'],
+    ]);
+    expect(planChange(routeFigure(3).scene, routeFigure(4).scene, 'full').map((t) => [t.id, t.property])).toEqual([
+      ['leg-3', 'reveal'],
+      ['stop-3', 'opacity'],
+    ]);
+  });
+
+  it('glides quickly after a person’s own input', () => {
+    const timeline = planChange(barsFigure(BAR_SETS[0]).scene, barsFigure(BAR_SETS[1]).scene, 'full', INPUT_CHANGE);
+    expect(timeline.every((t) => t.duration === MOTION.durations.quick)).toBe(true);
+  });
 });
+
+describe('the pipeline resolves departures (M5)', () => {
+  it('gives a departing element as it was drawn, and the item it sat under', () => {
+    const timeline = buildChangeTimeline(routeFigure(4).scene, routeFigure(3).scene, 'shown', () => undefined, 'full');
+    expect(timeline.map((t) => [t.id, t.property])).toEqual([
+      ['leg-3', 'exit'],
+      ['stop-3', 'exit'],
+    ]);
+    // The legs are drawn first: the leg that goes sat under the first stop; the last stop on top.
+    expect(timeline[0]).toMatchObject({ effect: 'undraw', under: 'stop-0', item: { kind: 'shape', shape: { type: 'line', x1: 206, x2: 274 } } });
+    expect(timeline[1]).toMatchObject({ effect: 'fade', under: null, item: { kind: 'shape', shape: { type: 'circle', cx: 274 } } });
+  });
+});
+

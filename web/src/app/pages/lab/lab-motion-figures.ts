@@ -102,6 +102,7 @@ export function setFigure(count: number): Composed {
         purpose: REFERENCE('one member of the set.'),
         moves: { why: 'Each member keeps its identity while the set makes room.' },
         enter: { effect: 'fade', why: 'A new member appears where the set made room for it.' },
+        exit: { effect: 'fade', why: 'A member that leaves fades where it was, as the set closes up.' },
       }),
     ),
   ];
@@ -112,5 +113,47 @@ export function setFigure(count: number): Composed {
     size: { width: 480, height: 240 },
     layers: [{ id: 'set', plane: 'subject', elements }],
     alt: `Reference: a set of ${count} members on a ring`,
+  });
+}
+
+export const ROUTE_STOPS = { min: 2, max: 6 } as const;
+/** Where the stops of a route are: left to right, up and down a little. */
+const STOP_AT = (i: number): [number, number] => [70 + i * 68, i % 2 ? 80 : 130];
+
+/** A route of stops joined by legs: a new leg is drawn to the new stop; a leg that goes is taken back. */
+export function routeFigure(count: number): Composed {
+  // The legs first, so each stop is drawn over the ends of its legs.
+  const legs: SceneElement[] = [];
+  const stops: SceneElement[] = [];
+  for (let i = 0; i < count; i++) {
+    const [x, y] = STOP_AT(i);
+    if (i > 0) {
+      const [px, py] = STOP_AT(i - 1);
+      legs.push({
+        kind: 'shape',
+        id: `leg-${i}`,
+        geometry: { type: 'line', x1: px, y1: py, x2: x, y2: y },
+        style: { role: 'subject' },
+        purpose: REFERENCE('the way from one stop to the next.'),
+        enter: { effect: 'draw', why: 'A new leg is drawn from the last stop to the new one, in the direction of travel.' },
+        exit: { effect: 'undraw', why: 'A leg that goes is taken back to the stop it came from.' },
+      });
+    }
+    stops.push({
+      kind: 'shape',
+      id: `stop-${i}`,
+      geometry: { type: 'circle', cx: x, cy: y, r: 9 },
+      style: { role: 'subject', material: 'tonal' },
+      purpose: REFERENCE('a stop on the route.'),
+      ...(i > 0 ? { enter: { with: `leg-${i}`, effect: 'fade' as const }, exit: { with: `leg-${i}`, effect: 'fade' as const } } : {}),
+    });
+  }
+  return composeScene({
+    id: 'reference.motion.route',
+    version: 1,
+    theme: 'action',
+    size: { width: 480, height: 200 },
+    layers: [{ id: 'route', plane: 'subject', elements: [...legs, ...stops] }],
+    alt: `Reference: a route of ${count} stops`,
   });
 }

@@ -4,7 +4,7 @@ import { ElementId, SceneDefinition, StateName, TextLookup } from '../compositio
 import { dotsPath, poissonDisc } from '../generation/distributions';
 import { generate, generateEdge } from '../generation/registry';
 import { deriveSeed } from '../generation/random';
-import { QualityTier, planChange, planMotion } from '../motion/plan-motion';
+import { Pace, QualityTier, Track, planChange, planMotion } from '../motion/plan-motion';
 import { DrawPaint, Drawable, FrameItem, ResolvedFrame, ResolvedTimeline, ResolvedTrack } from '../rendering/frame';
 import { canMorph } from '../rendering/tween';
 import { resolveState } from '../state/resolve-state';
@@ -157,9 +157,12 @@ function grainTile(): { tile: number; d: string } {
  * S5's timeline for a change, resolved for a backend: emphasis tracks become paint tracks through
  * S1, so a backend never sees an emphasis level. Labels take no emphasis, so only shapes get paint.
  */
-export function buildTimeline(scene: SceneDefinition, from: StateName | null, to: StateName, tier: QualityTier): ResolvedTimeline {
+export function buildTimeline(scene: SceneDefinition, from: StateName | null, to: StateName, tier: QualityTier, text: TextLookup = () => undefined): ResolvedTimeline {
   const shapes = new Map(scene.layers.flatMap((l) => l.elements).flatMap((e) => (e.kind !== 'label' ? [[e.id, e] as const] : [])));
-  return planMotion(scene, from, to, tier).flatMap((track): ResolvedTrack[] => {
+  const planned = planMotion(scene, from, to, tier);
+  const leaving = planned.some((t) => t.property === 'exit') && from ? departing(buildFrame(scene, from, text).items, buildFrame(scene, to, text).items) : null;
+  return planned.flatMap((track): ResolvedTrack[] => {
+    if (track.property === 'exit') return leaving ? leaving(track) : [];
     // A state change has no 'move' tracks; those are for figures built from data (buildChangeTimeline).
     if (track.property === 'move') return [];
     if (track.property !== 'emphasis') return [track];
@@ -175,16 +178,28 @@ export function buildTimeline(scene: SceneDefinition, from: StateName | null, to
  * changed too), and each label that moves an offset from its old place (`translate`). A top edge
  * moves with its plane. Entrances pass through as in a state change.
  */
-export function buildChangeTimeline(before: SceneDefinition | null, after: SceneDefinition, state: StateName, text: TextLookup, tier: QualityTier): ResolvedTimeline {
-  const tracks = planChange(before, after, tier);
-  if (!before || !tracks.some((t) => t.property === 'move')) return tracks as ResolvedTimeline;
-  const was = new Map(buildFrame(before, state, text).items.map((i) => [i.id, i]));
-  const now = new Map(buildFrame(after, state, text).items.map((i) => [i.id, i]));
+export function buildChangeTimeline(
+  before: SceneDefinition | null,
+  after: SceneDefinition,
+  state: StateName,
+  text: TextLookup,
+  tier: QualityTier,
+  options: { pace?: Pace; live?: LiveInput } = {},
+): ResolvedTimeline {
+  const tracks = planChange(before, after, tier, options.pace);
+  if (!before || !tracks.length) return [];
+  const old = buildFrame(before, state, text, options.live).items;
+  const fresh = buildFrame(after, state, text, options.live).items;
+  const was = new Map(old.map((i) => [i.id, i]));
+  const now = new Map(fresh.map((i) => [i.id, i]));
+  const leaving = departing(old, fresh);
   return tracks.flatMap((track): ResolvedTrack[] => {
     if (track.property === 'emphasis') return [];
+    if (track.property === 'exit') return leaving(track);
     if (track.property !== 'move') return [track];
     const { property: _, ...timing } = track;
-    return [track.id, `${track.id}-edge`].flatMap((id): ResolvedTrack[] => {
+    // A plane's top edge and a handle's focus ring move with it.
+    return [track.id, `${track.id}-edge`, `${track.id}-focus`].flatMap((id): ResolvedTrack[] => {
       const [a, b] = [was.get(id), now.get(id)];
       if (!a || !b) return [];
       if (a.kind === 'text' && b.kind === 'text') {
@@ -198,6 +213,25 @@ export function buildChangeTimeline(before: SceneDefinition | null, after: Scene
       return out;
     });
   });
+}
+
+/**
+ * Departures resolved: each leaving element's items (with its top edge) as they were drawn before
+ * the change, and the item still drawn after the change that each sat just below.
+ */
+function departing(old: readonly FrameItem[], fresh: readonly FrameItem[]) {
+  const kept = new Set(fresh.map((i) => i.id));
+  return (track: Extract<Track, { property: 'exit' }>): ResolvedTrack[] => {
+    const { property: _, effect, ...timing } = track;
+    return old.flatMap((item, k): ResolvedTrack[] => {
+      if (item.id !== track.id && item.id !== `${track.id}-edge`) return [];
+      if (kept.has(item.id)) return [];
+      const under = old.slice(k + 1).find((i) => kept.has(i.id))?.id ?? null;
+      // Only a line can be undrawn; its edge or anything filled fades with it.
+      const own = effect === 'undraw' && item.kind === 'shape' && item.paint.fill === 'none' ? 'undraw' : 'fade';
+      return [{ ...timing, id: item.id, property: 'exit', effect: own, item, under }];
+    });
+  };
 }
 
 /** A composition built from data, drawn: its one state, with its own words (composition/compose.ts). */

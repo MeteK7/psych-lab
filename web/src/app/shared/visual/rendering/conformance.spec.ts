@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { BAR_SETS, barsFigure, setFigure } from '../../../pages/lab/lab-motion-figures';
+import { BAR_SETS, barsFigure, routeFigure, setFigure } from '../../../pages/lab/lab-motion-figures';
 import { Composed, lookupOf } from '../composition/compose';
 import { composeCauseMap } from '../instruments/cause-map/cause-map';
 import { buildChangeTimeline, buildComposedFrame, buildFrame, buildTimeline } from '../integration/pipeline';
@@ -345,6 +345,34 @@ describe('SVG backend: glides between values (M5)', () => {
       expect(ghost?.getAttribute('d')).toBe(drawing(setFigure(4), 'outline'));
       expect(calls.find((c) => c.target === ghost)?.keyframes).toEqual([{ opacity: 1 }, { opacity: 0 }]);
       expect(calls.find((c) => c.target.getAttribute('data-vis-id') === 'outline')?.keyframes).toEqual([{ opacity: 0 }, { opacity: 1 }]);
+    } finally {
+      delete (Element.prototype as Partial<Element>).animate;
+    }
+  });
+
+  it('draws a departing item as it was, where it was, and lets it leave', async () => {
+    const calls: { target: Element; keyframes: Keyframe[] }[] = [];
+    Element.prototype.animate = function (this: Element, keyframes: Keyframe[]) {
+      calls.push({ target: this, keyframes });
+      return { cancel: () => undefined } as unknown as Animation;
+    } as Element['animate'];
+    try {
+      const { fixture, host } = await change(routeFigure(4), routeFigure(3));
+      const leg = host.querySelector('[data-vis-leaving="leg-3"]')!;
+      const stop = host.querySelector('[data-vis-leaving="stop-3"]')!;
+      // Under the first stop, as it was drawn; the stop that goes on top.
+      expect(leg.nextElementSibling?.getAttribute('data-vis-id')).toBe('stop-0');
+      expect(leg.getAttribute('d')).toBe('M206 130 L274 80');
+      expect(stop.parentElement?.lastElementChild).toBe(stop);
+      // The leg is taken back through a mask; the stop fades.
+      const mask = host.querySelector(`mask[id$="leaving-leg-3"]`)!;
+      expect(leg.getAttribute('mask')).toBe(`url(#${mask.id})`);
+      expect(calls.find((c) => c.target.parentElement === mask)?.keyframes).toEqual([{ strokeDashoffset: 0 }, { strokeDashoffset: 1 }]);
+      expect(calls.find((c) => c.target === stop)?.keyframes).toEqual([{ opacity: 1 }, { opacity: 0 }]);
+      // A new change ends it: nothing is left behind.
+      fixture.componentRef.setInput('timeline', []);
+      await fixture.whenStable();
+      expect(host.querySelectorAll('[data-vis-leaving], mask[id*="leaving"]')).toHaveLength(0);
     } finally {
       delete (Element.prototype as Partial<Element>).animate;
     }

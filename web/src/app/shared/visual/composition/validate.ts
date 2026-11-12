@@ -5,6 +5,7 @@ import {
   LINE_WEIGHTS,
   MATERIALS,
   MIN_TARGET,
+  EXIT_EFFECTS,
   MOTION_EFFECTS,
   NOT_ON_NEAR,
   PLANE_ROLES,
@@ -35,6 +36,25 @@ function purposeProblems(where: string, purpose: Purpose | undefined): string[] 
   return purpose.serves
     .filter((k) => !(PURPOSE_KINDS as readonly string[]).includes(k))
     .map((k) => `${where}: unknown purpose '${k}'`);
+}
+
+/** Departures (M5, read by S5): a known effect, a reason for anything that leaves on its own, no chains. */
+function departureProblems(element: SceneElement, all: Map<string, SceneElement>): string[] {
+  const { exit } = element;
+  if (!exit) return [];
+  const where = `element '${element.id}'`;
+  const problems: string[] = [];
+  if (exit.effect && !Object.hasOwn(EXIT_EFFECTS, exit.effect)) problems.push(`${where}: unknown departure '${exit.effect}'`);
+  if (exit.effect === 'undraw' && element.kind === 'label') problems.push(`${where}: a label can't be undrawn; it fades`);
+  if (exit.effect === 'undraw' && element.kind !== 'label' && (element.style.material ?? 'line') !== 'line') problems.push(`${where}: only line shapes can be undrawn`);
+  if (exit.with === undefined) {
+    if (!exit.why?.trim()) problems.push(`${where}: motion without a reason; an element that moves on its own says why`);
+    return problems;
+  }
+  const lead = all.get(exit.with);
+  if (!lead || exit.with === element.id) problems.push(`${where}: leaves with unknown element '${exit.with}'`);
+  else if (lead.exit?.with !== undefined) problems.push(`${where}: leaves with '${exit.with}', which itself leaves with another element`);
+  return problems;
 }
 
 /** Entrances (read by S5): a known effect, a reason for anything that moves on its own, no chains. */
@@ -243,7 +263,7 @@ export function validateScene(scene: SceneDefinition, text: TextLookup): string[
   }
 
   const all = everything;
-  for (const element of all.values()) problems.push(...entranceProblems(element, all));
+  for (const element of all.values()) problems.push(...entranceProblems(element, all), ...departureProblems(element, all));
 
   const { initial, states } = scene.states;
   if (!Object.hasOwn(states, initial)) problems.push(`initial state '${initial}' doesn't exist`);
@@ -275,6 +295,8 @@ export function validateScene(scene: SceneDefinition, text: TextLookup): string[
   for (const element of all.values()) {
     if (stateCount > 1 && element.enter && Object.values(states).every((s) => s.visible.includes(element.id)))
       problems.push(`element '${element.id}': has an entrance but is shown in every state`);
+    if (stateCount > 1 && element.exit && Object.values(states).every((s) => s.visible.includes(element.id)))
+      problems.push(`element '${element.id}': has a departure but is shown in every state`);
     if (element.moves) {
       if (!element.moves.why?.trim()) problems.push(`element '${element.id}': motion without a reason; an element that moves on its own says why`);
       if (stateCount > 1) problems.push(`element '${element.id}': 'moves' is for figures built from data; a scene's states don't change shapes`);

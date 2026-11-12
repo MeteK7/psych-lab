@@ -1,5 +1,5 @@
 import type { GeneratorId } from '../generation/registry';
-import type { Emphasis, FrameRatio, FrameSize, LabelTone, MotionEffect, StyleRef, ThemeId } from '../styling/vocabulary';
+import type { Emphasis, ExitEffect, FrameRatio, FrameSize, LabelTone, MotionEffect, StyleRef, ThemeId } from '../styling/vocabulary';
 
 /**
  * S3 Composition: the Scene Specification, version 0 (docs/visual-system.md §4). A scene is typed
@@ -53,6 +53,15 @@ export type Entrance =
   | { effect: MotionEffect; why: string; with?: undefined }
   /** Moves as part of another element (its courses, its label), at the same moment. Default effect: the lead's (`fade` for a label led by `draw`). */
   | { with: ElementId; effect?: MotionEffect; why?: undefined };
+
+/**
+ * A departure (M5): how an element leaves when a change hides it (a state change) or drops it (new
+ * data). Without one, it goes at once. Like an entrance, it says why, or leaves with another element.
+ */
+export type Departure =
+  | { effect: ExitEffect; why: string; with?: undefined }
+  /** Leaves as part of another element (its label), at the same moment. Default effect: `fade`. */
+  | { with: ElementId; effect?: ExitEffect; why?: undefined };
 
 /**
  * Motion between values (milestone M5): in a figure built from data, an element that `moves` glides
@@ -109,7 +118,7 @@ export type Target =
   | { kind: 'region'; value: string; option: ScaleValue; label: ContentKey };
 
 export type SceneElement =
-  | ({ kind: 'shape'; id: ElementId; geometry: Geometry; style: StyleRef; purpose: Purpose; enter?: Entrance; moves?: Movement; target?: Target } & Ties)
+  | ({ kind: 'shape'; id: ElementId; geometry: Geometry; style: StyleRef; purpose: Purpose; enter?: Entrance; exit?: Departure; moves?: Movement; target?: Target } & Ties)
   /**
    * Geometry made by an S2 generator (milestone M2) from its parameters and the element's own seed,
    * derived from the scene's seed and the element's id. Drawn, styled and animated like a shape.
@@ -122,6 +131,7 @@ export type SceneElement =
       style: StyleRef;
       purpose: Purpose;
       enter?: Entrance;
+      exit?: Departure;
       moves?: Movement;
       target?: Target;
     } & Ties)
@@ -145,6 +155,7 @@ export type SceneElement =
       names?: readonly ElementId[];
       purpose: Purpose;
       enter?: Entrance;
+      exit?: Departure;
       moves?: Movement;
     };
 

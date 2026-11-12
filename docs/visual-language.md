@@ -265,10 +265,13 @@ Figures set `forced-color-adjust: none` and map every role to a system colour ex
 | Emphasis change | An element that stays eases from one emphasis to the other: line weight and colour (§3.7). Built for MCII as the form of `recede` | `moderate`, `ease-move` |
 | `recede` | A cross-fade to the `receded` emphasis (§3.7). Not built: the emphasis change covers what MCII needs | `moderate` |
 | Move (M5) | In a figure built from data, an element that `moves` glides to its new shape, place and paint; all of them in one change move together. A shape that can't morph (a path with other commands) crossfades | `moderate`, `ease-move` |
+| Input change (M5) | In a figure a person moves, the step that follows their own input (a key, a click, Escape, a snapped step while dragging) glides; nothing else moves | `quick`, `ease-move` |
+| `fade` out (M5) | A departure: opacity 1 → 0, where the element was | `moderate`, `ease-depart` |
+| `undraw` (M5) | A departure: the reverse of `draw`, taken back along the line's direction through a mask (line shapes only; a label leaving with it fades) | `moderate`, `ease-depart` |
 
 **Under reduced motion,** every timeline is empty and the final state appears at once. No bounce, overshoot, elastic, spin or looping.
 
-**Departures** happen at once (as built): nothing so far needs a departure to be understood, and the page changes at the same moment. The presets live in `styling/vocabulary.ts` (`MOTION_EFFECTS`, `EMPHASIS_CHANGE`).
+**Departures** happen at once unless an element declares one (`exit`, with its reason, M5): then it fades or is undrawn where it was, and is gone. The presets live in `styling/vocabulary.ts` (`MOTION_EFFECTS`, `EXIT_EFFECTS`, `EMPHASIS_CHANGE`, `MOVE_CHANGE`, `INPUT_CHANGE`).
 
 ## 11. Area themes
 **The forms below are options, not obligations** (revision 2, `visual-policy.md` principle 6). A form is used only when a scene can name what it tells the participant. The hue and the line language are what make an area recognisable; ridges, lenses, rings or terrain are not added for atmosphere. The Action terrain, for example, was tried in `mcii.path@1` and removed, because it carried no meaning.

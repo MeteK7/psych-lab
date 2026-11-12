@@ -103,6 +103,13 @@ export type ResolvedTrack = TrackTiming &
      * moving with its form. A new timeline that arrives mid-move adds the offset still to go.
      */
     | { property: 'translate'; from: readonly [number, number]; to: readonly [number, number] }
+    /**
+     * A departure (M5): an item that is no longer in the frame, drawn as it was, leaving: `fade`
+     * (opacity 1 → 0) or `undraw` (taken back along its direction, through a mask, like `reveal` in
+     * reverse). It is drawn just below the frame item `under` (null: on top), where it was, and is
+     * gone once it has left.
+     */
+    | { property: 'exit'; effect: 'fade' | 'undraw'; item: FrameItem; under: string | null }
   );
 
 export type ResolvedTimeline = readonly ResolvedTrack[];

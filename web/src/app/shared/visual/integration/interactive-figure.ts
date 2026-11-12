@@ -1,15 +1,17 @@
-import { Component, ElementRef, computed, inject, input, linkedSignal, output, signal } from '@angular/core';
+import { Component, ElementRef, computed, inject, input, linkedSignal, output, signal, untracked } from '@angular/core';
 
 import { Composed, SHOWN, lookupOf } from '../composition/compose';
 import type { Box } from '../composition/bounds';
 import type { Pt } from '../composition/outline';
-import type { ElementId, ScaleValue } from '../composition/scene';
+import type { ElementId, ScaleValue, SceneDefinition } from '../composition/scene';
+import type { QualityTier } from '../motion/plan-motion';
 import { InteractionState, Values, escape, keyChoice, keyStep, lost, move, moving, press, putDown, release } from '../interaction/controller';
 import { ChoiceControl, SliderControl, controlsOf } from '../interaction/controls';
 import { Hit, hitTest, targetsOf, toScenePoint } from '../interaction/regions';
 import { SurfaceScheme, SvgBackend } from '../rendering/svg/svg-backend';
-import { frameSize } from '../styling/vocabulary';
-import { buildFrame } from './pipeline';
+import { INPUT_CHANGE, frameSize } from '../styling/vocabulary';
+import { LiveInput, buildChangeTimeline, buildFrame } from './pipeline';
+import { reducedMotion } from './reduced-motion';
 
 export type { Values };
 
@@ -31,6 +33,11 @@ export type ControlledBy = 'figure' | 'native';
  * drag a handle, press its track, or click a handle and then where it should go (no drag needed);
  * Escape during a drag or a pick-up puts the value back; a press on a region chooses it. The
  * handle being moved is focal. Hovering shows only a cursor.
+ *
+ * Motion (M5): each change that follows a person's input (a key, a click, Escape, a snapped step
+ * while dragging, a native control beside it) glides quickly (`INPUT_CHANGE`, 150 ms) for the
+ * elements that `moves`, focus ring included; nothing else moves. A new step mid-glide carries on
+ * from where the handle is. Reduced motion: every change shows at once.
  */
 @Component({
   selector: 'app-vis-interactive',
@@ -49,7 +56,7 @@ export type ControlledBy = 'figure' | 'native';
     '(document:pointerdown)': 'onOutside($event)',
   },
   template: `
-    <app-vis-svg [frame]="frame()" [scheme]="scheme()" />
+    <app-vis-svg [frame]="frame()" [timeline]="timeline()" [scheme]="scheme()" />
     @if (controlledBy() === 'figure') {
       @for (c of controls(); track c.key) {
         @if (c.kind === 'slider') {
@@ -83,6 +90,8 @@ export class InteractiveFigure {
   readonly values = input.required<Values>();
   readonly controlledBy = input<ControlledBy>('figure');
   readonly scheme = input<SurfaceScheme>('auto');
+  /** Defaults to the person's setting: reduced motion shows every change at once. */
+  readonly tier = input<QualityTier | 'auto'>('auto');
   /** Every change, in the exercise's own values: while dragging (snapped), on a click, a key, or Escape. */
   readonly valuesChange = output<Values>();
 
@@ -101,13 +110,25 @@ export class InteractiveFigure {
   protected readonly alt = computed(() => this.composed().text['alt']);
   protected readonly controls = computed(() => controlsOf(this.composed().scene, this.targets(), this.state().values, this.lookup()));
 
-  protected readonly frame = computed(() => {
+  private readonly live = computed<LiveInput>(() => {
     const handle = moving(this.state());
     const focus = this.focused();
-    return buildFrame(this.composed().scene, SHOWN, this.lookup(), {
-      emphasis: handle ? { [handle]: 'focal' } : {},
-      focus: focus?.visible ? focus.id : null,
-    });
+    return { emphasis: handle ? { [handle]: 'focal' } : {}, focus: focus?.visible ? focus.id : null };
+  });
+  protected readonly frame = computed(() => buildFrame(this.composed().scene, SHOWN, this.lookup(), this.live()));
+
+  private readonly reduce = reducedMotion();
+  /** The figure before and after each change of values (a new scene drawn by the exercise). */
+  private readonly change = linkedSignal<SceneDefinition, { before: SceneDefinition | null; now: SceneDefinition }>({
+    source: computed(() => this.composed().scene),
+    computation: (now, previous) => ({ before: previous ? previous.source : null, now }),
+  });
+  protected readonly timeline = computed(() => {
+    const { before, now } = this.change();
+    const tier = this.tier();
+    const effective: QualityTier = tier !== 'auto' ? tier : this.reduce() ? 'reduced' : 'full';
+    // Words and focus as they are; a change of focus alone moves nothing.
+    return untracked(() => buildChangeTimeline(before, now, SHOWN, this.lookup(), effective, { pace: INPUT_CHANGE, live: this.live() }));
   });
 
   protected readonly cursor = computed(() => {

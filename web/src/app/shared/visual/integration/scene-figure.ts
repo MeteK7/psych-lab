@@ -1,9 +1,10 @@
-import { Component, computed, input, linkedSignal, signal, untracked } from '@angular/core';
+import { Component, computed, input, linkedSignal, untracked } from '@angular/core';
 
 import { SceneDefinition, StateName, TextLookup } from '../composition/scene';
 import { QualityTier } from '../motion/plan-motion';
 import { SurfaceScheme, SvgBackend } from '../rendering/svg/svg-backend';
 import { buildChangeTimeline, buildFrame, buildTimeline } from './pipeline';
+import { reducedMotion } from './reduced-motion';
 
 export type { QualityTier, SurfaceScheme };
 
@@ -12,15 +13,6 @@ interface Shown {
   state: StateName;
 }
 
-const REDUCE = '(prefers-reduced-motion: reduce)';
-
-/** The person's motion preference, kept current while the page is open. */
-function reducedMotion() {
-  const query = typeof matchMedia === 'function' ? matchMedia(REDUCE) : null;
-  const reduce = signal(query?.matches ?? false);
-  query?.addEventListener?.('change', (e) => reduce.set(e.matches));
-  return reduce.asReadonly();
-}
 
 /**
  * S9 Integration: a scene in a given state, drawn by the SVG backend. The only place outside the
@@ -67,6 +59,6 @@ export class SceneFigure {
     const { before, now } = this.change();
     const tier = this.effectiveTier();
     if (before && before.state === now.state) return buildChangeTimeline(before.scene, now.scene, now.state, untracked(this.text), tier);
-    return buildTimeline(now.scene, before ? before.state : untracked(this.from), now.state, tier);
+    return buildTimeline(now.scene, before ? before.state : untracked(this.from), now.state, tier, untracked(this.text));
   });
 }

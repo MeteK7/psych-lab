@@ -1,6 +1,6 @@
 import { Component, DestroyRef, ElementRef, afterRenderEffect, computed, inject, input } from '@angular/core';
 
-import { DrawPaint, Drawable, ResolvedFrame, ResolvedTimeline, ResolvedTrack } from '../frame';
+import { DrawPaint, Drawable, FrameItem, ResolvedFrame, ResolvedTimeline, ResolvedTrack } from '../frame';
 import { FRAME_CLOCK } from '../frame-clock';
 import { done, lerp, progress } from '../timing';
 import { canMorph, tweenShape } from '../tween';
@@ -40,7 +40,9 @@ let surfaces = 0;
 
 type ShapeTrack = Extract<ResolvedTrack, { property: 'shape' }>;
 type TranslateTrack = Extract<ResolvedTrack, { property: 'translate' }>;
-type CssTrack = Exclude<ResolvedTrack, ShapeTrack>;
+type ExitTrack = Extract<ResolvedTrack, { property: 'exit' }>;
+type CssTrack = Exclude<ResolvedTrack, ShapeTrack | ExitTrack>;
+const SVG = 'http://www.w3.org/2000/svg';
 
 function keyframes(track: CssTrack): Keyframe[] {
   switch (track.property) {
@@ -75,7 +77,8 @@ function keyframes(track: CssTrack): Keyframe[] {
  * runs only while a glide is under way, and the browser pauses it when the page is hidden. A shape
  * that can't morph crossfades: a copy of its old drawing fades out over it. A new timeline that
  * arrives mid-glide starts each glide from where the shape is drawn now, and each label's move from
- * where it is now.
+ * where it is now. A departing item, no longer in the frame, is drawn as it was, where it was, and
+ * fades or is undrawn; then it is gone.
  */
 @Component({
   selector: 'app-vis-svg',
@@ -231,6 +234,10 @@ export class SvgBackend {
         this.startShape(track, now);
         continue;
       }
+      if (track.property === 'exit') {
+        this.startExit(track);
+        continue;
+      }
       const target = this.find(track.property === 'reveal' ? 'data-vis-mask' : 'data-vis-id', track.id);
       if (typeof target?.animate !== 'function') continue;
       const { delay, duration, easing } = track;
@@ -267,6 +274,88 @@ export class SvgBackend {
     this.running.push(target.animate([{ opacity: 0 }, { opacity: 1 }], { delay, duration, easing, fill: 'backwards' }));
     // The copy goes when its fade is done.
     this.running[this.running.length - 2].finished?.then(() => ghost.remove(), () => undefined);
+  }
+
+  /** Draws a departing item as the template would, with the template's style scope. */
+  private drawItem(item: FrameItem, scope: string | undefined): SVGElement {
+    const make = (tag: string) => {
+      const el = document.createElementNS(SVG, tag);
+      if (scope) el.setAttribute(scope, '');
+      return el;
+    };
+    if (item.kind === 'shape') {
+      const path = make('path');
+      path.setAttribute('d', pathData(item.shape));
+      path.style.fill = item.paint.fill;
+      path.style.stroke = item.paint.stroke;
+      path.style.strokeWidth = `${item.paint.width}px`;
+      if (item.paint.dash) path.style.strokeDasharray = item.paint.dash;
+      return path;
+    }
+    const text = make('text');
+    text.setAttribute('x', String(item.x));
+    text.setAttribute('y', String(item.y));
+    text.setAttribute('text-anchor', item.anchor);
+    text.style.fill = item.fill;
+    text.style.fontSize = `${item.size}px`;
+    if (item.weight === 'bold') text.style.fontWeight = '700';
+    if (item.halo) {
+      text.style.stroke = item.halo.colour;
+      text.style.strokeWidth = `${item.halo.width}px`;
+    }
+    if (item.lines) {
+      item.lines.forEach((line, i) => {
+        const span = make('tspan');
+        span.setAttribute('x', String(item.x));
+        span.setAttribute('y', String(item.y + i * item.lineHeight!));
+        span.textContent = line;
+        text.append(span);
+      });
+    } else text.textContent = item.text;
+    return text;
+  }
+
+  private startExit(track: ExitTrack): void {
+    const svg = this.host.querySelector('svg');
+    if (!svg) return;
+    const scope = [...svg.attributes].find((a) => a.name.startsWith('_ngcontent'))?.name;
+    const el = this.drawItem(track.item, scope);
+    el.setAttribute('data-vis-leaving', track.id);
+    if (typeof el.animate !== 'function') return;
+    const under = track.under ? this.find('data-vis-id', track.under) : null;
+    if (under) under.before(el);
+    else svg.append(el);
+    this.ghosts.push(el);
+    const { delay, duration, easing } = track;
+    let animation: Animation;
+    let mask: SVGElement | null = null;
+    if (track.effect === 'undraw' && track.item.kind === 'shape') {
+      // Taken back through a mask, as `reveal` draws, so a dashed line's dashes don't crawl: the
+      // mask's band retracts from the end of the line to its start.
+      const id = `${this.surface}-leaving-${track.id}`;
+      mask = document.createElementNS(SVG, 'mask');
+      for (const [k, v] of [['id', id], ['maskUnits', 'userSpaceOnUse'], ['x', '0'], ['y', '0'], ['width', String(this.frame().width)], ['height', String(this.frame().height)]])
+        mask.setAttribute(k, v);
+      const band = this.drawItem(track.item, scope);
+      band.removeAttribute('style');
+      for (const [k, v] of [['class', 'reveal'], ['pathLength', '1'], ['fill', 'none'], ['stroke', 'white'], ['stroke-width', '16'], ['stroke-dasharray', '1 2'], ['stroke-dashoffset', '0']])
+        band.setAttribute(k, v);
+      mask.append(band);
+      svg.prepend(mask);
+      this.ghosts.push(mask);
+      el.setAttribute('mask', `url(#${id})`);
+      animation = band.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: 1 }], { delay, duration, easing, fill: 'both' });
+    } else animation = el.animate([{ opacity: 1 }, { opacity: 0 }], { delay, duration, easing, fill: 'both' });
+    this.running.push(animation);
+    // Gone once it has left.
+    animation.finished?.then(
+      () => {
+        el.remove();
+        mask?.remove();
+        this.ghosts = this.ghosts.filter((g) => g !== el && g !== mask);
+      },
+      () => undefined,
+    );
   }
 
   /** One frame of every glide; the loop ends when they're all done. */

@@ -16,7 +16,7 @@ const GENERATOR_SETS = 21; // S2: the reference compositions, 2 or 3 per generat
 const LAYOUT_SETS = 4; // S2: grid, radial, flow, packing
 const MATERIAL_SETS = 5; // S1 (M3): the material set, a grounded lit form, depth, depth with grain, a translucent overlap
 const SHEET_SETS = 12; // the review sheet (M3 stage C): lines, type, and materials and depth in each of the five areas
-const MOTION_SETS = 2; // S5 (M5): bars whose values change, a set that reflows
+const MOTION_SETS = 3; // S5 (M5): bars whose values change, a set that reflows, a route that grows and shrinks
 const LIVE_SETS = 3; // S6 (M4): a rating scale, a field with two axes and a choice of three, each the control itself
 const PANELS =
   (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS + GENERATOR_SETS + LAYOUT_SETS + MATERIAL_SETS + SHEET_SETS + MOTION_SETS) * 2; // light and dark
@@ -389,3 +389,69 @@ test('Visual Lab: figures built from data glide to their new values', async ({ p
   await expect(page.locator('[data-motion="set-light"] [data-vis-ghost]')).toHaveCount(0);
   await expect(page.locator('[data-moved="set"]')).toContainText('member-6 fades in');
 });
+
+/** The drawings an element passes through, frame by frame, for `ms` after `act` runs. */
+async function drawingsDuring(page: Page, selector: string, act: () => Promise<void>, ms = 500): Promise<string[]> {
+  const seen = page.evaluate(
+    ({ selector, ms }) =>
+      new Promise<string[]>((resolve) => {
+        const seen: string[] = [];
+        const start = performance.now();
+        const look = () => {
+          seen.push(document.querySelector(selector)?.getAttribute('d') ?? '');
+          if (performance.now() - start < ms) requestAnimationFrame(look);
+          else resolve(seen);
+        };
+        requestAnimationFrame(look);
+      }),
+    { selector, ms },
+  );
+  await act();
+  return [...new Set(await seen)];
+}
+
+// Departures (M5 stage B): a leg that goes is taken back, its stop fades, and nothing is left behind.
+test('Visual Lab: elements that go are taken back or fade, then are gone', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/lab');
+  const route = page.locator('[data-motion="route-light"]');
+  await route.scrollIntoViewIfNeeded();
+  const leaving = page.evaluate(
+    () =>
+      new Promise<string[]>((resolve) => {
+        const seen = new Set<string>();
+        const start = performance.now();
+        const look = () => {
+          document.querySelectorAll('[data-motion="route-light"] [data-vis-leaving]').forEach((e) => seen.add(e.getAttribute('data-vis-leaving')!));
+          if (performance.now() - start < 500) requestAnimationFrame(look);
+          else resolve([...seen].sort());
+        };
+        requestAnimationFrame(look);
+      }),
+  );
+  await page.getByRole('button', { name: 'Remove a stop' }).click();
+  expect(await leaving).toEqual(['leg-3', 'stop-3']);
+  await expect(route.locator('[data-vis-leaving], mask[id*="leaving"]')).toHaveCount(0);
+  await expect(route.locator('[data-vis-id="leg-3"]')).toHaveCount(0);
+  await expect(page.locator('[data-moved="route"]')).toContainText('leg-3 is taken back along its direction (300 ms), with stop-3');
+});
+
+// Motion for figures people move (M5 stage B): a keyboard step glides quickly; with reduced motion,
+// the mark is at its new place at once.
+for (const reducedMotion of ['no-preference', 'reduce'] as const) {
+  test(`Visual Lab: a step by keyboard ${reducedMotion === 'reduce' ? 'shows at once with reduced motion' : 'glides quickly'}`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion });
+    await page.goto('/lab');
+    const stop = page.locator('[data-interaction="rating-light"] [role="slider"]');
+    await stop.focus();
+    const mark = '[data-interaction="rating-light"] [data-vis-id="mark"]';
+    const before = await page.locator(mark).getAttribute('d');
+    const drawings = await drawingsDuring(page, mark, () => page.keyboard.press('ArrowRight'), 400);
+    const after = await page.locator(mark).getAttribute('d');
+    expect(after).not.toBe(before);
+    const between = drawings.filter((d) => d !== before && d !== after);
+    if (reducedMotion === 'reduce') expect(between).toEqual([]);
+    else expect(between.length).toBeGreaterThan(2);
+    expect(drawings[drawings.length - 1]).toBe(after);
+  });
+}

@@ -64,6 +64,7 @@ export function ratingFigure(rating: number): Composed {
               geometry: { type: 'circle', cx: x, cy: 44, r: 11 },
               style: { role: 'subject', material: 'tonal' },
               purpose: REFERENCE('the value, which a person moves.'),
+              moves: { why: 'It follows the value a person sets, quickly, so each step can be seen.' },
               target: { kind: 'handle', x: { scale: 'rating', value: 'rating' }, track: 'track', label: 'mark-label' },
             },
           ],
@@ -118,6 +119,7 @@ export function fieldFigure(across: number, up: number): Composed {
               geometry: { type: 'circle', cx: at(across, FIELD.x.range), cy: at(up, FIELD.y.range), r: 13 },
               style: { role: 'subject', material: 'tonal' },
               purpose: REFERENCE('the place, which a person moves on both axes.'),
+              moves: { why: 'It follows the place a person sets, quickly, so each step can be seen.' },
               target: {
                 kind: 'handle',
                 x: { scale: 'across', value: 'across', label: 'across-label' },
@@ -147,6 +149,7 @@ export function choiceFigure(choice: (typeof CHOICES)[number]): Composed {
       geometry: { type: 'rect', x: 30 + i * 150, y: 24, width: 120, height: 72, rx: 16 },
       style: option === choice ? { role: 'subject', material: 'tonal' } : { role: 'context' },
       purpose: REFERENCE('an option, chosen as a whole.'),
+      moves: { why: 'Its colour eases as it is chosen or left, so the change of choice can be seen.' },
       target: { kind: 'region', value: 'choice', option, label: `${option}-label` },
     },
     label(`${option}-label`, 90 + i * 150, 65, 'middle', [option]),

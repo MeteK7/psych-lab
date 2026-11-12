@@ -142,6 +142,26 @@ export const MOTION_EFFECTS = {
 } as const satisfies Record<string, { duration: MotionDuration; easing: MotionEasing; distance?: number }>;
 export type MotionEffect = keyof typeof MOTION_EFFECTS;
 
+/**
+ * Departures (M5): an element that goes away with a reason leaves with one of these (§10;
+ * visual-policy §3.12: what recedes fades, never flies away). `fade`: opacity 1 → 0. `undraw`: taken
+ * back along its own direction, the reverse of `draw` (line shapes only). Others go at once.
+ */
+export const EXIT_EFFECTS = {
+  fade: { duration: 'moderate', easing: 'depart' },
+  undraw: { duration: 'moderate', easing: 'depart' },
+} as const satisfies Record<string, { duration: MotionDuration; easing: MotionEasing }>;
+export type ExitEffect = keyof typeof EXIT_EFFECTS;
+
+/**
+ * A change that follows a person's own input in an interactive figure (M5, visual-policy §3.12):
+ * a key, a click, Escape, a snapped step while dragging. Quick, so the figure keeps up.
+ */
+export const INPUT_CHANGE = { duration: 'quick', easing: 'move' } as const satisfies {
+  duration: MotionDuration;
+  easing: MotionEasing;
+};
+
 /** An element of a figure built from data that `moves` glides to its new shape, place and paint (M5). */
 export const MOVE_CHANGE = { duration: 'moderate', easing: 'move' } as const satisfies {
   duration: MotionDuration;

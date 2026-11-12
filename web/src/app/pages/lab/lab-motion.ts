@@ -4,7 +4,7 @@ import { Composed, lookupOf } from '../../shared/visual/composition/compose';
 import { TextLookup } from '../../shared/visual/composition/scene';
 import { QualityTier, SceneFigure, SurfaceScheme } from '../../shared/visual/integration/scene-figure';
 import { changeMovers } from '../../shared/visual/motion/plan-motion';
-import { BAR_SETS, SET_SIZES, barsFigure, setFigure } from './lab-motion-figures';
+import { BAR_SETS, ROUTE_STOPS, SET_SIZES, barsFigure, routeFigure, setFigure } from './lab-motion-figures';
 import { describeMover } from './lab-movers';
 
 interface Reference {
@@ -57,8 +57,8 @@ function reference(id: string, name: string, about: string, compose: () => Compo
       <h2 id="lab-motion">Motion between values<span class="meta"> · S5 · M5 · reference compositions</span></h2>
       <p class="note muted">
         A figure built from data is drawn again when its data changes. Elements marked to move glide to their new place, shape
-        and colour together, as one movement; new ones enter; everything else changes at once. With reduced motion, the new
-        figure shows at once.
+        and colour together, as one movement; new ones enter; ones that go fade or are taken back, when they say why; everything
+        else changes at once. With reduced motion, the new figure shows at once.
       </p>
       <label class="tier">Motion in these figures
         <select [value]="tier()" (change)="tier.set($any($event.target).value)">
@@ -71,11 +71,18 @@ function reference(id: string, name: string, about: string, compose: () => Compo
         <h3>{{ ref.name }}</h3>
         <p class="note">{{ ref.about }}</p>
         <div class="actions">
-          @if (ref.id === 'bars') {
-            <button type="button" (click)="nextValues()">New values</button>
-          } @else {
-            <button type="button" (click)="resize(1)" [disabled]="count() >= sizes.max">Add a member</button>
-            <button type="button" (click)="resize(-1)" [disabled]="count() <= sizes.min">Remove a member</button>
+          @switch (ref.id) {
+            @case ('bars') {
+              <button type="button" (click)="nextValues()">New values</button>
+            }
+            @case ('set') {
+              <button type="button" (click)="resize(1)" [disabled]="count() >= sizes.max">Add a member</button>
+              <button type="button" (click)="resize(-1)" [disabled]="count() <= sizes.min">Remove a member</button>
+            }
+            @case ('route') {
+              <button type="button" (click)="stop(1)" [disabled]="stops() >= routeStops.max">Add a stop</button>
+              <button type="button" (click)="stop(-1)" [disabled]="stops() <= routeStops.min">Remove a stop</button>
+            }
           }
         </div>
         <div class="grid">
@@ -105,13 +112,20 @@ export class LabMotion {
   protected readonly sizes = SET_SIZES;
   private readonly set = signal(0);
   protected readonly count = signal(5);
+  protected readonly routeStops = ROUTE_STOPS;
+  protected readonly stops = signal(4);
   protected readonly references: Reference[] = [
     reference('bars', 'Values that change', 'Three bars whose heights are their values; their numbers move with them.', () => barsFigure(BAR_SETS[this.set()])),
-    reference('set', 'A set that reflows', 'Members on a ring: adding or removing one moves the others to make room.', () => setFigure(this.count())),
+    reference('set', 'A set that reflows', 'Members on a ring: adding or removing one moves the others to make room; one that leaves fades.', () => setFigure(this.count())),
+    reference('route', 'A route that grows and shrinks', 'A new leg is drawn to the new stop; a leg that goes is taken back, and its stop fades with it.', () => routeFigure(this.stops())),
   ];
 
   protected nextValues(): void {
     this.set.update((i) => (i + 1) % BAR_SETS.length);
+  }
+
+  protected stop(by: number): void {
+    this.stops.update((n) => Math.min(Math.max(n + by, ROUTE_STOPS.min), ROUTE_STOPS.max));
   }
 
   protected resize(by: number): void {

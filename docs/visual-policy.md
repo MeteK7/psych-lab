@@ -257,7 +257,7 @@ Where a rule is a design judgement rather than a measured fact, it is marked [J]
 **Rules:**
 - **When:** only on a state change; only the elements that changed move; at most three per change. In a figure built from data (M5), a change of data is the change: the elements that glide to new places in it move together, with one timing, and count as one movement (a reflow), up to 12 forms; more than that change at once.
 - **Continuity:** an element present in both states persists and is never redrawn from nothing.
-- **Motion earns its place too** (principle 6): an element that moves on its own says why in its scene (`enter.why`, or `moves.why` in a figure built from data), and the Lab shows it next to the replay.
+- **Motion earns its place too** (principle 6): an element that moves on its own says why in its scene (`enter.why`, `exit.why`, or `moves.why` in a figure built from data), and the Lab shows it next to the replay.
 - **Direction carries meaning:**
   - things that appear rise from the ground or draw along their direction of travel (left to right for paths)
   - things that recede fade and desaturate, rather than flying away
@@ -265,7 +265,7 @@ Where a rule is a design judgement rather than a measured fact, it is marked [J]
 - **Never:**
   - looping in illustrations
   - motion during typing
-  - motion in response to a choice in progress
+  - motion in response to a choice in progress, with one exception (M5): in a figure a person moves, the step that follows their own input (a key, a click, Escape, a snapped step while dragging) glides quickly (`quick`, 150 ms), so the step can be followed. Nothing else in the figure moves at the same time; while dragging, the handle is never more than one such glide behind the pointer's snapped value; under reduced motion it moves at once
   - motion that delays the person or the focus move
 - **Reduced motion:** the final state appears at once. If a motion carries meaning, it switches to a different representation.
 
