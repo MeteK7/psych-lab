@@ -1,11 +1,11 @@
-import { BAR_SETS, barsFigure, routeFigure, setFigure } from '../../../pages/lab/lab-motion-figures';
+import { BAR_SETS, ROUTE_STOPS, SET_SIZES, barsFigure, routeFigure, setFigure } from '../../../pages/lab/lab-motion-figures';
 import { composeScene, lookupOf } from '../composition/compose';
 import { SceneElement } from '../composition/scene';
 import { validateScene } from '../composition/validate';
 import { composeCauseMap } from '../instruments/cause-map/cause-map';
 import { buildChangeTimeline } from '../integration/pipeline';
 import { INPUT_CHANGE, MOTION, MOVE_CHANGE } from '../styling/vocabulary';
-import { changeMovers, planChange } from './plan-motion';
+import { changeMovers, changeProblems, planChange } from './plan-motion';
 
 const AXES = { left: 'a', right: 'b', top: 'c', bottom: 'd' };
 
@@ -142,6 +142,45 @@ describe('the pipeline resolves departures (M5)', () => {
     // The legs are drawn first: the leg that goes sat under the first stop; the last stop on top.
     expect(timeline[0]).toMatchObject({ effect: 'undraw', under: 'stop-0', item: { kind: 'shape', shape: { type: 'line', x1: 206, x2: 274 } } });
     expect(timeline[1]).toMatchObject({ effect: 'fade', under: null, item: { kind: 'shape', shape: { type: 'circle', cx: 274 } } });
+  });
+});
+
+describe('the motion budget for changes in figures built from data (M5)', () => {
+  it('holds for every change the Lab references can make', () => {
+    const changes: [ReturnType<typeof barsFigure>, ReturnType<typeof barsFigure>][] = [];
+    for (let i = 0; i < BAR_SETS.length; i++) changes.push([barsFigure(BAR_SETS[i]), barsFigure(BAR_SETS[(i + 1) % BAR_SETS.length])]);
+    for (let n = SET_SIZES.min; n < SET_SIZES.max; n++) changes.push([setFigure(n), setFigure(n + 1)], [setFigure(n + 1), setFigure(n)]);
+    for (let n = ROUTE_STOPS.min; n < ROUTE_STOPS.max; n++) changes.push([routeFigure(n), routeFigure(n + 1)], [routeFigure(n + 1), routeFigure(n)]);
+    for (const [a, b] of changes) expect(changeProblems(a.scene, b.scene), `${a.text['alt']} → ${b.text['alt']}`).toEqual([]);
+  });
+
+  it('reports too many movements, and a reflow too large to glide', () => {
+    const P = { serves: ['understanding'], why: 'Test.' } as const;
+    const figure = (n: number, shift: number, entering: number) =>
+      composeScene({
+        id: 'test.budget',
+        version: 1,
+        theme: 'action',
+        size: { width: 480, height: 100 },
+        layers: [
+          {
+            id: 'l',
+            plane: 'subject',
+            elements: Array.from({ length: n + entering }, (_, i): SceneElement => ({
+              kind: 'shape',
+              id: `d${i}`,
+              geometry: { type: 'circle', cx: 10 + i * 25 + (i < n ? shift : 0), cy: 50, r: 4 },
+              style: { role: 'subject', material: 'solid' },
+              purpose: P,
+              moves: { why: 'Test.' },
+              enter: { effect: 'fade', why: 'Test.' },
+            })),
+          },
+        ],
+        alt: 'Test.',
+      }).scene;
+    expect(changeProblems(figure(13, 0, 0), figure(13, 5, 0))).toEqual([`a reflow of 13 forms changes at once; more than ${MOTION.maxReflow} don't glide`]);
+    expect(changeProblems(figure(2, 0, 0), figure(2, 5, 3))).toEqual([`4 movements in one change; at most ${MOTION.maxStaggered}`]);
   });
 });
 

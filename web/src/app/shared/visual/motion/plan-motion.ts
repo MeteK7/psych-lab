@@ -262,3 +262,22 @@ export function planChange(before: SceneDefinition | null, after: SceneDefinitio
   }
   return tracks;
 }
+
+/**
+ * Motion-budget problems for a change in a figure built from data (visual-policy.md §3.12), as
+ * `motionProblems` checks a scene's declared transitions: at most `MOTION.maxStaggered` movements,
+ * a reflow counting as one. A reflow of more than `MOTION.maxReflow` forms isn't a problem: it
+ * changes at once, and is reported so a reviewer knows. Empty when fine.
+ */
+export function changeProblems(before: SceneDefinition, after: SceneDefinition): string[] {
+  const moving = changeMovers(before, after);
+  const problems: string[] = [];
+  if (moving.length > MOTION.maxStaggered) problems.push(`${moving.length} movements in one change; at most ${MOTION.maxStaggered}`);
+  const forms = new Set(after.layers.flatMap((l) => l.elements).filter((e) => e.kind !== 'label').map((e) => e.id));
+  for (const m of moving)
+    if (m.change.kind === 'moves') {
+      const count = [m.id, ...m.with].filter((id) => forms.has(id)).length;
+      if (count > MOTION.maxReflow) problems.push(`a reflow of ${count} forms changes at once; more than ${MOTION.maxReflow} don't glide`);
+    }
+  return problems;
+}

@@ -94,9 +94,18 @@ function heading(run: Run): string {
   return root(run).querySelector('h2.progress')?.textContent?.trim() ?? '';
 }
 
+/**
+ * Waits until the step's picture is drawn: it loads on demand, and the visual source recorded with
+ * the step names what was drawn only once it has loaded (integration/scene-source.ts).
+ */
+async function drawn(run: Run): Promise<void> {
+  for (let i = 0; i < 50 && !root(run).querySelector('app-vis-svg svg'); i++) await settle(run);
+}
+
 async function toObstacle(run: Run): Promise<void> {
   await settle(run);
   await press(run, 'Begin');
+  await drawn(run);
   await write(run, 'PRIVATE wish');
   await pick(run, 'input[name="mcii-category"][value="work"]');
   await rate(run, 0, 8);

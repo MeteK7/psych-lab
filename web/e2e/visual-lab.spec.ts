@@ -1,5 +1,6 @@
 import { Page, expect, test } from '@playwright/test';
 
+import { progress } from '../src/app/shared/visual/rendering/timing';
 import { expectNoSeriousA11yIssues } from './helpers';
 
 // The Visual Lab (development build only): every composition renders in every state with its text
@@ -455,3 +456,182 @@ for (const reducedMotion of ['no-preference', 'reduce'] as const) {
     expect(drawings[drawings.length - 1]).toBe(after);
   });
 }
+
+// ── M5 stage C: conformance and the remaining browser checks ─────────────────────────────────────
+
+/** What a figure animation shows at a few moments, read from the browser itself. */
+interface Sampled {
+  property: string;
+  timing: { delay: number; duration: number; easing: string };
+  from: number;
+  to: number;
+  at: { ms: number; value: number }[];
+}
+
+/**
+ * Pauses every running figure animation and reads, at a quarter, half and three quarters of its
+ * time, the one number it animates: opacity, a translation, a mask's dash offset or a line width.
+ * Colours aren't compared: the timing core works in numbers, and a colour eases with them.
+ */
+const sampleAnimations = (page: Page) =>
+  page.evaluate(() => {
+    const number = (property: string, value: string): number => {
+      if (property === 'transform') {
+        if (value === 'none') return 0;
+        const m = value.match(/translate\(\s*(-?[\d.]+)px,\s*(-?[\d.]+)px\)/) ?? value.match(/matrix\([^,]+,[^,]+,[^,]+,[^,]+,\s*(-?[\d.]+),\s*(-?[\d.]+)\)/);
+        // The axis that moves is the one that differs; offsetY moves only y.
+        return m ? Math.hypot(Number(m[1]), Number(m[2])) : NaN;
+      }
+      return parseFloat(value);
+    };
+    const out: Sampled[] = [];
+    for (const animation of document.getAnimations()) {
+      const effect = animation.effect as KeyframeEffect | null;
+      const target = effect?.target as Element | null;
+      if (!effect || !target?.closest('app-vis-svg')) continue;
+      const frames = effect.getKeyframes();
+      const property = ['opacity', 'transform', 'strokeDashoffset', 'strokeWidth'].find((p) => frames[0][p] !== undefined);
+      if (!property) continue;
+      const timing = effect.getTiming();
+      const sampled: Sampled = {
+        property,
+        timing: { delay: Number(timing.delay), duration: Number(timing.duration), easing: String(timing.easing) },
+        from: number(property, String(frames[0][property])),
+        to: number(property, String(frames[frames.length - 1][property])),
+        at: [],
+      };
+      animation.pause();
+      const css = property.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+      for (const f of [0.25, 0.5, 0.75]) {
+        const ms = sampled.timing.delay + f * sampled.timing.duration;
+        animation.currentTime = ms;
+        sampled.at.push({ ms, value: number(property, getComputedStyle(target).getPropertyValue(css)) });
+      }
+      animation.cancel();
+      out.push(sampled);
+    }
+    return out;
+  });
+
+/** Every sampled value is where the timing core says it should be, within a hundredth of the way. */
+function expectOnTheCore(samples: Sampled[], where: string) {
+  expect(samples.length, where).toBeGreaterThan(0);
+  for (const s of samples)
+    for (const { ms, value } of s.at) {
+      const expected = s.from + (s.to - s.from) * progress(s.timing, ms);
+      expect(Math.abs(value - expected), `${where}: ${s.property} at ${ms} ms (${s.timing.easing})`).toBeLessThanOrEqual(Math.max(0.01 * Math.abs(s.to - s.from), 0.002));
+    }
+}
+
+test('Visual Lab: the browser’s animations follow the timing core', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'no-preference' });
+  await page.goto('/lab');
+  // State changes (MCII): rise, draw through a mask, and emphasis changes.
+  await page.getByRole('combobox', { name: /^Motion(?! in these figures)/ }).selectOption('full');
+  for (const [from, to] of [['future', 'contrast'], ['contrast', 'plan'], ['contrast', 'aside']]) {
+    await page.getByRole('button', { name: `Replay ${from} → ${to}` }).click();
+    await expect.poll(() => figureAnimations(page)).toBeGreaterThan(0);
+    expectOnTheCore(await sampleAnimations(page), `${from} → ${to}`);
+  }
+  // Changes of data: labels moving with their bars, a member fading in or out, a leg taken back.
+  const section = page.locator('section[aria-labelledby="lab-motion"]');
+  await section.getByLabel('Motion in these figures').selectOption('full');
+  for (const button of ['New values', 'Add a member', 'Remove a member', 'Remove a stop']) {
+    await page.getByRole('button', { name: button }).click();
+    await expect.poll(() => figureAnimations(page)).toBeGreaterThan(0);
+    expectOnTheCore(await sampleAnimations(page), button);
+    await idle(page);
+  }
+});
+
+/** Makes the changes, waits for each to end, and gives each figure's final drawing. */
+async function changesEnd(page: Page, tier: 'full' | 'reduced', clicks: string[]): Promise<Record<string, string>> {
+  await page.goto('/lab');
+  const section = page.locator('section[aria-labelledby="lab-motion"]');
+  await section.getByLabel('Motion in these figures').selectOption(tier);
+  for (const name of clicks) {
+    await page.getByRole('button', { name }).click();
+    await idle(page);
+    await page.waitForTimeout(350);
+  }
+  const out: Record<string, string> = {};
+  for (const ref of ['bars', 'set', 'route']) for (const scheme of ['light', 'dark']) out[`${ref}-${scheme}`] = await drawing(page, `figure[data-motion="${ref}-${scheme}"]`);
+  return out;
+}
+
+test('Visual Lab: every change of data ends on the picture it changes to', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  const clicks = ['New values', 'New values', 'Add a member', 'Remove a member', 'Remove a member', 'Add a stop', 'Remove a stop', 'Remove a stop'];
+  const moved = await changesEnd(page, 'full', clicks);
+  const shown = await changesEnd(page, 'reduced', clicks);
+  expect(moved).toEqual(shown);
+});
+
+test('Visual Lab: nothing redraws while nothing changes', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/lab');
+  await page.locator('section[aria-labelledby="lab-motion"]').getByLabel('Motion in these figures').selectOption('full');
+  await page.getByRole('button', { name: 'New values' }).click();
+  await page.getByRole('button', { name: 'Remove a stop' }).click();
+  await page.locator('[data-interaction="rating-light"] [role="slider"]').focus();
+  await page.keyboard.press('ArrowRight');
+  await idle(page);
+  await page.waitForTimeout(400);
+  // Over a second of quiet: no change to any figure, no animation, no frame drawn.
+  const changes = await page.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        let n = 0;
+        const observer = new MutationObserver((records) => (n += records.length));
+        for (const svg of document.querySelectorAll('app-vis-svg svg')) observer.observe(svg, { subtree: true, attributes: true, childList: true, characterData: true });
+        setTimeout(() => {
+          observer.disconnect();
+          resolve(n);
+        }, 1000);
+      }),
+  );
+  expect(changes).toBe(0);
+  expect(await figureAnimations(page)).toBe(0);
+});
+
+test('Visual Lab: a change cut short carries on from where it was and ends on the newest picture', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/lab');
+  const section = page.locator('section[aria-labelledby="lab-motion"]');
+  await section.getByLabel('Motion in these figures').selectOption('full');
+  await section.scrollIntoViewIfNeeded();
+  const bar = '[data-motion="bars-light"] [data-vis-id="bar-1"]';
+  const top = (d: string) => Number(d.match(/^M[\d.]+ ([\d.]+)/)![1]);
+  // Two new values 100 ms apart: the bar turns towards the newest value from where it is.
+  const drawings = await drawingsDuring(
+    page,
+    bar,
+    async () => {
+      await page.getByRole('button', { name: 'New values' }).click();
+      await page.waitForTimeout(100);
+      await page.getByRole('button', { name: 'New values' }).click();
+    },
+    800,
+  );
+  const tops = drawings.map(top);
+  for (let i = 1; i < tops.length; i++) expect(Math.abs(tops[i] - tops[i - 1]), `frame ${i}: ${tops[i - 1]} → ${tops[i]}`).toBeLessThan(20);
+  // From [2, 4, 3] by way of [5, 1, 3] to [3, 3, 5]: bar A ends at 3 (top 86).
+  expect(tops[tops.length - 1]).toBe(86);
+  // A departure cut short by an entrance: nothing is left behind.
+  await page.getByRole('button', { name: 'Remove a stop' }).click();
+  await page.getByRole('button', { name: 'Add a stop' }).click();
+  await idle(page);
+  await expect(page.locator('[data-vis-leaving], [data-vis-ghost], mask[id*="leaving"]')).toHaveCount(0);
+  await expect(page.locator('[data-motion="route-light"] [data-vis-id="leg-3"]')).toHaveCount(1);
+});
+
+test('Visual Lab: changes keep to the motion budget', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/lab');
+  await page.locator('section[aria-labelledby="lab-motion"]').getByLabel('Motion in these figures').selectOption('full');
+  for (const name of ['New values', 'New values', 'Add a member', 'Add a member', 'Add a member', 'Remove a member', 'Add a stop', 'Add a stop', 'Remove a stop']) {
+    await page.getByRole('button', { name }).click();
+    await expect(page.getByRole('list', { name: /^Motion budget/ })).toHaveCount(0);
+    for (const ref of ['bars', 'set', 'route']) expect(await page.locator(`[data-moved="${ref}"] > li`).count()).toBeLessThanOrEqual(3);
+  }
+});

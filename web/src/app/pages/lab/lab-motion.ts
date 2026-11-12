@@ -3,7 +3,7 @@ import { Component, Signal, computed, input, signal } from '@angular/core';
 import { Composed, lookupOf } from '../../shared/visual/composition/compose';
 import { TextLookup } from '../../shared/visual/composition/scene';
 import { QualityTier, SceneFigure, SurfaceScheme } from '../../shared/visual/integration/scene-figure';
-import { changeMovers } from '../../shared/visual/motion/plan-motion';
+import { changeMovers, changeProblems } from '../../shared/visual/motion/plan-motion';
 import { BAR_SETS, ROUTE_STOPS, SET_SIZES, barsFigure, routeFigure, setFigure } from './lab-motion-figures';
 import { describeMover } from './lab-movers';
 
@@ -15,6 +15,8 @@ interface Reference {
   text: Signal<TextLookup>;
   /** What moved in the last change, in words, with the reasons. */
   moved: Signal<{ id: string; what: string; why: string }[]>;
+  /** The last change's motion-budget problems (visual-policy §3.12); empty when it kept to the budget. */
+  problems: Signal<string[]>;
 }
 
 /** A reference drawn from data, remembering the figure before the last change. */
@@ -36,6 +38,10 @@ function reference(id: string, name: string, about: string, compose: () => Compo
     moved: computed(() => {
       const { before, now } = pair();
       return before ? changeMovers(before.scene, now.scene).map(describeMover) : [];
+    }),
+    problems: computed(() => {
+      const { before, now } = pair();
+      return before ? changeProblems(before.scene, now.scene) : [];
     }),
   };
 }
@@ -95,6 +101,11 @@ function reference(id: string, name: string, about: string, compose: () => Compo
             </div>
           }
         </div>
+        @if (ref.problems().length) {
+          <ul class="problems" [attr.aria-label]="'Motion budget: ' + ref.name">
+            @for (p of ref.problems(); track p) { <li>{{ p }}</li> }
+          </ul>
+        }
         <ul class="moves" [attr.aria-label]="'What moved: ' + ref.name" [attr.data-moved]="ref.id">
           @for (m of ref.moved(); track m.id) {
             <li><code>{{ m.id }}</code> {{ m.what }}@if (m.why) {: {{ m.why }}}</li>
