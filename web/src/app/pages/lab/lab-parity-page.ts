@@ -147,15 +147,27 @@ export class LabParityPage {
     return {
       cases: () => this.cases.map((c) => ({ key: c.key, group: c.group, name: c.name, width: c.frame.width, height: c.frame.height, change: !!c.timeline, gap: this.gap(c.frame) })),
       /** Shows a case: whole, without one item, or that item alone; a change starts at time 0 on the hand-moved clock. */
-      show: async (key: string, scheme: Scheme, variant: { without?: string; only?: string; none?: boolean; play?: boolean; swap?: [string, string] } = {}) => {
+      show: async (
+        key: string,
+        scheme: Scheme,
+        variant: { without?: string; only?: string; none?: boolean; play?: boolean; swap?: [string, string]; nudge?: { id: string; dx: number } } = {},
+      ) => {
         const c = this.cases.find((x) => x.key === key);
         if (!c) throw new Error(`No parity case '${key}'`);
         const items = variant.none ? [] : c.frame.items.filter((i) => (variant.only ? i.id === variant.only : i.id !== variant.without));
         const frame = { ...c.frame, items };
-        const swap = variant.swap;
-        const canvasFrame = swap
-          ? { ...frame, items: items.map((i) => (i.kind === 'shape' && i.paint.fill === swap[0] ? { ...i, paint: { ...i.paint, fill: swap[1] } } : i)) }
-          : frame;
+        const { swap, nudge } = variant;
+        // Deliberate faults on the canvas side only (the suite checks that they fail): a fill drawn in
+        // another colour, or a round mark moved sideways by `dx` units.
+        const canvasFrame = {
+          ...frame,
+          items: items.map((i) => {
+            if (i.kind !== 'shape') return i;
+            if (swap && i.paint.fill === swap[0]) return { ...i, paint: { ...i.paint, fill: swap[1] } };
+            if (nudge && i.id === nudge.id && i.shape.type === 'circle') return { ...i, shape: { ...i.shape, cx: i.shape.cx + nudge.dx } };
+            return i;
+          }),
+        };
         clock.manual = !!variant.play;
         clock.time = 0;
         this.shown.set([]);

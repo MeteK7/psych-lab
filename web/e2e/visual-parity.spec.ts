@@ -9,16 +9,26 @@ import { join } from 'node:path';
 // - a pixel differs when d > INTERIOR (measured rendering noise + 1, at most half the smallest
 //   gap between two fill colours); an edge pixel is one whose neighbourhood varies by more than
 //   EDGE in either capture;
-// - no differing pixel away from an edge; differing edge pixels at most 0.5% of all pixels;
+// - still frames: no differing pixel away from an edge;
+// - the neighbourhood rule: a differing pixel passes if each of its channels lies within the range
+//   of the other capture's 3 × 3 neighbourhood, give or take INTERIOR, checked both ways. Smoothing
+//   only blends the colours on either side of an edge, so it passes when both backends put the edge
+//   in the same place (within a device pixel); a shift of more than a pixel, a wrong colour, or a
+//   missing or extra part puts a colour where the other capture has none nearby, and fails. Pixels
+//   outside it: at most 0.05% of all pixels on a still frame (thin lines crossing can be painted a
+//   little darker by one backend), 0.5% at a moment of a change (crossfades and fades at fractional
+//   positions; a few pixels inside fading items count here too);
 // - text is compared by each label's box (within 1 device pixel) and its ink, summed in luminance
-//   (within 5%), since
-//   the two backends may smooth text differently; its region is left out of the pixel criteria;
+//   (within 5%), since the two backends may smooth text differently; its region is left out of the
+//   pixel criteria;
 // - every label, mark smaller than 24 × 24 units and subject is visibly drawn by both.
 
 /** Measured: the largest difference inside fills between the backends was below this (see the fill test). */
 const INTERIOR = 3;
 const EDGE = 16;
-const EDGE_SHARE = 0.005;
+/** Pixels outside the neighbourhood rule, as a share of all pixels (chosen 2026-11-12 from measurements). */
+const OUTSIDE_STILL = 0.0005;
+const OUTSIDE_CHANGE = 0.005;
 
 interface Box {
   x: number;
@@ -139,15 +149,38 @@ const MEASURE = async (job: {
       }
     return false;
   };
+  /** Whether every channel of P's pixel lies within the range of Q's 3 × 3 neighbourhood, give or take the threshold. */
+  const inRange = (P: ImageData, Q: ImageData, x: number, y: number) => {
+    const p = at(P, y * w + x);
+    for (let c = 0; c < 3; c++) {
+      let [lo, hi] = [255, 0];
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -1; dx <= 1; dx++) {
+          const [nx, ny] = [x + dx, y + dy];
+          if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+          const v = Q.data[(ny * w + nx) * 4 + c];
+          lo = Math.min(lo, v);
+          hi = Math.max(hi, v);
+        }
+      if (p[c] < lo - job.interior || p[c] > hi + job.interior) return false;
+    }
+    return true;
+  };
   let interiorFails = 0;
   let edgeDiffs = 0;
+  let outside = 0;
   let maxInterior = 0;
   let worst: number[] | null = null;
+  let worstOutside: number[] | null = null;
   for (let y = 0; y < h; y++)
     for (let x = 0; x < w; x++) {
       const i = y * w + x;
       if (skip[i]) continue;
       const v = d(i);
+      if (v > job.interior && !(inRange(A, B, x, y) && inRange(B, A, x, y))) {
+        outside++;
+        if (!worstOutside || v > worstOutside[2]) worstOutside = [x, y, v, ...at(A, i), ...at(B, i)];
+      }
       const edge = edgeIn(A, x, y) || edgeIn(B, x, y);
       if (!edge) {
         maxInterior = Math.max(maxInterior, v);
@@ -157,7 +190,7 @@ const MEASURE = async (job: {
         }
       } else if (v > job.interior) edgeDiffs++;
     }
-  return { interiorFails, edgeDiffs, share: edgeDiffs / (w * h), maxInterior, worst, pixels: w * h };
+  return { interiorFails, edgeDiffs, share: edgeDiffs / (w * h), outside, outsideShare: outside / (w * h), worstOutside, maxInterior, worst, pixels: w * h };
 };
 type Measured = Awaited<ReturnType<typeof MEASURE>>;
 const measure = (page: Page, job: Parameters<typeof MEASURE>[0]) => page.evaluate(MEASURE, job) as Promise<any>;
@@ -174,13 +207,15 @@ async function textRegions(page: Page): Promise<Box[]> {
   });
 }
 
-/** The shapes criteria for the case shown (text left out). */
-async function expectSameShapes(page: Page, c: CaseInfo, dpr: number, where: string) {
+/** The shapes criteria for the case shown (text left out): a still frame, or a moment of a change. */
+async function expectSameShapes(page: Page, c: CaseInfo, dpr: number, where: string, moment = false) {
   const { svg, canvas } = await capture(page, c);
   const r = await measure(page, { op: 'compare', a: svg, b: canvas, interior: INTERIOR, edge: EDGE, exclude: await textRegions(page), scale: dpr });
   expect(r.error, where).toBeUndefined();
-  expect(r.interiorFails, `${where}: differing pixels away from edges (worst x, y, d, svg rgb, canvas rgb: ${r.worst})`).toBe(0);
-  expect(r.share, `${where}: share of differing edge pixels`).toBeLessThanOrEqual(EDGE_SHARE);
+  if (!moment) expect(r.interiorFails, `${where}: differing pixels away from edges (worst x, y, d, svg rgb, canvas rgb: ${r.worst})`).toBe(0);
+  expect(r.outsideShare, `${where}: ${r.outside} pixels outside the neighbourhood rule (worst x, y, d, svg rgb, canvas rgb: ${r.worstOutside})`).toBeLessThanOrEqual(
+    moment ? OUTSIDE_CHANGE : OUTSIDE_STILL,
+  );
   return r;
 }
 
@@ -242,7 +277,7 @@ for (const dpr of [1, 1.5, 2]) {
         const end = (await page.evaluate(() => (globalThis as any).__parity.end())) as number;
         for (const f of [0.25, 0.5, 0.75]) {
           await page.evaluate((ms) => (globalThis as any).__parity.at(ms), f * end);
-          await expectSameShapes(page, c, dpr, `${c.key} at ${Math.round(f * end)} ms (×${dpr})`);
+          await expectSameShapes(page, c, dpr, `${c.key} at ${Math.round(f * end)} ms (×${dpr})`, true);
         }
       }
     });
@@ -331,6 +366,20 @@ test('fill colours: rendering noise is below the threshold, which is at most hal
     const r = await measure(page, { op: 'compare', a: svg, b: canvas, interior: INTERIOR, edge: EDGE });
     expect(r.interiorFails, `${key} ${scheme}: ${from} drawn as ${to} must fail`).toBeGreaterThan(1000);
   }
+});
+
+test('the neighbourhood rule: a mark moved by two pixels fails, by half a pixel passes', async ({ page }) => {
+  const c = (await harness(page)).find((x) => x.key === 'interaction.rating')!;
+  const run = async (dx: number) => {
+    await show(page, c.key, 'light', { nudge: { id: 'mark', dx } });
+    const { svg, canvas } = await capture(page, c);
+    return measure(page, { op: 'compare', a: svg, b: canvas, interior: INTERIOR, edge: EDGE, exclude: await textRegions(page) });
+  };
+  const moved = await run(2);
+  expect(moved.outsideShare, `moved by 2 px: ${moved.outside} pixels outside`).toBeGreaterThan(OUTSIDE_STILL);
+  const nudged = await run(0.5);
+  expect(nudged.outsideShare, `moved by half a pixel: ${nudged.outside} pixels outside`).toBeLessThanOrEqual(OUTSIDE_STILL);
+  expect(nudged.interiorFails, 'moved by half a pixel: nothing inside fills differs').toBe(0);
 });
 
 test('forced colours: both backends draw in system colours only', async ({ page }) => {
