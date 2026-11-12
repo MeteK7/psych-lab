@@ -94,6 +94,12 @@ export interface StyleRef {
 /** The smallest pointer target in scene units (1 unit = 1 CSS px at design width), WCAG 2.5.8 (M4). */
 export const MIN_TARGET = 24;
 
+/**
+ * The keyboard focus ring on a figure that is itself the control (M4): a line in the `focus` token
+ * (the page's accent; the system highlight in forced colours), `gap` units outside the target.
+ */
+export const FOCUS_RING = { gap: 3, width: 2 } as const;
+
 /** The grain texture (§5): a tile of fine seeded dots, at most 6% opacity. */
 export const GRAIN = { opacity: 0.05, tile: 64, spacing: 6, radius: 0.6, seed: 'platform-grain' } as const;
 

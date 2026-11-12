@@ -118,14 +118,20 @@ export function fieldFigure(across: number, up: number): Composed {
               geometry: { type: 'circle', cx: at(across, FIELD.x.range), cy: at(up, FIELD.y.range), r: 13 },
               style: { role: 'subject', material: 'tonal' },
               purpose: REFERENCE('the place, which a person moves on both axes.'),
-              target: { kind: 'handle', x: { scale: 'across', value: 'across' }, y: { scale: 'up', value: 'up' }, track: 'field', label: 'mark-label' },
+              target: {
+                kind: 'handle',
+                x: { scale: 'across', value: 'across', label: 'across-label' },
+                y: { scale: 'up', value: 'up', label: 'up-label' },
+                track: 'field',
+                label: 'mark-label',
+              },
             },
           ],
         },
       ],
       alt: `Reference: a mark at ${across} across and ${up} up, in a field from 1 to 5 each way`,
     },
-    { 'x-low': '1', 'x-high': '5', 'y-low': '1', 'y-high': '5', 'mark-label': 'Place' },
+    { 'x-low': '1', 'x-high': '5', 'y-low': '1', 'y-high': '5', 'mark-label': 'Place', 'across-label': 'across', 'up-label': 'up' },
   );
 }
 

@@ -1,15 +1,15 @@
 import { boundsOf } from '../composition/bounds';
 import { Composed, SHOWN, lookupOf } from '../composition/compose';
-import { SceneDefinition, StateName, TextLookup } from '../composition/scene';
+import { ElementId, SceneDefinition, StateName, TextLookup } from '../composition/scene';
 import { dotsPath, poissonDisc } from '../generation/distributions';
 import { generate, generateEdge } from '../generation/registry';
 import { deriveSeed } from '../generation/random';
 import { QualityTier, planMotion } from '../motion/plan-motion';
 import { DrawPaint, Drawable, FrameItem, ResolvedFrame, ResolvedTimeline, ResolvedTrack } from '../rendering/frame';
 import { resolveState } from '../state/resolve-state';
-import { resolveHalo, resolveLabel, resolveStyle } from '../styling/resolve';
+import { resolveFocus, resolveHalo, resolveLabel, resolveStyle } from '../styling/resolve';
 import { LINE_HEIGHT, wrapText } from '../styling/type';
-import { GRAIN, frameSize } from '../styling/vocabulary';
+import { Emphasis, FOCUS_RING, GRAIN, frameSize } from '../styling/vocabulary';
 
 /**
  * The pipeline (docs/visual-system.md §3.2), assembled outside every capability: S3 gives the
@@ -39,8 +39,18 @@ function generatedPath(scene: SceneDefinition, element: Extract<SceneDefinition[
   return d;
 }
 
-export function buildFrame(scene: SceneDefinition, state: StateName, text: TextLookup): ResolvedFrame {
+/**
+ * What a person is doing with an interactive figure (M4), on top of its state: the handle being
+ * moved takes `emphasis`, and the target with keyboard focus gets the focus ring, drawn last.
+ */
+export interface LiveInput {
+  emphasis?: Readonly<Record<ElementId, Emphasis>>;
+  focus?: ElementId | null;
+}
+
+export function buildFrame(scene: SceneDefinition, state: StateName, text: TextLookup, live: LiveInput = {}): ResolvedFrame {
   const targets = resolveState(scene, state);
+  for (const [id, emphasis] of Object.entries(live.emphasis ?? {})) if (targets[id]) targets[id] = { ...targets[id], emphasis };
   const items: FrameItem[] = [];
   for (const layer of scene.layers) {
     for (const element of layer.elements) {
@@ -93,9 +103,30 @@ export function buildFrame(scene: SceneDefinition, state: StateName, text: TextL
       }
     }
   }
+  const ring = live.focus ? focusRing(scene, live.focus) : null;
+  if (ring && targets[live.focus!]?.visible) items.push({ id: `${live.focus}-focus`, layer: 'focus', kind: 'shape', shape: ring, paint: resolveFocus() });
   const { width, height } = frameSize(scene.frame);
   const grained = items.some((i) => i.kind === 'shape' && i.paint.grain);
   return { width, height, theme: scene.theme, items, ...(grained ? { grain: grainTile() } : {}) };
+}
+
+/**
+ * The focus ring around a target (S1 FOCUS_RING): a circle around a round mark, otherwise a rounded
+ * box around the form, `gap` units clear of its line.
+ */
+function focusRing(scene: SceneDefinition, id: ElementId): Drawable | null {
+  const element = scene.layers.flatMap((l) => l.elements).find((e) => e.id === id);
+  if (!element || element.kind === 'label') return null;
+  const half = element.kind === 'shape' ? resolveStyle(element.style).width / 2 : 0;
+  const out = FOCUS_RING.gap + half + FOCUS_RING.width / 2;
+  if (element.kind === 'shape' && element.geometry.type === 'circle') {
+    const { cx, cy, r } = element.geometry;
+    return { type: 'circle', cx, cy, r: r + out };
+  }
+  const box = boundsOf(scene, element);
+  if (!box) return null;
+  const corner = element.kind === 'shape' && element.geometry.type === 'rect' ? (element.geometry.rx ?? 0) : 0;
+  return { type: 'rect', x: box.x - out, y: box.y - out, width: box.width + 2 * out, height: box.height + 2 * out, rx: corner + out };
 }
 
 /** A plane's top silhouette: the top side of a rect, or the generator's edge line. */

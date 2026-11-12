@@ -96,6 +96,7 @@ Scenes use roles, never ramp steps. A role resolves to a ramp step (or an existi
 | `ink` | Essential neutral lines; the intended (dashed) line | `--text` (#1c1c1e) | `--text` (#ececef) |
 | `label` | Labels in figures | `--text` | `--text` |
 | `label-soft` | Secondary labels | `--muted` (#55575d) | `--muted` (#a9abb2) |
+| `focus` | The keyboard focus ring on a figure that is itself the control (M4): 2 px, 3 units outside the target, the page's own focus colour so it looks like every other control's focus; at least 3:1 on the ground and every plane | `--accent` (#2457c5) | `--accent` (#8fb0ff) |
 
 **Example (Action and growth):**
 
@@ -145,6 +146,7 @@ Figures set `forced-color-adjust: none` and map every role to a system colour ex
 | `context`, `ink` | `CanvasText` |
 | `label`, `label-soft` | `CanvasText` |
 | `receded` elements | `GrayText` |
+| The focus ring | `Highlight` |
 | Dashes | Kept |
 | `lit`, `translucent` and textures | Become `line` (stroke only), with no gradient, transparency or texture |
 

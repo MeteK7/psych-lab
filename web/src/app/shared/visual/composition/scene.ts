@@ -78,10 +78,14 @@ export type ScaleDef =
   | { kind: 'points'; values: readonly (string | number)[]; range: readonly [number, number] };
 export type ScaleValue = string | number;
 
-/** One axis of a handle: the scale it moves along, and the name of the exercise's value it sets. */
+/**
+ * One axis of a handle: the scale it moves along, and the name of the exercise's value it sets.
+ * `label` names the axis in words: a handle on two scales is announced as one slider per axis.
+ */
 export interface Axis {
   scale: ScaleId;
   value: string;
+  label?: ContentKey;
 }
 
 /**

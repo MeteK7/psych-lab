@@ -2,6 +2,7 @@ import {
   ColorRole,
   DASHES,
   Emphasis,
+  FOCUS_RING,
   LABEL_SIZES,
   LINE_ORDER,
   LINE_WEIGHTS,
@@ -159,4 +160,12 @@ export function resolveLabel(tone: LabelTone = 'label'): TextPaint {
 /** A label's halo (§9): the ground colour, so in forced colours it becomes Canvas with the ground. */
 export function resolveHalo(): { colour: string; width: number } {
   return { colour: token('ground'), width: HALO.width };
+}
+
+/**
+ * The keyboard focus ring (M4): the page's own focus colour, so a figure's focus looks like every
+ * other control's; Highlight in forced colours. Its width doesn't change with emphasis.
+ */
+export function resolveFocus(): Paint {
+  return { fill: NONE, stroke: token('focus'), width: FOCUS_RING.width, dash: null };
 }

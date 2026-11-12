@@ -168,6 +168,22 @@ describe('the validator on interaction (M4)', () => {
     );
   });
 
+  it('asks a handle on two scales to name each axis, in words it has', () => {
+    const scales = { rating, upwards };
+    const twoAxes = (x: object, y: object): SceneElement => ({
+      kind: 'shape',
+      id: 'two',
+      geometry: { type: 'circle', cx: 400, cy: 150, r: 13 },
+      style: { role: 'subject', material: 'tonal' },
+      purpose: P,
+      target: { kind: 'handle', x: { scale: 'rating', value: 'r', ...x }, y: { scale: 'upwards', value: 'u', ...y }, label: 'handle' },
+    });
+    const check = (el: SceneElement) => validateScene({ ...figure(100, [el]), scales }, TEXT).filter((p) => p.includes("'two'"));
+    expect(check(twoAxes({}, { label: 'b' }))).toEqual(["element 'two': a handle on two scales names each axis ('label')"]);
+    expect(check(twoAxes({ label: 'a' }, { label: 'nothing' }))).toEqual(["element 'two': no content for 'nothing'"]);
+    expect(check(twoAxes({ label: 'a' }, { label: 'b' }))).toEqual([]);
+  });
+
   it('keeps small targets 24 units clear of each other', () => {
     const near: SceneElement = {
       kind: 'shape',

@@ -16,7 +16,8 @@ const GENERATOR_SETS = 21; // S2: the reference compositions, 2 or 3 per generat
 const LAYOUT_SETS = 4; // S2: grid, radial, flow, packing
 const MATERIAL_SETS = 5; // S1 (M3): the material set, a grounded lit form, depth, depth with grain, a translucent overlap
 const SHEET_SETS = 12; // the review sheet (M3 stage C): lines, type, and materials and depth in each of the five areas
-const INTERACTION_SETS = 3; // S6 (M4): a rating scale, a field with two axes, a choice of three
+const INTERACTION_SETS = 1; // S6 (M4): a choice of three, as a picture until stage C
+const LIVE_SETS = 2; // S6 (M4 stage B): a rating scale and a field with two axes, each the control itself
 const PANELS =
   (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS + GENERATOR_SETS + LAYOUT_SETS + MATERIAL_SETS + SHEET_SETS + INTERACTION_SETS) * 2; // light and dark
 
@@ -34,6 +35,10 @@ for (const [name, media] of [
     for (const label of await figures.evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')))) {
       expect(label?.length).toBeGreaterThan(10);
     }
+    // Live figures are groups of sliders, named by their text alternative.
+    const live = page.locator('app-vis-interactive[role="group"]');
+    await expect(live).toHaveCount(LIVE_SETS * 2);
+    for (const label of await live.evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')))) expect(label?.length).toBeGreaterThan(10);
     await expect(page.getByRole('list', { name: 'Validation problems' })).toHaveCount(0);
     // The purpose of every element is explained.
     await expect(page.getByRole('table').first().getByRole('row')).toHaveCount(1 + 11); // mcii.path
@@ -176,7 +181,7 @@ test('Visual Lab: the review sheet', async ({ page }) => {
 test('Visual Lab: interaction targets under the pointer', async ({ page }) => {
   await page.goto('/lab');
   const at = async (figure: string, x: number, y: number) => {
-    const svg = page.locator(`figure[data-interaction="${figure}"] app-vis-svg svg`);
+    const svg = page.locator(`[data-interaction="${figure}"] app-vis-svg svg`);
     await svg.scrollIntoViewIfNeeded();
     const box = (await svg.boundingBox())!;
     const s = box.width / 480;
@@ -196,4 +201,69 @@ test('Visual Lab: interaction targets under the pointer', async ({ page }) => {
   await expect(page.locator('svg.targets')).toHaveCount(6);
   await page.getByLabel('Show targets').uncheck();
   await expect(page.locator('svg.targets')).toHaveCount(0);
+});
+
+// Interaction (M4 stage B): the live references move by dragging, by clicks alone and by the
+// keyboard, and report the exercise's values; both panels of a reference share one value.
+test('Visual Lab: live figures take a drag, clicks alone and the keyboard', async ({ page }) => {
+  await page.goto('/lab');
+  const point = async (figure: string, x: number, y: number) => {
+    const svg = page.locator(`[data-interaction="${figure}"] app-vis-svg svg`);
+    await svg.scrollIntoViewIfNeeded();
+    const box = (await svg.boundingBox())!;
+    const s = box.width / 480;
+    return [box.x + x * s, box.y + y * s] as const;
+  };
+  const rating = page.locator('[data-value="rating"]');
+  const field = page.locator('[data-value="field"]');
+  await expect(rating).toContainText('rating 3');
+
+  // Drag the mark from 3 to the end; the dark panel follows the same value.
+  await page.mouse.move(...(await point('rating-light', 240, 44)));
+  await page.mouse.down();
+  await page.mouse.move(...(await point('rating-light', 330, 44)), { steps: 4 });
+  await expect(rating).toContainText('rating 4');
+  await page.mouse.move(...(await point('rating-light', 470, 44)), { steps: 4 });
+  await page.mouse.up();
+  await expect(rating).toContainText('rating 5');
+  await expect(page.locator('[data-interaction="rating-dark"] [role="slider"]')).toHaveAttribute('aria-valuenow', '5');
+
+  // Escape during a drag puts the value back.
+  await page.mouse.move(...(await point('rating-light', 420, 44)));
+  await page.mouse.down();
+  await page.mouse.move(...(await point('rating-light', 60, 44)), { steps: 4 });
+  await expect(rating).toContainText('rating 1');
+  await page.keyboard.press('Escape');
+  await expect(rating).toContainText('rating 5');
+  await page.mouse.up();
+  await expect(rating).toContainText('rating 5');
+
+  // Clicks alone: pick the mark up, then click where it goes (below the line still counts).
+  await page.mouse.click(...(await point('rating-dark', 420, 44)));
+  await expect(page.locator('[data-interaction="rating-dark"] [data-vis-id="mark"]')).toHaveCSS('stroke-width', '3px');
+  await page.mouse.click(...(await point('rating-dark', 150, 90)));
+  await expect(rating).toContainText('rating 2');
+  // Pressing the track places the mark there at once.
+  await page.mouse.click(...(await point('rating-light', 330, 50)));
+  await expect(rating).toContainText('rating 4');
+
+  // The keyboard only: Tab through the stops; each axis of the field is its own slider.
+  await page.locator('[data-interaction="rating-light"] [role="slider"]').focus();
+  await page.keyboard.press('Home');
+  await expect(rating).toContainText('rating 1');
+  await expect(page.locator('[data-interaction="rating-light"] [data-vis-id="mark-focus"]')).toHaveCount(1);
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('slider', { name: 'Place, across' }).first()).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect(field).toContainText('across 3, up 4');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowUp');
+  await expect(field).toContainText('across 3, up 5');
+  await page.keyboard.press('Home');
+  await expect(field).toContainText('across 3, up 1');
+  await expect(page.locator('[data-interaction="field-light"] [data-vis-id="mark-focus"]')).toHaveCount(1);
+  // The ring follows focus: it left the rating when focus did.
+  await expect(page.locator('[data-vis-id="mark-focus"]')).toHaveCount(1);
 });

@@ -162,7 +162,11 @@ function interactionProblems(scene: SceneDefinition, text: TextLookup): string[]
     if (text(t.label) === undefined) problems.push(`${where}: no content for '${t.label}'`);
     if (t.kind === 'handle') {
       if (!t.x && !t.y) problems.push(`${where}: a handle moves along at least one scale ('x' or 'y')`);
-      for (const axis of [t.x, t.y]) if (axis && !scene.scales?.[axis.scale]) problems.push(`${where}: unknown scale '${axis.scale}'`);
+      for (const axis of [t.x, t.y]) {
+        if (axis && !scene.scales?.[axis.scale]) problems.push(`${where}: unknown scale '${axis.scale}'`);
+        if (axis?.label !== undefined && text(axis.label) === undefined) problems.push(`${where}: no content for '${axis.label}'`);
+      }
+      if (t.x && t.y && (!t.x.label || !t.y.label)) problems.push(`${where}: a handle on two scales names each axis ('label')`);
       if (t.track !== undefined) {
         const track = byId.get(t.track);
         if (!track || t.track === f.id) problems.push(`${where}: unknown track '${t.track}'`);

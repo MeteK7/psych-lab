@@ -58,6 +58,8 @@
   --vis-shadow-edge: color-mix(in srgb, var(--vis-n-900) 0%, transparent);
   /* Grain (§5): the page's text tone, drawn at most 6% opaque, so it darkens in light and lifts in dark. */
   --vis-grain: var(--text);
+  /* Focus (M4): a figure that is itself the control shows the page's own focus colour. */
+  --vis-focus: var(--accent);
 }
 
 /* Roles, dark: farther planes move towards the dark ground, as they move towards white in light. */
@@ -104,5 +106,6 @@
     --vis-subject-lit: Canvas; --vis-subject-shade: Canvas;
     --vis-translucent: Canvas; --vis-overlap: GrayText;
     --vis-shadow: Canvas; --vis-shadow-edge: Canvas; --vis-grain: Canvas;
+    --vis-focus: Highlight;
   }
 }

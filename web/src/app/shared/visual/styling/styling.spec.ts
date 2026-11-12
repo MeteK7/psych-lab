@@ -1,5 +1,5 @@
 import { readSource } from '../testing/source-files';
-import { resolveLabel, resolveStyle } from './resolve';
+import { resolveFocus, resolveLabel, resolveStyle } from './resolve';
 import { THEMES, ThemeId } from './vocabulary';
 
 describe('resolveStyle', () => {
@@ -37,6 +37,10 @@ describe('resolveStyle', () => {
     expect(resolveStyle({ role: 'ink', dash: 'intended' }).dash).toBe('7 7');
   });
 
+  it('draws the focus ring in the focus token, at its own width whatever the emphasis', () => {
+    expect(resolveFocus()).toEqual({ fill: 'none', stroke: 'var(--vis-focus)', width: 2, dash: null });
+  });
+
   it('gives labels their tone and size', () => {
     expect(resolveLabel()).toEqual({ fill: 'var(--vis-label)', size: 14 });
     expect(resolveLabel('label-soft')).toEqual({ fill: 'var(--vis-label-soft)', size: 13 });
@@ -49,8 +53,8 @@ beforeAll(async () => {
   CSS = await readSource('src/app/shared/visual/styling/tokens.css');
 });
 const PAGE = {
-  light: { '--bg': '#ffffff', '--text': '#1c1c1e', '--muted': '#55575d' },
-  dark: { '--bg': '#17181b', '--text': '#ececef', '--muted': '#a9abb2' },
+  light: { '--bg': '#ffffff', '--text': '#1c1c1e', '--muted': '#55575d', '--accent': '#2457c5' },
+  dark: { '--bg': '#17181b', '--text': '#ececef', '--muted': '#a9abb2', '--accent': '#8fb0ff' },
 };
 
 function declarations(block: string): Record<string, string> {
@@ -97,6 +101,8 @@ const PAIRS: [fg: string, bg: string, min: number][] = [
   ...['ground', 'far', 'mid', 'near'].map((bg) => ['receded', bg, 3] as [string, string, number]),
   ...['ground', 'far', 'mid', 'near'].map((bg) => ['label', bg, 4.5] as [string, string, number]),
   ...['ground', 'far', 'mid'].map((bg) => ['label-soft', bg, 4.5] as [string, string, number]),
+  // The focus ring sits just outside a target, on whatever is behind it (M4).
+  ...['ground', 'far', 'mid', 'near'].map((bg) => ['focus', bg, 3] as [string, string, number]),
 ];
 
 describe('tokens.css', () => {
