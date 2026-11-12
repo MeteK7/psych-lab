@@ -4,8 +4,9 @@ import { ElementId, SceneDefinition, StateName, TextLookup } from '../compositio
 import { dotsPath, poissonDisc } from '../generation/distributions';
 import { generate, generateEdge } from '../generation/registry';
 import { deriveSeed } from '../generation/random';
-import { QualityTier, planMotion } from '../motion/plan-motion';
+import { QualityTier, planChange, planMotion } from '../motion/plan-motion';
 import { DrawPaint, Drawable, FrameItem, ResolvedFrame, ResolvedTimeline, ResolvedTrack } from '../rendering/frame';
+import { canMorph } from '../rendering/tween';
 import { resolveState } from '../state/resolve-state';
 import { resolveFocus, resolveHalo, resolveLabel, resolveStyle } from '../styling/resolve';
 import { LINE_HEIGHT, wrapText } from '../styling/type';
@@ -159,10 +160,43 @@ function grainTile(): { tile: number; d: string } {
 export function buildTimeline(scene: SceneDefinition, from: StateName | null, to: StateName, tier: QualityTier): ResolvedTimeline {
   const shapes = new Map(scene.layers.flatMap((l) => l.elements).flatMap((e) => (e.kind !== 'label' ? [[e.id, e] as const] : [])));
   return planMotion(scene, from, to, tier).flatMap((track): ResolvedTrack[] => {
+    // A state change has no 'move' tracks; those are for figures built from data (buildChangeTimeline).
+    if (track.property === 'move') return [];
     if (track.property !== 'emphasis') return [track];
     const shape = shapes.get(track.id);
     if (!shape) return [];
     return [{ ...track, property: 'paint', from: resolveStyle(shape.style, track.from), to: resolveStyle(shape.style, track.to) }];
+  });
+}
+
+/**
+ * S5's timeline for a change in a figure built from data (M5), resolved for a backend: each element
+ * that moves gets its drawing before and after (a `shape` track, with a `paint` track when its paint
+ * changed too), and each label that moves an offset from its old place (`translate`). A top edge
+ * moves with its plane. Entrances pass through as in a state change.
+ */
+export function buildChangeTimeline(before: SceneDefinition | null, after: SceneDefinition, state: StateName, text: TextLookup, tier: QualityTier): ResolvedTimeline {
+  const tracks = planChange(before, after, tier);
+  if (!before || !tracks.some((t) => t.property === 'move')) return tracks as ResolvedTimeline;
+  const was = new Map(buildFrame(before, state, text).items.map((i) => [i.id, i]));
+  const now = new Map(buildFrame(after, state, text).items.map((i) => [i.id, i]));
+  return tracks.flatMap((track): ResolvedTrack[] => {
+    if (track.property === 'emphasis') return [];
+    if (track.property !== 'move') return [track];
+    const { property: _, ...timing } = track;
+    return [track.id, `${track.id}-edge`].flatMap((id): ResolvedTrack[] => {
+      const [a, b] = [was.get(id), now.get(id)];
+      if (!a || !b) return [];
+      if (a.kind === 'text' && b.kind === 'text') {
+        const from = [a.x - b.x, a.y - b.y] as const;
+        return from[0] || from[1] ? [{ ...timing, id, property: 'translate', from, to: [0, 0] }] : [];
+      }
+      if (a.kind !== 'shape' || b.kind !== 'shape') return [];
+      const out: ResolvedTrack[] = [];
+      if (JSON.stringify(a.shape) !== JSON.stringify(b.shape)) out.push({ ...timing, id, property: 'shape', from: a.shape, to: b.shape, morph: canMorph(a.shape, b.shape) });
+      if (JSON.stringify(a.paint) !== JSON.stringify(b.paint)) out.push({ ...timing, id, property: 'paint', from: a.paint, to: b.paint });
+      return out;
+    });
   });
 }
 

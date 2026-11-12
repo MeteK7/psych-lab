@@ -11,12 +11,14 @@ import { ROUNDS, ROUNDS_PURPOSES } from '../../shared/visual/instruments/rounds/
 import { TRACKING, TRACKING_PURPOSES, TrackingInput, composeTrackingPreview } from '../../shared/visual/instruments/tracking/tracking';
 import { InstrumentFigure } from '../../shared/visual/integration/instruments';
 import { QualityTier, SceneFigure, SurfaceScheme } from '../../shared/visual/integration/scene-figure';
-import { Mover, motionProblems, movers } from '../../shared/visual/motion/plan-motion';
+import { motionProblems, movers } from '../../shared/visual/motion/plan-motion';
 import { SCENES } from '../../shared/visual/scenes';
-import { EMPHASIS_CHANGE, MOTION, MOTION_EFFECTS, THEMES } from '../../shared/visual/styling/vocabulary';
+import { THEMES } from '../../shared/visual/styling/vocabulary';
 import { LabGenerators } from './lab-generators';
 import { LabInteraction } from './lab-interaction';
+import { LabMotion } from './lab-motion';
 import { LabMaterials } from './lab-materials';
+import { describeMover } from './lab-movers';
 import { LabSheet } from './lab-sheet';
 import { LabTrackingStill } from './lab-tracking-still';
 
@@ -28,7 +30,7 @@ import { LabTrackingStill } from './lab-tracking-still';
  */
 @Component({
   selector: 'app-lab-page',
-  imports: [SceneFigure, InstrumentFigure, LabGenerators, LabInteraction, LabMaterials, LabSheet, LabTrackingStill],
+  imports: [SceneFigure, InstrumentFigure, LabGenerators, LabInteraction, LabMaterials, LabMotion, LabSheet, LabTrackingStill],
   template: `
     <h1>Visual Lab</h1>
     @if (env.showsDevelopment()) {
@@ -243,6 +245,7 @@ import { LabTrackingStill } from './lab-tracking-still';
       <app-lab-generators [schemes]="schemes" />
       <app-lab-materials [schemes]="schemes" />
       <app-lab-interaction [schemes]="schemes" />
+      <app-lab-motion [schemes]="schemes" />
       <app-lab-sheet [schemes]="schemes" />
     } @else {
       <p>The Visual Lab is available in the development build only.</p>
@@ -328,7 +331,7 @@ export class LabPage {
       from,
       to,
       alt: text(scene.alt[to]) ?? '',
-      moves: movers(scene, from, to).map((m) => this.describe(m)),
+      moves: movers(scene, from, to).map(describeMover),
     })),
   }));
 
@@ -338,16 +341,6 @@ export class LabPage {
 
   protected replay(key: string): void {
     this.runs.update((runs) => ({ ...runs, [key]: (runs[key] ?? 0) + 1 }));
-  }
-
-  /** What a mover does, in words, with the S1 timing it gets. */
-  private describe(m: Mover): { id: string; what: string; why: string } {
-    const ms = (d: keyof typeof MOTION.durations) => `${MOTION.durations[d]} ms`;
-    const along = m.with.length ? `, with ${m.with.join(', ')}` : '';
-    if (m.change.kind === 'emphasis')
-      return { id: m.id, what: `eases from ${m.change.from} to ${m.change.to} emphasis (${ms(EMPHASIS_CHANGE.duration)})`, why: '' };
-    const verb = { fade: 'fades in', rise: 'rises into place', draw: 'is drawn along its direction' }[m.change.effect];
-    return { id: m.id, what: `${verb} (${ms(MOTION_EFFECTS[m.change.effect].duration)})${along}`, why: m.change.why };
   }
 
   protected themeVersion(theme: string): number {

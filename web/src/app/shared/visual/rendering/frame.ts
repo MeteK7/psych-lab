@@ -78,7 +78,7 @@ export interface ResolvedFrame {
 /**
  * A timeline as a backend gets it: every value decided. `opacity`, `offsetY` (scene units, positive
  * is lower) and `reveal` (the drawn fraction along the element's direction) are numbers; `paint`
- * eases between two paints. The frame holds each element's final state; a backend plays tracks
+ * eases between two paints; `shape` and `translate` move an element that changed (M5). The frame holds each element's final state; a backend plays tracks
  * towards it and, when it can't play them, simply shows the frame.
  */
 interface TrackTiming {
@@ -92,6 +92,17 @@ export type ResolvedTrack = TrackTiming &
   (
     | { property: 'opacity' | 'offsetY' | 'reveal'; from: number; to: number }
     | { property: 'paint'; from: DrawPaint; to: DrawPaint }
+    /**
+     * A shape gliding to the frame's drawing (M5). With `morph`, it passes through the drawings in
+     * between (rendering/tween.ts); without, the old drawing fades out as the new one fades in.
+     * A new timeline that arrives while a glide is under way starts from where the shape is drawn now.
+     */
+    | { property: 'shape'; from: Drawable; to: Drawable; morph: boolean }
+    /**
+     * An offset from the item's place in the frame, in scene units, easing to `to` (M5): a label
+     * moving with its form. A new timeline that arrives mid-move adds the offset still to go.
+     */
+    | { property: 'translate'; from: readonly [number, number]; to: readonly [number, number] }
   );
 
 export type ResolvedTimeline = readonly ResolvedTrack[];

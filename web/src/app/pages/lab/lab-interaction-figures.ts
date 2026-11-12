@@ -157,9 +157,10 @@ export function choiceFigure(choice: (typeof CHOICES)[number]): Composed {
       version: 1,
       theme: 'regulation',
       size: { width: 480, height: 120 },
+      choices: { choice: { label: 'choice-label' } },
       layers: [{ id: 'options', plane: 'subject', elements }],
       alt: `Reference: three options, ${CHOICE_WORDS[choice]} chosen`,
     },
-    Object.fromEntries(CHOICES.map((o) => [`${o}-label`, CHOICE_WORDS[o]])),
+    { ...Object.fromEntries(CHOICES.map((o) => [`${o}-label`, CHOICE_WORDS[o]])), 'choice-label': 'Option' },
   );
 }

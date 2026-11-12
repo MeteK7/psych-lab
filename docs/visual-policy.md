@@ -255,9 +255,9 @@ Where a rule is a design judgement rather than a measured fact, it is marked [J]
 **Good:** motion explains a change. It shows what is new, where it came from and that the rest stayed the same, and then stops.
 
 **Rules:**
-- **When:** only on a state change; only the elements that changed move; at most three per change.
+- **When:** only on a state change; only the elements that changed move; at most three per change. In a figure built from data (M5), a change of data is the change: the elements that glide to new places in it move together, with one timing, and count as one movement (a reflow), up to 12 forms; more than that change at once.
 - **Continuity:** an element present in both states persists and is never redrawn from nothing.
-- **Motion earns its place too** (principle 6): an element that moves on its own says why in its scene (`enter.why`), and the Lab shows it next to the replay.
+- **Motion earns its place too** (principle 6): an element that moves on its own says why in its scene (`enter.why`, or `moves.why` in a figure built from data), and the Lab shows it next to the replay.
 - **Direction carries meaning:**
   - things that appear rise from the ground or draw along their direction of travel (left to right for paths)
   - things that recede fade and desaturate, rather than flying away

@@ -1,8 +1,11 @@
+import { TestBed } from '@angular/core/testing';
+
 import { SHOWN, lookupOf } from '../../shared/visual/composition/compose';
 import { spacingWarnings } from '../../shared/visual/composition/spacing';
 import { validateScene } from '../../shared/visual/composition/validate';
 import { hitTest, placeAt, targetsOf } from '../../shared/visual/interaction/regions';
 import { CHOICES, choiceFigure, fieldFigure, ratingFigure } from './lab-interaction-figures';
+import { LabNativeControls } from './lab-native-controls';
 
 describe('Visual Lab: interaction references (M4)', () => {
   it('are valid for every value, with labels clear of what they do not name', () => {
@@ -32,5 +35,39 @@ describe('Visual Lab: interaction references (M4)', () => {
   it('choose a region as a whole', () => {
     const targets = targetsOf(choiceFigure('first').scene, SHOWN);
     expect(hitTest(targets, [390, 60])).toMatchObject({ kind: 'region', target: { value: 'choice', option: 'third' } });
+  });
+});
+
+describe('Visual Lab: native controls beside a figure (M4 stage C)', () => {
+  async function mount(composed: ReturnType<typeof ratingFigure>, values: Record<string, string | number>) {
+    TestBed.configureTestingModule({ imports: [LabNativeControls] });
+    const fixture = TestBed.createComponent(LabNativeControls);
+    fixture.componentRef.setInput('composed', composed);
+    fixture.componentRef.setInput('values', values);
+    const reports: unknown[] = [];
+    fixture.componentInstance.valuesChange.subscribe((v) => reports.push(v));
+    await fixture.whenStable();
+    return { root: fixture.nativeElement as HTMLElement, reports };
+  }
+
+  it('gives a slider per axis, named and set like the figure, reporting the same values', async () => {
+    const { root, reports } = await mount(fieldFigure(2, 4), { across: 2, up: 4 });
+    const ranges = [...root.querySelectorAll<HTMLInputElement>('input[type="range"]')];
+    expect(ranges.map((r) => [r.closest('label')!.textContent!.trim().split(/\s+/).slice(0, 2).join(' '), r.value, r.min, r.max, r.step])).toEqual([
+      ['Place, across', '2', '1', '5', '1'],
+      ['Place, up', '4', '1', '5', '1'],
+    ]);
+    ranges[1].value = '1';
+    ranges[1].dispatchEvent(new Event('input'));
+    expect(reports).toEqual([{ across: 2, up: 1 }]);
+  });
+
+  it('gives a radio group for a choice', async () => {
+    const { root, reports } = await mount(choiceFigure('second'), { choice: 'second' });
+    expect(root.querySelector('legend')!.textContent).toBe('Option');
+    const radios = [...root.querySelectorAll<HTMLInputElement>('input[type="radio"]')];
+    expect(radios.map((r) => r.checked)).toEqual([false, true, false]);
+    radios[0].click();
+    expect(reports).toEqual([{ choice: 'first' }]);
   });
 });

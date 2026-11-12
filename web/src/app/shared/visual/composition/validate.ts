@@ -172,8 +172,13 @@ function interactionProblems(scene: SceneDefinition, text: TextLookup): string[]
         if (!track || t.track === f.id) problems.push(`${where}: unknown track '${t.track}'`);
         else if (track.target) problems.push(`${where}: its track '${t.track}' is a target itself`);
       }
-    } else if (!closed(f)) problems.push(`${where}: a region is a closed form`);
+    } else {
+      if (!closed(f)) problems.push(`${where}: a region is a closed form`);
+      if (!scene.choices?.[t.value]) problems.push(`${where}: the choice '${t.value}' needs its words ('choices')`);
+    }
   }
+  for (const [value, { label }] of Object.entries(scene.choices ?? {}))
+    if (text(label) === undefined) problems.push(`choice '${value}': no content for '${label}'`);
   // Least areas, per state.
   for (const [name, state] of Object.entries(scene.states.states)) {
     const shown = targets.filter((f) => state.visible.includes(f.id));
@@ -265,9 +270,16 @@ export function validateScene(scene: SceneDefinition, text: TextLookup): string[
     if (focal > maxFocal) problems.push(`${where}: ${focal} focal elements; the scene allows ${maxFocal}`);
   }
   for (const id of ids.keys()) if (!shown.has(id)) problems.push(`element '${id}': no state shows it`);
-  for (const element of all.values())
-    if (element.enter && Object.values(states).every((s) => s.visible.includes(element.id)))
+  // A figure built from data has one state: there, an entrance plays when the element is new in a change (M5).
+  const stateCount = Object.keys(states).length;
+  for (const element of all.values()) {
+    if (stateCount > 1 && element.enter && Object.values(states).every((s) => s.visible.includes(element.id)))
       problems.push(`element '${element.id}': has an entrance but is shown in every state`);
+    if (element.moves) {
+      if (!element.moves.why?.trim()) problems.push(`element '${element.id}': motion without a reason; an element that moves on its own says why`);
+      if (stateCount > 1) problems.push(`element '${element.id}': 'moves' is for figures built from data; a scene's states don't change shapes`);
+    }
+  }
   for (const [from, to] of scene.transitions ?? [])
     for (const name of [from, to])
       if (!Object.hasOwn(states, name)) problems.push(`transition ${from} → ${to}: unknown state '${name}'`);

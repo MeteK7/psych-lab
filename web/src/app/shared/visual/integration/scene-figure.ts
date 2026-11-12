@@ -3,9 +3,14 @@ import { Component, computed, input, linkedSignal, signal, untracked } from '@an
 import { SceneDefinition, StateName, TextLookup } from '../composition/scene';
 import { QualityTier } from '../motion/plan-motion';
 import { SurfaceScheme, SvgBackend } from '../rendering/svg/svg-backend';
-import { buildFrame, buildTimeline } from './pipeline';
+import { buildChangeTimeline, buildFrame, buildTimeline } from './pipeline';
 
 export type { QualityTier, SurfaceScheme };
+
+interface Shown {
+  scene: SceneDefinition;
+  state: StateName;
+}
 
 const REDUCE = '(prefers-reduced-motion: reduce)';
 
@@ -24,8 +29,9 @@ function reducedMotion() {
  *
  * Motion: when `state` changes, the change from the previous state plays (S5). On the first
  * appearance nothing moves, unless `from` names the state the person has just seen (a step that
- * creates a new figure). `tier` defaults to the person's setting: reduced motion shows the final
- * state at once.
+ * creates a new figure). When a figure built from data is drawn again from new data (the same
+ * figure id, the same state), the change between the two plays: what `moves` glides, what is new
+ * enters (M5). `tier` defaults to the person's setting: reduced motion shows the final state at once.
  */
 @Component({
   selector: 'app-vis-scene',
@@ -43,9 +49,13 @@ export class SceneFigure {
   readonly tier = input<QualityTier | 'auto'>('auto');
 
   private readonly reduce = reducedMotion();
-  private readonly change = linkedSignal<StateName, { from: StateName | null; to: StateName }>({
-    source: this.state,
-    computation: (to, previous) => ({ from: previous ? previous.source : untracked(this.from), to }),
+  /** What is drawn: changes only when the scene or the state does (new words alone play nothing). */
+  private readonly shown = computed(() => ({ scene: this.scene(), state: this.state() }), {
+    equal: (a, b) => a.scene === b.scene && a.state === b.state,
+  });
+  private readonly change = linkedSignal<Shown, { before: Shown | null; now: Shown }>({
+    source: this.shown,
+    computation: (now, previous) => ({ before: previous ? previous.source : null, now }),
   });
   private readonly effectiveTier = computed<QualityTier>(() => {
     const tier = this.tier();
@@ -54,7 +64,9 @@ export class SceneFigure {
 
   protected readonly frame = computed(() => buildFrame(this.scene(), this.state(), this.text()));
   protected readonly timeline = computed(() => {
-    const { from, to } = this.change();
-    return buildTimeline(this.scene(), from, to, this.effectiveTier());
+    const { before, now } = this.change();
+    const tier = this.effectiveTier();
+    if (before && before.state === now.state) return buildChangeTimeline(before.scene, now.scene, now.state, untracked(this.text), tier);
+    return buildTimeline(now.scene, before ? before.state : untracked(this.from), now.state, tier);
   });
 }

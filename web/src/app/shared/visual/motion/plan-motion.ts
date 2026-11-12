@@ -1,6 +1,6 @@
 import type { ElementId, SceneDefinition, SceneElement, StateName } from '../composition/scene';
 import { resolveState } from '../state/resolve-state';
-import { EMPHASIS_CHANGE, Emphasis, MOTION, MOTION_EFFECTS, MotionEffect } from '../styling/vocabulary';
+import { EMPHASIS_CHANGE, Emphasis, MOTION, MOTION_EFFECTS, MOVE_CHANGE, MotionEffect } from '../styling/vocabulary';
 
 /**
  * S5 Motion (docs/visual-system.md §3.3, §8): turns a change between two states into a timeline of
@@ -35,6 +35,8 @@ export type Track = Timing &
     /** The drawn fraction of the element, along its direction. */
     | { property: 'reveal'; from: number; to: number }
     | { property: 'emphasis'; from: Emphasis; to: Emphasis }
+    /** A figure built from data (M5): the element glides from its drawing before the change to its drawing after; S9 resolves both. */
+    | { property: 'move' }
   );
 
 export type Timeline = readonly Track[];
@@ -42,7 +44,11 @@ export type Timeline = readonly Track[];
 /** One element that moves on its own in a change, with the elements that move with it. */
 export interface Mover {
   id: ElementId;
-  change: { kind: 'enter'; effect: MotionEffect; why: string } | { kind: 'emphasis'; from: Emphasis; to: Emphasis };
+  change:
+    | { kind: 'enter'; effect: MotionEffect; why: string }
+    | { kind: 'emphasis'; from: Emphasis; to: Emphasis }
+    /** A reflow (M5): `id` and the elements `with` it glide together, as one movement; each reason once. */
+    | { kind: 'moves'; why: string[] };
   with: ElementId[];
 }
 
@@ -102,6 +108,7 @@ export function planMotion(scene: SceneDefinition, from: StateName | null, to: S
       tracks.push({ ...timing(m.id, 0, EMPHASIS_CHANGE), property: 'emphasis', from: m.change.from, to: m.change.to });
       continue;
     }
+    if (m.change.kind !== 'enter') continue;
     const delay = Math.min(entered++, MOTION.maxStaggered - 1) * MOTION.staggerMs;
     const lead = m.change.effect;
     tracks.push(...effectTracks(m.id, lead, delay));
@@ -123,4 +130,84 @@ export function motionProblems(scene: SceneDefinition): string[] {
       ? [`transition ${from} → ${to}: ${moving.length} elements move; at most ${MOTION.maxStaggered}`]
       : [];
   });
+}
+
+// ── Changes in figures built from data (milestone M5) ──────────────────────────────────────────
+
+/** What an element looks like and where it is, to tell whether a change touched it (words aside). */
+function drawnAs(e: SceneElement): string {
+  switch (e.kind) {
+    case 'shape':
+      return JSON.stringify([e.geometry, e.style]);
+    case 'generated':
+      return JSON.stringify([e.generator, e.params, e.style]);
+    case 'label':
+      return JSON.stringify([e.at, e.align, e.width ?? null]);
+  }
+}
+
+/**
+ * What moves when a figure built from data changes (one state each, matched by element id):
+ * - an element that is new enters with its `enter` effect; without one, it appears at once
+ * - an element that `moves` and was drawn differently glides to its new drawing; all of them
+ *   together are one movement, a reflow; a label that names one of them moves with it
+ * - everything else changes at once, and an element that is gone goes at once
+ */
+export function changeMovers(before: SceneDefinition, after: SceneDefinition): Mover[] {
+  const was = new Map(before.layers.flatMap((l) => l.elements).map((e) => [e.id, e]));
+  const elements = after.layers.flatMap((l) => l.elements);
+  const changed = (e: SceneElement) => was.has(e.id) && drawnAs(was.get(e.id)!) !== drawnAs(e);
+  const forms = elements.filter((e) => e.kind !== 'label' && e.moves && changed(e));
+  const moving = new Set(forms.map((e) => e.id));
+  const labels = elements.filter((e) => e.kind === 'label' && changed(e) && (e.moves || e.names?.some((n) => moving.has(n))));
+
+  const entering = new Set(elements.filter((e) => !was.has(e.id) && e.enter).map((e) => e.id));
+  const leadOf = (e: SceneElement) => (e.enter?.with !== undefined && entering.has(e.enter.with) ? e.enter.with : null);
+  const result: Mover[] = [];
+  const group = [...forms, ...labels];
+  if (forms.length) {
+    const why = [...new Set(group.flatMap((e) => (e.moves?.why ? [e.moves.why] : [])))];
+    result.push({ id: group[0].id, change: { kind: 'moves', why }, with: group.slice(1).map((e) => e.id) });
+  }
+  for (const e of elements) {
+    if (!entering.has(e.id)) continue;
+    const lead = leadOf(e);
+    if (lead) continue;
+    result.push({ id: e.id, change: { kind: 'enter', effect: (e.enter?.effect ?? 'fade') as MotionEffect, why: e.enter?.why ?? '' }, with: [] });
+  }
+  for (const e of elements) {
+    const lead = entering.has(e.id) ? leadOf(e) : null;
+    if (lead) result.find((m) => m.id === lead)!.with.push(e.id);
+  }
+  return result;
+}
+
+/**
+ * The timeline for a change in a figure built from data: empty below the full tier, for a first
+ * appearance, between different figures, or for a reflow of more than `MOTION.maxReflow` forms
+ * (then those change at once). Entrances are staggered as in a state change.
+ */
+export function planChange(before: SceneDefinition | null, after: SceneDefinition, tier: QualityTier): Timeline {
+  if (tier !== 'full' || !before || before === after || before.id !== after.id) return [];
+  const byId = new Map(after.layers.flatMap((l) => l.elements).map((e) => [e.id, e]));
+  const tracks: Track[] = [];
+  let entered = 0;
+  for (const m of changeMovers(before, after)) {
+    if (m.change.kind === 'moves') {
+      const ids = [m.id, ...m.with];
+      if (ids.filter((id) => byId.get(id)!.kind !== 'label').length > MOTION.maxReflow) continue;
+      for (const id of ids) tracks.push({ ...timing(id, 0, MOVE_CHANGE), property: 'move' });
+      continue;
+    }
+    if (m.change.kind !== 'enter') continue;
+    const delay = Math.min(entered++, MOTION.maxStaggered - 1) * MOTION.staggerMs;
+    const lead = m.change.effect;
+    tracks.push(...effectTracks(m.id, lead, delay));
+    for (const id of m.with) {
+      const own = byId.get(id)!;
+      const effect = own.enter?.effect ?? (lead === 'draw' && own.kind === 'label' ? 'fade' : lead);
+      tracks.push(...effectTracks(id, effect, delay));
+    }
+  }
+  return tracks;
 }

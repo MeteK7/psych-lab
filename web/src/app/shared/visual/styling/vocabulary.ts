@@ -120,6 +120,11 @@ export const MOTION = {
   staggerMs: 60,
   /** At most this many elements move in one state change (visual-policy.md §3.12). */
   maxStaggered: 3,
+  /**
+   * A reflow (M5): the elements of a figure built from data that glide to new places in one change
+   * move together, with one timing, and count as one movement; with more than this, they change at once.
+   */
+  maxReflow: 12,
 } as const;
 export type MotionDuration = keyof typeof MOTION.durations;
 export type MotionEasing = keyof typeof MOTION.easing;
@@ -136,6 +141,12 @@ export const MOTION_EFFECTS = {
   draw: { duration: 'deliberate', easing: 'move' },
 } as const satisfies Record<string, { duration: MotionDuration; easing: MotionEasing; distance?: number }>;
 export type MotionEffect = keyof typeof MOTION_EFFECTS;
+
+/** An element of a figure built from data that `moves` glides to its new shape, place and paint (M5). */
+export const MOVE_CHANGE = { duration: 'moderate', easing: 'move' } as const satisfies {
+  duration: MotionDuration;
+  easing: MotionEasing;
+};
 
 /** An element that stays but changes emphasis eases between the two paints (§3.7). */
 export const EMPHASIS_CHANGE = { duration: 'moderate', easing: 'move' } as const satisfies {

@@ -1,8 +1,11 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { fieldFigure, ratingFigure } from '../../../pages/lab/lab-interaction-figures';
+import { CHOICES, choiceFigure, fieldFigure, ratingFigure } from '../../../pages/lab/lab-interaction-figures';
 import { ControlledBy, InteractiveFigure, Values } from './interactive-figure';
+
+type Kind = 'rating' | 'field' | 'choice';
+const SIZES: Record<Kind, { width: number; height: number }> = { rating: { width: 480, height: 100 }, field: { width: 480, height: 300 }, choice: { width: 480, height: 120 } };
 
 /** An exercise in miniature: it holds the value and draws the figure again from it. */
 @Component({
@@ -10,31 +13,34 @@ import { ControlledBy, InteractiveFigure, Values } from './interactive-figure';
   template: `<app-vis-interactive [composed]="composed()" [values]="values()" (valuesChange)="changed($event)" [controlledBy]="controlledBy()" />`,
 })
 class Host {
-  readonly figure = input<'rating' | 'field'>('rating');
+  readonly figure = input<Kind>('rating');
   readonly controlledBy = input<ControlledBy>('figure');
   readonly values = signal<Values>({ rating: 3 });
   readonly reports: Values[] = [];
-  readonly composed = computed(() =>
-    this.figure() === 'rating' ? ratingFigure(Number(this.values()['rating'])) : fieldFigure(Number(this.values()['across']), Number(this.values()['up'])),
-  );
+  readonly composed = computed(() => {
+    const v = this.values();
+    if (this.figure() === 'choice') return choiceFigure(v['choice'] as (typeof CHOICES)[number]);
+    return this.figure() === 'rating' ? ratingFigure(Number(v['rating'])) : fieldFigure(Number(v['across']), Number(v['up']));
+  });
   changed(v: Values): void {
     this.reports.push(v);
     this.values.set(v);
   }
 }
 
-async function mount(figure: 'rating' | 'field' = 'rating', controlledBy: ControlledBy = 'figure') {
+async function mount(figure: Kind = 'rating', controlledBy: ControlledBy = 'figure') {
   TestBed.configureTestingModule({ imports: [Host] });
   const fixture = TestBed.createComponent(Host);
   fixture.componentRef.setInput('figure', figure);
   fixture.componentRef.setInput('controlledBy', controlledBy);
   if (figure === 'field') fixture.componentInstance.values.set({ across: 2, up: 4 });
+  if (figure === 'choice') fixture.componentInstance.values.set({ choice: 'second' });
   await fixture.whenStable();
   const root = fixture.nativeElement as HTMLElement;
   const figureEl = root.querySelector('app-vis-interactive') as HTMLElement;
   // Drawn at its design size from the page's top left, so client points are scene units.
   const svg = figureEl.querySelector('svg')!;
-  const { width, height } = figure === 'rating' ? { width: 480, height: 100 } : { width: 480, height: 300 };
+  const { width, height } = SIZES[figure];
   svg.getBoundingClientRect = () => ({ left: 0, top: 0, width, height, x: 0, y: 0, right: width, bottom: height, toJSON: () => ({}) });
   return { fixture, host: fixture.componentInstance, figure: figureEl };
 }
@@ -134,5 +140,30 @@ describe('InteractiveFigure (M4 stage B)', () => {
     await fixture.whenStable();
     // That press was on the track, a new gesture: not the put-down of the earlier pick-up.
     expect(host.values()).toEqual({ rating: 1 });
+  });
+
+  it('is a radio group for a choice: one stop, the arrows move and choose, a press chooses', async () => {
+    const { fixture, host, figure } = await mount('choice');
+    const group = figure.querySelector('[role="radiogroup"]')!;
+    expect(group.getAttribute('aria-label')).toBe('Option');
+    const radios = () => [...figure.querySelectorAll<HTMLElement>('[role="radio"]')];
+    expect(radios().map((r) => [r.getAttribute('aria-label'), r.getAttribute('aria-checked'), r.getAttribute('tabindex')])).toEqual([
+      ['First', 'false', '-1'],
+      ['Second', 'true', '0'],
+      ['Third', 'false', '-1'],
+    ]);
+    key(radios()[1], 'ArrowRight');
+    await fixture.whenStable();
+    expect(host.values()).toEqual({ choice: 'third' });
+    expect(document.activeElement).toBe(radios()[2]);
+    expect(radios()[2].getAttribute('tabindex')).toBe('0');
+    expect(figure.querySelector('[data-vis-id="third-focus"]')).not.toBeNull();
+    key(radios()[2], 'ArrowRight');
+    await fixture.whenStable();
+    expect(host.values()).toEqual({ choice: 'first' });
+    pointer(figure, 'pointerdown', 240, 60);
+    pointer(figure, 'pointerup', 240, 60);
+    await fixture.whenStable();
+    expect(host.reports).toEqual([{ choice: 'third' }, { choice: 'first' }, { choice: 'second' }]);
   });
 });

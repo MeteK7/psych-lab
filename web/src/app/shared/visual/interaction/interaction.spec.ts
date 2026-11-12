@@ -60,6 +60,7 @@ function figure(markX = 240, extra: SceneElement[] = []): SceneDefinition {
     theme: 'action',
     size: { width: 480, height: 200 },
     scales: { rating },
+    choices: { choice: { label: 'a' }, c: { label: 'b' } },
     layers: [
       {
         id: 'l',

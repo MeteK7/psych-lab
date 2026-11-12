@@ -264,6 +264,7 @@ Figures set `forced-color-adjust: none` and map every role to a system colour ex
 | `draw` | A reveal fraction 0 → 1 along the line's direction (left to right for paths). Dashed lines are revealed through a mask, so the dashes don't crawl | `deliberate` / `slow` |
 | Emphasis change | An element that stays eases from one emphasis to the other: line weight and colour (§3.7). Built for MCII as the form of `recede` | `moderate`, `ease-move` |
 | `recede` | A cross-fade to the `receded` emphasis (§3.7). Not built: the emphasis change covers what MCII needs | `moderate` |
+| Move (M5) | In a figure built from data, an element that `moves` glides to its new shape, place and paint; all of them in one change move together. A shape that can't morph (a path with other commands) crossfades | `moderate`, `ease-move` |
 
 **Under reduced motion,** every timeline is empty and the final state appears at once. No bounce, overshoot, elastic, spin or looping.
 

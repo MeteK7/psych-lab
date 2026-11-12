@@ -1,10 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
+import { BAR_SETS, barsFigure, setFigure } from '../../../pages/lab/lab-motion-figures';
+import { Composed, lookupOf } from '../composition/compose';
 import { composeCauseMap } from '../instruments/cause-map/cause-map';
-import { buildComposedFrame, buildFrame, buildTimeline } from '../integration/pipeline';
+import { buildChangeTimeline, buildComposedFrame, buildFrame, buildTimeline } from '../integration/pipeline';
 import { SCENES } from '../scenes';
 import { readSource } from '../testing/source-files';
 import { ResolvedFrame, ResolvedTimeline } from './frame';
+import { FRAME_CLOCK, FrameClock } from './frame-clock';
 import { SvgBackend, pathData } from './svg/svg-backend';
 
 const causeMapFrame = (input: Parameters<typeof composeCauseMap>[0]) => buildComposedFrame(composeCauseMap(input));
@@ -135,8 +138,9 @@ describe('SVG backend conformance', () => {
     expect(host.getAttribute('data-vis-scheme')).toBe('dark');
   });
 
-  it('stays idle when nothing changes: no frame loops or timers of its own', async () => {
-    // jsdom's animation-frame shim uses timers itself, so this is checked on the source.
+  it('stays idle when nothing changes: no timers, and frames only through the frame clock while a shape glides', async () => {
+    // jsdom's animation-frame shim uses timers itself, so this is checked on the source; the frame
+    // loop itself is checked with a test clock (M5, below).
     const code = await readSource('src/app/shared/visual/rendering/svg/svg-backend.ts');
     expect(code).not.toMatch(/requestAnimationFrame|setInterval|setTimeout/);
   });
@@ -250,5 +254,99 @@ describe('pathData', () => {
     expect(pathData({ type: 'rect', x: 0, y: 0, width: 4, height: 2 })).toBe('M0 0 H4 V2 H0 Z');
     expect(pathData({ type: 'circle', cx: 5, cy: 5, r: 2 })).toBe('M3 5 A2 2 0 1 0 7 5 A2 2 0 1 0 3 5 Z');
     expect(pathData({ type: 'rect', x: 0, y: 0, width: 10, height: 10, rx: 2 })).toContain('A2 2 0 0 1');
+  });
+});
+
+describe('SVG backend: glides between values (M5)', () => {
+  /** A test clock: frames run only when a test says so. */
+  let waiting: ((time: number) => void)[] = [];
+  let clock = 1000;
+  const fake: FrameClock = {
+    now: () => clock,
+    request: (f) => waiting.push(f),
+    cancel: () => (waiting = []),
+  };
+  /** Runs the waiting frame `ms` after the change began. */
+  const at = (ms: number) => {
+    const next = waiting;
+    waiting = [];
+    for (const f of next) f(1000 + ms);
+  };
+  beforeEach(() => {
+    waiting = [];
+    clock = 1000;
+  });
+
+  async function change(before: Composed, after: Composed) {
+    TestBed.configureTestingModule({ imports: [SvgBackend], providers: [{ provide: FRAME_CLOCK, useValue: fake }] });
+    const fixture = TestBed.createComponent(SvgBackend);
+    fixture.componentRef.setInput('frame', buildComposedFrame(before));
+    await fixture.whenStable();
+    fixture.componentRef.setInput('frame', buildComposedFrame(after));
+    fixture.componentRef.setInput('timeline', buildChangeTimeline(before.scene, after.scene, 'shown', lookupOf(after), 'full'));
+    await fixture.whenStable();
+    return { fixture, host: fixture.nativeElement as HTMLElement };
+  }
+  const drawing = (composed: Composed, id: string) => {
+    const item = buildComposedFrame(composed).items.find((i) => i.id === id);
+    return item?.kind === 'shape' ? pathData(item.shape) : null;
+  };
+
+  it('draws a shape from where it was, through the drawings between, to the frame’s own, then stops', async () => {
+    const [a, b] = [barsFigure(BAR_SETS[0]), barsFigure(BAR_SETS[1])];
+    const { host } = await change(a, b);
+    const bar = () => host.querySelector('[data-vis-id="bar-1"]')!.getAttribute('d');
+    expect(bar()).toBe(drawing(a, 'bar-1'));
+    expect(waiting).toHaveLength(1);
+    at(150);
+    expect([drawing(a, 'bar-1'), drawing(b, 'bar-1')]).not.toContain(bar());
+    at(300);
+    expect(bar()).toBe(drawing(b, 'bar-1'));
+    // Done: no frame waits.
+    expect(waiting).toHaveLength(0);
+  });
+
+  it('asks for no frames when nothing glides', async () => {
+    await change(barsFigure(BAR_SETS[0]), barsFigure(BAR_SETS[0]));
+    expect(waiting).toHaveLength(0);
+  });
+
+  it('starts a new glide from where the shape is drawn now', async () => {
+    const [a, b, c] = [0, 1, 2].map((i) => barsFigure(BAR_SETS[i]));
+    const { fixture, host } = await change(a, b);
+    at(150);
+    const halfway = host.querySelector('[data-vis-id="bar-1"]')!.getAttribute('d');
+    clock = 1150;
+    fixture.componentRef.setInput('frame', buildComposedFrame(c));
+    fixture.componentRef.setInput('timeline', buildChangeTimeline(b.scene, c.scene, 'shown', lookupOf(c), 'full'));
+    await fixture.whenStable();
+    expect(host.querySelector('[data-vis-id="bar-1"]')!.getAttribute('d')).toBe(halfway);
+  });
+
+  it('shows the final drawing at once when a new timeline is empty', async () => {
+    const [a, b] = [barsFigure(BAR_SETS[0]), barsFigure(BAR_SETS[1])];
+    const { fixture, host } = await change(a, b);
+    at(100);
+    fixture.componentRef.setInput('timeline', []);
+    await fixture.whenStable();
+    expect(host.querySelector('[data-vis-id="bar-1"]')!.getAttribute('d')).toBe(drawing(b, 'bar-1'));
+    expect(waiting).toHaveLength(0);
+  });
+
+  it('crossfades a shape that can’t morph: a copy of its old drawing fades out over it', async () => {
+    const calls: { target: Element; keyframes: Keyframe[] }[] = [];
+    Element.prototype.animate = function (this: Element, keyframes: Keyframe[]) {
+      calls.push({ target: this, keyframes });
+      return { cancel: () => undefined } as unknown as Animation;
+    } as Element['animate'];
+    try {
+      const { host } = await change(setFigure(4), setFigure(5));
+      const ghost = host.querySelector('[data-vis-ghost="outline"]');
+      expect(ghost?.getAttribute('d')).toBe(drawing(setFigure(4), 'outline'));
+      expect(calls.find((c) => c.target === ghost)?.keyframes).toEqual([{ opacity: 1 }, { opacity: 0 }]);
+      expect(calls.find((c) => c.target.getAttribute('data-vis-id') === 'outline')?.keyframes).toEqual([{ opacity: 0 }, { opacity: 1 }]);
+    } finally {
+      delete (Element.prototype as Partial<Element>).animate;
+    }
   });
 });

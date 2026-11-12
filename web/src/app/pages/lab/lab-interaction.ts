@@ -1,12 +1,12 @@
 import { Component, Signal, WritableSignal, computed, input, signal } from '@angular/core';
 
 import { Composed, SHOWN, lookupOf } from '../../shared/visual/composition/compose';
-import { TextLookup } from '../../shared/visual/composition/scene';
 import { Hit, TargetArea, hitTest, placeAt, targetsOf, toScenePoint } from '../../shared/visual/interaction/regions';
-import { InteractiveFigure, Values } from '../../shared/visual/integration/interactive-figure';
-import { SceneFigure, SurfaceScheme } from '../../shared/visual/integration/scene-figure';
+import { ControlledBy, InteractiveFigure, Values } from '../../shared/visual/integration/interactive-figure';
+import { SurfaceScheme } from '../../shared/visual/integration/scene-figure';
 import { frameSize } from '../../shared/visual/styling/vocabulary';
-import { choiceFigure, fieldFigure, ratingFigure } from './lab-interaction-figures';
+import { CHOICES, choiceFigure, fieldFigure, ratingFigure } from './lab-interaction-figures';
+import { LabNativeControls } from './lab-native-controls';
 
 type Shapes = { kind: 'box' | 'band' | 'outline'; d: string; width?: number }[];
 
@@ -14,8 +14,8 @@ interface Reference {
   id: string;
   name: string;
   about: string;
-  /** Live references take the pointer and the keyboard and hold their value here (stage B). */
-  values: WritableSignal<Values> | null;
+  /** The reference's values, shared by its light and dark panels and its native controls. */
+  values: WritableSignal<Values>;
   composed: Signal<Composed>;
   targets: Signal<TargetArea[]>;
   /** The overlay: each target's least area (small ones), lines' reach, and outlines. */
@@ -32,25 +32,27 @@ function overlay(targets: TargetArea[]): Shapes {
   });
 }
 
-function reference(id: string, name: string, about: string, compose: (v: Values) => Composed, start: Values | null): Reference {
-  const values = start ? signal<Values>(start) : null;
-  const composed = computed(() => compose(values ? values() : {}));
+function reference(id: string, name: string, about: string, compose: (v: Values) => Composed, start: Values): Reference {
+  const values = signal<Values>(start);
+  const composed = computed(() => compose(values()));
   const targets = computed(() => targetsOf(composed().scene, SHOWN));
   return { id, name, about, values, composed, targets, shapes: computed(() => overlay(targets())) };
 }
 
 /**
  * The Visual Lab's interaction section (milestone M4): reference figures with their targets. Under
- * the pointer, which target it's on and the value a handle would take there. Stage B: the rating
- * and the field are live, each figure the control itself, with one value shared by its light and
- * dark panels; the choice of three becomes live in stage C.
+ * the pointer, which target it's on and the value a handle would take there. Every reference is
+ * live, with one value shared by its light and dark panels. Either the figure is itself the control
+ * (sliders and a radio group in the figure), or native controls beside it hold the same values and
+ * the figures take the pointer only, as an exercise chooses.
  */
 @Component({
   selector: 'app-lab-interaction',
-  imports: [InteractiveFigure, SceneFigure],
+  imports: [InteractiveFigure, LabNativeControls],
   styleUrls: ['./lab.css'],
   styles: `
     .stage { position: relative; }
+    .options { display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.25rem; }
     .targets { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
     .targets path { fill: none; stroke: var(--accent); vector-effect: non-scaling-stroke; }
     .targets .outline { stroke-dasharray: 4 3; }
@@ -70,9 +72,18 @@ function reference(id: string, name: string, about: string, compose: (v: Values)
       <ul class="notes muted">
         <li>Drag a mark, or press its line or field. Escape while dragging puts the value back.</li>
         <li>Without dragging: click the mark to pick it up (its line gets heavier), then click where it should go. Escape, or a click on it again, puts it down.</li>
-        <li>With the keyboard: Tab to a mark, then the arrow keys step, Page Up and Page Down jump, Home and End go to the ends. The field has one stop per axis.</li>
+        <li>With the keyboard: Tab to a mark, then the arrow keys step, Page Up and Page Down jump, Home and End go to the ends. The field has one stop per axis. The options are a radio group: Tab to it, then the arrows choose.</li>
+        <li>Click an option to choose it.</li>
       </ul>
-      <label class="tier"><input type="checkbox" [checked]="showTargets()" (change)="showTargets.set($any($event.target).checked)" /> Show targets</label>
+      <div class="options">
+        <label class="tier">Keyboard and screen readers use
+          <select [value]="controlledBy()" (change)="controlledBy.set($any($event.target).value)">
+            <option value="figure">The figure itself</option>
+            <option value="native">Native controls beside it (the figure takes the pointer only)</option>
+          </select>
+        </label>
+        <label class="tier"><input type="checkbox" [checked]="showTargets()" (change)="showTargets.set($any($event.target).checked)" /> Show targets</label>
+      </div>
       @for (ref of references; track ref.id) {
         <h3>{{ ref.name }}</h3>
         <p class="note">{{ ref.about }}</p>
@@ -81,14 +92,8 @@ function reference(id: string, name: string, about: string, compose: (v: Values)
             <div class="panel" [class]="scheme">
               <span class="tag">{{ ref.composed().scene.id }} · {{ scheme }}</span>
               <div class="stage" (pointermove)="point(ref, $event)" (pointerleave)="leave(ref)">
-                @if (ref.values; as values) {
-                  <app-vis-interactive [composed]="ref.composed()" [values]="values()" (valuesChange)="values.set($event)" [scheme]="scheme"
-                                       [attr.data-interaction]="ref.id + '-' + scheme" />
-                } @else {
-                  <figure role="img" [attr.aria-label]="ref.composed().text['alt']" [attr.data-interaction]="ref.id + '-' + scheme">
-                    <app-vis-scene [scene]="ref.composed().scene" state="shown" [text]="text(ref.composed())" [scheme]="scheme" />
-                  </figure>
-                }
+                <app-vis-interactive [composed]="ref.composed()" [values]="ref.values()" (valuesChange)="ref.values.set($event)" [scheme]="scheme"
+                                     [controlledBy]="controlledBy()" [attr.data-interaction]="ref.id + '-' + scheme" />
                 @if (showTargets()) {
                   <svg class="targets" [attr.viewBox]="viewBox(ref)" aria-hidden="true">
                     @for (s of ref.shapes(); track $index) {
@@ -100,9 +105,10 @@ function reference(id: string, name: string, about: string, compose: (v: Values)
             </div>
           }
         </div>
-        @if (ref.values; as values) {
-          <p class="under" [attr.data-value]="ref.id"><span class="muted">Value:</span> {{ valueText(values()) }}</p>
+        @if (controlledBy() === 'native') {
+          <app-lab-native-controls [composed]="ref.composed()" [values]="ref.values()" (valuesChange)="ref.values.set($event)" />
         }
+        <p class="under" [attr.data-value]="ref.id"><span class="muted">Value:</span> {{ valueText(ref.values()) }}</p>
         <p class="under" [attr.data-under]="ref.id">
           <span class="muted">Under the pointer:</span> {{ under()[ref.id] ?? 'nothing' }}
         </p>
@@ -113,6 +119,7 @@ function reference(id: string, name: string, about: string, compose: (v: Values)
 export class LabInteraction {
   readonly schemes = input.required<SurfaceScheme[]>();
   protected readonly showTargets = signal(true);
+  protected readonly controlledBy = signal<ControlledBy>('figure');
   protected readonly under = signal<Record<string, string>>({});
   protected readonly references: Reference[] = [
     reference(
@@ -129,12 +136,14 @@ export class LabInteraction {
       (v) => fieldFigure(Number(v['across']), Number(v['up'])),
       { across: 2, up: 4 },
     ),
-    reference('choice', 'One of three options', 'Each option is a region, chosen as a whole (live in stage C).', () => choiceFigure('second'), null),
+    reference(
+      'choice',
+      'One of three options',
+      'Each option is a region, chosen as a whole.',
+      (v) => choiceFigure(v['choice'] as (typeof CHOICES)[number]),
+      { choice: 'second' },
+    ),
   ];
-
-  protected text(composed: Composed): TextLookup {
-    return lookupOf(composed);
-  }
 
   protected valueText(values: Values): string {
     return Object.entries(values)

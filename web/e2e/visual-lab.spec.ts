@@ -16,10 +16,10 @@ const GENERATOR_SETS = 21; // S2: the reference compositions, 2 or 3 per generat
 const LAYOUT_SETS = 4; // S2: grid, radial, flow, packing
 const MATERIAL_SETS = 5; // S1 (M3): the material set, a grounded lit form, depth, depth with grain, a translucent overlap
 const SHEET_SETS = 12; // the review sheet (M3 stage C): lines, type, and materials and depth in each of the five areas
-const INTERACTION_SETS = 1; // S6 (M4): a choice of three, as a picture until stage C
-const LIVE_SETS = 2; // S6 (M4 stage B): a rating scale and a field with two axes, each the control itself
+const MOTION_SETS = 2; // S5 (M5): bars whose values change, a set that reflows
+const LIVE_SETS = 3; // S6 (M4): a rating scale, a field with two axes and a choice of three, each the control itself
 const PANELS =
-  (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS + GENERATOR_SETS + LAYOUT_SETS + MATERIAL_SETS + SHEET_SETS + INTERACTION_SETS) * 2; // light and dark
+  (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS + GENERATOR_SETS + LAYOUT_SETS + MATERIAL_SETS + SHEET_SETS + MOTION_SETS) * 2; // light and dark
 
 for (const [name, media] of [
   ['light', { colorScheme: 'light' }],
@@ -117,7 +117,7 @@ const idle = (page: Page) => expect.poll(() => figureAnimations(page), { timeout
 test('Visual Lab: each transition plays and ends on the approved state', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'no-preference' });
   await page.goto('/lab');
-  await page.getByLabel('Motion').selectOption('full');
+  await page.getByRole('combobox', { name: /^Motion(?! in these figures)/ }).selectOption('full');
   await page.addStyleTag({ content: CAPTURE });
   for (const [from, to] of [['future', 'contrast'], ['contrast', 'plan'], ['contrast', 'aside']]) {
     await page.getByRole('button', { name: `Replay ${from} → ${to}` }).click();
@@ -266,4 +266,126 @@ test('Visual Lab: live figures take a drag, clicks alone and the keyboard', asyn
   await expect(page.locator('[data-interaction="field-light"] [data-vis-id="mark-focus"]')).toHaveCount(1);
   // The ring follows focus: it left the rating when focus did.
   await expect(page.locator('[data-vis-id="mark-focus"]')).toHaveCount(1);
+
+  // The options are one radio group: Tab reaches the chosen one, the arrows move and choose.
+  const choice = page.locator('[data-value="choice"]');
+  await page.locator('[data-interaction="choice-light"] [role="radio"][aria-checked="true"]').focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(choice).toContainText('choice third');
+  await expect(page.getByRole('radio', { name: 'Third' }).first()).toBeFocused();
+  await expect(page.locator('[data-interaction="choice-light"] [data-vis-id="third-focus"]')).toHaveCount(1);
+  await page.keyboard.press('ArrowRight');
+  await expect(choice).toContainText('choice first');
+  // A click chooses an option as a whole.
+  await page.mouse.click(...(await point('choice-dark', 240, 60)));
+  await expect(choice).toContainText('choice second');
+  await expect(page.locator('[data-interaction="choice-light"] [role="radio"][aria-checked="true"]')).toHaveAttribute('aria-label', 'Second');
+});
+
+// Native controls beside the figures (M4 stage C): they hold the same values; the figures take the
+// pointer only and are pictures to assistive technology.
+test('Visual Lab: native controls hold the same values as the figures', async ({ page }) => {
+  await page.goto('/lab');
+  await page.getByLabel('Keyboard and screen readers use').selectOption('native');
+  await expect(page.locator('app-vis-interactive[role="group"]')).toHaveCount(0);
+  await expect(page.locator('app-vis-interactive[role="img"]')).toHaveCount(LIVE_SETS * 2);
+  await expect(page.locator('app-vis-interactive [role="slider"], app-vis-interactive [role="radio"]')).toHaveCount(0);
+
+  const rating = page.getByRole('slider', { name: 'Rating' });
+  await rating.focus();
+  await page.keyboard.press('End');
+  await expect(page.locator('[data-value="rating"]')).toContainText('rating 5');
+  await expect(page.locator('[data-interaction="rating-light"] [data-vis-id="mark"]')).toHaveAttribute('d', /^M409 44/);
+  await page.getByRole('slider', { name: 'Place, up' }).fill('1');
+  await expect(page.locator('[data-value="field"]')).toContainText('across 2, up 1');
+  await page.getByRole('radio', { name: 'Third' }).check();
+  await expect(page.locator('[data-value="choice"]')).toContainText('choice third');
+
+  // The pointer still works on the figure, and the native control follows it.
+  const svg = page.locator('[data-interaction="rating-light"] app-vis-svg svg');
+  await svg.scrollIntoViewIfNeeded();
+  const box = (await svg.boundingBox())!;
+  await page.mouse.click(box.x + (150 * box.width) / 480, box.y + (50 * box.width) / 480);
+  await expect(rating).toHaveValue('2');
+  await expectNoSeriousA11yIssues(page, 'Visual Lab, native controls');
+});
+
+// Forced colours (M4 stage C): the focus ring and a handle being moved take the system highlight.
+test('Visual Lab: focus and movement show in forced colours', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  await page.goto('/lab');
+  const highlight = await page.evaluate(() => {
+    const probe = document.createElement('div');
+    probe.style.color = 'Highlight';
+    document.body.append(probe);
+    const colour = getComputedStyle(probe).color;
+    probe.remove();
+    return colour;
+  });
+  await page.locator('[data-interaction="choice-light"] [role="radio"][aria-checked="true"]').focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(page.locator('[data-interaction="choice-light"] [data-vis-id="third-focus"]')).toHaveCSS('stroke', highlight);
+  await page.locator('[data-interaction="rating-dark"] [role="slider"]').focus();
+  await page.keyboard.press('Home');
+  await expect(page.locator('[data-interaction="rating-dark"] [data-vis-id="mark-focus"]')).toHaveCSS('stroke', highlight);
+  // Picked up by a click, the mark is drawn in the highlight colour, one weight heavier.
+  const svg = page.locator('[data-interaction="rating-light"] app-vis-svg svg');
+  await svg.scrollIntoViewIfNeeded();
+  const box = (await svg.boundingBox())!;
+  await page.mouse.click(box.x + (60 * box.width) / 480, box.y + (44 * box.width) / 480);
+  const mark = page.locator('[data-interaction="rating-light"] [data-vis-id="mark"]');
+  await expect(mark).toHaveCSS('stroke', highlight);
+  await expect(mark).toHaveCSS('stroke-width', '3px');
+});
+
+// Motion between values (M5 stage A): a figure drawn again from new data glides there, and ends
+// on the new figure; with reduced motion, the new figure shows at once.
+test('Visual Lab: figures built from data glide to their new values', async ({ page }) => {
+  await page.goto('/lab');
+  const section = page.locator('section[aria-labelledby="lab-motion"]');
+  await section.scrollIntoViewIfNeeded();
+  await section.getByLabel('Motion in these figures').selectOption('full');
+  const bar = page.locator('[data-motion="bars-light"] [data-vis-id="bar-1"]');
+  const before = await bar.getAttribute('d');
+  // Record the drawings the bar passes through, frame by frame, until the glide ends.
+  const seen = page.evaluate(
+    () =>
+      new Promise<string[]>((resolve) => {
+        const el = document.querySelector('[data-motion="bars-light"] [data-vis-id="bar-1"]')!;
+        const seen: string[] = [];
+        const start = performance.now();
+        const look = () => {
+          seen.push(el.getAttribute('d')!);
+          if (performance.now() - start < 700) requestAnimationFrame(look);
+          else resolve(seen);
+        };
+        requestAnimationFrame(look);
+      }),
+  );
+  await page.getByRole('button', { name: 'New values' }).click();
+  const drawings = [...new Set(await seen)];
+  const after = await bar.getAttribute('d');
+  expect(after).not.toBe(before);
+  // Several drawings between the two, and it ends on the new one.
+  expect(drawings.filter((d) => d !== before && d !== after).length).toBeGreaterThan(3);
+  expect(drawings[drawings.length - 1]).toBe(after);
+  await expect(page.locator('[data-moved="bars"]')).toContainText('glides to its new place and shape (300 ms)');
+
+  // Reduced motion: the new drawing at once.
+  await section.getByLabel('Motion in these figures').selectOption('reduced');
+  const shown = await bar.getAttribute('d');
+  await page.getByRole('button', { name: 'New values' }).click();
+  // The first new drawing is the last: nothing in between.
+  await expect(bar).not.toHaveAttribute('d', shown!);
+  const next = await bar.getAttribute('d');
+  await page.waitForTimeout(400);
+  expect(await bar.getAttribute('d')).toBe(next);
+  expect(next).toBe(await page.locator('[data-motion="bars-dark"] [data-vis-id="bar-1"]').getAttribute('d'));
+
+  // A set that reflows: the new member enters; no copies are left behind.
+  await section.getByLabel('Motion in these figures').selectOption('full');
+  await page.getByRole('button', { name: 'Add a member' }).click();
+  await expect(page.locator('[data-motion="set-light"] [data-vis-id="member-6"]')).toHaveCount(1);
+  await expect(page.locator('[data-motion="set-light"] [data-vis-ghost]')).toHaveCount(0);
+  await expect(page.locator('[data-moved="set"]')).toContainText('member-6 fades in');
 });

@@ -162,7 +162,11 @@ describe('validateScene', () => {
     });
 
     it('flags an entrance on an element that is never hidden, and transitions between unknown states', () => {
-      expect(validateScene(withElement({ ...line, enter: { effect: 'fade', why: 'x' } }), TEXT)).toContain("element 'arc': has an entrance but is shown in every state");
+      const one = withElement({ ...line, enter: { effect: 'fade', why: 'x' } });
+      const two = { ...one, states: { initial: 'a', states: { a: one.states.states['a'], b: one.states.states['a'] } }, alt: { a: 'alt.a', b: 'alt.a' } };
+      expect(validateScene(two, TEXT)).toContain("element 'arc': has an entrance but is shown in every state");
+      // A figure built from data has one state: its entrance plays when the element is new in a change (M5).
+      expect(validateScene(one, TEXT).filter((p) => p.includes('entrance'))).toEqual([]);
       expect(validateScene(scene({ transitions: [['a', 'z']] }), TEXT)).toContain("transition a → z: unknown state 'z'");
     });
   });
@@ -170,5 +174,20 @@ describe('validateScene', () => {
   it('rejects raw colour values anywhere', () => {
     const s = withElement({ kind: 'shape', id: 'p', geometry: { type: 'path', d: 'M0 0 #ff0000' }, style: { role: 'subject' }, purpose: P });
     expect(validateScene(s, TEXT)).toContain('raw colour values found; use roles');
+  });
+
+  describe('motion between values (M5)', () => {
+    it('asks an element that moves for its reason', () => {
+      expect(validateScene(withElement({ kind: 'shape', id: 'm', geometry: circle, style: { role: 'subject' }, purpose: P, moves: { why: ' ' } }), TEXT)).toContain(
+        "element 'm': motion without a reason; an element that moves on its own says why",
+      );
+      expect(validateScene(withElement({ kind: 'shape', id: 'm', geometry: { type: 'circle', cx: 200, cy: 20, r: 4 }, style: { role: 'subject' }, purpose: P, moves: { why: 'It follows its value.' } }), TEXT)).toEqual([]);
+    });
+
+    it('keeps moves for figures built from data: a scene’s states don’t change shapes', () => {
+      const one = withElement({ kind: 'shape', id: 'm', geometry: { type: 'circle', cx: 200, cy: 20, r: 4 }, style: { role: 'subject' }, purpose: P, moves: { why: 'x' } });
+      const two = { ...one, states: { initial: 'a', states: { a: one.states.states['a'], b: one.states.states['a'] } }, alt: { a: 'alt.a', b: 'alt.a' } };
+      expect(validateScene(two, TEXT)).toContain("element 'm': 'moves' is for figures built from data; a scene's states don't change shapes");
+    });
   });
 });

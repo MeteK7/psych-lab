@@ -55,6 +55,15 @@ export type Entrance =
   | { with: ElementId; effect?: MotionEffect; why?: undefined };
 
 /**
+ * Motion between values (milestone M5): in a figure built from data, an element that `moves` glides
+ * to its new shape, place and paint when the data changes, and says why. Elements without it change
+ * at once. A label that names a moving form moves with it.
+ */
+export interface Movement {
+  why: string;
+}
+
+/**
  * Ties between elements that some materials need (milestone M3), checked by the validator:
  * - `grounds`: a `shadow` names the object it sits under (drawn after it)
  * - `overlapOf`: an `overlap` names the two `translucent` forms whose overlap it is
@@ -100,7 +109,7 @@ export type Target =
   | { kind: 'region'; value: string; option: ScaleValue; label: ContentKey };
 
 export type SceneElement =
-  | ({ kind: 'shape'; id: ElementId; geometry: Geometry; style: StyleRef; purpose: Purpose; enter?: Entrance; target?: Target } & Ties)
+  | ({ kind: 'shape'; id: ElementId; geometry: Geometry; style: StyleRef; purpose: Purpose; enter?: Entrance; moves?: Movement; target?: Target } & Ties)
   /**
    * Geometry made by an S2 generator (milestone M2) from its parameters and the element's own seed,
    * derived from the scene's seed and the element's id. Drawn, styled and animated like a shape.
@@ -113,6 +122,7 @@ export type SceneElement =
       style: StyleRef;
       purpose: Purpose;
       enter?: Entrance;
+      moves?: Movement;
       target?: Target;
     } & Ties)
   | {
@@ -135,6 +145,7 @@ export type SceneElement =
       names?: readonly ElementId[];
       purpose: Purpose;
       enter?: Entrance;
+      moves?: Movement;
     };
 
 export interface Layer {
@@ -175,6 +186,11 @@ export interface SceneDefinition {
   transitions?: readonly (readonly [StateName, StateName])[];
   /** The scales its handles move along (M4). */
   scales?: Readonly<Record<ScaleId, ScaleDef>>;
+  /**
+   * The words for each value chosen by regions (M4): the regions that set one value are one choice,
+   * announced as a group of options under this label.
+   */
+  choices?: Readonly<Record<string, { label: ContentKey }>>;
   /** Scene policy settings the validator reads (docs/visual-policy.md §8). */
   policy?: { maxFocal?: number };
   /**

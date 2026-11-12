@@ -15,6 +15,7 @@ import { endsOf, positionOf, stepFrom } from './scales';
  * - pressed on its track: the handle goes there at once, and a drag can go on from there;
  * - picked up and put down (WCAG 2.5.7, no dragging): a click on the handle picks it up, a click
  *   where it should go puts it there; a click on it again or Escape puts it down unchanged.
+ * A region is chosen as a whole by a press on it (stage C).
  */
 
 export type Values = Readonly<Record<string, ScaleValue>>;
@@ -74,6 +75,10 @@ export function press(scene: SceneDefinition, targets: readonly TargetArea[], st
     const at = handleAt(scene, hit.target, state.values, p);
     const gesture: Gesture = { kind: 'drag', handle: hit.id, target: hit.target, before: state.values, start: p, offset: [at[0] - p[0], at[1] - p[1]], moved: false };
     return { state: { values: state.values, gesture }, capture: true };
+  }
+  if (hit?.kind === 'region') {
+    // A region is chosen as a whole, on the press.
+    return { state: { values: merged(state.values, { [hit.target.value]: hit.target.option }), gesture: null }, capture: false };
   }
   if (hit?.kind === 'track') {
     // The handle goes where the track was pressed; a drag goes on from there, with no offset.
@@ -152,4 +157,17 @@ export function keyStep(scene: SceneDefinition, target: Handle, axis: 'x' | 'y',
   else if (key === 'Home' || key === 'End') next = endsOf(scale)[key === 'Home' ? 0 : 1];
   if (next === null) return null;
   return merged(values, { [a.value]: next });
+}
+
+/**
+ * A key on one option of a choice the figure is itself the control for (a radio group): the arrows
+ * move to the next or previous option and choose it, wrapping round; Space chooses the focused one.
+ * Gives the option to focus and the new values; null for any other key.
+ */
+export function keyChoice(value: string, options: readonly ScaleValue[], focused: ScaleValue, values: Values, key: string): { option: ScaleValue; values: Values } | null {
+  const i = Math.max(0, options.indexOf(focused));
+  const by = key === 'ArrowRight' || key === 'ArrowDown' ? 1 : key === 'ArrowLeft' || key === 'ArrowUp' ? -1 : key === ' ' ? 0 : null;
+  if (by === null) return null;
+  const option = options[(i + by + options.length) % options.length];
+  return { option, values: merged(values, { [value]: option }) };
 }

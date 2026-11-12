@@ -34,11 +34,13 @@ export interface ComposeOptions {
   seed?: string;
   /** For handles (milestone M4). */
   scales?: Readonly<Record<ScaleId, ScaleDef>>;
+  /** For regions: the words for each value they choose (milestone M4). */
+  choices?: Readonly<Record<string, { label: ContentKey }>>;
 }
 
 /** A scene with one state that shows every element. */
 export function composeScene(options: ComposeOptions, text: Readonly<Record<ContentKey, string>> = {}): Composed {
-  const { id, version, theme, size, layers, emphasis, alt, maxFocal, seed, scales } = options;
+  const { id, version, theme, size, layers, emphasis, alt, maxFocal, seed, scales, choices } = options;
   const visible = layers.flatMap((l) => l.elements.map((e) => e.id));
   return {
     scene: {
@@ -52,6 +54,7 @@ export function composeScene(options: ComposeOptions, text: Readonly<Record<Cont
       alt: { [SHOWN]: 'alt' },
       ...(maxFocal ? { policy: { maxFocal } } : {}),
       ...(scales ? { scales } : {}),
+      ...(choices ? { choices } : {}),
     },
     text: { alt, ...text },
   };

@@ -1,6 +1,6 @@
 import { SHOWN, composeScene } from '../composition/compose';
 import { ScaleDef, SceneDefinition } from '../composition/scene';
-import { InteractionState, escape, keyStep, lost, move, moving, press, putDown, release } from './controller';
+import { InteractionState, escape, keyChoice, keyStep, lost, move, moving, press, putDown, release } from './controller';
 import { targetsOf } from './regions';
 
 const rating: ScaleDef = { kind: 'linear', domain: [1, 5], range: [60, 420], step: 1 };
@@ -165,5 +165,17 @@ describe('S6 controller: keyboard, for a figure that is itself the control', () 
   it('steps through the values of a points scale', () => {
     expect(keyStep(scene, points, 'x', { level: 'low' }, 'ArrowRight')).toEqual({ level: 'mid' });
     expect(keyStep(scene, points, 'x', { level: 'mid' }, 'End')).toEqual({ level: 'high' });
+  });
+});
+
+describe('S6 controller: choosing a region (M4 stage C)', () => {
+  const options = ['first', 'second', 'third'];
+
+  it('chooses with the arrows, wrapping round, and with Space', () => {
+    expect(keyChoice('choice', options, 'second', { choice: 'second' }, 'ArrowRight')).toEqual({ option: 'third', values: { choice: 'third' } });
+    expect(keyChoice('choice', options, 'third', { choice: 'third' }, 'ArrowDown')).toEqual({ option: 'first', values: { choice: 'first' } });
+    expect(keyChoice('choice', options, 'first', { choice: 'first' }, 'ArrowUp')).toEqual({ option: 'third', values: { choice: 'third' } });
+    expect(keyChoice('choice', options, 'first', {}, ' ')).toEqual({ option: 'first', values: { choice: 'first' } });
+    expect(keyChoice('choice', options, 'first', {}, 'Enter')).toBeNull();
   });
 });
