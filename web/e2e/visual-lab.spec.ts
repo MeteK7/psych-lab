@@ -736,3 +736,34 @@ test('Visual Lab: the watchdog moves a slow figure to the reduced tier', async (
   await page.getByRole('button', { name: 'Add a member' }).click();
   await expect(page.locator('[data-overlay-row="reference.motion.set"] [data-tier]').first()).toHaveAttribute('data-tier', 'full');
 });
+
+// Assets (M7 stage A): the Lab shows every asset in the manifest in both schemes, and checks the
+// files as served against the manifest's size and checksum.
+test('Visual Lab: assets are shown with their record, and their files match the manifest', async ({ page }) => {
+  await page.goto('/lab');
+  const section = page.locator('section[aria-labelledby="lab-assets"]');
+  await section.scrollIntoViewIfNeeded();
+  for (const scheme of ['light', 'dark']) {
+    const img = section.locator(`img[data-asset="reference.mark-${scheme}"]`);
+    await expect(img).toHaveAttribute('alt', 'Reference asset: a mark in the middle of a line between two points');
+    await expect.poll(() => img.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  }
+  await expect(section.locator('[data-asset-status="reference.mark"]')).toContainText('draft');
+  await expect(section.locator('[data-asset-facts="reference.mark"]')).toContainText('No: a draft is shown in the Lab only');
+  await expect(section.locator('[data-asset-check="reference.mark"]')).toContainText('The files served match the manifest');
+  await expect(section.getByRole('list', { name: /^Asset problems/ })).toHaveCount(0);
+});
+
+test('Visual Lab: a file that differs from the manifest is reported', async ({ page }) => {
+  // The light file comes back changed by one character.
+  await page.route('**/visuals/reference/mark-light.svg', async (route) => {
+    const response = await route.fetch();
+    await route.fulfill({ response, body: (await response.text()).replace('r="14"', 'r="15"') });
+  });
+  await page.goto('/lab');
+  const check = page.locator('[data-asset-check="reference.mark"]');
+  await check.scrollIntoViewIfNeeded();
+  await expect(check.getByRole('list', { name: 'Asset problems: reference.mark' })).toContainText(
+    "asset 'reference.mark', light file: its checksum isn't the manifest's; a changed file is a new version",
+  );
+});

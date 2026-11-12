@@ -15,6 +15,7 @@ import { QualityTier, SceneFigure, SurfaceScheme } from '../../shared/visual/int
 import { motionProblems, movers } from '../../shared/visual/motion/plan-motion';
 import { SCENES } from '../../shared/visual/scenes';
 import { THEMES } from '../../shared/visual/styling/vocabulary';
+import { LabAssets } from './lab-assets';
 import { LabGenerators } from './lab-generators';
 import { LabInteraction } from './lab-interaction';
 import { LabMotion } from './lab-motion';
@@ -34,7 +35,7 @@ import { LabTrackingStill } from './lab-tracking-still';
  */
 @Component({
   selector: 'app-lab-page',
-  imports: [RouterLink, SceneFigure, InstrumentFigure, LabGenerators, LabInteraction, LabMaterials, LabMotion, LabOverlay, LabSheet, LabStimulus, LabTrackingStill],
+  imports: [RouterLink, SceneFigure, InstrumentFigure, LabAssets, LabGenerators, LabInteraction, LabMaterials, LabMotion, LabOverlay, LabSheet, LabStimulus, LabTrackingStill],
   template: `
     <h1>Visual Lab</h1>
     @if (env.showsDevelopment()) {
@@ -253,6 +254,7 @@ import { LabTrackingStill } from './lab-tracking-still';
       <app-lab-interaction [schemes]="schemes" />
       <app-lab-motion [schemes]="schemes" />
       <app-lab-stimulus />
+      <app-lab-assets />
       <app-lab-sheet [schemes]="schemes" />
     } @else {
       <p>The Visual Lab is available in the development build only.</p>

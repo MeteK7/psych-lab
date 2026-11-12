@@ -5,6 +5,8 @@
  */
 interface NodeFs {
   readFileSync(path: string, encoding: 'utf8'): string;
+  readFileSync(path: string): Uint8Array;
+  existsSync(path: string): boolean;
   readdirSync(path: string, options: { recursive: true }): string[];
 }
 
@@ -20,4 +22,14 @@ export async function readSource(path: string): Promise<string> {
 export async function listSources(folder: string): Promise<string[]> {
   const fs = await nodeFs();
   return fs.readdirSync(`${cwd()}/${folder}`, { recursive: true }).map((p) => `${folder}/${p.replace(/\\/g, '/')}`);
+}
+
+/** A file's size and SHA-256 checksum (hex), from a path relative to the web project; null when it isn't there. */
+export async function fileFacts(path: string): Promise<{ bytes: number; sha256: string } | null> {
+  const fs = await nodeFs();
+  const full = `${cwd()}/${path}`;
+  if (!fs.existsSync(full)) return null;
+  const data = new Uint8Array(fs.readFileSync(full));
+  const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', data));
+  return { bytes: data.length, sha256: [...digest].map((b) => b.toString(16).padStart(2, '0')).join('') };
 }

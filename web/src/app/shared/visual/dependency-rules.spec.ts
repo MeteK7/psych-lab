@@ -91,6 +91,10 @@ describe('Visual System dependency rules', () => {
     expect(bad).toEqual([]);
   });
 
+  it('4f. the asset manifest is pure data and checks: it imports only itself (no Angular, no DOM, no file access)', () => {
+    expect(outside(inFolder('assets'), ['assets'])).toEqual([]);
+  });
+
   it('5. rendering imports only itself and Angular, and only integration imports a backend', () => {
     expect(outside(inFolder('rendering'), ['rendering', '@angular/core'])).toEqual([]);
     const users = app
