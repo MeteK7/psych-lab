@@ -3,7 +3,7 @@
 > **Status:** in code since 2026-11-07 (`web/src/app/shared/visual/styling/`), with the values below unchanged; **review R1 still open.**
 > - The values entered code when v0.1 started, so the area studies could be reviewed in the Visual Lab (`/lab`, development build). Review changes go into `tokens.css` and this document together; a spec checks every contrast pair in §3.5 on `tokens.css`.
 > - **Revision 2:** token names in §2 match the code; the `500` area step isn't written because no role uses it yet; §5 adds the `solid` material; §11 makes the area forms optional, after your review of `mcii.path@1`.
-> - **Visual review sheet:** <https://claude.ai/artifact/U6pbq8LDPgeqUGejrWE9Pm> (private). It shows every value in this document in light and dark, with replayable motion and a small specimen per area. The sheet isn't stored in the repository.
+> - **Visual review sheet:** in the Visual Lab (`/lab`, development build), at the end: "Visual language review sheet" (M3 stage C, 2026-11-11). It's drawn from the tokens the figures use, so a token change shows there at once: the ranges and every role per area with the value each takes, in light and dark; line weights and dashes; every material, the light and the depth planes in each area; type. Motion is replayed in the Lab's Transitions sections. The earlier sheet (<https://claude.ai/artifact/U6pbq8LDPgeqUGejrWE9Pm>, private, outside the repository) is superseded.
 > - **Companions:**
 >   - `visual-system.md`: S1's place in the architecture
 >   - `visual-policy.md`: the criteria these values serve
@@ -96,6 +96,7 @@ Scenes use roles, never ramp steps. A role resolves to a ramp step (or an existi
 | `ink` | Essential neutral lines; the intended (dashed) line | `--text` (#1c1c1e) | `--text` (#ececef) |
 | `label` | Labels in figures | `--text` | `--text` |
 | `label-soft` | Secondary labels | `--muted` (#55575d) | `--muted` (#a9abb2) |
+| `focus` | The keyboard focus ring on a figure that is itself the control (M4): 2 px, 3 units outside the target, the page's own focus colour so it looks like every other control's focus; at least 3:1 on the ground and every plane | `--accent` (#2457c5) | `--accent` (#8fb0ff) |
 
 **Example (Action and growth):**
 
@@ -145,6 +146,7 @@ Figures set `forced-color-adjust: none` and map every role to a system colour ex
 | `context`, `ink` | `CanvasText` |
 | `label`, `label-soft` | `CanvasText` |
 | `receded` elements | `GrayText` |
+| The focus ring | `Highlight` |
 | Dashes | Kept |
 | `lit`, `translucent` and textures | Become `line` (stroke only), with no gradient, transparency or texture |
 
@@ -237,6 +239,9 @@ Figures set `forced-color-adjust: none` and map every role to a system colour ex
 | `label-soft` | 13 px, weight 400, colour `label-soft` |
 | Line height | 1.2 |
 | Placement | Horizontal only; at least 8 units from any form it doesn't name |
+| Wrapping | Built (M3, 2026-11-11): a label with a `width` wraps at spaces, never inside a word. Lines are measured with the face's advance widths (Segoe UI) plus 8% for wider system faces, so a line may break a little early but never runs past its width [J] |
+| Halo | Built (M3): a 4-unit stroke of the ground colour behind the glyphs (2 units show around them), for a label over a plane or across its edge [J] |
+| Clearance check | Built (M3): the validator lists a label closer than 8 units to a form it doesn't `names` as a warning in the Lab. A plane counts by its lines, a label with a halo may cross a plane's edge, and a form hidden under an opaque form that holds the label doesn't count |
 
 ## 10. Motion
 | Token | Value | Use |
@@ -259,10 +264,14 @@ Figures set `forced-color-adjust: none` and map every role to a system colour ex
 | `draw` | A reveal fraction 0 → 1 along the line's direction (left to right for paths). Dashed lines are revealed through a mask, so the dashes don't crawl | `deliberate` / `slow` |
 | Emphasis change | An element that stays eases from one emphasis to the other: line weight and colour (§3.7). Built for MCII as the form of `recede` | `moderate`, `ease-move` |
 | `recede` | A cross-fade to the `receded` emphasis (§3.7). Not built: the emphasis change covers what MCII needs | `moderate` |
+| Move (M5) | In a figure built from data, an element that `moves` glides to its new shape, place and paint; all of them in one change move together. A shape that can't morph (a path with other commands) crossfades | `moderate`, `ease-move` |
+| Input change (M5) | In a figure a person moves, the step that follows their own input (a key, a click, Escape, a snapped step while dragging) glides; nothing else moves | `quick`, `ease-move` |
+| `fade` out (M5) | A departure: opacity 1 → 0, where the element was | `moderate`, `ease-depart` |
+| `undraw` (M5) | A departure: the reverse of `draw`, taken back along the line's direction through a mask (line shapes only; a label leaving with it fades) | `moderate`, `ease-depart` |
 
 **Under reduced motion,** every timeline is empty and the final state appears at once. No bounce, overshoot, elastic, spin or looping.
 
-**Departures** happen at once (as built): nothing so far needs a departure to be understood, and the page changes at the same moment. The presets live in `styling/vocabulary.ts` (`MOTION_EFFECTS`, `EMPHASIS_CHANGE`).
+**Departures** happen at once unless an element declares one (`exit`, with its reason, M5): then it fades or is undrawn where it was, and is gone. The presets live in `styling/vocabulary.ts` (`MOTION_EFFECTS`, `EXIT_EFFECTS`, `EMPHASIS_CHANGE`, `MOVE_CHANGE`, `INPUT_CHANGE`).
 
 ## 11. Area themes
 **The forms below are options, not obligations** (revision 2, `visual-policy.md` principle 6). A form is used only when a scene can name what it tells the participant. The hue and the line language are what make an area recognisable; ridges, lenses, rings or terrain are not added for atmosphere. The Action terrain, for example, was tried in `mcii.path@1` and removed, because it carried no meaning.

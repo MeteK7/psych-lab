@@ -1,0 +1,7 @@
+{
+  "provider": "local-test",
+  "id": "reference.generated",
+  "seed": "lab-1",
+  "alt": "asset.reference.generated",
+  "brief": { "area": "action", "frame": "banner", "subject": "path" }
+}

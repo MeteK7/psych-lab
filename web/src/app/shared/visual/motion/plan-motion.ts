@@ -1,6 +1,6 @@
 import type { ElementId, SceneDefinition, SceneElement, StateName } from '../composition/scene';
 import { resolveState } from '../state/resolve-state';
-import { EMPHASIS_CHANGE, Emphasis, MOTION, MOTION_EFFECTS, MotionEffect } from '../styling/vocabulary';
+import { EMPHASIS_CHANGE, EXIT_EFFECTS, Emphasis, ExitEffect, MOTION, MOTION_EFFECTS, MOVE_CHANGE, MotionEffect } from '../styling/vocabulary';
 
 /**
  * S5 Motion (docs/visual-system.md §3.3, §8): turns a change between two states into a timeline of
@@ -10,8 +10,8 @@ import { EMPHASIS_CHANGE, Emphasis, MOTION, MOTION_EFFECTS, MotionEffect } from 
  * - an element that appears enters with its scene-declared effect (default `fade`); elements that
  *   enter `with` another start at the same moment as it
  * - an element that stays but changes emphasis eases between the two paints
- * - an element that goes away goes at once: in the exercises so far the page changes at the same
- *   moment, and nothing needs a departure to be understood
+ * - an element that goes away goes at once, unless it declares a departure (`exit`, M5): then it
+ *   fades or is undrawn, and elements that leave `with` it go at the same moment
  * - at most `MOTION.maxStaggered` elements move on their own, each one stagger after the previous
  * - under the reduced and static tiers, and on a first appearance, the timeline is empty: the
  *   final state is shown at once
@@ -35,6 +35,10 @@ export type Track = Timing &
     /** The drawn fraction of the element, along its direction. */
     | { property: 'reveal'; from: number; to: number }
     | { property: 'emphasis'; from: Emphasis; to: Emphasis }
+    /** A figure built from data (M5): the element glides from its drawing before the change to its drawing after; S9 resolves both. */
+    | { property: 'move' }
+    /** A departure (M5): the element, as it was drawn before the change, leaves with this effect; S9 gives the drawing. */
+    | { property: 'exit'; effect: ExitEffect }
   );
 
 export type Timeline = readonly Track[];
@@ -42,7 +46,12 @@ export type Timeline = readonly Track[];
 /** One element that moves on its own in a change, with the elements that move with it. */
 export interface Mover {
   id: ElementId;
-  change: { kind: 'enter'; effect: MotionEffect; why: string } | { kind: 'emphasis'; from: Emphasis; to: Emphasis };
+  change:
+    | { kind: 'enter'; effect: MotionEffect; why: string }
+    | { kind: 'exit'; effect: ExitEffect; why: string }
+    | { kind: 'emphasis'; from: Emphasis; to: Emphasis }
+    /** A reflow (M5): `id` and the elements `with` it glide together, as one movement; each reason once. */
+    | { kind: 'moves'; why: string[] };
   with: ElementId[];
 }
 
@@ -65,6 +74,44 @@ function effectTracks(id: ElementId, effect: MotionEffect, delay: number): Track
   }
 }
 
+/**
+ * The departures in a change: each element leaving with its own `exit`, with the elements that leave
+ * `with` it (when it leaves too). In drawing order, as the elements were before the change.
+ */
+function departures(elements: readonly SceneElement[], leaving: ReadonlySet<ElementId>): Mover[] {
+  const going = elements.filter((e) => leaving.has(e.id) && e.exit);
+  const leadOf = (e: SceneElement) => (e.exit?.with !== undefined && leaving.has(e.exit.with) && going.some((g) => g.id === e.exit!.with) ? e.exit.with : null);
+  const result: Mover[] = going
+    .filter((e) => !leadOf(e))
+    .map((e) => ({ id: e.id, change: { kind: 'exit', effect: e.exit!.effect ?? 'fade', why: e.exit!.why ?? '' }, with: [] }));
+  for (const e of going) {
+    const lead = leadOf(e);
+    if (lead) result.find((m) => m.id === lead)?.with.push(e.id);
+  }
+  return result;
+}
+
+function exitTracks(id: ElementId, effect: ExitEffect, delay: number): Track[] {
+  return [{ ...timing(id, delay, EXIT_EFFECTS[effect]), property: 'exit', effect }];
+}
+
+/** The tracks of departures, each lead with the elements that leave with it, staggered as entrances are. */
+function departureTracks(moving: readonly Mover[], byId: ReadonlyMap<ElementId, SceneElement>, count: () => number): Track[] {
+  const tracks: Track[] = [];
+  for (const m of moving) {
+    if (m.change.kind !== 'exit') continue;
+    const delay = Math.min(count(), MOTION.maxStaggered - 1) * MOTION.staggerMs;
+    tracks.push(...exitTracks(m.id, m.change.effect, delay));
+    for (const id of m.with) {
+      const own = byId.get(id)?.exit?.effect;
+      // A label can't be undrawn: it fades with its lead.
+      const effect = own ?? (m.change.effect === 'undraw' && byId.get(id)?.kind === 'label' ? 'fade' : m.change.effect);
+      tracks.push(...exitTracks(id, effect, delay));
+    }
+  }
+  return tracks;
+}
+
 /** What moves in a change from one state to another, in drawing order: the reviewable summary. */
 export function movers(scene: SceneDefinition, from: StateName, to: StateName): Mover[] {
   const before = resolveState(scene, from);
@@ -74,7 +121,8 @@ export function movers(scene: SceneDefinition, from: StateName, to: StateName): 
   // An element enters with its lead only when the lead enters too; otherwise it moves on its own.
   const leadOf = (e: SceneElement) => (e.enter?.with !== undefined && entering.has(e.enter.with) ? e.enter.with : null);
 
-  const result: Mover[] = [];
+  const leaving = new Set(elements.filter((e) => before[e.id].visible && !after[e.id].visible).map((e) => e.id));
+  const result: Mover[] = departures(elements, leaving);
   for (const e of elements) {
     if (entering.has(e.id) && !leadOf(e)) {
       const effect = (e.enter?.effect ?? 'fade') as MotionEffect;
@@ -97,11 +145,14 @@ export function planMotion(scene: SceneDefinition, from: StateName | null, to: S
   const byId = new Map(scene.layers.flatMap((l) => l.elements).map((e) => [e.id, e]));
   const tracks: Track[] = [];
   let entered = 0;
-  for (const m of movers(scene, from, to)) {
+  const moving = movers(scene, from, to);
+  tracks.push(...departureTracks(moving, byId, () => entered++));
+  for (const m of moving) {
     if (m.change.kind === 'emphasis') {
       tracks.push({ ...timing(m.id, 0, EMPHASIS_CHANGE), property: 'emphasis', from: m.change.from, to: m.change.to });
       continue;
     }
+    if (m.change.kind !== 'enter') continue;
     const delay = Math.min(entered++, MOTION.maxStaggered - 1) * MOTION.staggerMs;
     const lead = m.change.effect;
     tracks.push(...effectTracks(m.id, lead, delay));
@@ -123,4 +174,110 @@ export function motionProblems(scene: SceneDefinition): string[] {
       ? [`transition ${from} → ${to}: ${moving.length} elements move; at most ${MOTION.maxStaggered}`]
       : [];
   });
+}
+
+// ── Changes in figures built from data (milestone M5) ──────────────────────────────────────────
+
+/** What an element looks like and where it is, to tell whether a change touched it (words aside). */
+function drawnAs(e: SceneElement): string {
+  switch (e.kind) {
+    case 'shape':
+      return JSON.stringify([e.geometry, e.style]);
+    case 'generated':
+      return JSON.stringify([e.generator, e.params, e.style]);
+    case 'label':
+      return JSON.stringify([e.at, e.align, e.width ?? null]);
+  }
+}
+
+/**
+ * What moves when a figure built from data changes (one state each, matched by element id):
+ * - an element that is new enters with its `enter` effect; without one, it appears at once
+ * - an element that `moves` and was drawn differently glides to its new drawing; all of them
+ *   together are one movement, a reflow; a label that names one of them moves with it
+ * - everything else changes at once, and an element that is gone goes at once
+ */
+export function changeMovers(before: SceneDefinition, after: SceneDefinition): Mover[] {
+  const was = new Map(before.layers.flatMap((l) => l.elements).map((e) => [e.id, e]));
+  const elements = after.layers.flatMap((l) => l.elements);
+  const changed = (e: SceneElement) => was.has(e.id) && drawnAs(was.get(e.id)!) !== drawnAs(e);
+  const forms = elements.filter((e) => e.kind !== 'label' && e.moves && changed(e));
+  const moving = new Set(forms.map((e) => e.id));
+  const labels = elements.filter((e) => e.kind === 'label' && changed(e) && (e.moves || e.names?.some((n) => moving.has(n))));
+
+  const entering = new Set(elements.filter((e) => !was.has(e.id) && e.enter).map((e) => e.id));
+  const leadOf = (e: SceneElement) => (e.enter?.with !== undefined && entering.has(e.enter.with) ? e.enter.with : null);
+  const staying = new Set(elements.map((e) => e.id));
+  const old = before.layers.flatMap((l) => l.elements);
+  const result: Mover[] = departures(old, new Set(old.filter((e) => !staying.has(e.id)).map((e) => e.id)));
+  const group = [...forms, ...labels];
+  if (forms.length) {
+    const why = [...new Set(group.flatMap((e) => (e.moves?.why ? [e.moves.why] : [])))];
+    result.unshift({ id: group[0].id, change: { kind: 'moves', why }, with: group.slice(1).map((e) => e.id) });
+  }
+  for (const e of elements) {
+    if (!entering.has(e.id)) continue;
+    const lead = leadOf(e);
+    if (lead) continue;
+    result.push({ id: e.id, change: { kind: 'enter', effect: (e.enter?.effect ?? 'fade') as MotionEffect, why: e.enter?.why ?? '' }, with: [] });
+  }
+  for (const e of elements) {
+    const lead = entering.has(e.id) ? leadOf(e) : null;
+    if (lead) result.find((m) => m.id === lead)!.with.push(e.id);
+  }
+  return result;
+}
+
+/** The timing of the glides in a change: `MOVE_CHANGE` for new data, `INPUT_CHANGE` for a person's own input. */
+export type Pace = { duration: keyof typeof MOTION.durations; easing: keyof typeof MOTION.easing };
+
+/**
+ * The timeline for a change in a figure built from data: empty below the full tier, for a first
+ * appearance, between different figures, or for a reflow of more than `MOTION.maxReflow` forms
+ * (then those change at once). Entrances are staggered as in a state change.
+ */
+export function planChange(before: SceneDefinition | null, after: SceneDefinition, tier: QualityTier, pace: Pace = MOVE_CHANGE): Timeline {
+  if (tier !== 'full' || !before || before === after || before.id !== after.id) return [];
+  const byId = new Map([...before.layers, ...after.layers].flatMap((l) => l.elements).map((e) => [e.id, e]));
+  const tracks: Track[] = [];
+  let entered = 0;
+  const moving = changeMovers(before, after);
+  tracks.push(...departureTracks(moving, new Map(before.layers.flatMap((l) => l.elements).map((e) => [e.id, e])), () => entered++));
+  for (const m of moving) {
+    if (m.change.kind === 'moves') {
+      const ids = [m.id, ...m.with];
+      if (ids.filter((id) => byId.get(id)!.kind !== 'label').length > MOTION.maxReflow) continue;
+      for (const id of ids) tracks.push({ ...timing(id, 0, pace), property: 'move' });
+      continue;
+    }
+    if (m.change.kind !== 'enter') continue;
+    const delay = Math.min(entered++, MOTION.maxStaggered - 1) * MOTION.staggerMs;
+    const lead = m.change.effect;
+    tracks.push(...effectTracks(m.id, lead, delay));
+    for (const id of m.with) {
+      const own = byId.get(id)!;
+      const effect = own.enter?.effect ?? (lead === 'draw' && own.kind === 'label' ? 'fade' : lead);
+      tracks.push(...effectTracks(id, effect, delay));
+    }
+  }
+  return tracks;
+}
+
+/**
+ * Motion-budget problems for a change in a figure built from data (visual-policy.md §3.12), as
+ * `motionProblems` checks a scene's declared transitions: at most `MOTION.maxStaggered` movements,
+ * a reflow counting as one. A reflow of more than `MOTION.maxReflow` forms isn't a problem: it
+ * changes at once, and is reported so a reviewer knows. Empty when fine.
+ */
+export function changeProblems(before: SceneDefinition, after: SceneDefinition): string[] {
+  const moving = changeMovers(before, after);
+  const problems: string[] = [];
+  if (moving.length > MOTION.maxStaggered) problems.push(`${moving.length} movements in one change; at most ${MOTION.maxStaggered}`);
+  const forms = new Set(after.layers.flatMap((l) => l.elements).filter((e) => e.kind !== 'label').map((e) => e.id));
+  for (const m of moving)
+    if (m.change.kind === 'moves') {
+      const count = [m.id, ...m.with].filter((id) => forms.has(id)).length;
+      if (count > MOTION.maxReflow) problems.push(`a reflow of ${count} forms changes at once; more than ${MOTION.maxReflow} don't glide`);
+    }
+  return problems;
 }

@@ -91,6 +91,15 @@ export interface StyleRef {
   grain?: boolean;
 }
 
+/** The smallest pointer target in scene units (1 unit = 1 CSS px at design width), WCAG 2.5.8 (M4). */
+export const MIN_TARGET = 24;
+
+/**
+ * The keyboard focus ring on a figure that is itself the control (M4): a line in the `focus` token
+ * (the page's accent; the system highlight in forced colours), `gap` units outside the target.
+ */
+export const FOCUS_RING = { gap: 3, width: 2 } as const;
+
 /** The grain texture (§5): a tile of fine seeded dots, at most 6% opacity. */
 export const GRAIN = { opacity: 0.05, tile: 64, spacing: 6, radius: 0.6, seed: 'platform-grain' } as const;
 
@@ -111,6 +120,11 @@ export const MOTION = {
   staggerMs: 60,
   /** At most this many elements move in one state change (visual-policy.md §3.12). */
   maxStaggered: 3,
+  /**
+   * A reflow (M5): the elements of a figure built from data that glide to new places in one change
+   * move together, with one timing, and count as one movement; with more than this, they change at once.
+   */
+  maxReflow: 12,
 } as const;
 export type MotionDuration = keyof typeof MOTION.durations;
 export type MotionEasing = keyof typeof MOTION.easing;
@@ -127,6 +141,32 @@ export const MOTION_EFFECTS = {
   draw: { duration: 'deliberate', easing: 'move' },
 } as const satisfies Record<string, { duration: MotionDuration; easing: MotionEasing; distance?: number }>;
 export type MotionEffect = keyof typeof MOTION_EFFECTS;
+
+/**
+ * Departures (M5): an element that goes away with a reason leaves with one of these (§10;
+ * visual-policy §3.12: what recedes fades, never flies away). `fade`: opacity 1 → 0. `undraw`: taken
+ * back along its own direction, the reverse of `draw` (line shapes only). Others go at once.
+ */
+export const EXIT_EFFECTS = {
+  fade: { duration: 'moderate', easing: 'depart' },
+  undraw: { duration: 'moderate', easing: 'depart' },
+} as const satisfies Record<string, { duration: MotionDuration; easing: MotionEasing }>;
+export type ExitEffect = keyof typeof EXIT_EFFECTS;
+
+/**
+ * A change that follows a person's own input in an interactive figure (M5, visual-policy §3.12):
+ * a key, a click, Escape, a snapped step while dragging. Quick, so the figure keeps up.
+ */
+export const INPUT_CHANGE = { duration: 'quick', easing: 'move' } as const satisfies {
+  duration: MotionDuration;
+  easing: MotionEasing;
+};
+
+/** An element of a figure built from data that `moves` glides to its new shape, place and paint (M5). */
+export const MOVE_CHANGE = { duration: 'moderate', easing: 'move' } as const satisfies {
+  duration: MotionDuration;
+  easing: MotionEasing;
+};
 
 /** An element that stays but changes emphasis eases between the two paints (§3.7). */
 export const EMPHASIS_CHANGE = { duration: 'moderate', easing: 'move' } as const satisfies {

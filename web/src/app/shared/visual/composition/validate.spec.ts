@@ -162,7 +162,11 @@ describe('validateScene', () => {
     });
 
     it('flags an entrance on an element that is never hidden, and transitions between unknown states', () => {
-      expect(validateScene(withElement({ ...line, enter: { effect: 'fade', why: 'x' } }), TEXT)).toContain("element 'arc': has an entrance but is shown in every state");
+      const one = withElement({ ...line, enter: { effect: 'fade', why: 'x' } });
+      const two = { ...one, states: { initial: 'a', states: { a: one.states.states['a'], b: one.states.states['a'] } }, alt: { a: 'alt.a', b: 'alt.a' } };
+      expect(validateScene(two, TEXT)).toContain("element 'arc': has an entrance but is shown in every state");
+      // A figure built from data has one state: its entrance plays when the element is new in a change (M5).
+      expect(validateScene(one, TEXT).filter((p) => p.includes('entrance'))).toEqual([]);
       expect(validateScene(scene({ transitions: [['a', 'z']] }), TEXT)).toContain("transition a → z: unknown state 'z'");
     });
   });
@@ -170,5 +174,53 @@ describe('validateScene', () => {
   it('rejects raw colour values anywhere', () => {
     const s = withElement({ kind: 'shape', id: 'p', geometry: { type: 'path', d: 'M0 0 #ff0000' }, style: { role: 'subject' }, purpose: P });
     expect(validateScene(s, TEXT)).toContain('raw colour values found; use roles');
+  });
+
+  describe('motion between values (M5)', () => {
+    it('asks an element that moves for its reason', () => {
+      expect(validateScene(withElement({ kind: 'shape', id: 'm', geometry: circle, style: { role: 'subject' }, purpose: P, moves: { why: ' ' } }), TEXT)).toContain(
+        "element 'm': motion without a reason; an element that moves on its own says why",
+      );
+      expect(validateScene(withElement({ kind: 'shape', id: 'm', geometry: { type: 'circle', cx: 200, cy: 20, r: 4 }, style: { role: 'subject' }, purpose: P, moves: { why: 'It follows its value.' } }), TEXT)).toEqual([]);
+    });
+
+    it('keeps moves for figures built from data: a scene’s states don’t change shapes', () => {
+      const one = withElement({ kind: 'shape', id: 'm', geometry: { type: 'circle', cx: 200, cy: 20, r: 4 }, style: { role: 'subject' }, purpose: P, moves: { why: 'x' } });
+      const two = { ...one, states: { initial: 'a', states: { a: one.states.states['a'], b: one.states.states['a'] } }, alt: { a: 'alt.a', b: 'alt.a' } };
+      expect(validateScene(two, TEXT)).toContain("element 'm': 'moves' is for figures built from data; a scene's states don't change shapes");
+    });
+  });
+
+  describe('departures (M5)', () => {
+    const two = (one: SceneDefinition): SceneDefinition => ({
+      ...one,
+      states: { initial: 'a', states: { a: one.states.states['a'], b: { ...one.states.states['a'], visible: one.states.states['a'].visible.filter((id) => id !== 'gone') } } },
+      alt: { a: 'alt.a', b: 'alt.a' },
+    });
+    const gone = (exit: SceneElement['exit'], extra: Partial<SceneElement> = {}): SceneDefinition =>
+      two(withElement({ kind: 'shape', id: 'gone', geometry: { type: 'line', x1: 100, y1: 20, x2: 200, y2: 20 }, style: { role: 'subject' }, purpose: P, exit, ...extra } as SceneElement));
+
+    it('accepts a departure with a known effect and a reason', () => {
+      expect(validateScene(gone({ effect: 'undraw', why: 'It is taken back.' }), TEXT)).toEqual([]);
+      expect(validateScene(gone({ effect: 'fade', why: 'It fades.' }), TEXT)).toEqual([]);
+    });
+
+    it('asks for a reason, a known effect, and undraws only lines', () => {
+      expect(validateScene(gone({ effect: 'fade', why: '' }), TEXT)).toContain("element 'gone': motion without a reason; an element that moves on its own says why");
+      expect(validateScene(gone({ effect: 'fly' as 'fade', why: 'x' }), TEXT)).toContain("element 'gone': unknown departure 'fly'");
+      expect(validateScene(gone({ effect: 'undraw', why: 'x' }, { geometry: { type: 'circle', cx: 150, cy: 20, r: 5 }, style: { role: 'subject', material: 'tonal' } }), TEXT)).toContain(
+        "element 'gone': only line shapes can be undrawn",
+      );
+    });
+
+    it('lets an element leave with a lead, but not an unknown one', () => {
+      expect(validateScene(gone({ with: 'nowhere' }), TEXT)).toContain("element 'gone': leaves with unknown element 'nowhere'");
+    });
+
+    it('flags a departure on an element that never leaves', () => {
+      const one = withElement({ kind: 'shape', id: 'stays', geometry: { type: 'line', x1: 100, y1: 20, x2: 200, y2: 20 }, style: { role: 'subject' }, purpose: P, exit: { effect: 'fade', why: 'x' } });
+      const both = { ...one, states: { initial: 'a', states: { a: one.states.states['a'], b: one.states.states['a'] } }, alt: { a: 'alt.a', b: 'alt.a' } };
+      expect(validateScene(both, TEXT)).toContain("element 'stays': has a departure but is shown in every state");
+    });
   });
 });

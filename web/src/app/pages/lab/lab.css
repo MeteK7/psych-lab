@@ -18,8 +18,8 @@ h4 { font-size: 0.95rem; margin: 0; }
 .light { --bg: #ffffff; --text: #1c1c1e; --muted: #55575d; --border: #d6d7db; --accent: #2457c5; }
 .dark { --bg: #17181b; --text: #ececef; --muted: #a9abb2; --border: #3a3c42; --accent: #8fb0ff; }
 .tag { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.25rem; }
-/* Forced colours replace the pinned panel backgrounds, so the tags follow the system colours too. */
-@media (forced-colors: active) { .tag { color: CanvasText; } }
+/* Forced colours replace the pinned panel backgrounds, so the panels' own words follow the system colours too. */
+@media (forced-colors: active) { .tag, .panel, .panel .muted { color: CanvasText; } }
 figure { margin: 0; }
 .alt { margin: 0.4rem 0 0; font-size: 0.9rem; }
 table { font-size: 0.9rem; }

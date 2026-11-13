@@ -79,6 +79,28 @@ describe('Visual System dependency rules', () => {
     expect(outside(inFolder('instruments'), ['instruments', 'composition', 'styling', 'generation'])).toEqual([]);
   });
 
+  it('4d. interaction maps input to values, purely: it imports only composition, styling and generation (no Angular, no DOM, no rendering)', () => {
+    expect(outside(inFolder('interaction'), ['interaction', 'composition', 'styling', 'generation'])).toEqual([]);
+  });
+
+  it('4e. stimuli are pure: they import only S1 colours, S2 seeded randomness and the frame types (no Angular, no DOM, no backend)', () => {
+    const files = inFolder('stimulus');
+    const bad = files.flatMap(({ path, imports }) =>
+      imports.filter((i) => !['stimulus', 'styling', 'generation'].includes(area(i)) && i !== `${ROOT}/rendering/frame`).map((i) => `${path} imports ${i}`),
+    );
+    expect(bad).toEqual([]);
+  });
+
+  it('4f. the asset manifest is pure data and checks: it imports only itself (no Angular, no DOM, no file access)', () => {
+    expect(outside(inFolder('assets'), ['assets'])).toEqual([]);
+  });
+
+  it('4g. the app never reaches the generation path: nothing in it imports assets/generate or the authoring tools', () => {
+    // Only the authoring script (web/tools/visual-generate) runs a provider, so no session can.
+    const users = app.flatMap(({ path, imports }) => imports.filter((i) => i === `${ROOT}/assets/generate` || i.startsWith('tools/')).map((i) => `${path} imports ${i}`));
+    expect(users).toEqual([]);
+  });
+
   it('5. rendering imports only itself and Angular, and only integration imports a backend', () => {
     expect(outside(inFolder('rendering'), ['rendering', '@angular/core'])).toEqual([]);
     const users = app
@@ -105,4 +127,28 @@ describe('Visual System dependency rules', () => {
     expect(core).not.toHaveLength(0);
     expect(core.flatMap(({ path, imports }) => imports.filter((i) => i.startsWith(`${ROOT}/`)).map((i) => `${path} imports ${i}`))).toEqual([]);
   });
+
+  it('9. every figure is drawn through the Visual System: no exercise or page draws its own (M8)', async () => {
+    // Outside the Visual Lab, which is the system's own tooling. Icons (shared/icon.ts) are outside scope.
+    const files = (await Promise.all([listSources(`${APP}/experiences`), listSources(`${APP}/pages`)]))
+      .flat()
+      .filter((p) => /\.(ts|html)$/.test(p) && !p.endsWith('.spec.ts') && !p.startsWith(`${APP}/pages/lab/`));
+    expect(files.length).toBeGreaterThan(10);
+    const drawing: string[] = [];
+    const canvases: string[] = [];
+    const DRAWS = /<(svg|path|circle|rect)[\s>]|getContext\(|new Path2D|createElementNS/;
+    const CANVAS = /<canvas[\s>]/;
+    // The patterns work: they find a drawing and a canvas in text that has them.
+    expect([DRAWS.test('<svg viewBox="0 0 1 1">'), DRAWS.test('ctx = c.getContext("2d")'), CANVAS.test('<canvas\n #c>'), DRAWS.test('<section>')]).toEqual([true, true, true, false]);
+    for (const path of files) {
+      const code = await readSource(path);
+      if (DRAWS.test(code)) drawing.push(path);
+      if (CANVAS.test(code)) canvases.push(path);
+    }
+    expect(drawing).toEqual([]);
+    // The one canvas an exercise owns is the dot game's, and the system's own surface draws on it.
+    expect(canvases).toEqual([`${APP}/experiences/state-reset/tracking-game.ts`]);
+    expect(await readSource(canvases[0])).toContain("from '../../shared/visual/integration/tracking'");
+  });
 });
+

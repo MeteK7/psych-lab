@@ -28,6 +28,12 @@ export const routes: Routes = [
   },
   // The Visual Lab: development build only (the page checks), loaded on demand.
   {
+    path: 'lab/parity',
+    loadComponent: () => import('./pages/lab/lab-parity-page').then((m) => m.LabParityPage),
+    title: 'Rendering parity',
+    canActivate: [notInBooth],
+  },
+  {
     path: 'lab',
     loadComponent: () => import('./pages/lab/lab-page').then((m) => m.LabPage),
     title: 'Visual Lab',

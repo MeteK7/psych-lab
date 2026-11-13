@@ -1,21 +1,19 @@
-import { Component, computed, input, linkedSignal, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, computed, inject, input, linkedSignal, untracked } from '@angular/core';
 
 import { SceneDefinition, StateName, TextLookup } from '../composition/scene';
 import { QualityTier } from '../motion/plan-motion';
 import { SurfaceScheme, SvgBackend } from '../rendering/svg/svg-backend';
-import { buildFrame, buildTimeline } from './pipeline';
+import { FrameStats, FrameWatch } from './frame-watch';
+import { buildChangeTimeline, buildFrame, buildTimeline } from './pipeline';
+import { reducedMotion } from './reduced-motion';
 
 export type { QualityTier, SurfaceScheme };
 
-const REDUCE = '(prefers-reduced-motion: reduce)';
-
-/** The person's motion preference, kept current while the page is open. */
-function reducedMotion() {
-  const query = typeof matchMedia === 'function' ? matchMedia(REDUCE) : null;
-  const reduce = signal(query?.matches ?? false);
-  query?.addEventListener?.('change', (e) => reduce.set(e.matches));
-  return reduce.asReadonly();
+interface Shown {
+  scene: SceneDefinition;
+  state: StateName;
 }
+
 
 /**
  * S9 Integration: a scene in a given state, drawn by the SVG backend. The only place outside the
@@ -24,13 +22,16 @@ function reducedMotion() {
  *
  * Motion: when `state` changes, the change from the previous state plays (S5). On the first
  * appearance nothing moves, unless `from` names the state the person has just seen (a step that
- * creates a new figure). `tier` defaults to the person's setting: reduced motion shows the final
- * state at once.
+ * creates a new figure). When a figure built from data is drawn again from new data (the same
+ * figure id, the same state), the change between the two plays: what `moves` glides, what is new
+ * enters (M5). `tier` defaults to the person's setting: reduced motion shows the final state at once.
+ * With the default, the watchdog (M6, rendering/frame-stats.ts) also moves the figure to the reduced
+ * tier for the rest of the page view once its own motion runs below 50 fps over a second of motion.
  */
 @Component({
   selector: 'app-vis-scene',
   imports: [SvgBackend],
-  template: `<app-vis-svg [frame]="frame()" [timeline]="timeline()" [scheme]="scheme()" />`,
+  template: `<app-vis-svg [frame]="frame()" [timeline]="timeline()" [scheme]="scheme()" [observer]="stats" />`,
   styles: `:host { display: block; }`,
 })
 export class SceneFigure {
@@ -43,9 +44,15 @@ export class SceneFigure {
   readonly tier = input<QualityTier | 'auto'>('auto');
 
   private readonly reduce = reducedMotion();
-  private readonly change = linkedSignal<StateName, { from: StateName | null; to: StateName }>({
-    source: this.state,
-    computation: (to, previous) => ({ from: previous ? previous.source : untracked(this.from), to }),
+  /** How this figure's motion is drawn: the watchdog's measure, and the Lab overlay's. */
+  protected readonly stats = new FrameStats();
+  /** What is drawn: changes only when the scene or the state does (new words alone play nothing). */
+  private readonly shown = computed(() => ({ scene: this.scene(), state: this.state() }), {
+    equal: (a, b) => a.scene === b.scene && a.state === b.state,
+  });
+  private readonly change = linkedSignal<Shown, { before: Shown | null; now: Shown }>({
+    source: this.shown,
+    computation: (now, previous) => ({ before: previous ? previous.source : null, now }),
   });
   private readonly effectiveTier = computed<QualityTier>(() => {
     const tier = this.tier();
@@ -53,8 +60,16 @@ export class SceneFigure {
   });
 
   protected readonly frame = computed(() => buildFrame(this.scene(), this.state(), this.text()));
+  constructor() {
+    const stop = inject(FrameWatch).watch({ label: () => this.scene().id, backend: 'svg', stats: this.stats });
+    inject(DestroyRef).onDestroy(stop);
+  }
+
   protected readonly timeline = computed(() => {
-    const { from, to } = this.change();
-    return buildTimeline(this.scene(), from, to, this.effectiveTier());
+    const { before, now } = this.change();
+    // The watchdog's drop is read at each change (not a signal): it applies from the next change on.
+    const tier = this.effectiveTier() === 'full' && this.tier() === 'auto' && this.stats.dropped ? 'reduced' : this.effectiveTier();
+    if (before && before.state === now.state) return buildChangeTimeline(before.scene, now.scene, now.state, untracked(this.text), tier);
+    return buildTimeline(now.scene, before ? before.state : untracked(this.from), now.state, tier, untracked(this.text));
   });
 }

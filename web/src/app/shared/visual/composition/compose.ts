@@ -1,5 +1,5 @@
 import type { FrameSize, ThemeId } from '../styling/vocabulary';
-import type { ContentKey, ElementId, Layer, SceneDefinition, TextLookup } from './scene';
+import type { ContentKey, ElementId, Layer, ScaleDef, ScaleId, SceneDefinition, TextLookup } from './scene';
 
 /**
  * S3 Composition, built from data (milestone M1, docs/visual-system.md §14). An instrument or a
@@ -32,11 +32,15 @@ export interface ComposeOptions {
   maxFocal?: number;
   /** For generated elements (milestone M2). */
   seed?: string;
+  /** For handles (milestone M4). */
+  scales?: Readonly<Record<ScaleId, ScaleDef>>;
+  /** For regions: the words for each value they choose (milestone M4). */
+  choices?: Readonly<Record<string, { label: ContentKey }>>;
 }
 
 /** A scene with one state that shows every element. */
 export function composeScene(options: ComposeOptions, text: Readonly<Record<ContentKey, string>> = {}): Composed {
-  const { id, version, theme, size, layers, emphasis, alt, maxFocal, seed } = options;
+  const { id, version, theme, size, layers, emphasis, alt, maxFocal, seed, scales, choices } = options;
   const visible = layers.flatMap((l) => l.elements.map((e) => e.id));
   return {
     scene: {
@@ -49,6 +53,8 @@ export function composeScene(options: ComposeOptions, text: Readonly<Record<Cont
       states: { initial: SHOWN, states: { [SHOWN]: { visible, ...(emphasis ? { emphasis } : {}) } } },
       alt: { [SHOWN]: 'alt' },
       ...(maxFocal ? { policy: { maxFocal } } : {}),
+      ...(scales ? { scales } : {}),
+      ...(choices ? { choices } : {}),
     },
     text: { alt, ...text },
   };

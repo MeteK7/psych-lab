@@ -3,17 +3,29 @@ import { Component, inject, signal } from '@angular/core';
 import { CS_WHY_IT_HAPPENED, STATE_RESET } from '../../../content';
 import { AppEnvironment } from '../../shared/app-environment';
 import { PURPOSE_LABELS, SceneDefinition, elementsOf } from '../../shared/visual/composition/scene';
+import { lookupOf } from '../../shared/visual/composition/compose';
+import { spacingWarnings } from '../../shared/visual/composition/spacing';
 import { validateScene } from '../../shared/visual/composition/validate';
-import { CAUSE_MAP, CAUSE_MAP_PURPOSES, CauseMapInput } from '../../shared/visual/instruments/cause-map/cause-map';
+import { CAUSE_MAP, CAUSE_MAP_PURPOSES, CauseMapInput, composeCauseMap } from '../../shared/visual/instruments/cause-map/cause-map';
 import { ROUNDS, ROUNDS_PURPOSES } from '../../shared/visual/instruments/rounds/rounds';
-import { TRACKING, TRACKING_PURPOSES, TrackingInput } from '../../shared/visual/instruments/tracking/tracking';
+import { TRACKING, TRACKING_PURPOSES, TrackingInput, composeTrackingPreview } from '../../shared/visual/instruments/tracking/tracking';
 import { InstrumentFigure } from '../../shared/visual/integration/instruments';
 import { QualityTier, SceneFigure, SurfaceScheme } from '../../shared/visual/integration/scene-figure';
-import { Mover, motionProblems, movers } from '../../shared/visual/motion/plan-motion';
+import { motionProblems, movers } from '../../shared/visual/motion/plan-motion';
 import { SCENES } from '../../shared/visual/scenes';
-import { EMPHASIS_CHANGE, MOTION, MOTION_EFFECTS, THEMES } from '../../shared/visual/styling/vocabulary';
+import { THEMES } from '../../shared/visual/styling/vocabulary';
+import { LabAssets } from './lab-assets';
+import { LabCatalog, LabContents } from './lab-catalog';
 import { LabGenerators } from './lab-generators';
+import { LabGuide } from './lab-guide';
+import { LabInteraction } from './lab-interaction';
+import { LabMotion } from './lab-motion';
+import { LabOverlay } from './lab-overlay';
+import { LabStimulus } from './lab-stimulus';
+import { CAUSE_AXES, CAUSE_SETS, PREVIEW_LABELS, RING_RADIUS, ROUND_SETS, trackingStill } from './lab-instrument-sets';
 import { LabMaterials } from './lab-materials';
+import { describeMover } from './lab-movers';
+import { LabSheet } from './lab-sheet';
 import { LabTrackingStill } from './lab-tracking-still';
 
 /**
@@ -24,7 +36,7 @@ import { LabTrackingStill } from './lab-tracking-still';
  */
 @Component({
   selector: 'app-lab-page',
-  imports: [SceneFigure, InstrumentFigure, LabGenerators, LabMaterials, LabTrackingStill],
+  imports: [SceneFigure, InstrumentFigure, LabAssets, LabCatalog, LabContents, LabGenerators, LabGuide, LabInteraction, LabMaterials, LabMotion, LabOverlay, LabSheet, LabStimulus, LabTrackingStill],
   template: `
     <h1>Visual Lab</h1>
     @if (env.showsDevelopment()) {
@@ -33,6 +45,8 @@ import { LabTrackingStill } from './lab-tracking-still';
         <li>The states are drawn without motion. Each change between them is replayed under "Transitions", in full or reduced motion.</li>
         <li>For forced colours, turn on a Windows contrast theme: every panel then shows system colours.</li>
       </ul>
+      <app-lab-contents />
+      <app-lab-overlay />
 
       @for (entry of entries; track entry.scene.id) {
         <section class="scene" [attr.aria-labelledby]="entry.headingId">
@@ -101,6 +115,13 @@ import { LabTrackingStill } from './lab-tracking-still';
               </ul>
             }
 
+            @if (entry.spacing.length) {
+              <h3>Spacing check</h3>
+              <ul class="moves" [attr.aria-label]="'Spacing warnings: ' + entry.scene.id">
+                @for (w of entry.spacing; track w) { <li>{{ w }}</li> }
+              </ul>
+            }
+
             <h3>Why each element is there</h3>
             <table>
               <caption>Every element serves at least one purpose (visual-policy §2).</caption>
@@ -135,6 +156,12 @@ import { LabTrackingStill } from './lab-tracking-still';
               </div>
             }
           </div>
+        }
+        @if (causeSpacing.length) {
+          <h3>Spacing check</h3>
+          <ul class="moves" [attr.aria-label]="'Spacing warnings: ' + causeMap.id">
+            @for (w of causeSpacing; track w) { <li>{{ w }}</li> }
+          </ul>
         }
         <h3>Why each element is there</h3>
         <table>
@@ -205,6 +232,12 @@ import { LabTrackingStill } from './lab-tracking-still';
             }
           </div>
         }
+        @if (previewSpacing.length) {
+          <h3>Spacing check: the preview</h3>
+          <ul class="moves" [attr.aria-label]="'Spacing warnings: ' + tracking.id">
+            @for (w of previewSpacing; track w) { <li>{{ w }}</li> }
+          </ul>
+        }
         <h3>Why each element is there</h3>
         <table>
           <caption>Every element serves at least one purpose (visual-policy §2).</caption>
@@ -219,6 +252,13 @@ import { LabTrackingStill } from './lab-tracking-still';
 
       <app-lab-generators [schemes]="schemes" />
       <app-lab-materials [schemes]="schemes" />
+      <app-lab-interaction [schemes]="schemes" />
+      <app-lab-motion [schemes]="schemes" />
+      <app-lab-stimulus />
+      <app-lab-assets />
+      <app-lab-sheet [schemes]="schemes" />
+      <app-lab-guide [schemes]="schemes" />
+      <app-lab-catalog />
     } @else {
       <p>The Visual Lab is available in the development build only.</p>
     }
@@ -231,44 +271,34 @@ export class LabPage {
   protected readonly tier = signal<QualityTier | 'auto'>('auto');
   protected readonly causeMap = CAUSE_MAP;
   protected readonly rounds = ROUNDS;
-  protected readonly roundSets = [
-    { current: 1, name: 'Before the first round, and during it' },
-    { current: 4, name: 'Round 4: three done' },
-    { current: 8, name: 'The last round' },
-  ];
+  protected readonly roundSets = ROUND_SETS;
   protected readonly roundsPurposes = ROUNDS_PURPOSES.map(({ id, purpose }) => ({ id, serves: purpose.serves.map((k) => PURPOSE_LABELS[k]).join('; '), why: purpose.why }));
   protected readonly tracking = TRACKING;
-  protected readonly ringRadius = STATE_RESET.game.ring_radius;
-  protected readonly previewLabels = STATE_RESET.how_it_works.labels;
-  private readonly still = (onTarget: boolean): TrackingInput => ({
-    size: { width: 480, height: 320 },
-    target: { x: 170, y: 140 },
-    cursor: onTarget ? { x: 178, y: 148 } : { x: 300, y: 220 },
-    ringRadius: STATE_RESET.game.ring_radius,
-    onTarget,
-  });
+  protected readonly ringRadius = RING_RADIUS;
+  protected readonly previewLabels = PREVIEW_LABELS;
   protected readonly trackingSets: { key: string; name: string; alt: string; state: TrackingInput | null }[] = [
-    { key: 'outside', name: 'The game: pointer outside the ring', alt: 'The dot game, pointer outside the ring', state: this.still(false) },
-    { key: 'inside', name: 'The game: pointer inside the ring', alt: 'The dot game, pointer inside the ring', state: this.still(true) },
+    { key: 'outside', name: 'The game: pointer outside the ring', alt: 'The dot game, pointer outside the ring', state: trackingStill(false) },
+    { key: 'inside', name: 'The game: pointer inside the ring', alt: 'The dot game, pointer inside the ring', state: trackingStill(true) },
     { key: 'preview', name: '"How the game works"', alt: STATE_RESET.how_it_works.illustration_alt, state: null },
   ];
   protected readonly trackingPurposes = TRACKING_PURPOSES.map(({ id, purpose }) => ({ id, serves: purpose.serves.map((k) => PURPOSE_LABELS[k]).join('; '), why: purpose.why }));
   protected readonly chartLabel = CS_WHY_IT_HAPPENED.map.chart_label;
-  private readonly axisWords = CS_WHY_IT_HAPPENED.map.axes;
-  protected readonly axes: CauseMapInput['axes'] = {
-    left: this.axisWords[0].low,
-    right: this.axisWords[0].high,
-    top: this.axisWords[1].low,
-    bottom: this.axisWords[1].high,
-  };
+  protected readonly axes = CAUSE_AXES;
   /** Answer sets covering every case the map has to draw. */
-  protected readonly causeSets: { key: string; name: string; placing: number; causes: CauseMapInput['causes'] }[] = [
-    { key: 'start', name: 'Step 4, the start: every cause in the middle, cause 1 being placed', placing: 1, causes: [{ who: 3, time: 3 }, { who: 3, time: 3 }, { who: 3, time: 3 }] },
-    { key: 'placing', name: 'Step 4: cause 2 being placed', placing: 2, causes: [{ who: 1, time: 2 }, { who: 3, time: 3 }, { who: 3, time: 3 }] },
-    { key: 'spread', name: 'Step 5: causes spread out', placing: 0, causes: [{ who: 1, time: 2 }, { who: 5, time: 5 }, { who: 2, time: 5 }] },
-    { key: 'heavy', name: 'Step 5: a heavy map, every cause in one corner', placing: 0, causes: [{ who: 1, time: 1 }, { who: 1, time: 1 }, { who: 1, time: 1 }] },
-    { key: 'six', name: 'Step 5: six causes in one place, at the edge', placing: 0, causes: Array.from({ length: 6 }, () => ({ who: 5, time: 1 })) },
+  protected readonly causeSets = CAUSE_SETS;
+  /** Labels closer than 8 units to a form they don't name (visual-language.md §9), across every answer set. */
+  protected readonly causeSpacing = [
+    ...new Set(
+      this.causeSets.flatMap((set) => {
+        const composed = composeCauseMap({ causes: set.causes, placing: set.placing, axes: this.axes });
+        return spacingWarnings(composed.scene, lookupOf(composed)).map((w) => `${set.name}: ${w}`);
+      }),
+    ),
   ];
+  protected readonly previewSpacing = (() => {
+    const composed = composeTrackingPreview({ ringRadius: this.ringRadius, labels: this.previewLabels });
+    return spacingWarnings(composed.scene, lookupOf(composed));
+  })();
   protected readonly causeMapPurposes = CAUSE_MAP_PURPOSES.map(({ id, purpose }) => ({
     id,
     serves: purpose.serves.map((k) => PURPOSE_LABELS[k]).join('; '),
@@ -282,6 +312,7 @@ export class LabPage {
     text,
     headingId: `lab-${scene.id.replace(/\W/g, '-')}`,
     problems: [...validateScene(scene, text), ...motionProblems(scene)],
+    spacing: spacingWarnings(scene, text),
     states: Object.keys(scene.states.states).map((name) => ({ name, alt: text(scene.alt[name]) ?? '' })),
     purposes: this.purposes(scene),
     transitions: (scene.transitions ?? []).map(([from, to]) => ({
@@ -289,7 +320,7 @@ export class LabPage {
       from,
       to,
       alt: text(scene.alt[to]) ?? '',
-      moves: movers(scene, from, to).map((m) => this.describe(m)),
+      moves: movers(scene, from, to).map(describeMover),
     })),
   }));
 
@@ -299,16 +330,6 @@ export class LabPage {
 
   protected replay(key: string): void {
     this.runs.update((runs) => ({ ...runs, [key]: (runs[key] ?? 0) + 1 }));
-  }
-
-  /** What a mover does, in words, with the S1 timing it gets. */
-  private describe(m: Mover): { id: string; what: string; why: string } {
-    const ms = (d: keyof typeof MOTION.durations) => `${MOTION.durations[d]} ms`;
-    const along = m.with.length ? `, with ${m.with.join(', ')}` : '';
-    if (m.change.kind === 'emphasis')
-      return { id: m.id, what: `eases from ${m.change.from} to ${m.change.to} emphasis (${ms(EMPHASIS_CHANGE.duration)})`, why: '' };
-    const verb = { fade: 'fades in', rise: 'rises into place', draw: 'is drawn along its direction' }[m.change.effect];
-    return { id: m.id, what: `${verb} (${ms(MOTION_EFFECTS[m.change.effect].duration)})${along}`, why: m.change.why };
   }
 
   protected themeVersion(theme: string): number {

@@ -69,6 +69,31 @@ describe('S5 motion', () => {
     ]);
   });
 
+  it('lets an element with a departure leave with its effect, with the elements that leave with it (M5)', () => {
+    const line: SceneElement = {
+      kind: 'shape',
+      id: 'line',
+      geometry: { type: 'line', x1: 0, y1: 0, x2: 10, y2: 0 },
+      style: { role: 'subject' },
+      purpose: P,
+      exit: { effect: 'undraw', why: 'It is taken back.' },
+    };
+    const label: SceneElement = { kind: 'label', id: 'tag', text: 'x', at: [5, 10], align: 'middle', purpose: P, exit: { with: 'line' } };
+    const scene: SceneDefinition = {
+      ...CROWDED,
+      layers: [{ id: 's', plane: 'subject', elements: [line, label, dot('stays', { effect: 'fade', why: 'x' })] }],
+      states: { initial: 'a', states: { a: { visible: ['line', 'tag', 'stays'] }, b: { visible: ['stays'] } } },
+      transitions: [['a', 'b']],
+    };
+    expect(movers(scene, 'a', 'b')).toEqual([{ id: 'line', change: { kind: 'exit', effect: 'undraw', why: 'It is taken back.' }, with: ['tag'] }]);
+    // A label can't be undrawn: it fades with its line.
+    expect(planMotion(scene, 'a', 'b', 'full').map((t) => [t.id, t.property, t.property === 'exit' && t.effect])).toEqual([
+      ['line', 'exit', 'undraw'],
+      ['tag', 'exit', 'fade'],
+    ]);
+    expect(planMotion(scene, 'a', 'b', 'reduced')).toEqual([]);
+  });
+
   it('staggers elements that move on their own, from the S1 tokens', () => {
     const delays = planMotion(CROWDED, 'a', 'b', 'full').map((t) => t.delay);
     expect(delays).toEqual([0, MOTION.staggerMs, 2 * MOTION.staggerMs, 2 * MOTION.staggerMs]);

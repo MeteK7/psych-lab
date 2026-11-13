@@ -1,5 +1,5 @@
 import type { GeneratorId } from '../generation/registry';
-import type { Emphasis, FrameRatio, FrameSize, LabelTone, MotionEffect, StyleRef, ThemeId } from '../styling/vocabulary';
+import type { Emphasis, ExitEffect, FrameRatio, FrameSize, LabelTone, MotionEffect, StyleRef, ThemeId } from '../styling/vocabulary';
 
 /**
  * S3 Composition: the Scene Specification, version 0 (docs/visual-system.md §4). A scene is typed
@@ -55,6 +55,24 @@ export type Entrance =
   | { with: ElementId; effect?: MotionEffect; why?: undefined };
 
 /**
+ * A departure (M5): how an element leaves when a change hides it (a state change) or drops it (new
+ * data). Without one, it goes at once. Like an entrance, it says why, or leaves with another element.
+ */
+export type Departure =
+  | { effect: ExitEffect; why: string; with?: undefined }
+  /** Leaves as part of another element (its label), at the same moment. Default effect: `fade`. */
+  | { with: ElementId; effect?: ExitEffect; why?: undefined };
+
+/**
+ * Motion between values (milestone M5): in a figure built from data, an element that `moves` glides
+ * to its new shape, place and paint when the data changes, and says why. Elements without it change
+ * at once. A label that names a moving form moves with it.
+ */
+export interface Movement {
+  why: string;
+}
+
+/**
  * Ties between elements that some materials need (milestone M3), checked by the validator:
  * - `grounds`: a `shadow` names the object it sits under (drawn after it)
  * - `overlapOf`: an `overlap` names the two `translucent` forms whose overlap it is
@@ -64,8 +82,43 @@ export interface Ties {
   overlapOf?: readonly [ElementId, ElementId];
 }
 
+/**
+ * Scales (milestone M4, S6 Interaction): map a value the exercise holds to a position along one axis
+ * of the figure, in scene units, and a position back to a value.
+ * - `linear`: numbers from `domain[0]` to `domain[1]`, at `range[0]` to `range[1]`; with a `step`,
+ *   only whole steps from `domain[0]` (a 1–5 rating has step 1).
+ * - `points`: a few values, evenly spaced from `range[0]` to `range[1]` (categories, in order).
+ * A range may run either way: a vertical scale often runs upwards.
+ */
+export type ScaleId = string;
+export type ScaleDef =
+  | { kind: 'linear'; domain: readonly [number, number]; range: readonly [number, number]; step?: number }
+  | { kind: 'points'; values: readonly (string | number)[]; range: readonly [number, number] };
+export type ScaleValue = string | number;
+
+/**
+ * One axis of a handle: the scale it moves along, and the name of the exercise's value it sets.
+ * `label` names the axis in words: a handle on two scales is announced as one slider per axis.
+ */
+export interface Axis {
+  scale: ScaleId;
+  value: string;
+  label?: ContentKey;
+}
+
+/**
+ * What a pointer can do with an element (M4). A target's purpose serves `interaction`.
+ * - `handle`: moved along one scale (`x` or `y`) or two; a click on its `track` (the line or area
+ *   it moves in) places it there, so no drag is ever needed.
+ * - `region`: chosen as a whole; choosing it sets `value` to `option`.
+ * `label` names the target in words, for the exercise's controls and for assistive technology.
+ */
+export type Target =
+  | { kind: 'handle'; x?: Axis; y?: Axis; track?: ElementId; label: ContentKey }
+  | { kind: 'region'; value: string; option: ScaleValue; label: ContentKey };
+
 export type SceneElement =
-  | ({ kind: 'shape'; id: ElementId; geometry: Geometry; style: StyleRef; purpose: Purpose; enter?: Entrance } & Ties)
+  | ({ kind: 'shape'; id: ElementId; geometry: Geometry; style: StyleRef; purpose: Purpose; enter?: Entrance; exit?: Departure; moves?: Movement; target?: Target } & Ties)
   /**
    * Geometry made by an S2 generator (milestone M2) from its parameters and the element's own seed,
    * derived from the scene's seed and the element's id. Drawn, styled and animated like a shape.
@@ -78,6 +131,9 @@ export type SceneElement =
       style: StyleRef;
       purpose: Purpose;
       enter?: Entrance;
+      exit?: Departure;
+      moves?: Movement;
+      target?: Target;
     } & Ties)
   | {
       kind: 'label';
@@ -88,8 +144,19 @@ export type SceneElement =
       tone?: LabelTone;
       /** Bold marks the one item a person is working on (an instrument's current value). */
       weight?: 'bold';
+      /**
+       * Wraps the text within this width, in scene units, at spaces, lines 1.2 apart (M3). `at` is
+       * then the first line's baseline. Without it, the label is one line.
+       */
+      width?: number;
+      /** A halo in the ground colour behind the glyphs, so the label stays readable over a plane and across its edge (M3). */
+      halo?: boolean;
+      /** The forms the label names: it may sit closer to them than the 8-unit clearance (§9), e.g. a number inside its mark. */
+      names?: readonly ElementId[];
       purpose: Purpose;
       enter?: Entrance;
+      exit?: Departure;
+      moves?: Movement;
     };
 
 export interface Layer {
@@ -128,6 +195,13 @@ export interface SceneDefinition {
    * Visual Lab replays each for review. Other changes still work; they just aren't reviewed.
    */
   transitions?: readonly (readonly [StateName, StateName])[];
+  /** The scales its handles move along (M4). */
+  scales?: Readonly<Record<ScaleId, ScaleDef>>;
+  /**
+   * The words for each value chosen by regions (M4): the regions that set one value are one choice,
+   * announced as a group of options under this label.
+   */
+  choices?: Readonly<Record<string, { label: ContentKey }>>;
   /** Scene policy settings the validator reads (docs/visual-policy.md §8). */
   policy?: { maxFocal?: number };
   /**

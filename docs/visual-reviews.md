@@ -1,6 +1,6 @@
 # Visual reviews
 
-The review log (`visual-policy.md` §9.6). Each entry records a human review of a visual item: who reviewed it, what was seen, the verdict, and the screenshot baselines it approves. **Baselines change only with an accepted entry that names them** (`visual-system.md` §10).
+The review log (`visual-policy.md` §9.6). Each entry records a human review of a visual item: who reviewed it, what was seen, the verdict, and the screenshot baselines it approves. **Baselines change only with an accepted entry that names them** (`visual-system.md` §10). The list of accepted compositions (`web/src/app/pages/lab/lab-baselines.ts`) names the entries behind each composition's images, and a test checks it against this log: every image named by an accepted entry, every entry's images present, and none left stale by a version this log hasn't accepted.
 
 ---
 

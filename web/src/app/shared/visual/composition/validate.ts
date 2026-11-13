@@ -4,6 +4,8 @@ import {
   FRAMES,
   LINE_WEIGHTS,
   MATERIALS,
+  MIN_TARGET,
+  EXIT_EFFECTS,
   MOTION_EFFECTS,
   NOT_ON_NEAR,
   PLANE_ROLES,
@@ -11,7 +13,7 @@ import {
   THEMES,
 } from '../styling/vocabulary';
 import { GENERATORS, generatorProblems } from '../generation/registry';
-import { boundsOf, boxesOverlap } from './bounds';
+import { Box, atLeast, boundsOf, boxesOverlap } from './bounds';
 import { PURPOSE_KINDS, Purpose, SceneDefinition, SceneElement, TextLookup, elementsOf } from './scene';
 
 /** Any raw colour value: scenes use roles only (docs/visual-system.md §4.3). */
@@ -34,6 +36,25 @@ function purposeProblems(where: string, purpose: Purpose | undefined): string[] 
   return purpose.serves
     .filter((k) => !(PURPOSE_KINDS as readonly string[]).includes(k))
     .map((k) => `${where}: unknown purpose '${k}'`);
+}
+
+/** Departures (M5, read by S5): a known effect, a reason for anything that leaves on its own, no chains. */
+function departureProblems(element: SceneElement, all: Map<string, SceneElement>): string[] {
+  const { exit } = element;
+  if (!exit) return [];
+  const where = `element '${element.id}'`;
+  const problems: string[] = [];
+  if (exit.effect && !Object.hasOwn(EXIT_EFFECTS, exit.effect)) problems.push(`${where}: unknown departure '${exit.effect}'`);
+  if (exit.effect === 'undraw' && element.kind === 'label') problems.push(`${where}: a label can't be undrawn; it fades`);
+  if (exit.effect === 'undraw' && element.kind !== 'label' && (element.style.material ?? 'line') !== 'line') problems.push(`${where}: only line shapes can be undrawn`);
+  if (exit.with === undefined) {
+    if (!exit.why?.trim()) problems.push(`${where}: motion without a reason; an element that moves on its own says why`);
+    return problems;
+  }
+  const lead = all.get(exit.with);
+  if (!lead || exit.with === element.id) problems.push(`${where}: leaves with unknown element '${exit.with}'`);
+  else if (lead.exit?.with !== undefined) problems.push(`${where}: leaves with '${exit.with}', which itself leaves with another element`);
+  return problems;
 }
 
 /** Entrances (read by S5): a known effect, a reason for anything that moves on its own, no chains. */
@@ -130,6 +151,71 @@ function materialProblems(scene: SceneDefinition): string[] {
   return problems;
 }
 
+/**
+ * Interaction (milestone M4): scales that work, targets that say what they are and serve
+ * `interaction`, and targets easy to hit. A target smaller than MIN_TARGET (24 units) either way
+ * keeps its least area (24 × 24 around its centre) clear of every other target shown with it
+ * (WCAG 2.5.8); a handle's track is the area it moves in, so it doesn't count.
+ */
+function interactionProblems(scene: SceneDefinition, text: TextLookup): string[] {
+  const problems: string[] = [];
+  for (const [id, scale] of Object.entries(scene.scales ?? {})) {
+    const where = `scale '${id}'`;
+    if (scale.range[0] === scale.range[1]) problems.push(`${where}: its range has no length`);
+    if (scale.kind === 'linear') {
+      if (scale.domain[0] === scale.domain[1]) problems.push(`${where}: its domain has no length`);
+      if (scale.step !== undefined && !(scale.step > 0)) problems.push(`${where}: a step must be positive`);
+    } else {
+      if (scale.values.length < 2) problems.push(`${where}: a points scale needs at least two values`);
+      if (new Set(scale.values).size !== scale.values.length) problems.push(`${where}: its values repeat`);
+    }
+  }
+  const forms = elementsOf(scene)
+    .map(({ element }) => element)
+    .filter((e): e is Exclude<SceneElement, { kind: 'label' }> => e.kind !== 'label');
+  const byId = new Map(forms.map((f) => [f.id, f]));
+  const targets = forms.filter((f) => f.target);
+  for (const f of targets) {
+    const t = f.target!;
+    const where = `element '${f.id}'`;
+    if (!f.purpose?.serves?.includes('interaction')) problems.push(`${where}: a target serves 'interaction'`);
+    if (text(t.label) === undefined) problems.push(`${where}: no content for '${t.label}'`);
+    if (t.kind === 'handle') {
+      if (!t.x && !t.y) problems.push(`${where}: a handle moves along at least one scale ('x' or 'y')`);
+      for (const axis of [t.x, t.y]) {
+        if (axis && !scene.scales?.[axis.scale]) problems.push(`${where}: unknown scale '${axis.scale}'`);
+        if (axis?.label !== undefined && text(axis.label) === undefined) problems.push(`${where}: no content for '${axis.label}'`);
+      }
+      if (t.x && t.y && (!t.x.label || !t.y.label)) problems.push(`${where}: a handle on two scales names each axis ('label')`);
+      if (t.track !== undefined) {
+        const track = byId.get(t.track);
+        if (!track || t.track === f.id) problems.push(`${where}: unknown track '${t.track}'`);
+        else if (track.target) problems.push(`${where}: its track '${t.track}' is a target itself`);
+      }
+    } else {
+      if (!closed(f)) problems.push(`${where}: a region is a closed form`);
+      if (!scene.choices?.[t.value]) problems.push(`${where}: the choice '${t.value}' needs its words ('choices')`);
+    }
+  }
+  for (const [value, { label }] of Object.entries(scene.choices ?? {}))
+    if (text(label) === undefined) problems.push(`choice '${value}': no content for '${label}'`);
+  // Least areas, per state.
+  for (const [name, state] of Object.entries(scene.states.states)) {
+    const shown = targets.filter((f) => state.visible.includes(f.id));
+    const boxes = shown.map((f) => ({ id: f.id, box: boundsOf(scene, f) }));
+    for (let i = 0; i < boxes.length; i++)
+      for (let j = i + 1; j < boxes.length; j++) {
+        const [a, b] = [boxes[i], boxes[j]];
+        if (!a.box || !b.box) continue;
+        const small = (x: Box) => x.width < MIN_TARGET || x.height < MIN_TARGET;
+        if (!small(a.box) && !small(b.box)) continue;
+        if (boxesOverlap(atLeast(a.box, MIN_TARGET), atLeast(b.box, MIN_TARGET)))
+          problems.push(`state '${name}': targets '${a.id}' and '${b.id}' are too close; a small target keeps 24 × 24 units clear`);
+      }
+  }
+  return problems;
+}
+
 function strings(value: unknown): string[] {
   if (typeof value === 'string') return [value];
   if (Array.isArray(value)) return value.flatMap(strings);
@@ -146,6 +232,7 @@ export function validateScene(scene: SceneDefinition, text: TextLookup): string[
   } else if (!(scene.frame.width > 0 && scene.frame.height > 0)) problems.push('a frame size must be positive');
 
   const ids = new Map<string, { role?: string; label: boolean }>();
+  const everything = new Map(elementsOf(scene).map(({ element }) => [element.id, element]));
   for (const { layer, element } of elementsOf(scene)) {
     const where = `element '${element.id}'`;
     if (ids.has(element.id)) problems.push(`${where}: duplicate id`);
@@ -155,6 +242,11 @@ export function validateScene(scene: SceneDefinition, text: TextLookup): string[
       if (text(element.text) === undefined) problems.push(`${where}: no content for '${element.text}'`);
       if (layer.plane === 'near' && NOT_ON_NEAR.tones.includes(element.tone ?? 'label'))
         problems.push(`${where}: soft labels aren't allowed on the near plane`);
+      if (element.width !== undefined && !(element.width > 0)) problems.push(`${where}: a wrap width must be positive`);
+      for (const id of element.names ?? []) {
+        const named = everything.get(id);
+        if (!named || named.kind === 'label') problems.push(`${where}: names unknown form '${id}'`);
+      }
       continue;
     }
     ids.set(element.id, { role: element.style.role, label: false });
@@ -170,8 +262,8 @@ export function validateScene(scene: SceneDefinition, text: TextLookup): string[
       problems.push(`${where}: the '${element.style.role}' role isn't allowed on the near plane`);
   }
 
-  const all = new Map(elementsOf(scene).map(({ element }) => [element.id, element]));
-  for (const element of all.values()) problems.push(...entranceProblems(element, all));
+  const all = everything;
+  for (const element of all.values()) problems.push(...entranceProblems(element, all), ...departureProblems(element, all));
 
   const { initial, states } = scene.states;
   if (!Object.hasOwn(states, initial)) problems.push(`initial state '${initial}' doesn't exist`);
@@ -198,9 +290,18 @@ export function validateScene(scene: SceneDefinition, text: TextLookup): string[
     if (focal > maxFocal) problems.push(`${where}: ${focal} focal elements; the scene allows ${maxFocal}`);
   }
   for (const id of ids.keys()) if (!shown.has(id)) problems.push(`element '${id}': no state shows it`);
-  for (const element of all.values())
-    if (element.enter && Object.values(states).every((s) => s.visible.includes(element.id)))
+  // A figure built from data has one state: there, an entrance plays when the element is new in a change (M5).
+  const stateCount = Object.keys(states).length;
+  for (const element of all.values()) {
+    if (stateCount > 1 && element.enter && Object.values(states).every((s) => s.visible.includes(element.id)))
       problems.push(`element '${element.id}': has an entrance but is shown in every state`);
+    if (stateCount > 1 && element.exit && Object.values(states).every((s) => s.visible.includes(element.id)))
+      problems.push(`element '${element.id}': has a departure but is shown in every state`);
+    if (element.moves) {
+      if (!element.moves.why?.trim()) problems.push(`element '${element.id}': motion without a reason; an element that moves on its own says why`);
+      if (stateCount > 1) problems.push(`element '${element.id}': 'moves' is for figures built from data; a scene's states don't change shapes`);
+    }
+  }
   for (const [from, to] of scene.transitions ?? [])
     for (const name of [from, to])
       if (!Object.hasOwn(states, name)) problems.push(`transition ${from} → ${to}: unknown state '${name}'`);
@@ -208,6 +309,7 @@ export function validateScene(scene: SceneDefinition, text: TextLookup): string[
     if (!Object.hasOwn(states, name)) problems.push(`text alternative for unknown state '${name}'`);
 
   problems.push(...materialProblems(scene));
+  problems.push(...interactionProblems(scene, text));
   if (strings(scene).some((s) => RAW_COLOUR.test(s))) problems.push('raw colour values found; use roles');
   return problems;
 }

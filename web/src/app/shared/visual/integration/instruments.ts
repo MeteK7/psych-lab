@@ -2,8 +2,10 @@ import { Component, computed, input } from '@angular/core';
 
 import { Composed, SHOWN, lookupOf } from '../composition/compose';
 import { CauseMapInput, composeCauseMap } from '../instruments/cause-map/cause-map';
+import { GuideDaysInput, composeGuideDays } from '../instruments/guide-days/guide-days';
 import { RoundsInput, composeRounds } from '../instruments/rounds/rounds';
 import { PreviewInput, composeTrackingPreview } from '../instruments/tracking/tracking';
+import { THEMES } from '../styling/vocabulary';
 import { SceneFigure, SurfaceScheme } from './scene-figure';
 
 /**
@@ -18,12 +20,24 @@ export const INSTRUMENTS = {
   rounds: (inputs: RoundsInput) => composeRounds(inputs),
   /** "How the game works", the dot game's preview (instruments/tracking). */
   'tracking-preview': (inputs: PreviewInput) => composeTrackingPreview(inputs),
+  /** The authoring guide's worked example (instruments/guide-days): a reference shown in the Lab; no exercise uses it. */
+  'guide-days': (inputs: GuideDaysInput) => composeGuideDays(inputs),
 } as const;
 
 export type InstrumentName = keyof typeof INSTRUMENTS;
 
 export function composeInstrument(name: InstrumentName, inputs: Record<string, unknown>): Composed {
   return (INSTRUMENTS[name] as (inputs: unknown) => Composed)(inputs);
+}
+
+/**
+ * What an instrument drew, for the exercise's `visual_source` (docs/visual-system.md §9), in the
+ * same shape as a scene's: `instrument:<id>@<version>;theme:<theme>@<version>`. The inputs aren't
+ * part of it: they are the exercise's own answers, recorded with the step.
+ */
+export function instrumentSourceId(composed: Composed): string {
+  const { id, version, theme } = composed.scene;
+  return `instrument:${id}@${version};theme:${theme}@${THEMES[theme]}`;
 }
 
 /**
