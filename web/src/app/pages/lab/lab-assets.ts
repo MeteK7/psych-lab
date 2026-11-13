@@ -12,7 +12,7 @@ interface Row {
 
 function originWords(entry: AssetEntry): string {
   const o = entry.origin;
-  if (o.kind === 'exported') return `Exported from ${o.composition}@${o.version}, theme ${o.theme}@${o.themeVersion}${o.seed ? `, seed ${o.seed}` : ''}`;
+  if (o.kind === 'exported') return `Exported from ${o.composition}@${o.version}${o.state ? `, state ${o.state}` : ''}, theme ${o.theme}@${o.themeVersion}${o.seed ? `, seed ${o.seed}` : ''}`;
   if (o.kind === 'authored') return `Made by hand: ${o.author}`;
   const brief = Object.entries(o.brief)
     .map(([k, v]) => `${k} ${v}`)

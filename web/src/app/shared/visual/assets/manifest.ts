@@ -17,8 +17,8 @@ export interface AssetFile {
 
 /** Where an asset came from. */
 export type AssetOrigin =
-  /** Exported from a composition (stage B): exactly which one, so it can be made again. */
-  | { kind: 'exported'; composition: string; version: number; theme: string; themeVersion: number; seed?: string }
+  /** Exported from a composition, or from one state of a scene: exactly which one, so it can be made again. */
+  | { kind: 'exported'; composition: string; version: number; state?: string; theme: string; themeVersion: number; seed?: string }
   /** Made by hand. */
   | { kind: 'authored'; author: string }
   /**

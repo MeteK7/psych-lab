@@ -3,6 +3,7 @@ import { Component, DestroyRef, ElementRef, afterRenderEffect, computed, inject,
 import { DrawPaint, Drawable, FrameItem, ResolvedFrame, ResolvedTimeline, ResolvedTrack } from '../frame';
 import { FRAME_CLOCK } from '../frame-clock';
 import type { FrameObserver } from '../frame-stats';
+import { pathData } from '../path-data';
 import { carryOn, timelineEnd } from '../playback';
 import { done, progress } from '../timing';
 import { tweenShape } from '../tween';
@@ -10,33 +11,7 @@ import { tweenShape } from '../tween';
 /** How the surface picks light or dark: from the page, or pinned (the Visual Lab shows both side by side). */
 export type SurfaceScheme = 'auto' | 'light' | 'dark';
 
-/** Every drawable as SVG path data, so one element type carries all paint. */
-export function pathData(shape: Drawable): string {
-  switch (shape.type) {
-    case 'path':
-      return shape.d;
-    case 'line':
-      return `M${shape.x1} ${shape.y1} L${shape.x2} ${shape.y2}`;
-    case 'circle': {
-      const { cx, cy, r } = shape;
-      return `M${cx - r} ${cy} A${r} ${r} 0 1 0 ${cx + r} ${cy} A${r} ${r} 0 1 0 ${cx - r} ${cy} Z`;
-    }
-    case 'ellipse': {
-      const { cx, cy, rx, ry } = shape;
-      return `M${cx - rx} ${cy} A${rx} ${ry} 0 1 0 ${cx + rx} ${cy} A${rx} ${ry} 0 1 0 ${cx - rx} ${cy} Z`;
-    }
-    case 'rect': {
-      const { x, y, width: w, height: h } = shape;
-      const r = Math.min(shape.rx ?? 0, w / 2, h / 2);
-      if (!r) return `M${x} ${y} H${x + w} V${y + h} H${x} Z`;
-      return (
-        `M${x + r} ${y} H${x + w - r} A${r} ${r} 0 0 1 ${x + w} ${y + r} V${y + h - r} ` +
-        `A${r} ${r} 0 0 1 ${x + w - r} ${y + h} H${x + r} A${r} ${r} 0 0 1 ${x} ${y + h - r} ` +
-        `V${y + r} A${r} ${r} 0 0 1 ${x + r} ${y} Z`
-      );
-    }
-  }
-}
+export { pathData };
 
 let surfaces = 0;
 

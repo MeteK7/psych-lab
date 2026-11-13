@@ -44,6 +44,7 @@ interface CaseInfo {
   height: number;
   change: boolean;
   gap: number;
+  exportable: boolean;
 }
 
 const harness = async (page: Page) => {
@@ -426,6 +427,86 @@ test('forced colours: both backends draw in system colours only', async ({ page 
       expect(off, `${c.key}, ${side}: pixels away from edges not in a system colour`).toBe(0);
     }
   }
+});
+
+// ── Exports (M7 stage B): a file is the figure on screen ─────────────────────────────────────────
+// Each exportable case (every scene state, instrument set and Lab reference) is exported and shown
+// where the canvas would be, then compared with the SVG backend's figure under the same criteria.
+
+for (const dpr of [1, 2]) {
+  test.describe(`exports at device pixel ratio ${dpr}`, () => {
+    test.use({ deviceScaleFactor: dpr });
+    test.describe.configure({ timeout: 600_000 });
+
+    test(`an exported SVG, drawn in the page, is the figure on screen (×${dpr})`, async ({ page }) => {
+      const cases = (await harness(page)).filter((c) => c.exportable);
+      expect(cases.length).toBeGreaterThan(60);
+      for (const scheme of ['light', 'dark'] as const)
+        for (const c of cases) {
+          await show(page, c.key, scheme, { exported: 'svg-inline' });
+          const where = `${c.key} (${scheme}, ×${dpr}), exported SVG`;
+          const { svg, canvas: exported } = await capture(page, c);
+          // At 2× nothing is left out: labels are compared pixel by pixel too. At 1× the browser smooths
+          // the on-screen labels with colour fringes and the file's in grey, so there labels are
+          // compared by their boxes alone (below).
+          const exclude = dpr === 1 ? await textRegions(page) : [];
+          const r = await measure(page, { op: 'compare', a: svg, b: exported, interior: INTERIOR, edge: EDGE, exclude, scale: dpr });
+          expect(r.error, where).toBeUndefined();
+          expect(r.interiorFails, `${where}: differing pixels away from edges (worst ${r.worst})`).toBe(0);
+          expect(r.outsideShare, `${where}: ${r.outside} pixels outside the neighbourhood rule (worst ${r.worstOutside})`).toBeLessThanOrEqual(OUTSIDE_STILL);
+          // Every label in the same place, to a tenth of a unit.
+          const [onScreen, inFile] = await page.evaluate(() => [(globalThis as any).__parity.textBoxes(), (globalThis as any).__parity.exportedTextBoxes()]);
+          expect(inFile.length, `${where}: labels`).toBe(onScreen.length);
+          for (let i = 0; i < onScreen.length; i++)
+            for (const side of ['x', 'y', 'width', 'height'] as const)
+              expect(Math.abs(onScreen[i][side] - inFile[i][side]), `${where}: label ${onScreen[i].id}, ${side}`).toBeLessThanOrEqual(0.1);
+        }
+    });
+
+    test(`an exported PNG is the figure on screen, as the canvas is (×${dpr})`, async ({ page }) => {
+      const cases = (await harness(page)).filter((c) => c.exportable);
+      for (const scheme of ['light', 'dark'] as const)
+        for (const c of cases) {
+          await show(page, c.key, scheme, { exported: 'png' });
+          await expectSameShapes(page, c, dpr, `${c.key} (${scheme}, ×${dpr}), exported PNG`);
+        }
+    });
+  });
+}
+
+test('an exported SVG is a valid file on its own: it loads as an image and matches the figure', async ({ page }) => {
+  const cases = (await harness(page)).filter((c) => c.exportable).filter((_, i) => i % 5 === 0);
+  for (const scheme of ['light', 'dark'] as const)
+    for (const c of cases) {
+      // As an image, a file gets no styles from the page; text may be smoothed differently, so it is left out here.
+      await show(page, c.key, scheme, { exported: 'svg-image' });
+      await expectSameShapes(page, c, 1, `${c.key} (${scheme}), exported SVG as an image`);
+    }
+});
+
+test('exports are reproducible, and record exactly what they are', async ({ page }) => {
+  const cases = (await harness(page)).filter((c) => c.exportable);
+  const sample = cases.filter((_, i) => i % 7 === 0);
+  for (const c of sample)
+    for (const scheme of ['light', 'dark'] as const) {
+      const run = () =>
+        page.evaluate(
+          async ([k, s]) => [(globalThis as any).__parity.exportSvg(k, s), await (globalThis as any).__parity.exportPng(k, s, 1), await (globalThis as any).__parity.exportPng(k, s, 2)],
+          [c.key, scheme] as const,
+        ) as Promise<string[]>;
+      const [first, second] = [await run(), await run()];
+      expect(second, `${c.key} (${scheme}): the same bytes each time`).toEqual(first);
+      const facts = await page.evaluate(([k, s]) => (globalThis as any).__parity.exportFacts(k, s), [c.key, scheme] as const);
+      const recorded = JSON.parse(first[0].match(/<metadata>(.*)<\/metadata>/)![1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+      expect(recorded).toMatchObject({ exporter: 'visual-system.svg-export.v1', id: facts.id, version: facts.version, theme: facts.theme, scheme });
+      expect(first[0]).not.toMatch(/var\(|<style/);
+      // A light and a dark export of one composition differ: each has its own colours.
+    }
+  const key = cases.find((c) => c.key === 'mcii.path.plan')!.key;
+  const [light, dark] = await page.evaluate((k) => [(globalThis as any).__parity.exportSvg(k, 'light'), (globalThis as any).__parity.exportSvg(k, 'dark')], key);
+  expect(light).not.toBe(dark);
+  expect(light).toContain('#3766c7');
+  expect(dark).toContain('#a0c1ff');
 });
 
 export type { Measured };

@@ -27,11 +27,30 @@ export interface ParityCase {
   frame: ResolvedFrame;
   /** A change to play, towards `frame`; none for a still frame. */
   timeline?: ResolvedTimeline;
+  /**
+   * What the frame is, for export (M7): the composition or scene state it was built from, and its
+   * text alternative. Absent where the frame isn't one (a moment of interaction, the fill swatches).
+   */
+  source?: ExportSource;
+}
+
+/** What an exported file records about its origin; the scheme and theme version are added on export. */
+export interface ExportSource {
+  id: string;
+  version: number;
+  state?: string;
+  seed?: string;
+  alt: string;
 }
 
 const still = (key: string, group: string, name: string, frame: ResolvedFrame): ParityCase => ({ key, group, name, frame });
 const composed = (key: string, group: string, name: string, c: Composed, live?: LiveInput): ParityCase =>
-  still(key, group, name, live ? buildFrame(c.scene, SHOWN, lookupOf(c), live) : buildComposedFrame(c));
+  live
+    ? still(key, group, name, buildFrame(c.scene, SHOWN, lookupOf(c), live))
+    : {
+        ...still(key, group, name, buildComposedFrame(c)),
+        source: { id: c.scene.id, version: c.scene.version, ...(c.scene.seed ? { seed: c.scene.seed } : {}), alt: c.text['alt'] ?? '' },
+      };
 
 /** A change between two compositions of one figure, as the scene figure or the interactive figure plays it. */
 function change(key: string, group: string, name: string, before: Composed, after: Composed, input = false, live?: LiveInput): ParityCase {
@@ -76,7 +95,11 @@ export function parityCases(): ParityCase[] {
   const cases: ParityCase[] = [];
   for (const theme of Object.keys(THEMES) as ThemeId[]) cases.push(still(`calibration.${theme}`, 'Fill colours', `Every fill colour, ${theme}`, swatches(theme)));
   for (const { scene, text } of SCENES) {
-    for (const state of Object.keys(scene.states.states)) cases.push(still(`${scene.id}.${state}`, 'Scenes', `${scene.id}, ${state}`, buildFrame(scene, state, text)));
+    for (const state of Object.keys(scene.states.states))
+      cases.push({
+        ...still(`${scene.id}.${state}`, 'Scenes', `${scene.id}, ${state}`, buildFrame(scene, state, text)),
+        source: { id: scene.id, version: scene.version, state, ...(scene.seed ? { seed: scene.seed } : {}), alt: text(scene.alt[state]) ?? '' },
+      });
     for (const [from, to] of scene.transitions ?? [])
       cases.push({
         key: `${scene.id}.${from}-${to}`,

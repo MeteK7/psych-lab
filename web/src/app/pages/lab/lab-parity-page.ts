@@ -1,11 +1,16 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, viewChildren } from '@angular/core';
 
 import { AppEnvironment } from '../../shared/app-environment';
 import { FRAME_CLOCK, FrameClock, FrameFigure, FrameItem, ResolvedFrame, ResolvedTimeline } from '../../shared/visual/integration/frame-figure';
+import { ExportFacts, ExportScope } from '../../shared/visual/integration/export-scope';
+import { THEMES, ThemeId } from '../../shared/visual/styling/vocabulary';
 import { LabOverlay } from './lab-overlay';
 import { ParityCase, parityCases } from './lab-parity-cases';
 
 type Scheme = 'light' | 'dark';
+/** How an export is shown in the harness, in the canvas's place: its SVG in the page, its SVG as an image file, or its PNG. */
+type Exported = 'svg-inline' | 'svg-image' | 'png';
+type Format = 'svg' | 'png' | 'png@2x';
 
 /**
  * The frame clock on this page: the browser's, until the parity suite takes it over (`?harness`)
@@ -49,6 +54,8 @@ interface Shown {
   /** The canvas's frame: the same, unless a test swaps a colour on purpose (it must then fail). */
   canvasFrame: ResolvedFrame;
   timeline: ResolvedTimeline;
+  /** An export shown in the canvas's place, for the suite to compare with the figure on screen. */
+  exported?: Exported;
 }
 
 /** An item the suite checks is visibly drawn: text, small marks, the subject (M6, point 2). */
@@ -67,7 +74,7 @@ interface Checked {
  */
 @Component({
   selector: 'app-lab-parity-page',
-  imports: [FrameFigure, LabOverlay],
+  imports: [ExportScope, FrameFigure, LabOverlay],
   providers: [{ provide: FRAME_CLOCK, useValue: PARITY_CLOCK }],
   styleUrls: ['./lab.css'],
   styles: `
@@ -75,25 +82,58 @@ interface Checked {
     .pair .panel { padding: 0.4rem; }
     .stage { position: fixed; left: 0; top: 0; margin: 0; padding: 0; z-index: 2147483647; }
     .holder { position: absolute; left: 0; background: var(--bg); }
+    .export { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; margin: 0.5rem 0 1rem; }
+    .export select { max-width: 24rem; }
   `,
   template: `
     @if (env.showsDevelopment()) {
+      <!-- Export scopes (M7): one per theme and scheme, each resolving colours for its own. They draw nothing. -->
+      @for (scheme of schemes; track scheme) {
+        <div [class]="scheme">
+          @for (theme of themes; track theme) { <app-vis-export [theme]="theme" [scheme]="scheme" /> }
+        </div>
+      }
       @if (harness) {
         @for (s of shown(); track s.token) {
           <div class="stage" [class]="s.scheme" data-parity-stage>
             <div class="holder" data-parity="svg" [style.top.px]="0" [style.width.px]="s.frame.width" [style.height.px]="s.frame.height">
               <app-vis-frame backend="svg" [frame]="s.frame" [timeline]="s.timeline" [scheme]="s.scheme" />
             </div>
-            <div class="holder" data-parity="canvas" [style.top.px]="gap(s.frame)" [style.width.px]="s.frame.width" [style.height.px]="s.frame.height">
-              <app-vis-frame backend="canvas" [frame]="s.canvasFrame" [timeline]="s.timeline" [scheme]="s.scheme" />
-            </div>
+            @if (s.exported) {
+              <div class="holder" data-parity="export" [style.top.px]="gap(s.frame)" [style.width.px]="s.frame.width" [style.height.px]="s.frame.height"></div>
+            } @else {
+              <div class="holder" data-parity="canvas" [style.top.px]="gap(s.frame)" [style.width.px]="s.frame.width" [style.height.px]="s.frame.height">
+                <app-vis-frame backend="canvas" [frame]="s.canvasFrame" [timeline]="s.timeline" [scheme]="s.scheme" />
+              </div>
+            }
           </div>
         }
       } @else {
         <h1>Rendering parity</h1>
         <p class="lead">Every composition drawn by the SVG backend (left) and the canvas backend (right), in light and dark.</p>
         <app-lab-overlay />
+        <div class="export" role="group" aria-label="Export a composition">
+          <label class="tier">Export
+            <select #which>
+              @for (c of exportable; track c.key) { <option [value]="c.key">{{ c.name }}</option> }
+            </select>
+          </label>
+          <label class="tier">Scheme
+            <select #scheme><option value="light">Light</option><option value="dark">Dark</option></select>
+          </label>
+          <label class="tier">As
+            <select #format>
+              <option value="svg">SVG (text stays text)</option>
+              <option value="png">PNG, 1×</option>
+              <option value="png@2x">PNG, 2×</option>
+            </select>
+          </label>
+          <button type="button" (click)="download(which.value, $any(scheme.value), $any(format.value))">Download</button>
+        </div>
         <ul class="notes muted">
+          <li>An export is the picture itself: every colour resolved for its scheme, on a clear ground, with a record inside an SVG of
+            exactly what it is. The same composition gives the same file every time. <code>npm run visuals:export</code> writes the
+            whole catalogue to <code>web/visual-exports/</code>.</li>
           <li>The parity suite compares them in the browser at device pixel ratios 1, 1.5 and 2: no difference inside fills, lines and the
             ground beyond the measured rendering noise; differences only at edges, on at most 0.5% of the pixels; each label in the same
             place (within a pixel) with the same ink (within 5%); and every label, small mark and subject visibly drawn by both.</li>
@@ -130,6 +170,10 @@ export class LabParityPage {
   protected readonly schemes: Scheme[] = ['light', 'dark'];
   protected readonly harness = typeof location !== 'undefined' && new URLSearchParams(location.search).has('harness');
   private readonly cases = parityCases();
+  protected readonly themes = Object.keys(THEMES) as ThemeId[];
+  /** Every case that is a composition or a scene state: what can be exported. */
+  protected readonly exportable = this.cases.filter((c) => c.source);
+  private readonly scopes = viewChildren(ExportScope);
   protected readonly groups = [...new Set(this.cases.map((c) => c.group))].map((name) => ({ name, cases: this.cases.filter((c) => c.group === name) }));
   protected readonly shown = signal<Shown[]>([]);
   private token = 0;
@@ -143,16 +187,74 @@ export class LabParityPage {
     return Math.ceil((frame.height + 8) / 2) * 2;
   }
 
+  private scope(c: ParityCase, scheme: Scheme): ExportScope {
+    const scope = this.scopes().find((s) => s.theme() === c.frame.theme && s.scheme() === scheme);
+    if (!scope) throw new Error(`No export scope for ${c.frame.theme}, ${scheme}`);
+    return scope;
+  }
+
+  private exportCase(key: string): ParityCase & { source: NonNullable<ParityCase['source']> } {
+    const c = this.cases.find((x) => x.key === key);
+    if (!c?.source) throw new Error(`'${key}' can't be exported`);
+    return c as ParityCase & { source: NonNullable<ParityCase['source']> };
+  }
+
+  private facts(c: ParityCase & { source: NonNullable<ParityCase['source']> }, scheme: Scheme): ExportFacts {
+    return { ...c.source, theme: c.frame.theme, themeVersion: THEMES[c.frame.theme as ThemeId], scheme };
+  }
+
+  /** The case as a standalone SVG. */
+  exportSvg(key: string, scheme: Scheme): string {
+    const c = this.exportCase(key);
+    return this.scope(c, scheme).svg(c.frame, this.facts(c, scheme));
+  }
+
+  /** The case as a PNG, `scale` pixels per unit. */
+  exportPng(key: string, scheme: Scheme, scale: number): Promise<Blob> {
+    const c = this.exportCase(key);
+    return this.scope(c, scheme).png(c.frame, scale);
+  }
+
+  /** The file an export is saved as: the case, the scheme, and the scale of a PNG. */
+  fileName(key: string, scheme: Scheme, format: Format): string {
+    return `${key}.${scheme}${format === 'png@2x' ? '@2x.png' : `.${format}`}`;
+  }
+
+  protected async download(key: string, scheme: Scheme, format: Format): Promise<void> {
+    const blob = format === 'svg' ? new Blob([this.exportSvg(key, scheme)], { type: 'image/svg+xml' }) : await this.exportPng(key, scheme, format === 'png' ? 1 : 2);
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = this.fileName(key, scheme, format);
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
   private api() {
     const clock = PARITY_CLOCK;
     const frames = () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     return {
-      cases: () => this.cases.map((c) => ({ key: c.key, group: c.group, name: c.name, width: c.frame.width, height: c.frame.height, change: !!c.timeline, gap: this.gap(c.frame) })),
+      cases: () =>
+        this.cases.map((c) => ({ key: c.key, group: c.group, name: c.name, width: c.frame.width, height: c.frame.height, change: !!c.timeline, gap: this.gap(c.frame), exportable: !!c.source })),
+      /** Exports, for the suite and the export script: the SVG's text; a PNG as base64; the facts recorded. */
+      exportSvg: (key: string, scheme: Scheme) => this.exportSvg(key, scheme),
+      exportPng: async (key: string, scheme: Scheme, scale: number) => {
+        const bytes = new Uint8Array(await (await this.exportPng(key, scheme, scale)).arrayBuffer());
+        let binary = '';
+        for (const b of bytes) binary += String.fromCharCode(b);
+        return btoa(binary);
+      },
+      exportFacts: (key: string, scheme: Scheme) => this.facts(this.exportCase(key), scheme),
+      /** Each text's box in the export shown in the page, for comparison with `textBoxes`. */
+      exportedTextBoxes: () =>
+        [...document.querySelectorAll<SVGTextElement>('[data-parity="export"] text')].map((t) => {
+          const b = t.getBBox();
+          return { x: b.x, y: b.y, width: b.width, height: b.height };
+        }),
       /** Shows a case: whole, without one item, or that item alone; a change starts at time 0 on the hand-moved clock. */
       show: async (
         key: string,
         scheme: Scheme,
-        variant: { without?: string; only?: string; none?: boolean; play?: boolean; swap?: [string, string]; nudge?: { id: string; dx: number } } = {},
+        variant: { without?: string; only?: string; none?: boolean; play?: boolean; swap?: [string, string]; nudge?: { id: string; dx: number }; exported?: Exported } = {},
       ) => {
         const c = this.cases.find((x) => x.key === key);
         if (!c) throw new Error(`No parity case '${key}'`);
@@ -174,9 +276,30 @@ export class LabParityPage {
         clock.time = 0;
         this.shown.set([]);
         await frames();
-        this.shown.set([{ token: ++this.token, case: c, scheme, frame, canvasFrame, timeline: variant.play ? (c.timeline ?? []) : [] }]);
+        this.shown.set([{ token: ++this.token, case: c, scheme, frame, canvasFrame, timeline: variant.play ? (c.timeline ?? []) : [], exported: variant.exported }]);
         await document.fonts.ready;
         await frames();
+        if (variant.exported) {
+          // The export, where the canvas would be: the suite compares it with the figure on screen.
+          const holder = document.querySelector('[data-parity="export"]')!;
+          if (variant.exported === 'svg-inline') {
+            const svg = document.importNode(new DOMParser().parseFromString(this.exportSvg(key, scheme), 'image/svg+xml').documentElement, true);
+            // A block, as the backends' own surfaces are: an inline element would sit on the text baseline.
+            (svg as unknown as SVGElement).style.display = 'block';
+            holder.replaceChildren(svg);
+          } else {
+            const blob =
+              variant.exported === 'svg-image'
+                ? new Blob([this.exportSvg(key, scheme)], { type: 'image/svg+xml' })
+                : await this.exportPng(key, scheme, Math.max(1, Math.round(devicePixelRatio)));
+            const img = new Image(c.frame.width, c.frame.height);
+            img.style.display = 'block';
+            img.src = URL.createObjectURL(blob);
+            await img.decode();
+            holder.replaceChildren(img);
+          }
+          await frames();
+        }
       },
       /** Moves a playing change to `ms`: the canvas draws that moment; SVG's animations are paused there. */
       at: async (ms: number) => {
