@@ -1,5 +1,6 @@
 import { Composed, SHOWN, lookupOf } from '../../shared/visual/composition/compose';
 import { composeCauseMap } from '../../shared/visual/instruments/cause-map/cause-map';
+import { composeGuideDays } from '../../shared/visual/instruments/guide-days/guide-days';
 import { composeRounds } from '../../shared/visual/instruments/rounds/rounds';
 import { composeTracking, composeTrackingPreview } from '../../shared/visual/instruments/tracking/tracking';
 import { LiveInput, buildChangeTimeline, buildComposedFrame, buildFrame, buildTimeline } from '../../shared/visual/integration/pipeline';
@@ -91,6 +92,9 @@ function swatches(theme: ThemeId): ResolvedFrame {
   };
 }
 
+/** The bar's name in the worked example (an exercise takes it from its content). */
+const GUIDE_BAR = 'Days you plan to practise';
+
 export function parityCases(): ParityCase[] {
   const cases: ParityCase[] = [];
   for (const theme of Object.keys(THEMES) as ThemeId[]) cases.push(still(`calibration.${theme}`, 'Fill colours', `Every fill colour, ${theme}`, swatches(theme)));
@@ -115,6 +119,9 @@ export function parityCases(): ParityCase[] {
   cases.push(composed('tracking.preview', 'Instruments', 'state-reset.tracking: the preview', composeTrackingPreview({ ringRadius: RING_RADIUS, labels: PREVIEW_LABELS })));
   for (const onTarget of [false, true])
     cases.push(composed(`tracking.${onTarget ? 'inside' : 'outside'}`, 'Instruments', `state-reset.tracking: the game, pointer ${onTarget ? 'inside' : 'outside'} the ring`, composeTracking(trackingStill(onTarget))));
+  // The authoring guide's worked example, as still frames and as a change of number (the bar glides).
+  for (const days of [0, 3, 7]) cases.push(composed(`guide.days.${days}`, 'Instruments', `reference.guide.days: ${days} of 7 days`, composeGuideDays({ days, barLabel: GUIDE_BAR })));
+  cases.push(change('change.guide-days', 'Changes', 'reference.guide.days: a day added (the bar glides, a mark fills)', composeGuideDays({ days: 3, barLabel: GUIDE_BAR }), composeGuideDays({ days: 4, barLabel: GUIDE_BAR }), true));
   referenceCompositions().forEach((c, i) => cases.push(composed(`generators.${i}.${c.scene.id}`, 'Generators', c.scene.id, c)));
   for (const l of LAYOUTS) cases.push(composed(`layouts.${l.id}`, 'Layouts', l.name, l.composed));
   for (const m of MATERIALS_REFERENCES) cases.push(composed(`materials.${m.id}`, 'Materials', m.name, m.composed));

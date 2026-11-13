@@ -8,6 +8,7 @@ const RATIOS: Record<InstrumentName, string> = {
   'cause-map': '416 / 284',
   rounds: '480 / 16',
   'tracking-preview': '480 / 200',
+  'guide-days': '480 / 80',
 };
 
 /**

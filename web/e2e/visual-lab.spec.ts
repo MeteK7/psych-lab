@@ -1,5 +1,6 @@
 import { Page, expect, test } from '@playwright/test';
 
+import { ACCEPTED, baselineName } from '../src/app/pages/lab/lab-baselines';
 import { progress } from '../src/app/shared/visual/rendering/timing';
 import { expectNoSeriousA11yIssues } from './helpers';
 
@@ -18,9 +19,10 @@ const LAYOUT_SETS = 4; // S2: grid, radial, flow, packing
 const MATERIAL_SETS = 5; // S1 (M3): the material set, a grounded lit form, depth, depth with grain, a translucent overlap
 const SHEET_SETS = 12; // the review sheet (M3 stage C): lines, type, and materials and depth in each of the five areas
 const MOTION_SETS = 3; // S5 (M5): bars whose values change, a set that reflows, a route that grows and shrinks
+const GUIDE_SLOT = 1; // M8: the worked example shown through the slot, once, in the page's scheme (its interactive panels are images named by their text alternative)
 const LIVE_SETS = 3; // S6 (M4): a rating scale, a field with two axes and a choice of three, each the control itself
 const PANELS =
-  (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS + GENERATOR_SETS + LAYOUT_SETS + MATERIAL_SETS + SHEET_SETS + MOTION_SETS) * 2; // light and dark
+  (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS + GENERATOR_SETS + LAYOUT_SETS + MATERIAL_SETS + SHEET_SETS + MOTION_SETS) * 2 + GUIDE_SLOT; // light and dark
 
 for (const [name, media] of [
   ['light', { colorScheme: 'light' }],
@@ -65,40 +67,39 @@ for (const [name, media] of [
   });
 }
 
-// Approved baselines (docs/visual-reviews.md, entries 1–3): every state of each accepted scene
-// and every answer set of each accepted instrument, light and dark, and in forced colours. Each
-// figure is captured on its own fixed surface, 480 px wide (the scene's design width) at the
-// page's top left, so the Lab's layout can change without moving a single pixel of the capture.
-const BASELINES = [
-  { id: 'mcii.path', attribute: 'data-baseline', keys: ['future', 'contrast', 'plan', 'aside'] }, // entry 1
-  { id: 'cs2.cause-map', attribute: 'data-instrument', keys: ['start', 'placing', 'spread', 'heavy', 'six'] }, // entry 3
-];
-const CAPTURE = `.capture { position: fixed !important; left: 0; top: 0; width: 480px; margin: 0;
-  z-index: 2147483647; background: var(--bg); }`;
-
-async function capture(page: Page, figure: string, file: string, options: { maxDiffPixels?: number } = {}) {
-  const locator = page.locator(figure);
-  await locator.evaluate((el) => el.classList.add('capture'));
-  await expect(locator).toHaveScreenshot(file, { animations: 'disabled', ...options });
-  await locator.evaluate((el) => el.classList.remove('capture'));
-}
-
+// Approved baselines (M8 stage B; docs/visual-reviews.md, entries 1–3): one harness for every
+// composition a review accepted, as listed in src/app/pages/lab/lab-baselines.ts. Each state or answer
+// set is drawn on the parity page's test surface at the width it was approved at (480 px, at the page's
+// top left, on an opaque ground), light and dark, and in forced colours, and must match its approved
+// image pixel for pixel. lab-baselines.spec.ts ties the list to the review log and the snapshot folder.
 for (const [name, media, schemes] of [
   ['light and dark', { colorScheme: 'light' }, ['light', 'dark']],
   ['forced colours', { forcedColors: 'active' }, ['light']],
 ] as const) {
   test(`Visual Lab: approved baselines, ${name}`, async ({ page }) => {
     await page.emulateMedia(media);
-    await page.goto('/lab');
-    await page.addStyleTag({ content: CAPTURE });
-    for (const { id: composition, attribute, keys } of BASELINES)
-      for (const key of keys)
+    await page.goto('/lab/parity?harness');
+    await page.waitForFunction(() => '__parity' in globalThis);
+    for (const { composition, width, shots } of ACCEPTED)
+      for (const shot of shots)
         for (const scheme of schemes) {
-          const id = `${composition}-${key}-${scheme}`;
-          const file = media.forcedColors ? `${composition}-${key}-forced.png` : `${id}.png`;
-          await capture(page, `figure[${attribute}="${id}"]`, file);
+          await page.evaluate(([k, s, w]) => (globalThis as any).__parity.show(k, s, { width: w }), [shot.case, scheme, width] as const);
+          const file = baselineName(composition, shot.key, media.forcedColors ? 'forced' : scheme);
+          await expect(page.locator('[data-parity="svg"]'), file).toHaveScreenshot(file, { animations: 'disabled', threshold: 0, maxDiffPixels: 0 });
         }
   });
+}
+
+// The Lab's own figures are captured on a fixed surface of the same size where a test compares
+// them with an approved image (a transition's end, below).
+const CAPTURE = `.capture { position: fixed !important; left: 0; top: 0; width: 480px; margin: 0;
+  z-index: 2147483647; background: var(--bg); }`;
+
+async function capture(page: Page, figure: string, file: string) {
+  const locator = page.locator(figure);
+  await locator.evaluate((el) => el.classList.add('capture'));
+  await expect(locator).toHaveScreenshot(file, { animations: 'disabled' });
+  await locator.evaluate((el) => el.classList.remove('capture'));
 }
 
 // Motion (MCII step 4c): a transition plays and ends on the approved state, and under reduced
@@ -289,7 +290,7 @@ test('Visual Lab: native controls hold the same values as the figures', async ({
   await page.goto('/lab');
   await page.getByLabel('Keyboard and screen readers use').selectOption('native');
   await expect(page.locator('app-vis-interactive[role="group"]')).toHaveCount(0);
-  await expect(page.locator('app-vis-interactive[role="img"]')).toHaveCount(LIVE_SETS * 2);
+  await expect(page.locator('app-lab-interaction app-vis-interactive[role="img"]')).toHaveCount(LIVE_SETS * 2);
   await expect(page.locator('app-vis-interactive [role="slider"], app-vis-interactive [role="radio"]')).toHaveCount(0);
 
   const rating = page.getByRole('slider', { name: 'Rating' });
@@ -806,7 +807,7 @@ test('Visual Lab: the contents and the catalog lead to every section', async ({ 
   await page.goto('/lab');
   const contents = page.getByRole('navigation', { name: 'Lab contents' });
   const links = contents.getByRole('link');
-  await expect(links).toHaveCount(14);
+  await expect(links).toHaveCount(15);
   // Every link but the last (the parity page) goes to a heading on this page, and focus goes with it.
   const labels = await links.allInnerTexts();
   for (const label of labels.slice(0, -1)) {
@@ -827,4 +828,43 @@ test('Visual Lab: the contents and the catalog lead to every section', async ({ 
   await contents.getByRole('link', { name: /^Rendering parity/ }).click();
   await expect(page).toHaveURL(/\/lab\/parity$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Rendering parity' })).toBeVisible();
+});
+
+// The authoring guide's worked example (M8 stage C): bound as an exercise binds an instrument. The
+// exercise's native control holds the number; the figure takes the pointer and reports the number
+// back; both panels, the slot and the words follow the one value; the source names what was drawn.
+test('Visual Lab: the worked example keeps its native control and its figure in step', async ({ page }) => {
+  await page.goto('/lab');
+  const native = page.locator('input[data-guide="native"]');
+  const words = page.locator('output[data-guide="value"]');
+  const barX = (figure: string) =>
+    page.locator(`[data-guide="${figure}"] path[data-vis-id="bar"]`).evaluate((p) => Math.round((p as SVGGraphicsElement).getBBox().x + 3));
+  await expect(native).toHaveValue('3');
+  await expect(words).toHaveText('3 of 7 days');
+  await expect(page.locator('[data-guide="figure-light"]')).toHaveAttribute('role', 'img');
+  await expect(page.locator('[data-guide="figure-light"]')).toHaveAttribute('aria-label', '3 of 7 days planned.');
+  await expect(page.locator('[data-guide="source"]')).toHaveText(/^instrument:reference\.guide\.days@1;theme:action@\d+$/);
+
+  // A press on the figure's line places the bar: 6 days. The native control and the words follow.
+  const svg = page.locator('[data-guide="figure-light"] app-vis-svg svg');
+  await svg.scrollIntoViewIfNeeded();
+  const box = (await svg.boundingBox())!;
+  const s = box.width / 480;
+  await page.mouse.click(box.x + 390 * s, box.y + 64 * s);
+  await expect(native).toHaveValue('6');
+  await expect(words).toHaveText('6 of 7 days');
+  await expect.poll(() => barX('figure-dark')).toBe(390);
+
+  // The native control sets the number; both figures and the slot draw it.
+  await native.fill('1');
+  await expect(words).toHaveText('1 of 7 days');
+  await expect.poll(() => barX('figure-light')).toBe(90);
+  await expect.poll(() => barX('figure-dark')).toBe(90);
+  await expect.poll(() => barX('slot')).toBe(90);
+  await expect(page.locator('[data-guide="slot"]')).toHaveAttribute('aria-label', '1 of 7 days planned');
+  const filled = await page
+    .locator('[data-guide="figure-light"] path[data-vis-id^="day-"]')
+    .evaluateAll((els) => els.map((e) => getComputedStyle(e).fill !== 'none'));
+  expect(filled).toEqual([true, false, false, false, false, false, false]);
+  await expect(page.getByRole('list', { name: 'Validation problems' })).toHaveCount(0);
 });

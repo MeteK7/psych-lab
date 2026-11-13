@@ -56,6 +56,8 @@ interface Shown {
   timeline: ResolvedTimeline;
   /** An export shown in the canvas's place, for the suite to compare with the figure on screen. */
   exported?: Exported;
+  /** The size it's shown at, in CSS px: its design size, or scaled to a given width (the baseline harness, M8). */
+  size: { width: number; height: number };
 }
 
 /** An item the suite checks is visibly drawn: text, small marks, the subject (M6, point 2). */
@@ -96,13 +98,13 @@ interface Checked {
       @if (harness) {
         @for (s of shown(); track s.token) {
           <div class="stage" [class]="s.scheme" data-parity-stage>
-            <div class="holder" data-parity="svg" [style.top.px]="0" [style.width.px]="s.frame.width" [style.height.px]="s.frame.height">
+            <div class="holder" data-parity="svg" [style.top.px]="0" [style.width.px]="s.size.width" [style.height.px]="s.size.height">
               <app-vis-frame backend="svg" [frame]="s.frame" [timeline]="s.timeline" [scheme]="s.scheme" />
             </div>
             @if (s.exported) {
-              <div class="holder" data-parity="export" [style.top.px]="gap(s.frame)" [style.width.px]="s.frame.width" [style.height.px]="s.frame.height"></div>
+              <div class="holder" data-parity="export" [style.top.px]="gap(s.size.height)" [style.width.px]="s.size.width" [style.height.px]="s.size.height"></div>
             } @else {
-              <div class="holder" data-parity="canvas" [style.top.px]="gap(s.frame)" [style.width.px]="s.frame.width" [style.height.px]="s.frame.height">
+              <div class="holder" data-parity="canvas" [style.top.px]="gap(s.size.height)" [style.width.px]="s.size.width" [style.height.px]="s.size.height">
                 <app-vis-frame backend="canvas" [frame]="s.canvasFrame" [timeline]="s.timeline" [scheme]="s.scheme" />
               </div>
             }
@@ -183,8 +185,8 @@ export class LabParityPage {
   }
 
   /** The canvas sits below the SVG at an even number of CSS px, so both start on a device pixel at ratio 1.5. */
-  protected gap(frame: ResolvedFrame): number {
-    return Math.ceil((frame.height + 8) / 2) * 2;
+  protected gap(height: number): number {
+    return Math.ceil((height + 8) / 2) * 2;
   }
 
   private scope(c: ParityCase, scheme: Scheme): ExportScope {
@@ -234,7 +236,7 @@ export class LabParityPage {
     const frames = () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     return {
       cases: () =>
-        this.cases.map((c) => ({ key: c.key, group: c.group, name: c.name, width: c.frame.width, height: c.frame.height, change: !!c.timeline, gap: this.gap(c.frame), exportable: !!c.source })),
+        this.cases.map((c) => ({ key: c.key, group: c.group, name: c.name, width: c.frame.width, height: c.frame.height, change: !!c.timeline, gap: this.gap(c.frame.height), exportable: !!c.source })),
       /** Exports, for the suite and the export script: the SVG's text; a PNG as base64; the facts recorded. */
       exportSvg: (key: string, scheme: Scheme) => this.exportSvg(key, scheme),
       exportPng: async (key: string, scheme: Scheme, scale: number) => {
@@ -254,7 +256,7 @@ export class LabParityPage {
       show: async (
         key: string,
         scheme: Scheme,
-        variant: { without?: string; only?: string; none?: boolean; play?: boolean; swap?: [string, string]; nudge?: { id: string; dx: number }; exported?: Exported } = {},
+        variant: { without?: string; only?: string; none?: boolean; play?: boolean; swap?: [string, string]; nudge?: { id: string; dx: number }; exported?: Exported; width?: number } = {},
       ) => {
         const c = this.cases.find((x) => x.key === key);
         if (!c) throw new Error(`No parity case '${key}'`);
@@ -272,11 +274,14 @@ export class LabParityPage {
             return i;
           }),
         };
+        // A width scales the drawing to it (the baseline harness captures at an approved width); otherwise its design size.
+        const width = variant.width ?? c.frame.width;
+        const size = { width, height: (c.frame.height * width) / c.frame.width };
         clock.manual = !!variant.play;
         clock.time = 0;
         this.shown.set([]);
         await frames();
-        this.shown.set([{ token: ++this.token, case: c, scheme, frame, canvasFrame, timeline: variant.play ? (c.timeline ?? []) : [], exported: variant.exported }]);
+        this.shown.set([{ token: ++this.token, case: c, scheme, frame, canvasFrame, timeline: variant.play ? (c.timeline ?? []) : [], exported: variant.exported, size }]);
         await document.fonts.ready;
         await frames();
         if (variant.exported) {

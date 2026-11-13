@@ -17,6 +17,7 @@ import { THEMES } from '../../shared/visual/styling/vocabulary';
 import { LabAssets } from './lab-assets';
 import { LabCatalog, LabContents } from './lab-catalog';
 import { LabGenerators } from './lab-generators';
+import { LabGuide } from './lab-guide';
 import { LabInteraction } from './lab-interaction';
 import { LabMotion } from './lab-motion';
 import { LabOverlay } from './lab-overlay';
@@ -35,7 +36,7 @@ import { LabTrackingStill } from './lab-tracking-still';
  */
 @Component({
   selector: 'app-lab-page',
-  imports: [SceneFigure, InstrumentFigure, LabAssets, LabCatalog, LabContents, LabGenerators, LabInteraction, LabMaterials, LabMotion, LabOverlay, LabSheet, LabStimulus, LabTrackingStill],
+  imports: [SceneFigure, InstrumentFigure, LabAssets, LabCatalog, LabContents, LabGenerators, LabGuide, LabInteraction, LabMaterials, LabMotion, LabOverlay, LabSheet, LabStimulus, LabTrackingStill],
   template: `
     <h1>Visual Lab</h1>
     @if (env.showsDevelopment()) {
@@ -256,6 +257,7 @@ import { LabTrackingStill } from './lab-tracking-still';
       <app-lab-stimulus />
       <app-lab-assets />
       <app-lab-sheet [schemes]="schemes" />
+      <app-lab-guide [schemes]="schemes" />
       <app-lab-catalog />
     } @else {
       <p>The Visual Lab is available in the development build only.</p>
