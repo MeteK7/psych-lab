@@ -9,6 +9,7 @@ const RATIOS: Record<InstrumentName, string> = {
   rounds: '480 / 16',
   'tracking-preview': '480 / 200',
   'guide-days': '480 / 80',
+  view: '480 / 240',
 };
 
 /**

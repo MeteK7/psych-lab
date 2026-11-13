@@ -55,6 +55,7 @@ export const SECTIONS: readonly Where[] = [
   ASSETS_AT,
   SHEET,
   at('lab-guide', 'Worked example: reference.guide.days'),
+  at('lab-view', 'camera-angle.view'),
   at('lab-catalog', 'Catalog of capabilities'),
   PARITY_PAGE,
 ];
@@ -156,11 +157,11 @@ export const CATALOG: readonly Subsystem[] = [
       },
       {
         name: 'Figures built from data (instruments)',
-        what: 'A pure function from an exercise’s data to a figure, through the same pipeline as a scene: the cause map, the rounds, the dot game’s preview, and the authoring guide’s worked example. Each records what it drew as `instrument:<id>@<version>;theme:<theme>@<version>`.',
-        covers: ['instrument:cause-map', 'instrument:rounds', 'instrument:tracking-preview', 'instrument:guide-days'],
+        what: 'A pure function from an exercise’s data to a figure, through the same pipeline as a scene: the cause map, the rounds, the dot game’s preview, the authoring guide’s worked example, and the camera angle’s view. Each records what it drew as `instrument:<id>@<version>;theme:<theme>@<version>`.',
+        covers: ['instrument:cause-map', 'instrument:rounds', 'instrument:tracking-preview', 'instrument:guide-days', 'instrument:view'],
         since: 'v0.2, M1',
         where: at('lab-instruments', 'cs2.cause-map'),
-        tests: [`${V}/instruments/cause-map/cause-map.policy.spec.ts`, `${V}/instruments/rounds/rounds.policy.spec.ts`, `${V}/instruments/tracking/tracking.policy.spec.ts`, `${V}/instruments/guide-days/guide-days.policy.spec.ts`],
+        tests: [`${V}/instruments/cause-map/cause-map.policy.spec.ts`, `${V}/instruments/rounds/rounds.policy.spec.ts`, `${V}/instruments/tracking/tracking.policy.spec.ts`, `${V}/instruments/guide-days/guide-days.policy.spec.ts`, `${V}/instruments/view/view.policy.spec.ts`],
       },
     ],
   },

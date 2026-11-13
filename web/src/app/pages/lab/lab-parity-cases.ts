@@ -3,13 +3,14 @@ import { composeCauseMap } from '../../shared/visual/instruments/cause-map/cause
 import { composeGuideDays } from '../../shared/visual/instruments/guide-days/guide-days';
 import { composeRounds } from '../../shared/visual/instruments/rounds/rounds';
 import { composeTracking, composeTrackingPreview } from '../../shared/visual/instruments/tracking/tracking';
+import { POSITIONS, composeView } from '../../shared/visual/instruments/view/view';
 import { LiveInput, buildChangeTimeline, buildComposedFrame, buildFrame, buildTimeline } from '../../shared/visual/integration/pipeline';
 import type { ResolvedFrame, ResolvedTimeline } from '../../shared/visual/integration/frame-figure';
 import { SCENES } from '../../shared/visual/scenes';
 import { resolveStyle } from '../../shared/visual/styling/resolve';
 import { INPUT_CHANGE, THEMES, ThemeId } from '../../shared/visual/styling/vocabulary';
 import { LAYOUTS, referenceCompositions } from './lab-generators';
-import { CAUSE_AXES, CAUSE_SETS, PREVIEW_LABELS, RING_RADIUS, ROUNDS_TOTAL, ROUND_SETS, trackingStill } from './lab-instrument-sets';
+import { CAUSE_AXES, CAUSE_SETS, PREVIEW_LABELS, RING_RADIUS, ROUNDS_TOTAL, ROUND_SETS, VIEW_WORDS, trackingStill } from './lab-instrument-sets';
 import { choiceFigure, fieldFigure, ratingFigure } from './lab-interaction-figures';
 import { MATERIALS_REFERENCES } from './lab-materials';
 import { BAR_SETS, barsFigure, routeFigure, setFigure } from './lab-motion-figures';
@@ -122,6 +123,11 @@ export function parityCases(): ParityCase[] {
   // The authoring guide's worked example, as still frames and as a change of number (the bar glides).
   for (const days of [0, 3, 7]) cases.push(composed(`guide.days.${days}`, 'Instruments', `reference.guide.days: ${days} of 7 days`, composeGuideDays({ days, barLabel: GUIDE_BAR })));
   cases.push(change('change.guide-days', 'Changes', 'reference.guide.days: a day added (the bar glides, a mark fills)', composeGuideDays({ days: 3, barLabel: GUIDE_BAR }), composeGuideDays({ days: 4, barLabel: GUIDE_BAR }), true));
+  // "Change the camera angle": each position as a still frame, a step back and a jump from end to end (glides that follow input).
+  for (let position = 0; position < POSITIONS; position++)
+    cases.push(composed(`view.${position}`, 'Instruments', `camera-angle.view: position ${position}`, composeView({ position, words: VIEW_WORDS })));
+  cases.push(change('change.view-step', 'Changes', 'camera-angle.view: one step back (the view glides, you fade in)', composeView({ position: 0, words: VIEW_WORDS }), composeView({ position: 1, words: VIEW_WORDS }), true));
+  cases.push(change('change.view-far', 'Changes', 'camera-angle.view: close up to furthest back (glides, you fade in, the line is drawn)', composeView({ position: 0, words: VIEW_WORDS }), composeView({ position: 3, words: VIEW_WORDS }), true));
   referenceCompositions().forEach((c, i) => cases.push(composed(`generators.${i}.${c.scene.id}`, 'Generators', c.scene.id, c)));
   for (const l of LAYOUTS) cases.push(composed(`layouts.${l.id}`, 'Layouts', l.name, l.composed));
   for (const m of MATERIALS_REFERENCES) cases.push(composed(`materials.${m.id}`, 'Materials', m.name, m.composed));

@@ -5,6 +5,7 @@ import { CauseMapInput, composeCauseMap } from '../instruments/cause-map/cause-m
 import { GuideDaysInput, composeGuideDays } from '../instruments/guide-days/guide-days';
 import { RoundsInput, composeRounds } from '../instruments/rounds/rounds';
 import { PreviewInput, composeTrackingPreview } from '../instruments/tracking/tracking';
+import { ViewInput, composeView } from '../instruments/view/view';
 import { THEMES } from '../styling/vocabulary';
 import { SceneFigure, SurfaceScheme } from './scene-figure';
 
@@ -22,6 +23,8 @@ export const INSTRUMENTS = {
   'tracking-preview': (inputs: PreviewInput) => composeTrackingPreview(inputs),
   /** The authoring guide's worked example (instruments/guide-days): a reference shown in the Lab; no exercise uses it. */
   'guide-days': (inputs: GuideDaysInput) => composeGuideDays(inputs),
+  /** "Change the camera angle" (instruments/view): the moment seen from where a person chooses to look from. */
+  view: (inputs: ViewInput) => composeView(inputs),
 } as const;
 
 export type InstrumentName = keyof typeof INSTRUMENTS;
