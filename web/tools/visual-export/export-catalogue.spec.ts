@@ -42,7 +42,8 @@ test('export the catalogue', async ({ page }) => {
 
   // Emptied, not removed: Windows refuses to remove a folder that is open in Explorer or a terminal.
   mkdirSync(OUT, { recursive: true });
-  for (const name of readdirSync(OUT)) rmSync(join(OUT, name), { recursive: true, force: true });
+  // The drafts of generated pictures (npm run visuals:generate) live in a folder of their own here, and stay.
+  for (const name of readdirSync(OUT)) if (name !== 'generated') rmSync(join(OUT, name), { recursive: true, force: true });
   const files: { path: string; bytes: number; sha256: string }[] = [];
   const save = (name: string, data: Buffer) => {
     writeFileSync(join(OUT, name), data);

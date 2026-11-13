@@ -22,10 +22,27 @@ export const ASSETS: readonly AssetEntry[] = [
     licence: 'Project-owned',
     status: 'draft',
   },
+  {
+    // The Lab's reference for the generation path (M7 stage C): the draft `npm run visuals:generate`
+    // makes with the local test provider, a fixed hand-written picture. No AI made it. A draft.
+    id: 'reference.generated',
+    version: 1,
+    files: {
+      light: { path: 'visuals/generated/reference.generated.light.svg', bytes: 484, sha256: 'fb8949cc90271cc5fd6683e60c58f936ae7f82f01833f8abe5b580a1fd126995' },
+      dark: { path: 'visuals/generated/reference.generated.dark.svg', bytes: 484, sha256: '82a0824cb451233241adebcafb213c391201f127336722770b623cd53814bd61' },
+    },
+    width: 480,
+    height: 120,
+    alt: 'asset.reference.generated',
+    origin: { kind: 'generated', provider: 'local-test', brief: { area: 'action', frame: 'banner', subject: 'path' }, seed: 'lab-1' },
+    licence: 'Project-owned',
+    status: 'draft',
+  },
 ];
 
 const TEXT: Readonly<Record<string, string>> = {
   'asset.reference.mark': 'Reference asset: a mark in the middle of a line between two points',
+  'asset.reference.generated': 'Reference asset: a dashed path rising from a line to a round mark',
 };
 
 /** The words of the assets' text alternatives, by content key. */

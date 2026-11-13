@@ -95,6 +95,12 @@ describe('Visual System dependency rules', () => {
     expect(outside(inFolder('assets'), ['assets'])).toEqual([]);
   });
 
+  it('4g. the app never reaches the generation path: nothing in it imports assets/generate or the authoring tools', () => {
+    // Only the authoring script (web/tools/visual-generate) runs a provider, so no session can.
+    const users = app.flatMap(({ path, imports }) => imports.filter((i) => i === `${ROOT}/assets/generate` || i.startsWith('tools/')).map((i) => `${path} imports ${i}`));
+    expect(users).toEqual([]);
+  });
+
   it('5. rendering imports only itself and Angular, and only integration imports a backend', () => {
     expect(outside(inFolder('rendering'), ['rendering', '@angular/core'])).toEqual([]);
     const users = app

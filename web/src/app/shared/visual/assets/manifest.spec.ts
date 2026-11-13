@@ -60,11 +60,11 @@ describe('S8 the asset manifest (M7)', () => {
     expect(assetProblems(entry({ origin: { kind: 'authored', author: '' } }), there, text)).toEqual(["asset 'test.asset': an authored asset names its author"]);
   });
 
-  it('keeps the brief of a generated asset to closed-vocabulary words, never typed text', () => {
+  it('keeps the brief of a generated asset to words from the fixed lists, never typed text', () => {
     const generated = (brief: Record<string, string>) => entry({ origin: { kind: 'generated', provider: 'test-provider', brief } });
-    expect(assetProblems(generated({ subject: 'path', mood: 'calm-morning' }), there, text)).toEqual([]);
-    expect(assetProblems(generated({ subject: 'A long sentence someone typed.' }), there, text)).toEqual([
-      "asset 'test.asset': a brief holds closed-vocabulary words only, never typed text",
+    expect(assetProblems(generated({ area: 'action', frame: 'banner', subject: 'path' }), there, text)).toEqual([]);
+    expect(assetProblems(generated({ area: 'action', frame: 'banner', subject: 'A long sentence someone typed.' }), there, text)).toEqual([
+      "asset 'test.asset': a brief holds words from the fixed lists only, never typed text ('A long sentence someone typed.' isn't a listed subject (path, horizon, stones))",
     ]);
     expect(assetProblems(generated({}), there, text)).toEqual(["asset 'test.asset': a generated asset keeps its brief"]);
   });

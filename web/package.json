@@ -8,7 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "e2e": "playwright test",
-    "visuals:export": "playwright test -c playwright.export.config.ts"
+    "visuals:export": "playwright test -c playwright.export.config.ts",
+    "visuals:generate": "playwright test -c playwright.generate.config.ts"
   },
   "private": true,
   "packageManager": "npm@11.19.0",

@@ -1,3 +1,5 @@
+import { briefProblems } from './brief';
+
 /**
  * S8 Assets: the manifest (milestone M7, docs/visual-system.md §9). A picture that is a file, not
  * drawn live, has one entry here saying exactly what it is: its files (light and dark) with their
@@ -52,7 +54,6 @@ export interface FileFacts {
 }
 
 const ID = /^[a-z0-9]+(?:[.-][a-z0-9]+)*$/;
-const WORD = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const PATH = /^visuals\/[a-z0-9/._-]+\.(svg|png)$/;
 
 /** The id recorded with a shown visual. */
@@ -90,9 +91,8 @@ export function assetProblems(entry: AssetEntry, facts: (path: string) => FileFa
     if (!origin.author?.trim()) problems.push(`${where}: an authored asset names its author`);
   } else {
     if (!origin.provider?.trim()) problems.push(`${where}: a generated asset names its provider`);
-    const brief = Object.entries(origin.brief ?? {});
-    if (!brief.length) problems.push(`${where}: a generated asset keeps its brief`);
-    if (brief.some(([k, v]) => !WORD.test(k) || !WORD.test(v))) problems.push(`${where}: a brief holds closed-vocabulary words only, never typed text`);
+    if (!Object.keys(origin.brief ?? {}).length) problems.push(`${where}: a generated asset keeps its brief`);
+    else if (briefProblems(origin.brief).length) problems.push(`${where}: a brief holds words from the fixed lists only, never typed text (${briefProblems(origin.brief).join('; ')})`);
   }
   if (entry.status === 'approved') {
     if (!entry.review?.by?.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(entry.review?.on ?? '')) problems.push(`${where}: an approved asset says who reviewed it and when`);
