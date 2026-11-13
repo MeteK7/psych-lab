@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.booth import booth_exercises, not_in_booth
 from app.clock import get_now
 from app.config import Settings, get_settings
 from app.db import get_db
@@ -74,6 +75,11 @@ def upsert_session(
     if settings.app_env == "production" and body.condition in DEVELOPMENT_ONLY_EXERCISES:
         # Released only once its content review and full-text gates pass.
         raise HTTPException(status.HTTP_403_FORBIDDEN, "This exercise isn't released yet.")
+    if settings.app_profile == "booth" and (
+        body.mode != "try" or body.condition not in booth_exercises()
+    ):
+        # The booth runs Try it only, and only exercises rated safe for unsupervised use.
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "This exercise isn't offered here.")
     fields = _fields(body)
     _check_reveal(body, session_id, db)
     record = db.get(SessionRecord, session_id)
@@ -99,7 +105,8 @@ def upsert_session(
     return record
 
 
-@router.get("/sessions", response_model=list[SessionOut])
+# Records are never listed in the booth, where they'd belong to other visitors.
+@router.get("/sessions", response_model=list[SessionOut], dependencies=[Depends(not_in_booth)])
 def list_sessions(
     db: DbSession,
     mode: Mode | None = None,
@@ -111,11 +118,18 @@ def list_sessions(
     return list(db.scalars(query))
 
 
-@router.patch("/sessions/{session_id}/follow-up", response_model=SessionOut)
+@router.patch(
+    "/sessions/{session_id}/follow-up",
+    response_model=SessionOut,
+    dependencies=[Depends(not_in_booth)],
+)
 def record_follow_up(session_id: uuid.UUID, body: FollowUp, db: DbSession) -> SessionRecord:
     record = db.get(SessionRecord, session_id)
     if record is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Session not found.")
+    if record.mode == "try":
+        # The follow-up is for experiment days; Try it keeps no answers or notes.
+        raise HTTPException(status.HTTP_409_CONFLICT, "Try it runs have no follow-up.")
     record.followup = {**body.model_dump(), "recorded_at": datetime.now(UTC).isoformat()}
     db.commit()
     db.refresh(record)

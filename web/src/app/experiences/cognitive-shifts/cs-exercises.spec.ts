@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 
 import { SessionUpsert } from '../../api/types';
+import { CHOOSE_SINK, KEEP_EVERYTHING, sinkFor } from '../../flow/result-sink';
 import { SessionPage } from '../../flow/session-page';
 
 // The three Cognitive shifts exercises, run through the session page as a person would.
@@ -15,13 +16,16 @@ interface Run {
   bodies: SessionUpsert[];
 }
 
-function start(condition: string, mode = 'try', reveal?: string): Run {
+function start(condition: string, mode = 'try', reveal?: string, sink = KEEP_EVERYTHING): Run {
   TestBed.configureTestingModule({
     imports: [SessionPage],
     providers: [
       provideRouter([]),
       provideHttpClient(),
       provideHttpClientTesting(),
+      // These tests check the record each exercise makes; Try it then keeps only its metadata
+      // (flow/result-sink.ts), which the last test here checks with the real sink.
+      { provide: CHOOSE_SINK, useValue: () => sink },
       {
         provide: ActivatedRoute,
         useValue: { snapshot: { queryParamMap: convertToParamMap({ mode, condition, ...(reveal ? { reveal } : {}) }) } },
@@ -251,25 +255,53 @@ describe('Cognitive shifts exercises', () => {
     await press(run, 'Next');
 
     expect(heading(run)).toBe('Step 4 of 6: Place each cause');
+    // The map's marks, as the numbers each lists; [n] is the cause being placed, in bold.
+    const marks = () => {
+      const byMark = new Map<string, string[]>();
+      for (const t of Array.from(root(run).querySelectorAll<SVGElement>('figure text[data-vis-id*="-num-"]'))) {
+        const [mark] = t.getAttribute('data-vis-id')!.split('-num-');
+        const n = t.textContent!.trim();
+        byMark.set(mark, [...(byMark.get(mark) ?? []), t.style.fontWeight === '700' ? `[${n}]` : n]);
+      }
+      return [...byMark.values()].map((numbers) => numbers.join(' '));
+    };
+    // The map loads on demand; wait for it as a person would.
+    const mapShown = async () => {
+      for (let i = 0; i < 50 && !root(run).querySelector('figure [data-vis-id="frame"]'); i++) await settle(run);
+    };
+    await mapShown();
+    // Every cause starts in the middle: one mark lists them all, so the one being placed isn't hidden.
+    expect(marks()).toEqual(['[1] 2 3']);
     for (let i = 0; i < 3; i++) {
       for (const slider of Array.from(root(run).querySelectorAll<HTMLInputElement>('input[type="range"]'))) {
         await slide(run, slider, 1);
       }
       await press(run, i < 2 ? 'Next cause' : 'Next');
+      if (i === 0) expect(marks()).toEqual(['1', '[2] 3']);
     }
 
     expect(heading(run)).toBe('Step 5 of 6: What the map shows');
     const map = root(run).textContent!;
     expect(map).toContain("That's a heavy way to see it.");
     expect(map).toContain("Effort is one possible cause among many. It isn't the answer by default.");
-    expect(root(run).querySelector('figure svg[role="img"]')).not.toBeNull();
+    expect(root(run).querySelector('figure [role="img"]')?.getAttribute('aria-label')).toContain('Map of your causes');
     expect(root(run).querySelectorAll('.map-list li')).toHaveLength(3);
+    // A cause that ends a sentence takes no colon; one that doesn't keeps it.
+    const lines = Array.from(root(run).querySelectorAll('.map-list li')).map((li) => li.textContent!.trim());
+    expect(lines[0]).toBe("I'm just not good at this. About me, lasting, affects everything");
+    expect(lines[2]).toBe('PRIVATE cause: about me, lasting, affects everything');
+    expect(lines.join(' ')).not.toContain('.:');
+    // The heavy map shows all three causes, in one place, with nothing in bold.
+    await mapShown();
+    expect(marks()).toEqual(['1 2 3']);
+    expect(root(run).querySelector('figure [data-vis-id="mark-2"]')).toBeNull();
     await check(run, root(run).querySelector('.add app-card-pick input[value="chance"]'));
     for (const slider of Array.from(root(run).querySelectorAll<HTMLInputElement>('.add input[type="range"]'))) {
       await slide(run, slider, 5);
     }
     await press(run, 'Add');
     expect(root(run).querySelectorAll('.map-list li')).toHaveLength(4);
+    expect(marks()).toEqual(['1 2 3', '4']);
     await press(run, 'Next');
 
     expect(heading(run)).toBe('Step 6 of 6: Anything to change?');
@@ -413,4 +445,34 @@ describe('Cognitive shifts exercises', () => {
       TestBed.resetTestingModule();
     }
   });
+
+  it('in Try it, sends only that each exercise ran: no cards, places or ratings', async () => {
+    for (const condition of ['cs_other_readings', 'cs_why_it_happened', 'cs_not_enough_to_go_on']) {
+      TestBed.resetTestingModule();
+      const run = start(condition, 'try', undefined, sinkFor('try'));
+      await run.fixture.whenStable();
+      await press(run, 'Begin');
+      const first = root(run).querySelector<HTMLInputElement>('input[type="radio"]');
+      if (first) await check(run, first);
+      const field = root(run).querySelector<HTMLInputElement>('input[type="text"], textarea');
+      if (field) await type(run, field as HTMLInputElement, 'PRIVATE words');
+      if (Array.from(root(run).querySelectorAll('button')).some((b) => b.textContent?.trim() === 'Next' && !b.disabled)) {
+        await press(run, 'Next');
+      }
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      await press(run, 'Stop the exercise');
+      expect(run.bodies.length, condition).toBeGreaterThan(1);
+      for (const body of run.bodies) {
+        expect(body.plan, condition).toBeNull();
+        expect(body.ratings, condition).toBeNull();
+        for (const step of body.steps ?? []) {
+          expect(Object.keys(step.result ?? {}).every((k) => k === 'during'), condition).toBe(true);
+        }
+      }
+      expect(run.bodies.at(-1)?.status, condition).toBe('aborted');
+      expect(JSON.stringify(run.bodies), condition).not.toContain('PRIVATE');
+      vi.restoreAllMocks();
+    }
+  });
 });
+

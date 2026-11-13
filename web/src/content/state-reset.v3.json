@@ -21,7 +21,7 @@
       "ring": "the ring: keep your pointer inside it",
       "pointer": "your pointer"
     },
-    "text": "A dot moves slowly around the box, with a ring around it. Keep your pointer inside the ring as the dot moves. The ring changes colour while you're inside it.",
+    "text": "A dot moves slowly around the box, with a ring around it. Keep your pointer inside the ring as the dot moves. The ring changes colour and gets thicker while you're inside it.",
     "mouse": "Mouse or touchpad: just move the pointer; no clicking needed.",
     "keyboard": "Keyboard: press Tab to select the box, then move your marker (a small cross) with the arrow keys.",
     "start_practice": "Start practice",

@@ -1,15 +1,25 @@
 <a class="skip-link" href="#main">Skip to content</a>
 <header>
   <a routerLink="/" class="brand">Experiences (working title)</a>
-  @if (environment() === 'development') {
+  @if (environment.value() === 'development') {
     <span class="env-badge" title="Development build: Test mode only, never your experiment">Development</span>
   }
   <nav aria-label="Main">
     <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page">Home</a>
-    <a routerLink="/experiment" routerLinkActive="active" ariaCurrentWhenActive="page">My experiment</a>
-    <a routerLink="/records" routerLinkActive="active" ariaCurrentWhenActive="page">My records</a>
+    <!-- A booth has no experiment and lists no records: they'd belong to other visitors. -->
+    @if (!environment.booth()) {
+      <a routerLink="/experiment" routerLinkActive="active" ariaCurrentWhenActive="page">My experiment</a>
+      <a routerLink="/records" routerLinkActive="active" ariaCurrentWhenActive="page">My records</a>
+    }
   </nav>
 </header>
+@if (environment.booth(); as booth) {
+  <!-- The booth's local support line, set by its operator, on every screen (M1). -->
+  <p class="support-line" role="note">{{ booth.support_line }}</p>
+  @if (idleReset(); as component) {
+    <ng-container *ngComponentOutlet="component; inputs: { seconds: booth.idle_seconds }" />
+  }
+}
 <main id="main" tabindex="-1">
   <router-outlet />
 </main>

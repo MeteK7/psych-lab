@@ -1,0 +1,242 @@
+import { boundsOf } from '../composition/bounds';
+import { Composed, SHOWN, lookupOf } from '../composition/compose';
+import { ElementId, SceneDefinition, StateName, TextLookup } from '../composition/scene';
+import { dotsPath, poissonDisc } from '../generation/distributions';
+import { generate, generateEdge } from '../generation/registry';
+import { deriveSeed } from '../generation/random';
+import { Pace, QualityTier, Track, planChange, planMotion } from '../motion/plan-motion';
+import { DrawPaint, Drawable, FrameItem, ResolvedFrame, ResolvedTimeline, ResolvedTrack } from '../rendering/frame';
+import { canMorph } from '../rendering/tween';
+import { resolveState } from '../state/resolve-state';
+import { resolveFocus, resolveHalo, resolveLabel, resolveStyle } from '../styling/resolve';
+import { LINE_HEIGHT, wrapText } from '../styling/type';
+import { Emphasis, FOCUS_RING, GRAIN, frameSize } from '../styling/vocabulary';
+
+/**
+ * The pipeline (docs/visual-system.md §3.2), assembled outside every capability: S3 gives the
+ * elements and their geometry, S4 their targets for the state, S1 their paint. The result is a
+ * resolved frame any backend can draw. It runs when a scene or state changes. Compositions built
+ * from data (composition/compose.ts) go through it the same way; the dot game builds one per frame.
+ * S2 Generation: a `generated` element's path is made here, from its generator, parameters and
+ * its own seed, and kept, so a scene that changes state doesn't recompute it.
+ */
+const generated = new Map<string, string>();
+
+/** A gradient carries its shape's bounding box, so a canvas backend needn't work it out. */
+function withBox(scene: SceneDefinition, element: SceneDefinition['layers'][number]['elements'][number], paint: ReturnType<typeof resolveStyle>) {
+  if (!paint.gradient) return paint;
+  const box = boundsOf(scene, element);
+  return box ? { ...paint, gradient: { ...paint.gradient, box } } : paint;
+}
+function generatedPath(scene: SceneDefinition, element: Extract<SceneDefinition['layers'][number]['elements'][number], { kind: 'generated' }>): string {
+  const seed = deriveSeed(scene.seed ?? scene.id, element.id);
+  const key = `${element.generator}|${seed}|${JSON.stringify(element.params)}`;
+  let d = generated.get(key);
+  if (d === undefined) {
+    d = generate(element.generator, element.params, seed);
+    if (generated.size > 500) generated.clear();
+    generated.set(key, d);
+  }
+  return d;
+}
+
+/**
+ * What a person is doing with an interactive figure (M4), on top of its state: the handle being
+ * moved takes `emphasis`, and the target with keyboard focus gets the focus ring, drawn last.
+ */
+export interface LiveInput {
+  emphasis?: Readonly<Record<ElementId, Emphasis>>;
+  focus?: ElementId | null;
+}
+
+export function buildFrame(scene: SceneDefinition, state: StateName, text: TextLookup, live: LiveInput = {}): ResolvedFrame {
+  const targets = resolveState(scene, state);
+  for (const [id, emphasis] of Object.entries(live.emphasis ?? {})) if (targets[id]) targets[id] = { ...targets[id], emphasis };
+  const items: FrameItem[] = [];
+  for (const layer of scene.layers) {
+    for (const element of layer.elements) {
+      const target = targets[element.id];
+      if (!target.visible) continue;
+      const base = { id: element.id, layer: layer.id };
+      switch (element.kind) {
+        case 'label': {
+          const paint = resolveLabel(element.tone);
+          const words = text(element.text) ?? '';
+          items.push({
+            ...base,
+            kind: 'text',
+            text: words,
+            x: element.at[0],
+            y: element.at[1],
+            anchor: element.align,
+            fill: paint.fill,
+            size: paint.size,
+            ...(element.weight ? { weight: element.weight } : {}),
+            // Wrapped here (S1 type), so every backend draws the same lines.
+            ...(element.width !== undefined
+              ? { lines: wrapText(words, paint.size, element.width, element.weight), lineHeight: paint.size * LINE_HEIGHT }
+              : {}),
+            ...(element.halo ? { halo: resolveHalo() } : {}),
+          });
+          break;
+        }
+        case 'shape':
+        case 'generated': {
+          const shape = element.kind === 'shape' ? element.geometry : ({ type: 'path', d: generatedPath(scene, element) } as const);
+          let paint: DrawPaint = withBox(scene, element, resolveStyle(element.style, target.emphasis));
+          if (element.style.grain) paint = { ...paint, grain: GRAIN.opacity };
+          const edge = element.style.edge === 'top' ? topEdge(scene, element) : null;
+          if (!edge) {
+            items.push({ ...base, kind: 'shape', shape, paint });
+            break;
+          }
+          // Top edge only (visual-language.md §7): the plane filled without an outline, then its silhouette.
+          items.push({ ...base, kind: 'shape', shape, paint: { ...paint, stroke: 'none', width: 0 } });
+          items.push({
+            id: `${element.id}-edge`,
+            layer: layer.id,
+            kind: 'shape',
+            shape: edge,
+            paint: { fill: 'none', stroke: paint.stroke, width: paint.width, dash: paint.dash },
+          });
+          break;
+        }
+      }
+    }
+  }
+  const ring = live.focus ? focusRing(scene, live.focus) : null;
+  if (ring && targets[live.focus!]?.visible) items.push({ id: `${live.focus}-focus`, layer: 'focus', kind: 'shape', shape: ring, paint: resolveFocus() });
+  const { width, height } = frameSize(scene.frame);
+  const grained = items.some((i) => i.kind === 'shape' && i.paint.grain);
+  return { width, height, theme: scene.theme, items, ...(grained ? { grain: grainTile() } : {}) };
+}
+
+/**
+ * The focus ring around a target (S1 FOCUS_RING): a circle around a round mark, otherwise a rounded
+ * box around the form, `gap` units clear of its line.
+ */
+function focusRing(scene: SceneDefinition, id: ElementId): Drawable | null {
+  const element = scene.layers.flatMap((l) => l.elements).find((e) => e.id === id);
+  if (!element || element.kind === 'label') return null;
+  const half = element.kind === 'shape' ? resolveStyle(element.style).width / 2 : 0;
+  const out = FOCUS_RING.gap + half + FOCUS_RING.width / 2;
+  if (element.kind === 'shape' && element.geometry.type === 'circle') {
+    const { cx, cy, r } = element.geometry;
+    return { type: 'circle', cx, cy, r: r + out };
+  }
+  const box = boundsOf(scene, element);
+  if (!box) return null;
+  const corner = element.kind === 'shape' && element.geometry.type === 'rect' ? (element.geometry.rx ?? 0) : 0;
+  return { type: 'rect', x: box.x - out, y: box.y - out, width: box.width + 2 * out, height: box.height + 2 * out, rx: corner + out };
+}
+
+/** A plane's top silhouette: the top side of a rect, or the generator's edge line. */
+function topEdge(scene: SceneDefinition, element: SceneDefinition['layers'][number]['elements'][number]): Drawable | null {
+  if (element.kind === 'generated') {
+    const d = generateEdge(element.generator, element.params, deriveSeed(scene.seed ?? scene.id, element.id));
+    return d ? { type: 'path', d } : null;
+  }
+  if (element.kind === 'shape' && element.geometry.type === 'rect') {
+    const { x, y, width } = element.geometry;
+    return { type: 'line', x1: x, y1: y, x2: x + width, y2: y };
+  }
+  return null;
+}
+
+let grain: { tile: number; d: string } | null = null;
+/** The platform's one grain tile, made once from its fixed seed. */
+function grainTile(): { tile: number; d: string } {
+  grain ??= {
+    tile: GRAIN.tile,
+    d: dotsPath(poissonDisc({ x: 0, y: 0, width: GRAIN.tile, height: GRAIN.tile, spacing: GRAIN.spacing, max: 400 }, GRAIN.seed), GRAIN.radius),
+  };
+  return grain;
+}
+
+/**
+ * S5's timeline for a change, resolved for a backend: emphasis tracks become paint tracks through
+ * S1, so a backend never sees an emphasis level. Labels take no emphasis, so only shapes get paint.
+ */
+export function buildTimeline(scene: SceneDefinition, from: StateName | null, to: StateName, tier: QualityTier, text: TextLookup = () => undefined): ResolvedTimeline {
+  const shapes = new Map(scene.layers.flatMap((l) => l.elements).flatMap((e) => (e.kind !== 'label' ? [[e.id, e] as const] : [])));
+  const planned = planMotion(scene, from, to, tier);
+  const leaving = planned.some((t) => t.property === 'exit') && from ? departing(buildFrame(scene, from, text).items, buildFrame(scene, to, text).items) : null;
+  return planned.flatMap((track): ResolvedTrack[] => {
+    if (track.property === 'exit') return leaving ? leaving(track) : [];
+    // A state change has no 'move' tracks; those are for figures built from data (buildChangeTimeline).
+    if (track.property === 'move') return [];
+    if (track.property !== 'emphasis') return [track];
+    const shape = shapes.get(track.id);
+    if (!shape) return [];
+    return [{ ...track, property: 'paint', from: resolveStyle(shape.style, track.from), to: resolveStyle(shape.style, track.to) }];
+  });
+}
+
+/**
+ * S5's timeline for a change in a figure built from data (M5), resolved for a backend: each element
+ * that moves gets its drawing before and after (a `shape` track, with a `paint` track when its paint
+ * changed too), and each label that moves an offset from its old place (`translate`). A top edge
+ * moves with its plane. Entrances pass through as in a state change.
+ */
+export function buildChangeTimeline(
+  before: SceneDefinition | null,
+  after: SceneDefinition,
+  state: StateName,
+  text: TextLookup,
+  tier: QualityTier,
+  options: { pace?: Pace; live?: LiveInput } = {},
+): ResolvedTimeline {
+  const tracks = planChange(before, after, tier, options.pace);
+  if (!before || !tracks.length) return [];
+  const old = buildFrame(before, state, text, options.live).items;
+  const fresh = buildFrame(after, state, text, options.live).items;
+  const was = new Map(old.map((i) => [i.id, i]));
+  const now = new Map(fresh.map((i) => [i.id, i]));
+  const leaving = departing(old, fresh);
+  return tracks.flatMap((track): ResolvedTrack[] => {
+    if (track.property === 'emphasis') return [];
+    if (track.property === 'exit') return leaving(track);
+    if (track.property !== 'move') return [track];
+    const { property: _, ...timing } = track;
+    // A plane's top edge and a handle's focus ring move with it.
+    return [track.id, `${track.id}-edge`, `${track.id}-focus`].flatMap((id): ResolvedTrack[] => {
+      const [a, b] = [was.get(id), now.get(id)];
+      if (!a || !b) return [];
+      if (a.kind === 'text' && b.kind === 'text') {
+        const from = [a.x - b.x, a.y - b.y] as const;
+        return from[0] || from[1] ? [{ ...timing, id, property: 'translate', from, to: [0, 0] }] : [];
+      }
+      if (a.kind !== 'shape' || b.kind !== 'shape') return [];
+      const out: ResolvedTrack[] = [];
+      if (JSON.stringify(a.shape) !== JSON.stringify(b.shape)) out.push({ ...timing, id, property: 'shape', from: a.shape, to: b.shape, morph: canMorph(a.shape, b.shape) });
+      if (JSON.stringify(a.paint) !== JSON.stringify(b.paint)) out.push({ ...timing, id, property: 'paint', from: a.paint, to: b.paint });
+      return out;
+    });
+  });
+}
+
+/**
+ * Departures resolved: each leaving element's items (with its top edge) as they were drawn before
+ * the change, and the item still drawn after the change that each sat just below.
+ */
+function departing(old: readonly FrameItem[], fresh: readonly FrameItem[]) {
+  const kept = new Set(fresh.map((i) => i.id));
+  return (track: Extract<Track, { property: 'exit' }>): ResolvedTrack[] => {
+    const { property: _, effect, ...timing } = track;
+    return old.flatMap((item, k): ResolvedTrack[] => {
+      if (item.id !== track.id && item.id !== `${track.id}-edge`) return [];
+      if (kept.has(item.id)) return [];
+      const under = old.slice(k + 1).find((i) => kept.has(i.id))?.id ?? null;
+      // Only a line can be undrawn; its edge or anything filled fades with it.
+      const own = effect === 'undraw' && item.kind === 'shape' && item.paint.fill === 'none' ? 'undraw' : 'fade';
+      return [{ ...timing, id: item.id, property: 'exit', effect: own, item, under }];
+    });
+  };
+}
+
+/** A composition built from data, drawn: its one state, with its own words (composition/compose.ts). */
+export function buildComposedFrame(composed: Composed): ResolvedFrame {
+  return buildFrame(composed.scene, SHOWN, lookupOf(composed));
+}
+
+export { contentText } from './content-text';

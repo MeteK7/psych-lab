@@ -39,7 +39,7 @@ import { CsStore, Pick } from './cs-store';
             <input type="text" maxlength="120" [value]="ownSituation()" (input)="ownSituation.set(value($event))" />
           </label>
         }
-        <button type="button" [disabled]="!choice() || (choice() === 'own' && !ownSituation().trim())" (click)="submitSituation()">
+        <button class="primary" type="button" [disabled]="!choice() || (choice() === 'own' && !ownSituation().trim())" (click)="submitSituation()">
           {{ c.next_label }}
         </button>
       }
@@ -48,7 +48,7 @@ import { CsStore, Pick } from './cs-store';
         <app-card-pick [legend]="c.first.ask" [cards]="readings()" [ownChoice]="c.first.own_choice"
                        [ownLabel]="c.first.own_label" [(value)]="pick" />
         <app-rating-scale [item]="c.first.certainty" [(value)]="certainty" />
-        <button type="button" [disabled]="!pick() || certainty() === null" (click)="submitFirst()">{{ c.next_label }}</button>
+        <button class="primary" type="button" [disabled]="!pick() || certainty() === null" (click)="submitFirst()">{{ c.next_label }}</button>
       }
       @case ('cs3_fit') {
         <!-- The facts of the moment sit next to the question: this checks whether the facts can
@@ -96,9 +96,9 @@ import { CsStore, Pick } from './cs-store';
             }
             <p>{{ c.fit.note_always }}</p>
           </div>
-          <button type="button" (click)="submitFit()">{{ c.next_label }}</button>
+          <button class="primary" type="button" (click)="submitFit()">{{ c.next_label }}</button>
         } @else {
-          <button type="button" (click)="noteShown.set(true)">{{ c.fit.done }}</button>
+          <button class="primary" type="button" (click)="noteShown.set(true)">{{ c.fit.done }}</button>
         }
       }
       @case ('cs3_find') {
@@ -117,7 +117,7 @@ import { CsStore, Pick } from './cs-store';
         @if (follow(); as text) {
           <p class="note" role="status">{{ text }}</p>
         }
-        <button type="button" [disabled]="!store.cs3Find()" (click)="done({ choice: store.cs3Find() })">{{ c.next_label }}</button>
+        <button class="primary" type="button" [disabled]="!store.cs3Find()" (click)="done({ choice: store.cs3Find() })">{{ c.next_label }}</button>
       }
       @case ('cs3_after') {
         <p class="quote">{{ say(c.after.reading, { reading: store.cs3First()?.text ?? '' }) }}</p>
@@ -142,7 +142,7 @@ import { CsStore, Pick } from './cs-store';
         @if (plan()) {
           <p class="note">{{ c.after.plan_prompt }}</p>
         }
-        <button type="button" [disabled]="certainty() === null" (click)="finish()">{{ c.finish_label }}</button>
+        <button class="primary" type="button" [disabled]="certainty() === null" (click)="finish()">{{ c.finish_label }}</button>
       }
     }
   `,

@@ -9,6 +9,7 @@ import {
   viewChild,
 } from '@angular/core';
 
+import { TrackingSurface } from '../../shared/visual/integration/tracking';
 import { Direction, Point, TrackingScore, isDirection, isOnTarget, moveCursor, targetAt } from './tracking';
 
 export interface SetResult {
@@ -26,25 +27,30 @@ const MAX_FRAME_MS = 100;
 /** One timed set of the dot-following game, drawn on a canvas. */
 @Component({
   selector: 'app-tracking-game',
+  imports: [TrackingSurface],
   template: `
-    <canvas
-      #canvas
-      tabindex="0"
-      role="application"
-      aria-roledescription="dot-following game"
-      [attr.aria-label]="'Keep your pointer, or your marker with the arrow keys, inside the ring around the moving dot. ' + remaining() + ' seconds left.'"
-      [width]="size.width"
-      [height]="size.height"
-      (pointermove)="onPointer($event)"
-      (keydown)="onKeyDown($event)"
-      (keyup)="onKeyUp($event)"
-      (blur)="held.clear()"
-    ></canvas>
+    <!-- Drawn by the Visual System (instruments/tracking); the game's timing, scoring and input stay here. -->
+    <app-vis-tracking-surface>
+      <canvas
+        #canvas
+        tabindex="0"
+        role="application"
+        aria-roledescription="dot-following game"
+        [attr.aria-label]="'Keep your pointer, or your marker with the arrow keys, inside the ring around the moving dot. ' + remaining() + ' seconds left.'"
+        [width]="size.width"
+        [height]="size.height"
+        (pointermove)="onPointer($event)"
+        (keydown)="onKeyDown($event)"
+        (keyup)="onKeyUp($event)"
+        (blur)="held.clear()"
+      ></canvas>
+    </app-vis-tracking-surface>
     <p class="timer" aria-live="off">{{ remaining() }} s</p>
   `,
   styles: `
     canvas { display: block; width: 100%; max-width: 480px; aspect-ratio: 3 / 2;
              border: 1px solid var(--border); border-radius: 8px; touch-action: none; cursor: crosshair; }
+    @media (forced-colors: active) { canvas { border-color: CanvasText; } }
     .timer { color: var(--muted); margin: 0.25rem 0 0; font-variant-numeric: tabular-nums; }
   `,
 })
@@ -59,6 +65,7 @@ export class TrackingGame implements AfterViewInit, OnDestroy {
   protected readonly held = new Set<Direction>();
 
   private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
+  private readonly surface = viewChild.required(TrackingSurface);
   private readonly score = new TrackingScore();
   private cursor: Point = { x: SIZE.width / 2, y: SIZE.height / 2 };
   private elapsedMs = 0;
@@ -124,30 +131,13 @@ export class TrackingGame implements AfterViewInit, OnDestroy {
   }
 
   private draw(target: Point, onTarget: boolean): void {
-    const ctx = this.canvas().nativeElement.getContext('2d');
-    if (!ctx) return; // e.g. test environments without canvas support
-    const css = getComputedStyle(document.documentElement);
-    const color = (name: string, fallback: string) => css.getPropertyValue(name).trim() || fallback;
-
-    ctx.clearRect(0, 0, SIZE.width, SIZE.height);
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = onTarget ? color('--accent', '#2457c5') : color('--muted', '#777');
-    ctx.beginPath();
-    ctx.arc(target.x, target.y, this.ringRadius(), 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.fillStyle = color('--text', '#222');
-    ctx.beginPath();
-    ctx.arc(target.x, target.y, 7, 0, Math.PI * 2);
-    ctx.fill();
-    // Keyboard cursor (pointer users see their own cursor too).
-    ctx.strokeStyle = color('--text', '#222');
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(this.cursor.x - 6, this.cursor.y);
-    ctx.lineTo(this.cursor.x + 6, this.cursor.y);
-    ctx.moveTo(this.cursor.x, this.cursor.y - 6);
-    ctx.lineTo(this.cursor.x, this.cursor.y + 6);
-    ctx.stroke();
+    this.surface().draw(this.canvas().nativeElement, {
+      size: SIZE,
+      target,
+      cursor: this.cursor,
+      ringRadius: this.ringRadius(),
+      onTarget,
+    });
   }
 }
 

@@ -1,0 +1,154 @@
+import { listSources, readSource } from './testing/source-files';
+
+/**
+ * The Visual System's dependency rules (docs/visual-system.md §3.4), checked on the source. They
+ * keep the six core capabilities independent and stop exercises from growing private renderers.
+ */
+const ROOT = 'src/app/shared/visual';
+const APP = 'src/app';
+
+interface Source {
+  path: string;
+  imports: string[];
+}
+
+function resolveImport(from: string, spec: string): string {
+  if (!spec.startsWith('.')) return spec;
+  const parts = from.split('/').slice(0, -1);
+  for (const p of spec.split('/')) {
+    if (p === '..') parts.pop();
+    else if (p !== '.') parts.push(p);
+  }
+  return parts.join('/');
+}
+
+async function sources(folder: string): Promise<Source[]> {
+  const files = (await listSources(folder)).filter((p) => p.endsWith('.ts') && !p.endsWith('.spec.ts'));
+  return Promise.all(
+    files.map(async (path) => {
+      const code = await readSource(path);
+      const specs = [...code.matchAll(/(?:from|import)\s*\(?\s*'([^']+)'/g)].map((m) => m[1]);
+      return { path, imports: specs.map((s) => resolveImport(path, s)) };
+    }),
+  );
+}
+
+/** Which Visual System folder a resolved import points into, or the import itself. */
+function area(target: string): string {
+  return target.startsWith(`${ROOT}/`) ? target.slice(ROOT.length + 1).split('/')[0] : target;
+}
+
+function outside(files: Source[], allowed: string[]): string[] {
+  return files.flatMap(({ path, imports }) =>
+    imports.filter((i) => !allowed.includes(area(i))).map((i) => `${path} imports ${i}`),
+  );
+}
+
+let visual: Source[] = [];
+let app: Source[] = [];
+beforeAll(async () => {
+  visual = await sources(ROOT);
+  app = await sources(APP);
+});
+
+const inFolder = (name: string) => visual.filter((s) => s.path.startsWith(`${ROOT}/${name}/`));
+
+describe('Visual System dependency rules', () => {
+  it('1. generation imports nothing outside itself: no Angular, no DOM, no other capability', () => {
+    // The folder exists only while a composition uses a generator (the pull rule).
+    expect(outside(inFolder('generation'), ['generation'])).toEqual([]);
+  });
+
+  it('2. styling imports only itself', () => {
+    expect(outside(inFolder('styling'), ['styling'])).toEqual([]);
+  });
+
+  it('3. composition imports only styling vocabulary and generator ids', () => {
+    expect(outside(inFolder('composition'), ['composition', 'styling', 'generation'])).toEqual([]);
+  });
+
+  it('4. state imports only composition and styling types', () => {
+    expect(outside(inFolder('state'), ['state', 'composition', 'styling'])).toEqual([]);
+  });
+
+  it('4b. motion imports only composition and state types and the styling tokens', () => {
+    expect(outside(inFolder('motion'), ['motion', 'state', 'composition', 'styling'])).toEqual([]);
+  });
+
+  it('4c. instruments are compositions built from data: they import only composition, styling and generation (no Angular, no rendering)', () => {
+    expect(outside(inFolder('instruments'), ['instruments', 'composition', 'styling', 'generation'])).toEqual([]);
+  });
+
+  it('4d. interaction maps input to values, purely: it imports only composition, styling and generation (no Angular, no DOM, no rendering)', () => {
+    expect(outside(inFolder('interaction'), ['interaction', 'composition', 'styling', 'generation'])).toEqual([]);
+  });
+
+  it('4e. stimuli are pure: they import only S1 colours, S2 seeded randomness and the frame types (no Angular, no DOM, no backend)', () => {
+    const files = inFolder('stimulus');
+    const bad = files.flatMap(({ path, imports }) =>
+      imports.filter((i) => !['stimulus', 'styling', 'generation'].includes(area(i)) && i !== `${ROOT}/rendering/frame`).map((i) => `${path} imports ${i}`),
+    );
+    expect(bad).toEqual([]);
+  });
+
+  it('4f. the asset manifest is pure data and checks: it imports only itself (no Angular, no DOM, no file access)', () => {
+    expect(outside(inFolder('assets'), ['assets'])).toEqual([]);
+  });
+
+  it('4g. the app never reaches the generation path: nothing in it imports assets/generate or the authoring tools', () => {
+    // Only the authoring script (web/tools/visual-generate) runs a provider, so no session can.
+    const users = app.flatMap(({ path, imports }) => imports.filter((i) => i === `${ROOT}/assets/generate` || i.startsWith('tools/')).map((i) => `${path} imports ${i}`));
+    expect(users).toEqual([]);
+  });
+
+  it('5. rendering imports only itself and Angular, and only integration imports a backend', () => {
+    expect(outside(inFolder('rendering'), ['rendering', '@angular/core'])).toEqual([]);
+    const users = app
+      .filter((s) => !s.path.startsWith(`${ROOT}/rendering/`))
+      .flatMap(({ path, imports }) =>
+        imports.filter((i) => i.startsWith(`${ROOT}/rendering/`) && i !== `${ROOT}/rendering/frame`).map(() => path),
+      );
+    expect(users.every((p) => p.startsWith(`${ROOT}/integration/`)), users.join(', ')).toBe(true);
+  });
+
+  it('6. exercises use only the contract, the slot and integration', () => {
+    const exercises = app.filter((s) => s.path.startsWith(`${APP}/experiences/`));
+    const reaches = exercises.flatMap(({ path, imports }) =>
+      imports
+        .filter((i) => i.startsWith(`${ROOT}/`))
+        .filter((i) => ![`${ROOT}/visual`, `${ROOT}/visual-slot`].includes(i) && area(i) !== 'integration')
+        .map((i) => `${path} imports ${i}`),
+    );
+    expect(reaches).toEqual([]);
+  });
+
+  it('7. exercise logic and stores import nothing from the Visual System', () => {
+    const core = app.filter((s) => /-(logic|store)\.ts$/.test(s.path));
+    expect(core).not.toHaveLength(0);
+    expect(core.flatMap(({ path, imports }) => imports.filter((i) => i.startsWith(`${ROOT}/`)).map((i) => `${path} imports ${i}`))).toEqual([]);
+  });
+
+  it('9. every figure is drawn through the Visual System: no exercise or page draws its own (M8)', async () => {
+    // Outside the Visual Lab, which is the system's own tooling. Icons (shared/icon.ts) are outside scope.
+    const files = (await Promise.all([listSources(`${APP}/experiences`), listSources(`${APP}/pages`)]))
+      .flat()
+      .filter((p) => /\.(ts|html)$/.test(p) && !p.endsWith('.spec.ts') && !p.startsWith(`${APP}/pages/lab/`));
+    expect(files.length).toBeGreaterThan(10);
+    const drawing: string[] = [];
+    const canvases: string[] = [];
+    const DRAWS = /<(svg|path|circle|rect)[\s>]|getContext\(|new Path2D|createElementNS/;
+    const CANVAS = /<canvas[\s>]/;
+    // The patterns work: they find a drawing and a canvas in text that has them.
+    expect([DRAWS.test('<svg viewBox="0 0 1 1">'), DRAWS.test('ctx = c.getContext("2d")'), CANVAS.test('<canvas\n #c>'), DRAWS.test('<section>')]).toEqual([true, true, true, false]);
+    for (const path of files) {
+      const code = await readSource(path);
+      if (DRAWS.test(code)) drawing.push(path);
+      if (CANVAS.test(code)) canvases.push(path);
+    }
+    expect(drawing).toEqual([]);
+    // The one canvas an exercise owns is the dot game's, and the system's own surface draws on it.
+    expect(canvases).toEqual([`${APP}/experiences/state-reset/tracking-game.ts`]);
+    expect(await readSource(canvases[0])).toContain("from '../../shared/visual/integration/tracking'");
+  });
+});
+

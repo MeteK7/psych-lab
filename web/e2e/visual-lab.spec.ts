@@ -1,0 +1,870 @@
+import { Page, expect, test } from '@playwright/test';
+
+import { ACCEPTED, baselineName } from '../src/app/pages/lab/lab-baselines';
+import { progress } from '../src/app/shared/visual/rendering/timing';
+import { expectNoSeriousA11yIssues } from './helpers';
+
+// The Visual Lab (development build only): every composition renders in every state with its text
+// alternative, and the page passes axe in light, dark and
+// forced colours. The screenshot baselines are the ones named by an accepted entry in
+// docs/visual-reviews.md (docs/visual-system.md §10): update them only together with such an entry.
+
+const STATES = 4; // mcii.path
+const TRANSITIONS = 3; // mcii.path: future → contrast, contrast → plan, contrast → aside
+const CAUSE_SETS = 5; // cs2.cause-map: the answer sets in the Lab
+const ROUND_SETS = 3; // state-reset.rounds: first, middle, last
+const TRACKING_SETS = 3; // state-reset.tracking: outside, inside, the preview
+const GENERATOR_SETS = 21; // S2: the reference compositions, 2 or 3 per generator
+const LAYOUT_SETS = 4; // S2: grid, radial, flow, packing
+const MATERIAL_SETS = 5; // S1 (M3): the material set, a grounded lit form, depth, depth with grain, a translucent overlap
+const SHEET_SETS = 12; // the review sheet (M3 stage C): lines, type, and materials and depth in each of the five areas
+const MOTION_SETS = 3; // S5 (M5): bars whose values change, a set that reflows, a route that grows and shrinks
+const GUIDE_SLOT = 1; // M8: the worked example shown through the slot, once, in the page's scheme (its interactive panels are images named by their text alternative)
+const LIVE_SETS = 3; // S6 (M4): a rating scale, a field with two axes and a choice of three, each the control itself
+const PANELS =
+  (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS + GENERATOR_SETS + LAYOUT_SETS + MATERIAL_SETS + SHEET_SETS + MOTION_SETS) * 2 + GUIDE_SLOT; // light and dark
+
+for (const [name, media] of [
+  ['light', { colorScheme: 'light' }],
+  ['dark', { colorScheme: 'dark' }],
+  ['forced colours', { forcedColors: 'active' }],
+] as const) {
+  test(`Visual Lab: every composition, ${name}`, async ({ page }) => {
+    await page.emulateMedia(media);
+    await page.goto('/lab');
+    await expect(page.getByRole('heading', { level: 1, name: 'Visual Lab' })).toBeVisible();
+    const figures = page.locator('figure[role="img"]');
+    await expect(figures).toHaveCount(PANELS);
+    for (const label of await figures.evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')))) {
+      expect(label?.length).toBeGreaterThan(10);
+    }
+    // Live figures are groups of sliders, named by their text alternative.
+    const live = page.locator('app-vis-interactive[role="group"]');
+    await expect(live).toHaveCount(LIVE_SETS * 2);
+    for (const label of await live.evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')))) expect(label?.length).toBeGreaterThan(10);
+    await expect(page.getByRole('list', { name: 'Validation problems' })).toHaveCount(0);
+    // The purpose of every element is explained.
+    await expect(page.getByRole('table').first().getByRole('row')).toHaveCount(1 + 11); // mcii.path
+    await expect(page.getByRole('table').nth(1).getByRole('row')).toHaveCount(1 + 7); // cs2.cause-map
+    await expect(page.getByRole('table').nth(2).getByRole('row')).toHaveCount(1 + 1); // state-reset.rounds
+    await expect(page.getByRole('table').nth(3).getByRole('row')).toHaveCount(1 + 4); // state-reset.tracking
+    // Every figure draws something.
+    for (const count of await page.locator('app-vis-svg svg').evaluateAll((els) => els.map((e) => e.childElementCount))) {
+      expect(count).toBeGreaterThan(0);
+    }
+    // The game's stills are drawn on a canvas: each has painted pixels.
+    const painted = await page.locator('app-lab-tracking-still canvas').evaluateAll((els) =>
+      (els as HTMLCanvasElement[]).map((c) => {
+        const { data } = c.getContext('2d')!.getImageData(0, 0, c.width, c.height);
+        let n = 0;
+        for (let i = 3; i < data.length; i += 4) if (data[i] > 0) n++;
+        return n;
+      }),
+    );
+    expect(painted).toHaveLength(4);
+    for (const n of painted) expect(n).toBeGreaterThan(100);
+    await expectNoSeriousA11yIssues(page, `Visual Lab, ${name}`);
+  });
+}
+
+// Approved baselines (M8 stage B; docs/visual-reviews.md, entries 1–3): one harness for every
+// composition a review accepted, as listed in src/app/pages/lab/lab-baselines.ts. Each state or answer
+// set is drawn on the parity page's test surface at the width it was approved at (480 px, at the page's
+// top left, on an opaque ground), light and dark, and in forced colours, and must match its approved
+// image pixel for pixel. lab-baselines.spec.ts ties the list to the review log and the snapshot folder.
+for (const [name, media, schemes] of [
+  ['light and dark', { colorScheme: 'light' }, ['light', 'dark']],
+  ['forced colours', { forcedColors: 'active' }, ['light']],
+] as const) {
+  test(`Visual Lab: approved baselines, ${name}`, async ({ page }) => {
+    await page.emulateMedia(media);
+    await page.goto('/lab/parity?harness');
+    await page.waitForFunction(() => '__parity' in globalThis);
+    for (const { composition, width, shots } of ACCEPTED)
+      for (const shot of shots)
+        for (const scheme of schemes) {
+          await page.evaluate(([k, s, w]) => (globalThis as any).__parity.show(k, s, { width: w }), [shot.case, scheme, width] as const);
+          const file = baselineName(composition, shot.key, media.forcedColors ? 'forced' : scheme);
+          await expect(page.locator('[data-parity="svg"]'), file).toHaveScreenshot(file, { animations: 'disabled', threshold: 0, maxDiffPixels: 0 });
+        }
+  });
+}
+
+// The Lab's own figures are captured on a fixed surface of the same size where a test compares
+// them with an approved image (a transition's end, below).
+const CAPTURE = `.capture { position: fixed !important; left: 0; top: 0; width: 480px; margin: 0;
+  z-index: 2147483647; background: var(--bg); }`;
+
+async function capture(page: Page, figure: string, file: string) {
+  const locator = page.locator(figure);
+  await locator.evaluate((el) => el.classList.add('capture'));
+  await expect(locator).toHaveScreenshot(file, { animations: 'disabled' });
+  await locator.evaluate((el) => el.classList.remove('capture'));
+}
+
+// Motion (MCII step 4c): a transition plays and ends on the approved state, and under reduced
+// motion nothing moves. The end state is compared with the approved state's drawing as markup,
+// and the bridge, which is drawn through a mask, also as pixels.
+const drawing = (page: Page, figure: string) =>
+  page
+    .locator(`${figure} svg`)
+    .evaluate((svg) => svg.outerHTML.replace(/<defs[^>]*>.*?<\/defs>/s, '').replace(/ mask="[^"]*"/g, ''));
+/** Animations in the figures only: the page's own controls (a button's hover colour) aren't the figure moving. */
+const figureAnimations = (page: Page) =>
+  page.evaluate(
+    () => document.getAnimations().filter((a) => ((a.effect as KeyframeEffect | null)?.target as Element | null)?.closest('app-vis-svg')).length,
+  );
+const idle = (page: Page) => expect.poll(() => figureAnimations(page), { timeout: 5_000 }).toBe(0);
+
+test('Visual Lab: each transition plays and ends on the approved state', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'no-preference' });
+  await page.goto('/lab');
+  await page.getByRole('combobox', { name: /^Motion(?! in these figures)/ }).selectOption('full');
+  await page.addStyleTag({ content: CAPTURE });
+  for (const [from, to] of [['future', 'contrast'], ['contrast', 'plan'], ['contrast', 'aside']]) {
+    await page.getByRole('button', { name: `Replay ${from} → ${to}` }).click();
+    await expect.poll(() => figureAnimations(page)).toBeGreaterThan(0);
+    await idle(page);
+    for (const scheme of ['light', 'dark'])
+      expect(await drawing(page, `figure[data-transition="${from}-${to}-${scheme}"]`), `${from} → ${to}, ${scheme}`).toBe(
+        await drawing(page, `figure[data-baseline="mcii.path-${to}-${scheme}"]`),
+      );
+  }
+  // The bridge is fully drawn at the end, pixel for pixel.
+  await capture(page, 'figure[data-transition="contrast-plan-light"]', 'mcii.path-plan-light.png');
+});
+
+test('Visual Lab: nothing moves under reduced motion', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/lab');
+  await expect(page.locator('figure[data-transition]')).toHaveCount(TRANSITIONS * 2);
+  for (const [from, to] of [['future', 'contrast'], ['contrast', 'plan'], ['contrast', 'aside']]) {
+    await page.getByRole('button', { name: `Replay ${from} → ${to}` }).click();
+    expect(await figureAnimations(page), `${from} → ${to}`).toBe(0);
+    expect(await drawing(page, `figure[data-transition="${from}-${to}-light"]`)).toBe(await drawing(page, `figure[data-baseline="mcii.path-${to}-light"]`));
+  }
+});
+
+// The visual-language review sheet (M3 stage C): every colour shows the value it takes, wrapped
+// labels fit their width in the real face (the widths S1 measures with are a little generous), and
+// the spacing check lists only the known cases.
+test('Visual Lab: the review sheet', async ({ page }) => {
+  await page.goto('/lab');
+  for (const scheme of ['light', 'dark']) {
+    const values = page.locator(`[data-sheet="roles-${scheme}"] .value`);
+    await expect(values).toHaveCount(21 * 5);
+    // Read from the surface once it has rendered: every colour names its value.
+    await expect.poll(async () => (await values.allInnerTexts()).filter((v) => !v.trim()).length, { message: scheme }).toBe(0);
+    // The ramps: six ranges of eleven steps, the area ranges' 500 not used.
+    await expect(page.locator(`[data-sheet="ramps-${scheme}"] .chip`)).toHaveCount(66);
+    await expect(page.locator(`[data-sheet="ramps-${scheme}"] .chip.unused`)).toHaveCount(5);
+  }
+  // A far plane takes a lighter step in light and a darker one in dark.
+  await expect(page.locator('[data-sheet="roles-light"] [data-token="far"] .value').first()).toHaveText('a-050');
+  await expect(page.locator('[data-sheet="roles-dark"] [data-token="far"] .value').first()).toHaveText('a-950');
+
+  const wrapped = page.locator('figure[data-sheet="type-light"] text[data-vis-id="wrapped"] tspan');
+  await expect(wrapped).toHaveCount(3);
+  for (const width of await wrapped.evaluateAll((spans) => spans.map((s) => (s as SVGTextContentElement).getComputedTextLength())))
+    expect(width).toBeLessThanOrEqual(200);
+  const halo = page.locator('figure[data-sheet="type-light"] text[data-vis-id="halo"]');
+  await expect(halo).toHaveCSS('stroke-width', '4px');
+  await expect(halo).toHaveCSS('paint-order', 'stroke');
+
+  // Only the type figure's example: every figure in use keeps its labels clear.
+  await expect(page.locator('ul[aria-label^="Spacing warnings"]')).toHaveCount(1);
+  await expect(page.getByRole('list', { name: 'Spacing warnings: type' })).toContainText("'no-halo'");
+  // The preview's long label wraps within the frame.
+  await expect(page.locator('figure[data-instrument="state-reset.tracking-preview-light"] text[data-vis-id="label-ring"] tspan')).toHaveCount(2);
+});
+
+// Interaction (M4 stage A): the Lab says which target is under the pointer, from the figure's own
+// geometry, at the size the figure is drawn, and the value a click there would set.
+test('Visual Lab: interaction targets under the pointer', async ({ page }) => {
+  await page.goto('/lab');
+  const at = async (figure: string, x: number, y: number) => {
+    const svg = page.locator(`[data-interaction="${figure}"] app-vis-svg svg`);
+    await svg.scrollIntoViewIfNeeded();
+    const box = (await svg.boundingBox())!;
+    const s = box.width / 480;
+    await page.mouse.move(box.x + x * s, box.y + y * s, { steps: 2 });
+  };
+  await at('rating-light', 240, 44);
+  await expect(page.locator('[data-under="rating"]')).toContainText("handle 'mark' (Rating)");
+  await at('rating-dark', 400, 50);
+  await expect(page.locator('[data-under="rating"]')).toContainText('a click places it at rating 5');
+  await at('field-light', 345, 85);
+  await expect(page.locator('[data-under="field"]')).toContainText('across 4, up 4');
+  await at('choice-light', 390, 60);
+  await expect(page.locator('[data-under="choice"]')).toContainText('choice = third');
+  await at('choice-light', 165, 60);
+  await expect(page.locator('[data-under="choice"]')).toContainText('nothing');
+  // The target view can be turned off.
+  await expect(page.locator('svg.targets')).toHaveCount(6);
+  await page.getByLabel('Show targets').uncheck();
+  await expect(page.locator('svg.targets')).toHaveCount(0);
+});
+
+// Interaction (M4 stage B): the live references move by dragging, by clicks alone and by the
+// keyboard, and report the exercise's values; both panels of a reference share one value.
+test('Visual Lab: live figures take a drag, clicks alone and the keyboard', async ({ page }) => {
+  await page.goto('/lab');
+  const point = async (figure: string, x: number, y: number) => {
+    const svg = page.locator(`[data-interaction="${figure}"] app-vis-svg svg`);
+    await svg.scrollIntoViewIfNeeded();
+    const box = (await svg.boundingBox())!;
+    const s = box.width / 480;
+    return [box.x + x * s, box.y + y * s] as const;
+  };
+  const rating = page.locator('[data-value="rating"]');
+  const field = page.locator('[data-value="field"]');
+  await expect(rating).toContainText('rating 3');
+
+  // Drag the mark from 3 to the end; the dark panel follows the same value.
+  await page.mouse.move(...(await point('rating-light', 240, 44)));
+  await page.mouse.down();
+  await page.mouse.move(...(await point('rating-light', 330, 44)), { steps: 4 });
+  await expect(rating).toContainText('rating 4');
+  await page.mouse.move(...(await point('rating-light', 470, 44)), { steps: 4 });
+  await page.mouse.up();
+  await expect(rating).toContainText('rating 5');
+  await expect(page.locator('[data-interaction="rating-dark"] [role="slider"]')).toHaveAttribute('aria-valuenow', '5');
+
+  // Escape during a drag puts the value back.
+  await page.mouse.move(...(await point('rating-light', 420, 44)));
+  await page.mouse.down();
+  await page.mouse.move(...(await point('rating-light', 60, 44)), { steps: 4 });
+  await expect(rating).toContainText('rating 1');
+  await page.keyboard.press('Escape');
+  await expect(rating).toContainText('rating 5');
+  await page.mouse.up();
+  await expect(rating).toContainText('rating 5');
+
+  // Clicks alone: pick the mark up, then click where it goes (below the line still counts).
+  await page.mouse.click(...(await point('rating-dark', 420, 44)));
+  await expect(page.locator('[data-interaction="rating-dark"] [data-vis-id="mark"]')).toHaveCSS('stroke-width', '3px');
+  await page.mouse.click(...(await point('rating-dark', 150, 90)));
+  await expect(rating).toContainText('rating 2');
+  // Pressing the track places the mark there at once.
+  await page.mouse.click(...(await point('rating-light', 330, 50)));
+  await expect(rating).toContainText('rating 4');
+
+  // The keyboard only: Tab through the stops; each axis of the field is its own slider.
+  await page.locator('[data-interaction="rating-light"] [role="slider"]').focus();
+  await page.keyboard.press('Home');
+  await expect(rating).toContainText('rating 1');
+  await expect(page.locator('[data-interaction="rating-light"] [data-vis-id="mark-focus"]')).toHaveCount(1);
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('slider', { name: 'Place, across' }).first()).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect(field).toContainText('across 3, up 4');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowUp');
+  await expect(field).toContainText('across 3, up 5');
+  await page.keyboard.press('Home');
+  await expect(field).toContainText('across 3, up 1');
+  await expect(page.locator('[data-interaction="field-light"] [data-vis-id="mark-focus"]')).toHaveCount(1);
+  // The ring follows focus: it left the rating when focus did.
+  await expect(page.locator('[data-vis-id="mark-focus"]')).toHaveCount(1);
+
+  // The options are one radio group: Tab reaches the chosen one, the arrows move and choose.
+  const choice = page.locator('[data-value="choice"]');
+  await page.locator('[data-interaction="choice-light"] [role="radio"][aria-checked="true"]').focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(choice).toContainText('choice third');
+  await expect(page.getByRole('radio', { name: 'Third' }).first()).toBeFocused();
+  await expect(page.locator('[data-interaction="choice-light"] [data-vis-id="third-focus"]')).toHaveCount(1);
+  await page.keyboard.press('ArrowRight');
+  await expect(choice).toContainText('choice first');
+  // A click chooses an option as a whole.
+  await page.mouse.click(...(await point('choice-dark', 240, 60)));
+  await expect(choice).toContainText('choice second');
+  await expect(page.locator('[data-interaction="choice-light"] [role="radio"][aria-checked="true"]')).toHaveAttribute('aria-label', 'Second');
+});
+
+// Native controls beside the figures (M4 stage C): they hold the same values; the figures take the
+// pointer only and are pictures to assistive technology.
+test('Visual Lab: native controls hold the same values as the figures', async ({ page }) => {
+  await page.goto('/lab');
+  await page.getByLabel('Keyboard and screen readers use').selectOption('native');
+  await expect(page.locator('app-vis-interactive[role="group"]')).toHaveCount(0);
+  await expect(page.locator('app-lab-interaction app-vis-interactive[role="img"]')).toHaveCount(LIVE_SETS * 2);
+  await expect(page.locator('app-vis-interactive [role="slider"], app-vis-interactive [role="radio"]')).toHaveCount(0);
+
+  const rating = page.getByRole('slider', { name: 'Rating' });
+  await rating.focus();
+  await page.keyboard.press('End');
+  await expect(page.locator('[data-value="rating"]')).toContainText('rating 5');
+  await expect(page.locator('[data-interaction="rating-light"] [data-vis-id="mark"]')).toHaveAttribute('d', /^M409 44/);
+  await page.getByRole('slider', { name: 'Place, up' }).fill('1');
+  await expect(page.locator('[data-value="field"]')).toContainText('across 2, up 1');
+  await page.getByRole('radio', { name: 'Third' }).check();
+  await expect(page.locator('[data-value="choice"]')).toContainText('choice third');
+
+  // The pointer still works on the figure, and the native control follows it.
+  const svg = page.locator('[data-interaction="rating-light"] app-vis-svg svg');
+  await svg.scrollIntoViewIfNeeded();
+  const box = (await svg.boundingBox())!;
+  await page.mouse.click(box.x + (150 * box.width) / 480, box.y + (50 * box.width) / 480);
+  await expect(rating).toHaveValue('2');
+  await expectNoSeriousA11yIssues(page, 'Visual Lab, native controls');
+});
+
+// Forced colours (M4 stage C): the focus ring and a handle being moved take the system highlight.
+test('Visual Lab: focus and movement show in forced colours', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  await page.goto('/lab');
+  const highlight = await page.evaluate(() => {
+    const probe = document.createElement('div');
+    probe.style.color = 'Highlight';
+    document.body.append(probe);
+    const colour = getComputedStyle(probe).color;
+    probe.remove();
+    return colour;
+  });
+  await page.locator('[data-interaction="choice-light"] [role="radio"][aria-checked="true"]').focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(page.locator('[data-interaction="choice-light"] [data-vis-id="third-focus"]')).toHaveCSS('stroke', highlight);
+  await page.locator('[data-interaction="rating-dark"] [role="slider"]').focus();
+  await page.keyboard.press('Home');
+  await expect(page.locator('[data-interaction="rating-dark"] [data-vis-id="mark-focus"]')).toHaveCSS('stroke', highlight);
+  // Picked up by a click, the mark is drawn in the highlight colour, one weight heavier.
+  const svg = page.locator('[data-interaction="rating-light"] app-vis-svg svg');
+  await svg.scrollIntoViewIfNeeded();
+  const box = (await svg.boundingBox())!;
+  await page.mouse.click(box.x + (60 * box.width) / 480, box.y + (44 * box.width) / 480);
+  const mark = page.locator('[data-interaction="rating-light"] [data-vis-id="mark"]');
+  await expect(mark).toHaveCSS('stroke', highlight);
+  await expect(mark).toHaveCSS('stroke-width', '3px');
+});
+
+// Motion between values (M5 stage A): a figure drawn again from new data glides there, and ends
+// on the new figure; with reduced motion, the new figure shows at once.
+test('Visual Lab: figures built from data glide to their new values', async ({ page }) => {
+  await page.goto('/lab');
+  const section = page.locator('section[aria-labelledby="lab-motion"]');
+  await section.scrollIntoViewIfNeeded();
+  await section.getByLabel('Motion in these figures').selectOption('full');
+  const bar = page.locator('[data-motion="bars-light"] [data-vis-id="bar-1"]');
+  const before = await bar.getAttribute('d');
+  // Record the drawings the bar passes through, frame by frame, until the glide ends.
+  const seen = page.evaluate(
+    () =>
+      new Promise<string[]>((resolve) => {
+        const el = document.querySelector('[data-motion="bars-light"] [data-vis-id="bar-1"]')!;
+        const seen: string[] = [];
+        const start = performance.now();
+        const look = () => {
+          seen.push(el.getAttribute('d')!);
+          if (performance.now() - start < 700) requestAnimationFrame(look);
+          else resolve(seen);
+        };
+        requestAnimationFrame(look);
+      }),
+  );
+  await page.getByRole('button', { name: 'New values' }).click();
+  const drawings = [...new Set(await seen)];
+  const after = await bar.getAttribute('d');
+  expect(after).not.toBe(before);
+  // Several drawings between the two, and it ends on the new one.
+  expect(drawings.filter((d) => d !== before && d !== after).length).toBeGreaterThan(3);
+  expect(drawings[drawings.length - 1]).toBe(after);
+  await expect(page.locator('[data-moved="bars"]')).toContainText('glides to its new place and shape (300 ms)');
+
+  // Reduced motion: the new drawing at once.
+  await section.getByLabel('Motion in these figures').selectOption('reduced');
+  const shown = await bar.getAttribute('d');
+  await page.getByRole('button', { name: 'New values' }).click();
+  // The first new drawing is the last: nothing in between.
+  await expect(bar).not.toHaveAttribute('d', shown!);
+  const next = await bar.getAttribute('d');
+  await page.waitForTimeout(400);
+  expect(await bar.getAttribute('d')).toBe(next);
+  expect(next).toBe(await page.locator('[data-motion="bars-dark"] [data-vis-id="bar-1"]').getAttribute('d'));
+
+  // A set that reflows: the new member enters; no copies are left behind.
+  await section.getByLabel('Motion in these figures').selectOption('full');
+  await page.getByRole('button', { name: 'Add a member' }).click();
+  await expect(page.locator('[data-motion="set-light"] [data-vis-id="member-6"]')).toHaveCount(1);
+  await expect(page.locator('[data-motion="set-light"] [data-vis-ghost]')).toHaveCount(0);
+  await expect(page.locator('[data-moved="set"]')).toContainText('member-6 fades in');
+});
+
+/** The drawings an element passes through, frame by frame, for `ms` after `act` runs. */
+async function drawingsDuring(page: Page, selector: string, act: () => Promise<void>, ms = 500): Promise<string[]> {
+  const seen = page.evaluate(
+    ({ selector, ms }) =>
+      new Promise<string[]>((resolve) => {
+        const seen: string[] = [];
+        const start = performance.now();
+        const look = () => {
+          seen.push(document.querySelector(selector)?.getAttribute('d') ?? '');
+          if (performance.now() - start < ms) requestAnimationFrame(look);
+          else resolve(seen);
+        };
+        requestAnimationFrame(look);
+      }),
+    { selector, ms },
+  );
+  await act();
+  return [...new Set(await seen)];
+}
+
+// Departures (M5 stage B): a leg that goes is taken back, its stop fades, and nothing is left behind.
+test('Visual Lab: elements that go are taken back or fade, then are gone', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/lab');
+  const route = page.locator('[data-motion="route-light"]');
+  await route.scrollIntoViewIfNeeded();
+  const leaving = page.evaluate(
+    () =>
+      new Promise<string[]>((resolve) => {
+        const seen = new Set<string>();
+        const start = performance.now();
+        const look = () => {
+          document.querySelectorAll('[data-motion="route-light"] [data-vis-leaving]').forEach((e) => seen.add(e.getAttribute('data-vis-leaving')!));
+          if (performance.now() - start < 500) requestAnimationFrame(look);
+          else resolve([...seen].sort());
+        };
+        requestAnimationFrame(look);
+      }),
+  );
+  await page.getByRole('button', { name: 'Remove a stop' }).click();
+  expect(await leaving).toEqual(['leg-3', 'stop-3']);
+  await expect(route.locator('[data-vis-leaving], mask[id*="leaving"]')).toHaveCount(0);
+  await expect(route.locator('[data-vis-id="leg-3"]')).toHaveCount(0);
+  await expect(page.locator('[data-moved="route"]')).toContainText('leg-3 is taken back along its direction (300 ms), with stop-3');
+});
+
+// Motion for figures people move (M5 stage B): a keyboard step glides quickly; with reduced motion,
+// the mark is at its new place at once.
+for (const reducedMotion of ['no-preference', 'reduce'] as const) {
+  test(`Visual Lab: a step by keyboard ${reducedMotion === 'reduce' ? 'shows at once with reduced motion' : 'glides quickly'}`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion });
+    await page.goto('/lab');
+    const stop = page.locator('[data-interaction="rating-light"] [role="slider"]');
+    await stop.focus();
+    const mark = '[data-interaction="rating-light"] [data-vis-id="mark"]';
+    const before = await page.locator(mark).getAttribute('d');
+    const drawings = await drawingsDuring(page, mark, () => page.keyboard.press('ArrowRight'), 400);
+    const after = await page.locator(mark).getAttribute('d');
+    expect(after).not.toBe(before);
+    const between = drawings.filter((d) => d !== before && d !== after);
+    if (reducedMotion === 'reduce') expect(between).toEqual([]);
+    else expect(between.length).toBeGreaterThan(2);
+    expect(drawings[drawings.length - 1]).toBe(after);
+  });
+}
+
+// ── M5 stage C: conformance and the remaining browser checks ─────────────────────────────────────
+
+/** What a figure animation shows at a few moments, read from the browser itself. */
+interface Sampled {
+  property: string;
+  timing: { delay: number; duration: number; easing: string };
+  from: number;
+  to: number;
+  at: { ms: number; value: number }[];
+}
+
+/**
+ * Pauses every running figure animation and reads, at a quarter, half and three quarters of its
+ * time, the one number it animates: opacity, a translation, a mask's dash offset or a line width.
+ * Colours aren't compared: the timing core works in numbers, and a colour eases with them.
+ */
+const sampleAnimations = (page: Page) =>
+  page.evaluate(() => {
+    const number = (property: string, value: string): number => {
+      if (property === 'transform') {
+        if (value === 'none') return 0;
+        const m = value.match(/translate\(\s*(-?[\d.]+)px,\s*(-?[\d.]+)px\)/) ?? value.match(/matrix\([^,]+,[^,]+,[^,]+,[^,]+,\s*(-?[\d.]+),\s*(-?[\d.]+)\)/);
+        // The axis that moves is the one that differs; offsetY moves only y.
+        return m ? Math.hypot(Number(m[1]), Number(m[2])) : NaN;
+      }
+      return parseFloat(value);
+    };
+    const out: Sampled[] = [];
+    for (const animation of document.getAnimations()) {
+      const effect = animation.effect as KeyframeEffect | null;
+      const target = effect?.target as Element | null;
+      if (!effect || !target?.closest('app-vis-svg')) continue;
+      const frames = effect.getKeyframes();
+      const property = ['opacity', 'transform', 'strokeDashoffset', 'strokeWidth'].find((p) => frames[0][p] !== undefined);
+      if (!property) continue;
+      const timing = effect.getTiming();
+      const sampled: Sampled = {
+        property,
+        timing: { delay: Number(timing.delay), duration: Number(timing.duration), easing: String(timing.easing) },
+        from: number(property, String(frames[0][property])),
+        to: number(property, String(frames[frames.length - 1][property])),
+        at: [],
+      };
+      animation.pause();
+      const css = property.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+      for (const f of [0.25, 0.5, 0.75]) {
+        const ms = sampled.timing.delay + f * sampled.timing.duration;
+        animation.currentTime = ms;
+        sampled.at.push({ ms, value: number(property, getComputedStyle(target).getPropertyValue(css)) });
+      }
+      animation.cancel();
+      out.push(sampled);
+    }
+    return out;
+  });
+
+/** Every sampled value is where the timing core says it should be, within a hundredth of the way. */
+function expectOnTheCore(samples: Sampled[], where: string) {
+  expect(samples.length, where).toBeGreaterThan(0);
+  for (const s of samples)
+    for (const { ms, value } of s.at) {
+      const expected = s.from + (s.to - s.from) * progress(s.timing, ms);
+      expect(Math.abs(value - expected), `${where}: ${s.property} at ${ms} ms (${s.timing.easing})`).toBeLessThanOrEqual(Math.max(0.01 * Math.abs(s.to - s.from), 0.002));
+    }
+}
+
+test('Visual Lab: the browser’s animations follow the timing core', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'no-preference' });
+  await page.goto('/lab');
+  // State changes (MCII): rise, draw through a mask, and emphasis changes.
+  await page.getByRole('combobox', { name: /^Motion(?! in these figures)/ }).selectOption('full');
+  for (const [from, to] of [['future', 'contrast'], ['contrast', 'plan'], ['contrast', 'aside']]) {
+    await page.getByRole('button', { name: `Replay ${from} → ${to}` }).click();
+    await expect.poll(() => figureAnimations(page)).toBeGreaterThan(0);
+    expectOnTheCore(await sampleAnimations(page), `${from} → ${to}`);
+  }
+  // Changes of data: labels moving with their bars, a member fading in or out, a leg taken back.
+  const section = page.locator('section[aria-labelledby="lab-motion"]');
+  await section.getByLabel('Motion in these figures').selectOption('full');
+  for (const button of ['New values', 'Add a member', 'Remove a member', 'Remove a stop']) {
+    await page.getByRole('button', { name: button }).click();
+    await expect.poll(() => figureAnimations(page)).toBeGreaterThan(0);
+    expectOnTheCore(await sampleAnimations(page), button);
+    await idle(page);
+  }
+});
+
+/** Makes the changes, waits for each to end, and gives each figure's final drawing. */
+async function changesEnd(page: Page, tier: 'full' | 'reduced', clicks: string[]): Promise<Record<string, string>> {
+  await page.goto('/lab');
+  const section = page.locator('section[aria-labelledby="lab-motion"]');
+  await section.getByLabel('Motion in these figures').selectOption(tier);
+  for (const name of clicks) {
+    await page.getByRole('button', { name }).click();
+    await idle(page);
+    await page.waitForTimeout(350);
+  }
+  const out: Record<string, string> = {};
+  for (const ref of ['bars', 'set', 'route']) for (const scheme of ['light', 'dark']) out[`${ref}-${scheme}`] = await drawing(page, `figure[data-motion="${ref}-${scheme}"]`);
+  return out;
+}
+
+test('Visual Lab: every change of data ends on the picture it changes to', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  const clicks = ['New values', 'New values', 'Add a member', 'Remove a member', 'Remove a member', 'Add a stop', 'Remove a stop', 'Remove a stop'];
+  const moved = await changesEnd(page, 'full', clicks);
+  const shown = await changesEnd(page, 'reduced', clicks);
+  expect(moved).toEqual(shown);
+});
+
+test('Visual Lab: nothing redraws while nothing changes', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/lab');
+  await page.locator('section[aria-labelledby="lab-motion"]').getByLabel('Motion in these figures').selectOption('full');
+  await page.getByRole('button', { name: 'New values' }).click();
+  await page.getByRole('button', { name: 'Remove a stop' }).click();
+  await page.locator('[data-interaction="rating-light"] [role="slider"]').focus();
+  await page.keyboard.press('ArrowRight');
+  await idle(page);
+  await page.waitForTimeout(400);
+  // Over a second of quiet: no change to any figure, no animation, no frame drawn.
+  const changes = await page.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        let n = 0;
+        const observer = new MutationObserver((records) => (n += records.length));
+        for (const svg of document.querySelectorAll('app-vis-svg svg')) observer.observe(svg, { subtree: true, attributes: true, childList: true, characterData: true });
+        setTimeout(() => {
+          observer.disconnect();
+          resolve(n);
+        }, 1000);
+      }),
+  );
+  expect(changes).toBe(0);
+  expect(await figureAnimations(page)).toBe(0);
+});
+
+test('Visual Lab: a change cut short carries on from where it was and ends on the newest picture', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  const bar = '[data-motion="bars-light"] [data-vis-id="bar-1"]';
+  const top = (d: string) => Number(d.match(/^M[\d.]+ ([\d.]+)/)![1]);
+  // Two new values about 100 ms apart, timed in the page itself, each frame recorded with its time.
+  // Bar A glides from 114 towards 30 (300 ms); cut short, it turns from where it is towards 86, so it
+  // never gets near 30. A glide started from the first change's end would begin at 30, every time.
+  // The exact behaviour is tested on a test clock (rendering/conformance.spec.ts); here the real page
+  // shows it. Under load the second change can land when the first glide is nearly over, which shows
+  // nothing either way: such an attempt is made again on a fresh page, up to five times.
+  const attempts: { lowest: number; last: number }[] = [];
+  for (let i = 0; i < 5 && !attempts.some((a) => a.lowest > 40 && a.last === 86); i++) {
+    await page.goto('/lab');
+    const section = page.locator('section[aria-labelledby="lab-motion"]');
+    await section.getByLabel('Motion in these figures').selectOption('full');
+    await section.scrollIntoViewIfNeeded();
+    const made = await page.evaluate(
+      (selector) =>
+        new Promise<{ t1: number; t2: number; frames: [number, string][] }>((resolve) => {
+          const el = () => document.querySelector(selector)!;
+          const button = [...document.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'New values')!;
+          const frames: [number, string][] = [];
+          let t2 = 0;
+          const look = (t: number) => {
+            frames.push([performance.now(), el().getAttribute('d')!]);
+            void t;
+            if (performance.now() - t1 < 900) requestAnimationFrame(look);
+            else resolve({ t1, t2, frames });
+          };
+          const t1 = performance.now();
+          button.click();
+          requestAnimationFrame(look);
+          setTimeout(() => {
+            t2 = performance.now();
+            button.click();
+          }, 100);
+        }),
+      bar,
+    );
+    const after = made.frames.filter(([t]) => t > made.t2).map(([, d]) => top(d));
+    attempts.push({ lowest: Math.min(...after), last: after[after.length - 1] });
+  }
+  // In one attempt at least, the bar turned well before 30 and ended on the newest value:
+  // from [2, 4, 3] by way of [5, 1, 3] to [3, 3, 5], bar A ends at 3 (top 86).
+  expect(attempts.some((a) => a.lowest > 40 && a.last === 86), `lowest point and end of each attempt: ${JSON.stringify(attempts)}`).toBe(true);
+  // A departure cut short by an entrance: nothing is left behind.
+  await page.getByRole('button', { name: 'Remove a stop' }).click();
+  await page.getByRole('button', { name: 'Add a stop' }).click();
+  await idle(page);
+  await expect(page.locator('[data-vis-leaving], [data-vis-ghost], mask[id*="leaving"]')).toHaveCount(0);
+  await expect(page.locator('[data-motion="route-light"] [data-vis-id="leg-3"]')).toHaveCount(1);
+});
+
+test('Visual Lab: changes keep to the motion budget', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/lab');
+  await page.locator('section[aria-labelledby="lab-motion"]').getByLabel('Motion in these figures').selectOption('full');
+  for (const name of ['New values', 'New values', 'Add a member', 'Add a member', 'Add a member', 'Remove a member', 'Add a stop', 'Add a stop', 'Remove a stop']) {
+    await page.getByRole('button', { name }).click();
+    await expect(page.getByRole('list', { name: /^Motion budget/ })).toHaveCount(0);
+    for (const ref of ['bars', 'set', 'route']) expect(await page.locator(`[data-moved="${ref}"] > li`).count()).toBeLessThanOrEqual(3);
+  }
+});
+
+// The stimulus lane (M6 stage B): the check before a run, a run and its timing log. Timing in a
+// test browser isn't the display's own, so these check what the Lab says, not how stable it is.
+test('Visual Lab: the stimulus lane checks the display, runs, and logs every event with a verdict', async ({ page }) => {
+  await page.goto('/lab');
+  const section = page.locator('section[aria-labelledby="lab-stimulus"]');
+  await section.scrollIntoViewIfNeeded();
+  await expect(section).toContainText('browser frame time (estimated, not display time)');
+  await expect(section.getByRole('button', { name: 'Run the reference stimulus' })).toBeDisabled();
+  await section.getByRole('button', { name: 'Check this display (2 s)' }).click();
+  await expect(section.locator('[data-check] [data-verdict]')).toHaveText(/^(stable|not stable: .+)$/, { timeout: 15_000 });
+  await expect(section.locator('[data-units="frames"]')).toHaveText(/^(run|refused): .+/);
+  await expect(section.locator('[data-units="ms"]')).toHaveText(/^(run|refused): .+/);
+  await section.getByRole('button', { name: 'Run the reference stimulus' }).click();
+  await expect(section.locator('[data-summary]')).toContainText('Frames produced', { timeout: 15_000 });
+  const verdicts = await section.locator('tr[data-event] [data-verdict]').allInnerTexts();
+  expect(verdicts).toHaveLength(4);
+  for (const v of verdicts) expect(v).toMatch(/^(as specified|late onset|too long|unstable|interrupted|refused):/);
+  await expectNoSeriousA11yIssues(page, 'Visual Lab, stimulus lane');
+});
+
+test('Visual Lab: losing focus refuses a check and interrupts a run', async ({ page }) => {
+  await page.goto('/lab');
+  const section = page.locator('section[aria-labelledby="lab-stimulus"]');
+  await section.scrollIntoViewIfNeeded();
+  // Test browsers keep a page focused even when it isn't in front, so focus is lost by an event here.
+  await section.getByRole('button', { name: 'Check this display (2 s)' }).click();
+  await page.evaluate(() => window.dispatchEvent(new Event('blur')));
+  await expect(section.locator('[data-check] [data-verdict]')).toContainText('not stable: the page lost focus during the check', { timeout: 15_000 });
+  await expect(section.locator('[data-units="ms"]')).toContainText('refused');
+  await section.getByRole('button', { name: 'Run the reference stimulus' }).click();
+  await expect(section.locator('[data-summary]')).toContainText('Frames produced', { timeout: 15_000 });
+  for (const v of await section.locator('tr[data-event] [data-verdict]').allInnerTexts()) expect(v).toMatch(/^refused:/);
+  // Checked again, then a run that loses focus part-way is interrupted.
+  await section.getByRole('button', { name: 'Check this display (2 s)' }).click();
+  await expect(section.locator('[data-check] [data-verdict]')).not.toContainText('lost focus', { timeout: 15_000 });
+  if (await section.locator('[data-units="ms"]').innerText().then((t) => t.startsWith('run'))) {
+    await section.getByRole('button', { name: 'Run the reference stimulus' }).click();
+    await page.waitForTimeout(800);
+    await page.evaluate(() => window.dispatchEvent(new Event('blur')));
+    await expect(section.locator('[data-interrupted]')).toHaveText('Interrupted: the page lost focus', { timeout: 15_000 });
+  }
+});
+
+// The watchdog (M6 stage C): a figure whose own motion runs below 50 fps for a second of motion
+// shows its next changes at once; other figures keep their motion; the overlay says so.
+test('Visual Lab: the watchdog moves a slow figure to the reduced tier', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/lab');
+  const section = page.locator('section[aria-labelledby="lab-motion"]');
+  await section.scrollIntoViewIfNeeded();
+  await expect(section.getByLabel('Motion in these figures')).toHaveValue('auto');
+  // Busy for 30 ms in every frame: the page draws about 30 frames a second.
+  await page.evaluate(() => {
+    (globalThis as Record<string, unknown>)['busy'] = true;
+    const busy = () => {
+      const start = performance.now();
+      while (performance.now() - start < 30) {
+        /* busy */
+      }
+      if ((globalThis as Record<string, unknown>)['busy']) requestAnimationFrame(busy);
+    };
+    requestAnimationFrame(busy);
+  });
+  for (let i = 0; i < 8; i++) {
+    await page.getByRole('button', { name: 'New values' }).click();
+    await page.waitForTimeout(450);
+  }
+  await page.evaluate(() => ((globalThis as Record<string, unknown>)['busy'] = false));
+  await page.getByLabel('Performance overlay').check();
+  await expect(page.locator('[data-overlay-row="reference.motion.bars"] [data-tier]').first()).toHaveAttribute('data-tier', 'reduced');
+  // The next change shows at once: no drawing between the two.
+  const bar = '[data-motion="bars-light"] [data-vis-id="bar-1"]';
+  const before = await page.locator(bar).getAttribute('d');
+  const drawings = await drawingsDuring(page, bar, () => page.getByRole('button', { name: 'New values' }).click(), 400);
+  const after = await page.locator(bar).getAttribute('d');
+  expect(after).not.toBe(before);
+  expect(drawings.filter((d) => d !== before && d !== after)).toEqual([]);
+  // Another figure, never slow, still moves.
+  await page.getByRole('button', { name: 'Add a member' }).click();
+  await expect(page.locator('[data-overlay-row="reference.motion.set"] [data-tier]').first()).toHaveAttribute('data-tier', 'full');
+});
+
+// Assets (M7 stage A): the Lab shows every asset in the manifest in both schemes, and checks the
+// files as served against the manifest's size and checksum.
+test('Visual Lab: assets are shown with their record, and their files match the manifest', async ({ page }) => {
+  await page.goto('/lab');
+  const section = page.locator('section[aria-labelledby="lab-assets"]');
+  await section.scrollIntoViewIfNeeded();
+  for (const scheme of ['light', 'dark']) {
+    const img = section.locator(`img[data-asset="reference.mark-${scheme}"]`);
+    await expect(img).toHaveAttribute('alt', 'Reference asset: a mark in the middle of a line between two points');
+    await expect.poll(() => img.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  }
+  await expect(section.locator('[data-asset-status="reference.mark"]')).toContainText('draft');
+  await expect(section.locator('[data-asset-facts="reference.mark"]')).toContainText('No: a draft is shown in the Lab only');
+  await expect(section.locator('[data-asset-check="reference.mark"]')).toContainText('The files served match the manifest');
+  await expect(section.getByRole('list', { name: /^Asset problems/ })).toHaveCount(0);
+});
+
+test('Visual Lab: a file that differs from the manifest is reported', async ({ page }) => {
+  // The light file comes back changed by one character.
+  await page.route('**/visuals/reference/mark-light.svg', async (route) => {
+    const response = await route.fetch();
+    await route.fulfill({ response, body: (await response.text()).replace('r="14"', 'r="15"') });
+  });
+  await page.goto('/lab');
+  const check = page.locator('[data-asset-check="reference.mark"]');
+  await check.scrollIntoViewIfNeeded();
+  await expect(check.getByRole('list', { name: 'Asset problems: reference.mark' })).toContainText(
+    "asset 'reference.mark', light file: its checksum isn't the manifest's; a changed file is a new version",
+  );
+});
+
+// Generated pictures (M7 stage C): off by default. The Lab shows the one draft the local test
+// provider made, marked as generated, a draft that reaches no one, with its brief on record.
+test('Visual Lab: a generated picture is a marked draft that reaches no one', async ({ page }) => {
+  await page.goto('/lab');
+  const section = page.locator('section[aria-labelledby="lab-assets"]');
+  await section.scrollIntoViewIfNeeded();
+  await expect(section).toContainText('Generated pictures are off: no AI provider is configured');
+  await expect(section.locator('[data-asset-status="reference.generated"]')).toHaveText(/draft\s*· generated/);
+  const facts = section.locator('[data-asset-facts="reference.generated"]');
+  await expect(facts).toContainText('Generated by the local test provider (a fixed, hand-written picture: no AI, no network); brief: area action, frame banner, subject path; seed lab-1');
+  await expect(facts).toContainText('Not reviewed yet');
+  await expect(facts).toContainText('No: a draft is shown in the Lab only');
+  await expect(section.locator('[data-asset-check="reference.generated"]')).toContainText('The files served match the manifest');
+  for (const scheme of ['light', 'dark']) {
+    const img = section.locator(`img[data-asset="reference.generated-${scheme}"]`);
+    await expect.poll(() => img.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  }
+  // The page asks no other host for anything: every request stays on this origin.
+  const origin = new URL(page.url()).origin;
+  const elsewhere: string[] = [];
+  page.on('request', (r) => {
+    if (!r.url().startsWith(origin) && !r.url().startsWith('data:') && !r.url().startsWith('blob:')) elsewhere.push(r.url());
+  });
+  await page.reload();
+  await section.scrollIntoViewIfNeeded();
+  await expect(section.locator('[data-asset-check="reference.generated"]')).toContainText('The files served match the manifest');
+  expect(elsewhere).toEqual([]);
+});
+
+// The catalog (M8 stage A): the Lab's contents lead to every section, and the catalog lists every
+// capability by subsystem with where the Lab shows it.
+test('Visual Lab: the contents and the catalog lead to every section', async ({ page }) => {
+  await page.goto('/lab');
+  const contents = page.getByRole('navigation', { name: 'Lab contents' });
+  const links = contents.getByRole('link');
+  await expect(links).toHaveCount(15);
+  // Every link but the last (the parity page) goes to a heading on this page, and focus goes with it.
+  const labels = await links.allInnerTexts();
+  for (const label of labels.slice(0, -1)) {
+    await contents.getByRole('link', { name: label, exact: true }).click();
+    const focused = page.locator(':focus');
+    await expect.poll(() => focused.evaluate((el) => el.tagName), label).toMatch(/^H[23]$/);
+    await expect(focused).toBeInViewport();
+  }
+  await contents.getByRole('link', { name: 'Catalog of capabilities' }).click();
+  await expect(page.locator(':focus')).toHaveAttribute('id', 'lab-catalog');
+  const catalog = page.locator('section[aria-labelledby="lab-catalog"]');
+  await expect(catalog.getByRole('table')).toHaveCount(11);
+  expect(await catalog.locator('tbody tr').count()).toBeGreaterThanOrEqual(25);
+  // A row leads to where the Lab shows the capability.
+  await catalog.getByRole('row', { name: /^Generators/ }).getByRole('link', { name: 'Generators' }).click();
+  await expect(page.locator(':focus')).toHaveAttribute('id', 'lab-generators');
+  // The parity page is its own page.
+  await contents.getByRole('link', { name: /^Rendering parity/ }).click();
+  await expect(page).toHaveURL(/\/lab\/parity$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Rendering parity' })).toBeVisible();
+});
+
+// The authoring guide's worked example (M8 stage C): bound as an exercise binds an instrument. The
+// exercise's native control holds the number; the figure takes the pointer and reports the number
+// back; both panels, the slot and the words follow the one value; the source names what was drawn.
+test('Visual Lab: the worked example keeps its native control and its figure in step', async ({ page }) => {
+  await page.goto('/lab');
+  const native = page.locator('input[data-guide="native"]');
+  const words = page.locator('output[data-guide="value"]');
+  const barX = (figure: string) =>
+    page.locator(`[data-guide="${figure}"] path[data-vis-id="bar"]`).evaluate((p) => Math.round((p as SVGGraphicsElement).getBBox().x + 3));
+  await expect(native).toHaveValue('3');
+  await expect(words).toHaveText('3 of 7 days');
+  await expect(page.locator('[data-guide="figure-light"]')).toHaveAttribute('role', 'img');
+  await expect(page.locator('[data-guide="figure-light"]')).toHaveAttribute('aria-label', '3 of 7 days planned.');
+  await expect(page.locator('[data-guide="source"]')).toHaveText(/^instrument:reference\.guide\.days@1;theme:action@\d+$/);
+
+  // A press on the figure's line places the bar: 6 days. The native control and the words follow.
+  const svg = page.locator('[data-guide="figure-light"] app-vis-svg svg');
+  await svg.scrollIntoViewIfNeeded();
+  const box = (await svg.boundingBox())!;
+  const s = box.width / 480;
+  await page.mouse.click(box.x + 390 * s, box.y + 64 * s);
+  await expect(native).toHaveValue('6');
+  await expect(words).toHaveText('6 of 7 days');
+  await expect.poll(() => barX('figure-dark')).toBe(390);
+
+  // The native control sets the number; both figures and the slot draw it.
+  await native.fill('1');
+  await expect(words).toHaveText('1 of 7 days');
+  await expect.poll(() => barX('figure-light')).toBe(90);
+  await expect.poll(() => barX('figure-dark')).toBe(90);
+  await expect.poll(() => barX('slot')).toBe(90);
+  await expect(page.locator('[data-guide="slot"]')).toHaveAttribute('aria-label', '1 of 7 days planned');
+  const filled = await page
+    .locator('[data-guide="figure-light"] path[data-vis-id^="day-"]')
+    .evaluateAll((els) => els.map((e) => getComputedStyle(e).fill !== 'none'));
+  expect(filled).toEqual([true, false, false, false, false, false, false]);
+  await expect(page.getByRole('list', { name: 'Validation problems' })).toHaveCount(0);
+});

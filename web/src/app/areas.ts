@@ -11,8 +11,6 @@ export interface Topic {
   experiences: ExerciseId[];
   /** Whether My experiment runs on this topic. */
   hasExperiment: boolean;
-  /** The note under this topic's exercises, when it differs from the area's. */
-  practiceNote?: string;
 }
 
 export interface Area {
@@ -22,8 +20,6 @@ export interface Area {
   /** development: shown as available in the development build only, planned elsewhere. */
   status: 'available' | 'planned' | 'development';
   intro?: string;
-  /** The note under the exercises; defaults to the Action and growth wording. */
-  practiceNote?: string;
   topics?: Topic[];
 }
 
@@ -52,8 +48,6 @@ export const AREAS: Area[] = [
         text: "For something you want, when you're not sure what's in the way or whether to go for it.",
         experiences: ['mcii'],
         hasExperiment: false,
-        practiceNote:
-          "Practice exercises are saved in My records, without anything you write. They're never part of your experiment.",
       },
     ],
   },
@@ -66,8 +60,6 @@ export const AREAS: Area[] = [
     status: 'development',
     intro:
       "Exercises for looking at a situation from more than one side, and keeping the reading that fits best, even if it's the first one.",
-    practiceNote:
-      "Practice exercises are saved in My records, without anything you write. They're never part of your experiment.",
     topics: [
       {
         title: "When you're stuck on one reading",

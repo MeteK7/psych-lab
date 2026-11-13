@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 
 import { SessionUpsert } from '../api/types';
+import { PageExit } from '../shared/page-exit';
 import { SessionPage } from './session-page';
 
 function setup(params: Record<string, string>) {
@@ -84,13 +85,13 @@ describe('SessionPage', () => {
     expect(text).toContain('About 3 minutes.');
   });
 
-  it('runs a goal-restatement exercise and saves after every step', async () => {
+  it('runs a Try it exercise, records after every step, and keeps none of the answers', async () => {
     const { fixture, backend } = await begin({ mode: 'try', condition: 'goal_restatement' });
     expect((await flushSave(fixture, backend)).status).toBe('in_progress');
 
     expect(root(fixture).textContent).toContain('Step 1 of 3: How starting feels');
     await rate(fixture, 6);
-    expect((await flushSave(fixture, backend)).ratings).toEqual({ unpleasant_pre: 6 });
+    expect((await flushSave(fixture, backend)).ratings).toBeNull(); // Try it keeps no ratings
 
     const inputs = root(fixture).querySelectorAll<HTMLInputElement>('input[type="text"]');
     type(fixture, inputs[0], 'understand neural networks');
@@ -102,22 +103,21 @@ describe('SessionPage', () => {
     await fixture.whenStable();
     click(fixture, 'Continue');
     const afterPlan = await flushSave(fixture, backend);
-    expect(afterPlan.plan).toEqual({
-      type: 'goal_restatement',
-      goal: 'understand neural networks',
-      topic: 'backpropagation',
-      read_back: true,
-    });
+    expect(afterPlan.plan).toBeNull();
+    expect(JSON.stringify(afterPlan)).not.toContain('neural');
 
     await rate(fixture, 3);
     const final = await flushSave(fixture, backend);
     expect(final.status).toBe('completed');
     expect(final.ended_at).toBeTruthy();
-    expect(final.ratings).toEqual({ unpleasant_pre: 6, unpleasant_post: 3 });
+    expect(final.ratings).toBeNull();
     expect(final.steps?.map((s) => s.step)).toEqual(['pre_rating', 'goal_restatement', 'post_rating']);
+    expect(final.steps?.every((s) => Object.keys(s.result ?? {}).length === 0)).toBe(true);
     expect(final.content_versions).toEqual({ ratings: '2', 'goal-restatement': '2' });
     expect(root(fixture).textContent).toContain('Exercise complete');
-    expect(root(fixture).textContent).toContain('Saved at');
+    expect(root(fixture).textContent).toContain('Only that you did this exercise, and when, is kept.');
+    // The goal goes with the person, never to the server.
+    expect(root(fixture).querySelector('.kept')?.textContent).toBe('understand neural networks');
     // The outcome window is never mentioned during or after an exercise.
     expect(root(fixture).textContent).not.toContain('window');
     expect(root(fixture).textContent).toContain('Back to Action and growth');
@@ -184,7 +184,8 @@ describe('SessionPage', () => {
     expect(body.status).toBe('aborted');
     expect(body.steps?.at(-1)).toMatchObject({ step: 'stopped', result: { during: 'pre_rating' } });
     expect(root(fixture).textContent).toContain('Exercise stopped');
-    expect(root(fixture).textContent).toContain('What you did so far is saved.');
+    expect(root(fixture).textContent).toContain('Only that you started this exercise, and when, is kept.');
+    expect(root(fixture).querySelector('.keep')).toBeNull(); // nothing to take from a stopped run
   });
 
   it('shows a retry option when the final save fails', async () => {
@@ -197,9 +198,59 @@ describe('SessionPage', () => {
       .expectOne((r) => r.method === 'PUT')
       .flush(null, { status: 503, statusText: 'Unavailable' });
     await settle(fixture);
-    expect(root(fixture).querySelector('[role="alert"]')?.textContent).toContain("couldn't be saved");
+    expect(root(fixture).querySelector('[role="alert"]')?.textContent).toContain("couldn't be recorded");
 
     click(fixture, 'Try again');
     expect((await flushSave(fixture, backend)).status).toBe('aborted');
+  });
+
+  it('keeps everything in an experiment run, and offers no Done or Take it with you there', async () => {
+    const reveal = '11111111-2222-4333-8444-555555555555';
+    const { fixture, backend } = await begin({ mode: 'self_use', condition: 'goal_restatement', reveal });
+    await flushSave(fixture, backend);
+    expect(root(fixture).textContent).not.toContain('Nothing you write or choose is saved');
+    await rate(fixture, 6);
+    expect((await flushSave(fixture, backend)).ratings).toEqual({ unpleasant_pre: 6 });
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    click(fixture, 'Stop the exercise');
+    await flushSave(fixture, backend);
+    expect(root(fixture).textContent).toContain('What you did so far is saved.');
+    expect(Array.from(root(fixture).querySelectorAll('button')).map((b) => b.textContent?.trim())).not.toContain('Done');
+  });
+
+  it('says before Begin that Try it keeps nothing written or chosen', async () => {
+    const { fixture } = setup({ mode: 'try', condition: 'action_bridge' });
+    await fixture.whenStable();
+    expect(root(fixture).textContent).toContain(
+      'Nothing you write or choose is saved. Only that you did this exercise, and when, is kept on this computer.',
+    );
+  });
+
+  it('lets the person take their goal with them, then leaves with Done', async () => {
+    const { fixture, backend } = await begin({ mode: 'try', condition: 'goal_restatement' });
+    const exit = TestBed.inject(PageExit);
+    const home = vi.spyOn(exit, 'home').mockImplementation(() => undefined);
+    const download = vi.spyOn(exit, 'download').mockImplementation(() => undefined);
+    await flushSave(fixture, backend);
+    await rate(fixture, 6);
+    await flushSave(fixture, backend);
+    const inputs = root(fixture).querySelectorAll<HTMLInputElement>('input[type="text"]');
+    type(fixture, inputs[0], 'PRIVATE goal');
+    type(fixture, inputs[1], 'topic');
+    await fixture.whenStable();
+    click(fixture, 'Continue');
+    await fixture.whenStable();
+    root(fixture).querySelector<HTMLInputElement>('input[type="checkbox"]')!.click();
+    await fixture.whenStable();
+    click(fixture, 'Continue');
+    await flushSave(fixture, backend);
+    await rate(fixture, 3);
+    const final = await flushSave(fixture, backend);
+    expect(JSON.stringify(final)).not.toContain('PRIVATE');
+
+    click(fixture, 'Save as a file');
+    expect(download).toHaveBeenCalledWith('Write down your goal.txt', 'PRIVATE goal\n');
+    click(fixture, 'Done');
+    expect(home).toHaveBeenCalled();
   });
 });

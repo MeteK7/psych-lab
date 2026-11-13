@@ -82,7 +82,7 @@ describe('AreaPage', () => {
   });
 
   describe('MCII (development only)', () => {
-    it('adds its own topic, with its method and note, in the development build', async () => {
+    it('adds its own topic, with its method, in the development build, and says once what practice keeps', async () => {
       const fixture = create('action-growth', 'development');
       await fixture.whenStable();
       const root = fixture.nativeElement as HTMLElement;
@@ -95,9 +95,11 @@ describe('AreaPage', () => {
       expect(card?.querySelector('h3')?.textContent?.trim()).toBe("Your wish, and what's in the way");
       expect(card?.querySelector('a.method')?.textContent).toContain('Picturing the obstacle, then planning (MCII)');
       expect(card?.textContent).toContain('About 6 minutes');
-      expect(sections[1].textContent).toContain('without anything you write');
       expect(sections[1].textContent).not.toContain('Open My experiment');
-      expect(sections[0].textContent).not.toContain('without anything you write');
+      // What practice keeps is said once for the area, before any topic, not under each one.
+      const notes = Array.from(root.querySelectorAll('p.muted')).filter((p) => p.textContent?.includes('without anything you write or choose'));
+      expect(notes).toHaveLength(1);
+      expect(notes[0].closest('section')).toBeNull();
     });
 
     it('leaves no empty section in the production build', async () => {

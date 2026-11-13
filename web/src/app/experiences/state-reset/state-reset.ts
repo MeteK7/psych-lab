@@ -3,7 +3,8 @@ import { Component, OnDestroy, computed, input, output, signal } from '@angular/
 import { RATINGS, STATE_RESET, STATE_RESET_SOUND, fill } from '../../../content';
 import { Experience, StepOutcome } from '../../flow/step-outcome';
 import { RatingScale } from '../../shared/rating-scale';
-import { GamePreview } from './game-preview';
+import { InstrumentSlot } from '../../shared/visual/integration/instrument-slot';
+import { InstrumentFigure } from '../../shared/visual/integration/instruments';
 import { Phase, Variant, buildSchedule } from './schedule';
 import { playTone, unlockAudio } from './tone-audio';
 import { ToneGame } from './tone-game';
@@ -22,7 +23,7 @@ export type Task = 'dot' | 'sound';
  */
 @Component({
   selector: 'app-state-reset',
-  imports: [GamePreview, RatingScale, ToneGame, TrackingGame],
+  imports: [InstrumentFigure, InstrumentSlot, RatingScale, ToneGame, TrackingGame],
   template: `
     @switch (phase().kind) {
       @case ('intro') {
@@ -33,7 +34,7 @@ export type Task = 'dot' | 'sound';
           }
         </ol>
         <p>{{ texts().about_duration }}</p>
-        <button type="button" (click)="next()">{{ content.next_label }}</button>
+        <button class="primary" type="button" (click)="next()">{{ content.next_label }}</button>
       }
       @case ('picture') {
         <h3>{{ content.picture.heading }}</h3>
@@ -55,7 +56,7 @@ export type Task = 'dot' | 'sound';
                    aria-describedby="picture-hint" required />
           </label>
           <p id="picture-hint" class="hint">{{ content.picture.field_hint }}</p>
-          <button type="submit" [disabled]="!picture().trim()">{{ content.next_label }}</button>
+          <button class="primary" type="submit" [disabled]="!picture().trim()">{{ content.next_label }}</button>
         </form>
       }
       @case ('rating') {
@@ -67,7 +68,7 @@ export type Task = 'dot' | 'sound';
         }
         <app-rating-scale [item]="ratingItems.image_vividness" [(value)]="vividness" />
         <app-rating-scale [item]="ratingItems.image_emotionality" [(value)]="emotionality" />
-        <button type="button" [disabled]="vividness() === null || emotionality() === null" (click)="saveRating()">
+        <button class="primary" type="button" [disabled]="vividness() === null || emotionality() === null" (click)="saveRating()">
           {{ ratingWhen() === 'pre' ? content.next_label : content.continue_label }}
         </button>
       }
@@ -98,7 +99,10 @@ export type Task = 'dot' | 'sound';
               <button type="button" (click)="playSample('high')">{{ sound.how_it_works.high }}</button>
             </div>
           } @else {
-            <app-game-preview [ringRadius]="content.game.ring_radius" />
+            <figure class="preview" role="img" [attr.aria-label]="content.how_it_works.illustration_alt">
+              <app-vis-instrument instrument="tracking-preview"
+                                  [inputs]="{ ringRadius: content.game.ring_radius, labels: content.how_it_works.labels }" />
+            </figure>
             <p>{{ content.how_it_works.text }}</p>
             <ul>
               <li>{{ content.how_it_works.mouse }}</li>
@@ -107,7 +111,7 @@ export type Task = 'dot' | 'sound';
           }
           <p>{{ texts().practice }}</p>
           @if (practice() === 'preview') {
-            <button type="button" (click)="startPractice()">{{ content.how_it_works.start_practice }}</button>
+            <button class="primary" type="button" (click)="startPractice()">{{ content.how_it_works.start_practice }}</button>
             <!-- Offered in Try it only: an experiment exercise keeps the dot game (protocol). -->
             @if (!assigned()) {
               <section class="alternative" aria-label="Sound version">
@@ -126,21 +130,25 @@ export type Task = 'dot' | 'sound';
             <p role="status">{{ content.how_it_works.practice_done }}</p>
             <div class="actions">
               <button type="button" (click)="startPractice()">{{ content.how_it_works.practise_again }}</button>
-              <button type="button" (click)="next()">{{ content.how_it_works.ready }}</button>
+              <button class="primary" type="button" (click)="next()">{{ content.how_it_works.ready }}</button>
             </div>
           }
         }
       }
       @case ('hold') {
+        <!-- Where you are in the rounds, at the top of every game screen, so it stays in one place. -->
+        <app-vis-instrument-slot class="rounds" instrument="rounds" [inputs]="{ total: content.timing.sets, current: 1 }" />
         <p class="cue" role="status">{{ say(texts().hold) }}</p>
         <p class="countdown" aria-hidden="true">{{ say(texts().hold_countdown, { seconds: remaining() }) }}</p>
       }
       @case ('rest') {
+        <app-vis-instrument-slot class="rounds" instrument="rounds" [inputs]="{ total: content.timing.sets, current: restNext() }" />
         <!-- The visible text counts down; screen readers hear it once, not every second. -->
         <p class="cue" aria-hidden="true">{{ say(texts().rest, { next: restNext(), seconds: remaining() }) }}</p>
         <p class="sr-only" role="status">{{ say(texts().rest, { next: restNext(), seconds: content.timing.rest_seconds }) }}</p>
       }
       @case ('play') {
+        <app-vis-instrument-slot class="rounds" instrument="rounds" [inputs]="{ total: content.timing.sets, current: setNumber() }" />
         <h3>{{ say(texts().round_heading, { round: setNumber(), seconds: content.timing.set_seconds }) }}</h3>
         <p class="cue" role="status">{{ say(roundText()) }}</p>
         <!-- Rest phases sit between sets, so each set gets a fresh game instance. -->
@@ -159,6 +167,9 @@ export type Task = 'dot' | 'sound';
     <button type="button" class="stop" (click)="stopped.emit()">{{ content.stop_label }}</button>
   `,
   styles: `
+    /* The rounds line up with the game box under them. */
+    .rounds { max-width: 480px; margin: 0 0 0.75rem; }
+    .preview { margin: 0 0 1rem; max-width: 480px; }
     .cue { font-size: 1.2rem; font-weight: 600; }
     .countdown { font-size: 1.5rem; font-variant-numeric: tabular-nums; margin: 0.5rem 0 1rem; }
     .stop { display: block; margin-top: 1.5rem; }

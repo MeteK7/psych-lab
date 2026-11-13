@@ -100,7 +100,10 @@ test.describe('keyboard only', () => {
     const saved = await savedSession(page, id);
     expect(saved.mode).toBe('try');
     expect(saved.steps.map((s) => s.step)).toEqual(['pre_rating', 'action_bridge', 'post_rating']);
-    expect(saved.ratings).toEqual({ unpleasant_pre: 6, unpleasant_post: 3 });
+    // Try it keeps only that the exercise ran, and when (M1): no plan, no ratings.
+    expect(saved.ratings).toBeNull();
+    expect(saved.plan).toBeNull();
+    expect(saved.steps.map((s) => s.result)).toEqual([{}, {}, {}]);
   });
 
   test('Write down your goal', async ({ page }) => {
@@ -156,14 +159,9 @@ test.describe('keyboard only', () => {
       'action_bridge',
       'post_rating',
     ]);
-    const result = saved.steps[1].result as {
-      sets: unknown[];
-      practice_runs: number;
-      speed: number;
-    };
-    expect(result.sets).toHaveLength(8);
-    expect(result.practice_runs).toBe(1);
-    expect(result.speed).toBe(1);
+    // Try it keeps only which game ran (M1); the game's data belongs to the experiment's record.
+    expect(saved.steps[1].result).toEqual({ task: 'dot' });
+    expect(saved.ratings).toBeNull();
     expect(JSON.stringify(saved)).not.toContain('chapter 3 and feeling lost'); // never saved
   });
 
@@ -189,9 +187,9 @@ test.describe('keyboard only', () => {
         'action_bridge',
         'post_rating',
       ]);
-      const result = saved.steps[1].result as { sets: unknown[]; speed: number };
-      expect(result.sets).toHaveLength(8);
-      expect(result.speed).toBe(0.5);
+      // The half speed under reduced motion is checked in state-reset.spec.ts: Try it keeps no
+      // game data (M1).
+      expect(saved.steps[1].result).toEqual({ task: 'dot' });
     });
   });
 
@@ -223,9 +221,7 @@ test.describe('keyboard only', () => {
     await expect.poll(async () => (await savedSession(page, id)).status).toBe('completed');
     const saved = await savedSession(page, id);
     expect(saved.content_versions['state-reset-sound']).toBe('1');
-    const result = saved.steps[1].result as { task: string; sets: { tones: number }[] };
-    expect(result.task).toBe('sound');
-    expect(result.sets).toHaveLength(8);
-    expect(result.sets.every((s) => s.tones > 0)).toBe(true);
+    // Try it keeps which game ran, so the sound content version is still recorded (M1).
+    expect(saved.steps[1].result).toEqual({ task: 'sound' });
   });
 });

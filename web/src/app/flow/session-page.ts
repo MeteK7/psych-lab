@@ -19,8 +19,10 @@ import { MciiStore } from '../experiences/mcii/mcii-store';
 import { RatingStep } from '../experiences/rating-step/rating-step';
 import { exerciseInfo, isExerciseId, stepsFor } from '../experiences/registry';
 import { StateReset } from '../experiences/state-reset/state-reset';
+import { PageExit } from '../shared/page-exit';
 import { ScienceSection } from '../shared/science-section';
 import { STEP_NAMES, StepId, isLevelAMode } from './conditions';
+import { CHOOSE_SINK, STORAGE_TEXT } from './result-sink';
 import { SessionDraft, addStep, addStop, newDraft, toUpsert } from './session-record';
 import { StepOutcome } from './step-outcome';
 
@@ -61,7 +63,7 @@ type SaveState = 'idle' | 'saving' | 'error';
           <li>{{ line }}</li>
         }
       </ol>
-      <p>About {{ info()?.minutes }} minutes. Your answers are saved after each step. You can stop at any time.</p>
+      <p>About {{ info()?.minutes }} minutes. {{ text().before }} You can stop at any time.</p>
       @if (science(); as s) {
         <app-science-section [science]="s" [method]="info()?.method?.name" [open]="openWhy" />
       }
@@ -77,22 +79,44 @@ type SaveState = 'idle' | 'saving' | 'error';
             {{ end.status === 'completed' ? 'Exercise complete' : 'Exercise stopped' }}
           </h2>
           @if (saveState() === 'error') {
-            <p role="alert">Your answers couldn't be saved. Is the local server running?</p>
+            <p role="alert">{{ text().failed }}</p>
             <button type="button" (click)="save(end.status, end.at)">Try again</button>
           } @else if (saveState() === 'saving') {
             <p role="status">Saving…</p>
           } @else {
             <p role="status">
-              {{ end.status === 'completed' ? 'Saved at ' + (end.at | date: 'HH:mm') + '.' : 'What you did so far is saved.' }}
+              {{ end.status === 'completed' ? fill(text().completed, (end.at | date: 'HH:mm') ?? '') : text().stopped }}
             </p>
             @if (next(); as n) {
               <!-- A full page load starts the suggested exercise fresh. -->
               <p><a class="primary-link" [href]="'/session?mode=try&condition=' + n.exercise">{{ n.label }}</a></p>
             }
+            @if (keepText(); as keep) {
+              <!-- Try it keeps no answers, so the person's own words go with them, if they want. -->
+              <section class="keep" aria-labelledby="keep-heading">
+                <h3 id="keep-heading">Take it with you</h3>
+                <p class="kept">{{ keep }}</p>
+                <p class="muted">It isn't kept here. Copy it, or save it as a file, if you want it.</p>
+                <p class="keep-actions">
+                  <button type="button" (click)="copyKeep(keep)">Copy</button>
+                  <button type="button" (click)="downloadKeep(keep)">Save as a file</button>
+                  <span role="status">{{ keepMessage() }}</span>
+                </p>
+              </section>
+            }
+            @if (sink().keeps === 'run-only') {
+              <p><button type="button" class="primary" (click)="done()">Done</button></p>
+            }
             @if (assigned()) {
               <p><a routerLink="/experiment" class="primary-link">Back to My experiment</a></p>
             } @else {
-              <p><a [routerLink]="homeLink()">Back to {{ areaTitle() }}</a> · <a routerLink="/records">My records</a></p>
+              <p>
+                <a [routerLink]="homeLink()">Back to {{ areaTitle() }}</a>
+                <!-- A booth lists no records: they'd belong to other visitors. -->
+                @if (!booth) {
+                  · <a routerLink="/records">My records</a>
+                }
+              </p>
             }
           }
           @if (science(); as s) {
@@ -105,23 +129,27 @@ type SaveState = 'idle' | 'saving' | 'error';
           Step {{ index() + 1 }} of {{ steps().length }}: {{ stepName() }}
         </h2>
         @if (saveState() === 'error') {
-          <p role="alert">
-            Your answers couldn't be saved. Is the local server running? You can continue; they'll
-            be saved again after the next step.
-          </p>
+          <p role="alert">{{ text().failedDuring }}</p>
         }
+        <!-- Each exercise loads when its step first shows (@defer), so the first download carries none of them. -->
         <!-- Cognitive shifts: one component per exercise, recreated for each step. -->
         @if (csGroup(); as group) {
           @for (s of [step()]; track s) {
             @switch (group) {
               @case ('cs1') {
-                <app-cs-other-readings [stage]="s" (completed)="onCompleted($event)" />
+                @defer (on immediate) {
+                  <app-cs-other-readings [stage]="s" (completed)="onCompleted($event)" />
+                }
               }
               @case ('cs2') {
-                <app-cs-why-it-happened [stage]="s" (completed)="onCompleted($event)" />
+                @defer (on immediate) {
+                  <app-cs-why-it-happened [stage]="s" (completed)="onCompleted($event)" />
+                }
               }
               @case ('cs3') {
-                <app-cs-not-enough [stage]="s" (completed)="onCompleted($event)" />
+                @defer (on immediate) {
+                  <app-cs-not-enough [stage]="s" (completed)="onCompleted($event)" />
+                }
               }
             }
           }
@@ -129,29 +157,43 @@ type SaveState = 'idle' | 'saving' | 'error';
         <!-- MCII: one component, recreated for each step. -->
         @if (mciiStage(); as stage) {
           @for (s of [stage]; track s) {
-            <app-mcii [stage]="s" (completed)="onCompleted($event)" />
+            @defer (on immediate) {
+              <app-mcii [stage]="s" (completed)="onCompleted($event)" />
+            }
           }
         }
         @switch (step()) {
           @case ('pre_rating') {
-            <app-rating-step phase="pre" (completed)="onCompleted($event)" />
+            @defer (on immediate) {
+              <app-rating-step phase="pre" (completed)="onCompleted($event)" />
+            }
           }
           @case ('post_rating') {
-            <app-rating-step phase="post" (completed)="onCompleted($event)" />
+            @defer (on immediate) {
+              <app-rating-step phase="post" (completed)="onCompleted($event)" />
+            }
           }
           @case ('state_reset') {
-            <app-state-reset variant="image" [assigned]="assigned()"
-                             (completed)="onCompleted($event)" (stopped)="stop()" />
+            @defer (on immediate) {
+              <app-state-reset variant="image" [assigned]="assigned()"
+                               (completed)="onCompleted($event)" (stopped)="stop()" />
+            }
           }
           @case ('game_only') {
-            <app-state-reset variant="game_only" [assigned]="assigned()"
-                             (completed)="onCompleted($event)" (stopped)="stop()" />
+            @defer (on immediate) {
+              <app-state-reset variant="game_only" [assigned]="assigned()"
+                               (completed)="onCompleted($event)" (stopped)="stop()" />
+            }
           }
           @case ('action_bridge') {
-            <app-action-bridge (completed)="onCompleted($event)" />
+            @defer (on immediate) {
+              <app-action-bridge (completed)="onCompleted($event)" />
+            }
           }
           @case ('goal_restatement') {
-            <app-goal-restatement (completed)="onCompleted($event)" />
+            @defer (on immediate) {
+              <app-goal-restatement (completed)="onCompleted($event)" />
+            }
           }
         }
         @if (step() !== 'state_reset' && step() !== 'game_only') {
@@ -166,6 +208,10 @@ type SaveState = 'idle' | 'saving' | 'error';
     .actions { display: flex; align-items: center; gap: 1.25rem; }
     .primary { font-size: 1.05rem; padding: 0.5rem 1.25rem; }
     .primary-link { font-weight: 600; font-size: 1.1rem; }
+    .keep { border-left: 4px solid var(--accent); padding-left: 0.75rem; margin: 1rem 0; }
+    .keep h3 { font-size: 1rem; margin: 0 0 0.25rem; }
+    .kept { white-space: pre-line; }
+    .keep-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
     h2 { font-size: 1.15rem; }
   `,
 })
@@ -208,6 +254,11 @@ export class SessionPage {
     return isMciiStage(step) ? step : null;
   });
   protected readonly info = computed(() => exerciseInfo(this.setup()?.condition));
+  /** Where the record goes, chosen here from the mode; the exercise never knows (result-sink.ts). */
+  private readonly chooseSink = inject(CHOOSE_SINK);
+  protected readonly sink = computed(() => this.chooseSink(this.setup()?.mode ?? 'try'));
+  /** What the screens say about storage, from the same sink. */
+  protected readonly text = computed(() => STORAGE_TEXT[this.sink().keeps]);
   /**
    * "Why this exercise?" for practice only. Experiment exercises show exactly what the
    * approved protocol fixes, and a rationale could add an expectancy confound (plan §3.1).
@@ -217,12 +268,29 @@ export class SessionPage {
   );
   /** Opened straight away when the area page's "Why this exercise?" link was used. */
   protected readonly openWhy: boolean;
+  /** Whether this runs in a booth (M1), as the route found out before opening the page. */
+  protected readonly booth: boolean;
+
+  /**
+   * What the person wrote that they may want to keep: their plan, or their goal. Only when the
+   * sink keeps no answers and the run finished; it stays in this page and is never sent.
+   */
+  protected readonly keepText = computed(() => {
+    const plan = this.draft()?.plan;
+    if (this.sink().keeps !== 'run-only' || this.finished()?.status !== 'completed' || !plan) return null;
+    const text = plan['plan_text'] ?? plan['goal'];
+    return typeof text === 'string' && text.trim() ? text.trim() : null;
+  });
+  protected readonly keepMessage = signal('');
+  private readonly exit = inject(PageExit);
 
   private stepStartedAt = new Date().toISOString();
   private saveQueue: Promise<void> = Promise.resolve();
 
   constructor() {
-    const params = inject(ActivatedRoute).snapshot.queryParamMap;
+    const route = inject(ActivatedRoute).snapshot;
+    const params = route.queryParamMap;
+    this.booth = route.data?.['booth'] === true;
     const condition = params.get('condition');
     const mode = params.get('mode');
     // n-of-1 sessions carry the reveal that assigned their condition (from My experiment).
@@ -265,7 +333,7 @@ export class SessionPage {
 
   protected stop(): void {
     const draft = this.draft();
-    if (!draft || !confirm('Stop this exercise? What you did so far will be saved.')) return;
+    if (!draft || !confirm(this.text().confirmStop)) return;
     const now = new Date().toISOString();
     this.draft.set(addStop(draft, this.step(), now));
     this.finished.set({ status: 'aborted', at: now });
@@ -277,7 +345,7 @@ export class SessionPage {
   save(status: Status, endedAt: string | null): Promise<void> {
     const draft = this.draft();
     if (!draft) return this.saveQueue;
-    const body = toUpsert(draft, status, endedAt);
+    const body = this.sink().record(toUpsert(draft, status, endedAt));
     this.saveQueue = this.saveQueue.then(async () => {
       this.saveState.set('saving');
       try {
@@ -288,6 +356,30 @@ export class SessionPage {
       }
     });
     return this.saveQueue;
+  }
+
+  protected async copyKeep(text: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(text);
+      this.keepMessage.set('Copied.');
+    } catch {
+      this.keepMessage.set("It couldn't be copied. You can select the text and copy it yourself.");
+    }
+  }
+
+  protected downloadKeep(text: string): void {
+    this.exit.download(`${this.info()?.label ?? 'Exercise'}.txt`, `${text}
+`);
+    this.keepMessage.set('Saved as a file.');
+  }
+
+  /** Ends the visit: a full load of Home, so nothing from it stays in this tab's memory. */
+  protected done(): void {
+    this.exit.home();
+  }
+
+  protected fill(text: string, time: string): string {
+    return text.replace('{time}', time);
   }
 
   private focusSoon(): void {

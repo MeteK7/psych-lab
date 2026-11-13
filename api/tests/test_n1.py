@@ -341,7 +341,6 @@ def test_export_lists_try_it_runs_on_session_days_without_their_answers(
             "status": "completed",
             "started_at": start + "+03:00",
             "ended_at": start + "+03:00",
-            "plan": {"goal": "private plan"},
         }
         assert client.put(f"/api/sessions/{session_id}", json=body).status_code == 201
         return session_id
@@ -362,6 +361,23 @@ def test_export_lists_try_it_runs_on_session_days_without_their_answers(
     others = data["other_sessions"]
     assert [o["id"] for o in others] == [morning, after_midnight]
     assert {before, too_late}.isdisjoint(o["id"] for o in others)
-    assert set(others[0]) == {"id", "mode", "condition", "status", "started_at", "ended_at"}
-    assert others[1]["mode"] == "try"
-    assert "private plan" not in str(data)
+    # A Try it run keeps no answers (M1), but its row still gives the exposure analysis all it
+    # reads: the same six fields as before M1.
+    assert others == [
+        {
+            "id": morning,
+            "mode": "try",
+            "condition": "action_bridge",
+            "status": "completed",
+            "started_at": "2026-11-02T00:00:00+03:00",
+            "ended_at": "2026-11-02T00:00:00+03:00",
+        },
+        {
+            "id": after_midnight,
+            "mode": "try",
+            "condition": "goal_restatement",
+            "status": "completed",
+            "started_at": "2026-11-03T00:30:00+03:00",
+            "ended_at": "2026-11-03T00:30:00+03:00",
+        },
+    ]

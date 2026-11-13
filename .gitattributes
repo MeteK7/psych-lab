@@ -1,2 +1,4 @@
 # Schedules are hashed byte for byte; never let git convert their line endings.
 analysis/schedules/** -text
+# Asset files are checksummed byte for byte in the manifest (web/src/app/shared/visual/assets); never convert their line endings.
+web/public/visuals/** -text

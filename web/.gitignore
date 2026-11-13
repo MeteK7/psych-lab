@@ -2,6 +2,8 @@
 
 # Compiled output
 /dist
+# Exported visuals (npm run visuals:export): made again at any time; adopted assets go to public/visuals
+/visual-exports
 /tmp
 /out-tsc
 /bazel-out

@@ -8,11 +8,11 @@ import { StateReset } from '../experiences/state-reset/state-reset';
 import golden from './__golden__/experiment-exercises.json';
 import { SessionPage } from './session-page';
 
-// Golden tests for the four experiment exercises (cognitive-shifts-design.md §1.2).
-// They were generated from the code before the experience-registry refactor, and must stay
-// identical: every request body the session page saves, and the text of every screen,
-// including each exercise's "Why this exercise?" section. If one of these fails, the
-// experiment's exercises have changed. Fix the code; never regenerate the golden file.
+// Golden tests for the four Action and growth exercises: every request body the session page
+// saves, and the text of every screen, including each exercise's "Why this exercise?" section.
+// During development they're ordinary regression tests (docs/plan.md, "Development stage"): if
+// a change to these exercises is intended, re-pin the affected cases in the same change and say
+// so. When participant data collection approaches, they become a gate again: never re-pinned.
 //
 // The timed dot rounds are finished directly through the exercise component; their own
 // timing is covered by the State Reset tests and the browser tests.

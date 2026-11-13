@@ -46,4 +46,28 @@ describe('App', () => {
     }).compileComponents();
     expect(await badge(null)).toBeNull();
   });
+
+  it('in a booth, shows the support line and hides the experiment and records', async () => {
+    const fixture = TestBed.createComponent(App);
+    TestBed.inject(HttpTestingController)
+      .expectOne('/api/health')
+      .flush({
+        status: 'ok',
+        database: 'ok',
+        environment: 'production',
+        profile: 'booth',
+        booth: { support_line: 'Support line: 000', idle_seconds: 180, exercises: [] },
+      });
+    await fixture.whenStable();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(Array.from(root.querySelectorAll('nav a')).map((a) => a.textContent?.trim())).toEqual(['Home']);
+    expect(root.querySelector('.support-line')?.textContent).toBe('Support line: 000');
+    // The idle reset loads on demand, in the booth only.
+    for (let i = 0; i < 20 && !root.querySelector('app-idle-reset'); i++) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      await fixture.whenStable();
+    }
+    expect(root.querySelector('app-idle-reset')).not.toBeNull();
+  });
 });
+
