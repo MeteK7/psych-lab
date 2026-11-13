@@ -117,6 +117,7 @@ Where a rule is a design judgement rather than a measured fact, it is marked [J]
 
 **Rules:**
 - **One viewpoint per scene,** kept in every state.
+  - A figure whose idea is the viewing distance may change that distance, for example `camera-angle.view`. The direction of view stays frontal: nothing rotates, tilts or looks down. (Added 2026-11-13, for "Change the camera angle".)
 - **Eye level [J]:** at or slightly above the horizon, looking slightly down on a landscape.
   - The person looks *over* the path, never up at an obstacle.
   - This supports the MCII policy that the obstacle stays low and surmountable [F: `mcii-design.md` §5].
