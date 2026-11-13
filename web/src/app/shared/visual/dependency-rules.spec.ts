@@ -127,4 +127,28 @@ describe('Visual System dependency rules', () => {
     expect(core).not.toHaveLength(0);
     expect(core.flatMap(({ path, imports }) => imports.filter((i) => i.startsWith(`${ROOT}/`)).map((i) => `${path} imports ${i}`))).toEqual([]);
   });
+
+  it('9. every figure is drawn through the Visual System: no exercise or page draws its own (M8)', async () => {
+    // Outside the Visual Lab, which is the system's own tooling. Icons (shared/icon.ts) are outside scope.
+    const files = (await Promise.all([listSources(`${APP}/experiences`), listSources(`${APP}/pages`)]))
+      .flat()
+      .filter((p) => /\.(ts|html)$/.test(p) && !p.endsWith('.spec.ts') && !p.startsWith(`${APP}/pages/lab/`));
+    expect(files.length).toBeGreaterThan(10);
+    const drawing: string[] = [];
+    const canvases: string[] = [];
+    const DRAWS = /<(svg|path|circle|rect)[\s>]|getContext\(|new Path2D|createElementNS/;
+    const CANVAS = /<canvas[\s>]/;
+    // The patterns work: they find a drawing and a canvas in text that has them.
+    expect([DRAWS.test('<svg viewBox="0 0 1 1">'), DRAWS.test('ctx = c.getContext("2d")'), CANVAS.test('<canvas\n #c>'), DRAWS.test('<section>')]).toEqual([true, true, true, false]);
+    for (const path of files) {
+      const code = await readSource(path);
+      if (DRAWS.test(code)) drawing.push(path);
+      if (CANVAS.test(code)) canvases.push(path);
+    }
+    expect(drawing).toEqual([]);
+    // The one canvas an exercise owns is the dot game's, and the system's own surface draws on it.
+    expect(canvases).toEqual([`${APP}/experiences/state-reset/tracking-game.ts`]);
+    expect(await readSource(canvases[0])).toContain("from '../../shared/visual/integration/tracking'");
+  });
 });
+

@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 import { CS_WHY_IT_HAPPENED, STATE_RESET } from '../../../content';
 import { AppEnvironment } from '../../shared/app-environment';
@@ -16,6 +15,7 @@ import { motionProblems, movers } from '../../shared/visual/motion/plan-motion';
 import { SCENES } from '../../shared/visual/scenes';
 import { THEMES } from '../../shared/visual/styling/vocabulary';
 import { LabAssets } from './lab-assets';
+import { LabCatalog, LabContents } from './lab-catalog';
 import { LabGenerators } from './lab-generators';
 import { LabInteraction } from './lab-interaction';
 import { LabMotion } from './lab-motion';
@@ -35,7 +35,7 @@ import { LabTrackingStill } from './lab-tracking-still';
  */
 @Component({
   selector: 'app-lab-page',
-  imports: [RouterLink, SceneFigure, InstrumentFigure, LabAssets, LabGenerators, LabInteraction, LabMaterials, LabMotion, LabOverlay, LabSheet, LabStimulus, LabTrackingStill],
+  imports: [SceneFigure, InstrumentFigure, LabAssets, LabCatalog, LabContents, LabGenerators, LabInteraction, LabMaterials, LabMotion, LabOverlay, LabSheet, LabStimulus, LabTrackingStill],
   template: `
     <h1>Visual Lab</h1>
     @if (env.showsDevelopment()) {
@@ -43,8 +43,8 @@ import { LabTrackingStill } from './lab-tracking-still';
       <ul class="notes muted">
         <li>The states are drawn without motion. Each change between them is replayed under "Transitions", in full or reduced motion.</li>
         <li>For forced colours, turn on a Windows contrast theme: every panel then shows system colours.</li>
-        <li><a routerLink="/lab/parity">Rendering parity</a>: every composition drawn by the SVG and the canvas backend side by side.</li>
       </ul>
+      <app-lab-contents />
       <app-lab-overlay />
 
       @for (entry of entries; track entry.scene.id) {
@@ -256,6 +256,7 @@ import { LabTrackingStill } from './lab-tracking-still';
       <app-lab-stimulus />
       <app-lab-assets />
       <app-lab-sheet [schemes]="schemes" />
+      <app-lab-catalog />
     } @else {
       <p>The Visual Lab is available in the development build only.</p>
     }

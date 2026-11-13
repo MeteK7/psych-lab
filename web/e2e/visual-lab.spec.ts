@@ -799,3 +799,32 @@ test('Visual Lab: a generated picture is a marked draft that reaches no one', as
   await expect(section.locator('[data-asset-check="reference.generated"]')).toContainText('The files served match the manifest');
   expect(elsewhere).toEqual([]);
 });
+
+// The catalog (M8 stage A): the Lab's contents lead to every section, and the catalog lists every
+// capability by subsystem with where the Lab shows it.
+test('Visual Lab: the contents and the catalog lead to every section', async ({ page }) => {
+  await page.goto('/lab');
+  const contents = page.getByRole('navigation', { name: 'Lab contents' });
+  const links = contents.getByRole('link');
+  await expect(links).toHaveCount(14);
+  // Every link but the last (the parity page) goes to a heading on this page, and focus goes with it.
+  const labels = await links.allInnerTexts();
+  for (const label of labels.slice(0, -1)) {
+    await contents.getByRole('link', { name: label, exact: true }).click();
+    const focused = page.locator(':focus');
+    await expect.poll(() => focused.evaluate((el) => el.tagName), label).toMatch(/^H[23]$/);
+    await expect(focused).toBeInViewport();
+  }
+  await contents.getByRole('link', { name: 'Catalog of capabilities' }).click();
+  await expect(page.locator(':focus')).toHaveAttribute('id', 'lab-catalog');
+  const catalog = page.locator('section[aria-labelledby="lab-catalog"]');
+  await expect(catalog.getByRole('table')).toHaveCount(11);
+  expect(await catalog.locator('tbody tr').count()).toBeGreaterThanOrEqual(25);
+  // A row leads to where the Lab shows the capability.
+  await catalog.getByRole('row', { name: /^Generators/ }).getByRole('link', { name: 'Generators' }).click();
+  await expect(page.locator(':focus')).toHaveAttribute('id', 'lab-generators');
+  // The parity page is its own page.
+  await contents.getByRole('link', { name: /^Rendering parity/ }).click();
+  await expect(page).toHaveURL(/\/lab\/parity$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Rendering parity' })).toBeVisible();
+});
