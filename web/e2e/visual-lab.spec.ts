@@ -17,13 +17,13 @@ const TRACKING_SETS = 3; // state-reset.tracking: outside, inside, the preview
 const GENERATOR_SETS = 21; // S2: the reference compositions, 2 or 3 per generator
 const LAYOUT_SETS = 4; // S2: grid, radial, flow, packing
 const MATERIAL_SETS = 5; // S1 (M3): the material set, a grounded lit form, depth, depth with grain, a translucent overlap
-const SHEET_SETS = 12; // the review sheet (M3 stage C): lines, type, and materials and depth in each of the five areas
+const SHEET_SETS = 17; // the review sheet (M3 stage C): lines, type, and materials, depth and shaded surfaces in each of the five areas
 const MOTION_SETS = 3; // S5 (M5): bars whose values change, a set that reflows, a route that grows and shrinks
 const GUIDE_SLOT = 1; // M8: the worked example shown through the slot, once, in the page's scheme (its interactive panels are images named by their text alternative)
-const VIEW_SETS = 4; // camera-angle.view: each position as a still (its interactive panels are images named by their text alternative)
+const ROOM_SETS = 4; // camera-angle.room: each position as a still (its moving panels are images named by their text alternative)
 const LIVE_SETS = 3; // S6 (M4): a rating scale, a field with two axes and a choice of three, each the control itself
 const PANELS =
-  (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS + GENERATOR_SETS + LAYOUT_SETS + MATERIAL_SETS + SHEET_SETS + MOTION_SETS + VIEW_SETS) * 2 + GUIDE_SLOT; // light and dark
+  (STATES + TRANSITIONS + CAUSE_SETS + ROUND_SETS + TRACKING_SETS + GENERATOR_SETS + LAYOUT_SETS + MATERIAL_SETS + SHEET_SETS + MOTION_SETS + ROOM_SETS) * 2 + GUIDE_SLOT; // light and dark
 
 for (const [name, media] of [
   ['light', { colorScheme: 'light' }],
@@ -870,70 +870,61 @@ test('Visual Lab: the worked example keeps its native control and its figure in 
   await expect(page.getByRole('list', { name: 'Validation problems' })).toHaveCount(0);
 });
 
-// "Change the camera angle" (camera-angle.view): the person steps back with the native slider, by
-// pressing the figure's line, or by dragging its bar; the slider, both panels and the words follow
-// the one position, and what is in view changes with it. Under reduced motion the change shows at once.
-test('Visual Lab: the camera angle steps back by slider, press and drag, and keeps the slider in step', async ({ page }) => {
+// "Change the camera angle" (camera-angle.room, a spatial view): the camera steps back through the
+// room with the native slider, or by dragging across the picture; the slider, both panels and the
+// words follow the one position. Each still shows you only from one step back, and everyone from
+// furthest back. Under reduced motion the view cuts to the new position.
+test('Visual Lab: the room steps back by slider and drag, and keeps the slider in step', async ({ page }) => {
   await page.goto('/lab');
-  const native = page.locator('input[data-view="native"]');
-  const words = page.locator('output[data-view="value"]');
-  const figure = (scheme: string) => page.locator(`[data-view="figure-${scheme}"]`);
-  const barX = (scheme: string) =>
-    figure(scheme).locator('path[data-vis-id="standpoint"]').evaluate((p) => Math.round((p as SVGGraphicsElement).getBBox().x + 3));
-  const shown = (scheme: string, id: string) => figure(scheme).locator(`[data-vis-id="${id}"]`);
+  const native = page.locator('input[data-room="native"]');
+  const words = page.locator('output[data-room="value"]');
+  const figure = (scheme: string) => page.locator(`[data-room="figure-${scheme}"]`);
+  const picture = (scheme: string) => figure(scheme).locator('canvas').evaluate((c) => (c as HTMLCanvasElement).toDataURL());
 
   await expect(native).toHaveValue('0');
   await expect(words).toHaveText('Through your own eyes');
   await expect(figure('light')).toHaveAttribute('role', 'img');
-  await expect(figure('light')).toHaveAttribute('aria-label', 'Close up: the moment fills the view.');
-  await expect(page.locator('[data-view="source"]')).toHaveText(/^instrument:camera-angle\.view@1;theme:cognitive@\d+$/);
-  await expect(shown('light', 'you')).toHaveCount(0);
-  await expect(page.locator('tr[data-view-change] td:last-child')).toHaveText(Array(12).fill('Yes'));
+  await expect(figure('light')).toHaveAttribute('aria-label', /^Through your own eyes/);
+  await expect(page.locator('[data-room="source"]')).toHaveText(/^instrument:camera-angle\.room@1;theme:cognitive@\d+$/);
+  // Through your own eyes, only your forearms of you; from one step back, you; from furthest back, everyone.
+  // A person's pieces are named by the parts they hold (`you-s2-forearm-l+forearm-r`).
+  const pieces = (p: number, match: string) => page.locator(`figure[data-instrument="camera-angle.room-${p}-light"] [data-vis-id${match}]`);
+  await expect(pieces(0, '^="you-s"][data-vis-id*="head"')).toHaveCount(0);
+  await expect(pieces(0, '^="you-s"][data-vis-id*="forearm"')).toHaveCount(1);
+  await expect(pieces(1, '^="you-s"][data-vis-id*="head"')).toHaveCount(1);
+  await expect(pieces(3, '*="head"')).toHaveCount(7);
+  await expect(page.locator('figure[data-instrument="camera-angle.room-2-light"] text')).toHaveText('You');
 
-  // The keyboard on the native slider: one step back, then to the far end and back.
+  // The keyboard on the native slider: the view moves and settles, and both panels say where it is.
+  const before = await picture('light');
   await native.focus();
   await page.keyboard.press('ArrowRight');
   await expect(native).toHaveValue('1');
-  await expect(words).toHaveText('One step back');
   await expect(native).toHaveAttribute('aria-valuetext', 'One step back');
-  await expect.poll(() => barX('light')).toBe(180);
-  await expect(shown('light', 'you')).toHaveCount(1);
-  await expect(shown('dark', 'others-1')).toHaveCount(0);
+  await expect(figure('dark')).toHaveAttribute('aria-label', /^One step back/);
+  await expect.poll(() => picture('light')).not.toBe(before);
   await page.keyboard.press('End');
   await expect(native).toHaveValue('3');
-  await expect(shown('dark', 'time')).toHaveCount(1);
-  await page.keyboard.press('Home');
-  await expect(native).toHaveValue('0');
+  await expect(figure('light')).toHaveAttribute('aria-label', /^From further away/);
 
-  // A press on the figure's line places the bar: position 2. The slider, the words and the other panel follow.
-  const svg = figure('light').locator('app-vis-svg svg');
-  await svg.scrollIntoViewIfNeeded();
-  let box = (await svg.boundingBox())!;
-  let s = box.width / 480;
-  await page.mouse.click(box.x + 300 * s, box.y + 200 * s);
-  await expect(native).toHaveValue('2');
-  await expect(words).toHaveText('From across the room');
-  await expect.poll(() => barX('dark')).toBe(300);
-  await expect(shown('dark', 'others-1')).toHaveCount(1);
-  await expect(figure('light')).toHaveAttribute('aria-label', /^From across the room/);
-
-  // Dragging the bar back to the near end.
-  box = (await svg.boundingBox())!;
-  s = box.width / 480;
-  await page.mouse.move(box.x + 300 * s, box.y + 200 * s);
+  // A drag across the picture to the left steps closer; letting go settles on a position, and the slider follows.
+  await figure('light').scrollIntoViewIfNeeded();
+  const box = (await figure('light').boundingBox())!;
+  await page.mouse.move(box.x + box.width * 0.9, box.y + box.height / 2);
   await page.mouse.down();
-  await page.mouse.move(box.x + 200 * s, box.y + 200 * s, { steps: 5 });
-  await page.mouse.move(box.x + 50 * s, box.y + 200 * s, { steps: 5 });
+  await page.mouse.move(box.x + box.width * 0.6, box.y + box.height / 2, { steps: 8 });
+  await page.mouse.move(box.x + box.width * 0.4, box.y + box.height / 2, { steps: 8 });
   await page.mouse.up();
-  await expect(native).toHaveValue('0');
-  await expect.poll(() => barX('light')).toBe(60);
-  await expect(shown('light', 'others-1')).toHaveCount(0);
+  await expect(native).toHaveValue('1');
+  await expect(words).toHaveText('One step back');
+  await expect(figure('dark')).toHaveAttribute('aria-label', /^One step back/);
 
-  // Reduced motion: a jump to the far end shows at once, with nothing left playing.
+  // Reduced motion: a jump to the far end cuts, with nothing left playing, and the picture is final at once.
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await native.fill('3');
-  await expect(words).toHaveText('From further away');
-  await expect.poll(() => barX('light')).toBe(420);
-  expect(await figure('light').evaluate((el) => el.getAnimations({ subtree: true }).length)).toBe(0);
+  await expect(figure('light')).toHaveAttribute('aria-label', /^From further away/);
+  const cut = await picture('light');
+  await page.waitForTimeout(400);
+  expect(await picture('light')).toBe(cut);
   await expect(page.getByRole('list', { name: 'Validation problems' })).toHaveCount(0);
 });

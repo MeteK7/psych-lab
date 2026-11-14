@@ -1,11 +1,11 @@
 import { CS_WHY_IT_HAPPENED, STATE_RESET } from '../../../content';
 import { CauseMapInput } from '../../shared/visual/instruments/cause-map/cause-map';
 import { TrackingInput } from '../../shared/visual/instruments/tracking/tracking';
-import { ViewWords } from '../../shared/visual/instruments/view/view';
+import { RoomWords } from '../../shared/visual/instruments/camera-room/room';
 
 /**
  * The instrument inputs the Visual Lab shows (shared by the Lab page and the parity page, M6): the
- * cause map's answer sets, the rounds, the dot game's stills and preview, and the camera angle's words.
+ * cause map's answer sets, the rounds, the dot game's stills and preview, and the camera angle room's words.
  */
 
 const AXIS_WORDS = CS_WHY_IT_HAPPENED.map.axes;
@@ -36,28 +36,22 @@ export const RING_RADIUS = STATE_RESET.game.ring_radius;
 export const PREVIEW_LABELS = STATE_RESET.how_it_works.labels;
 
 /**
- * "Change the camera angle" (camera-angle.view): the words the exercise will take from its content
+ * "Change the camera angle" (camera-angle.room): the words the exercise will take from its content
  * (docs/camera-angle-design.md, step 3). Fixed phrases here, as the worked example has; the content
  * file arrives with the exercise.
  */
-export const VIEW_WORDS: ViewWords = {
-  standpoint: 'Where you look from',
-  near: 'Close up',
-  far: 'Further back',
+export const ROOM_WORDS: RoomWords = {
   you: 'You',
-  others: 'Others',
-  before: 'Before',
-  after: 'After',
   alts: [
-    'Close up: the moment fills the view.',
-    'One step back: the whole moment, with you in it.',
-    'From across the room: the moment with you in it, and the other people beside it.',
-    'From further away: the moment with you and the others in it, as one point between before and after.',
+    'Through your own eyes: the person across the table, your forearms at the bottom of the view.',
+    'One step back: you, from behind your shoulder, with the person across the table.',
+    'From across the room: the whole room, you and the person opposite at the table, and a third person at their own desk.',
+    'From further away: the room from above, its walls cut low, among other rooms: someone in the corridor, two people next door, someone in the room behind.',
   ],
 };
 
 /** The native slider's words for each position (the exercise's step 3). */
-export const VIEW_POSITIONS = ['Through your own eyes', 'One step back', 'From across the room', 'From further away'];
+export const ROOM_POSITION_NAMES = ['Through your own eyes', 'One step back', 'From across the room', 'From further away'];
 
 /** One still frame of the dot game, with the pointer outside the ring or inside it. */
 export function trackingStill(onTarget: boolean): TrackingInput {

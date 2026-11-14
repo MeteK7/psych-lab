@@ -27,7 +27,7 @@ import { LabMaterials } from './lab-materials';
 import { describeMover } from './lab-movers';
 import { LabSheet } from './lab-sheet';
 import { LabTrackingStill } from './lab-tracking-still';
-import { LabView } from './lab-view';
+import { LabRoom } from './lab-room';
 
 /**
  * The Visual Lab (S10, docs/visual-system.md §5.3), development build only. Every composition in
@@ -37,7 +37,7 @@ import { LabView } from './lab-view';
  */
 @Component({
   selector: 'app-lab-page',
-  imports: [SceneFigure, InstrumentFigure, LabAssets, LabCatalog, LabContents, LabGenerators, LabGuide, LabInteraction, LabMaterials, LabMotion, LabOverlay, LabSheet, LabStimulus, LabTrackingStill, LabView],
+  imports: [SceneFigure, InstrumentFigure, LabAssets, LabCatalog, LabContents, LabGenerators, LabGuide, LabInteraction, LabMaterials, LabMotion, LabOverlay, LabSheet, LabStimulus, LabTrackingStill, LabRoom],
   template: `
     <h1>Visual Lab</h1>
     @if (env.showsDevelopment()) {
@@ -259,7 +259,7 @@ import { LabView } from './lab-view';
       <app-lab-assets />
       <app-lab-sheet [schemes]="schemes" />
       <app-lab-guide [schemes]="schemes" />
-      <app-lab-view [schemes]="schemes" />
+      <app-lab-room [schemes]="schemes" />
       <app-lab-catalog />
     } @else {
       <p>The Visual Lab is available in the development build only.</p>
