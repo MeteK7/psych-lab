@@ -1,6 +1,6 @@
 import { Composed, composeScene } from '../../composition/compose';
 import type { Point, Purpose, SceneElement } from '../../composition/scene';
-import { Camera, V3, alongV, along, camera, clipNear, clipSegment, dot, facesCamera, length, normalize, onFrame, place, sub, toCamera } from '../../generation/spatial/camera';
+import { Camera, V3, alongV, along, camera, clipNear, clipSegment, dot, facesCamera, length, mixV, normalize, onFrame, place, sub, toCamera } from '../../generation/spatial/camera';
 import { POSES, Pose, SEEN_FROM_WITHIN } from '../../generation/spatial/figures';
 import { paintersOrder, splitPolygon, splitSegment } from '../../generation/spatial/order';
 import { Face, boxFaces, capsulePath, floorEllipse, polygonPath } from '../../generation/spatial/solids';
@@ -39,7 +39,8 @@ import type { ColorRole, Facing, StyleRef, ThemeId } from '../../styling/vocabul
  *               hands clearly in view at position 0; the first step reshaped so you no longer appear
  *               all at once; the other rooms and the ground drawn when the camera is above the walls,
  *               not at a fixed point; only the moment's room has a tinted floor; a faint line where
- *               floors meet walls; a quieter door; the furthest view a little closer.
+ *               floors meet walls; a quieter door; the furthest view a little closer. Distant people's
+ *               legs close into one form gradually, not in one frame (2026-11-16; stills unchanged).
  *   Alt texts:  the exercise gives one per position.
  *   Assertions: `room.policy.spec.ts`.
  *   Review:     R2 in the Visual Lab; R3 and the psychology-trained reviewer in the exercise.
@@ -324,9 +325,38 @@ function slabbedFace(cam: Camera, id: string, f: Face, role: ColorRole, group: R
   });
 }
 
-/** A pose's legs as one form each for thighs and shins (for people far away): from the middle of the
- * pair to the middle of the pair, wide enough to cover both. Other parts as they are. */
-function together(parts: Pose['parts']): Pose['parts'] {
+/**
+ * How far a person's legs have closed into one form, from 0 (as posed) to 1 (one form), by the size of
+ * their head on the picture. Far away (a head under 12 units across) a gap between two legs would be
+ * thinner than a pixel, which no backend draws the same way, so the legs are one form. Between a head
+ * 12.9 and 11.9 units across they close together gradually, so as the camera pulls back the gap between
+ * them narrows and goes, never vanishing in one frame. (The band lies between the sizes at the four
+ * positions: everyone's legs are as posed at positions 0 to 2, and at position 3 yours are as posed and
+ * everyone else's are one form, so the still pictures are what they were.)
+ */
+const LEGS_APART = 6.45;
+const LEGS_TOGETHER = 5.95;
+function legsClosed(headRadius: number): number {
+  const x = Math.min(1, Math.max(0, (LEGS_APART - headRadius) / (LEGS_APART - LEGS_TOGETHER)));
+  return x * x * (3 - 2 * x);
+}
+
+function closedFor(cam: Camera, p: Person): number {
+  const head = toCamera(cam, place(p.pose.head.at, p.angle, p.at));
+  return head[2] > 0.15 ? legsClosed((cam.f * p.pose.head.r) / head[2]) : 0;
+}
+
+/** How far each person's legs have closed at a viewpoint, by person id: for the policy spec. */
+export function legsAt(view: number): Record<string, number> {
+  const cam = cameraAt(Math.min(Math.max(view, 0), ROOM_POSITIONS - 1));
+  return Object.fromEntries(ROOMS.flatMap((r) => r.people).map((p) => [p.id, closedFor(cam, p)]));
+}
+
+/** A pose's legs closed by `closed` (see legsClosed): at 1, one form each for thighs and shins, from the
+ * middle of the pair to the middle of the pair, wide enough to cover both; between, each leg partway
+ * there. Other parts as they are. */
+function together(parts: Pose['parts'], closed: number): Pose['parts'] {
+  if (closed <= 0) return parts;
   const by = new Map(parts.map((q) => [q.name, q]));
   const pair = (l: string, r: string, name: 'thigh-l' | 'shin-l') => {
     const a = by.get(l as never)!;
@@ -335,11 +365,15 @@ function together(parts: Pose['parts']): Pose['parts'] {
     const half = (u: V3, w: V3) => length(sub(u, w)) / 2;
     return { name, from: mid(a.from, b.from), to: mid(a.to, b.to), r0: Math.max(a.r0, b.r0) + half(a.from, b.from), r1: Math.max(a.r1, b.r1) + half(a.to, b.to) };
   };
-  return [
-    pair('thigh-l', 'thigh-r', 'thigh-l'),
-    pair('shin-l', 'shin-r', 'shin-l'),
-    ...parts.filter((q) => !q.name.startsWith('thigh') && !q.name.startsWith('shin')),
-  ];
+  const thighs = pair('thigh-l', 'thigh-r', 'thigh-l');
+  const shins = pair('shin-l', 'shin-r', 'shin-l');
+  if (closed >= 1) return [thighs, shins, ...parts.filter((q) => !q.name.startsWith('thigh') && !q.name.startsWith('shin'))];
+  // Partway: each leg moves toward the one form and widens to it, so at 1 the two are the same form.
+  return parts.map((q) => {
+    const to = q.name.startsWith('thigh') ? thighs : q.name.startsWith('shin') ? shins : null;
+    if (!to) return q;
+    return { ...q, from: mixV(q.from, to.from, closed), to: mixV(q.to, to.to, closed), r0: q.r0 + (to.r0 - q.r0) * closed, r1: q.r1 + (to.r1 - q.r1) * closed };
+  });
 }
 
 /**
@@ -360,11 +394,8 @@ function person(cam: Camera, p: Person, hideSelf: boolean): Drawn[] {
     s.depths.push(depth);
     slabs.set(slab, s);
   };
-  // Far away (a head under 12 units across), a person's legs are one form: a gap between two legs would
-  // be thinner than a pixel, which no backend draws the same way. Up close, every part as posed.
-  const head = toCamera(cam, place(p.pose.head.at, p.angle, p.at));
-  const far = head[2] > 0.15 && (cam.f * p.pose.head.r) / head[2] < 6;
-  for (const part of far ? together(p.pose.parts) : p.pose.parts) {
+  // Far away, a person's legs close into one form (see legsClosed). Up close, every part as posed.
+  for (const part of together(p.pose.parts, closedFor(cam, p))) {
     if (hideSelf && !SEEN_FROM_WITHIN.includes(part.name)) continue;
     const pieces = splitSegment(place(part.from, p.angle, p.at), place(part.to, p.angle, p.at), part.r0, part.r1, CUTS);
     for (const piece of pieces) {

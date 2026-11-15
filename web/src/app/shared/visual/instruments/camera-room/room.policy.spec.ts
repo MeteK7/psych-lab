@@ -6,7 +6,7 @@ import { validateScene } from '../../composition/validate';
 import { onFrame, toCamera } from '../../generation/spatial/camera';
 import { POSES } from '../../generation/spatial/figures';
 import { buildComposedFrame } from '../../integration/pipeline';
-import { ROOM, ROOM_POSITIONS, ROOM_SIZE, RoomWords, YOUR_HEAD, cameraAt, composeRoom, groupOf, wallHeightAt } from './room';
+import { ROOM, ROOM_POSITIONS, ROOM_SIZE, RoomWords, YOUR_HEAD, cameraAt, composeRoom, groupOf, legsAt, wallHeightAt } from './room';
 
 // "Change the camera angle": camera-angle.room@2, a spatial view (room.ts, its policy header).
 // Asserted at every quarter of the camera's path, not only at the four positions.
@@ -150,6 +150,33 @@ describe('camera-angle.room (policy)', () => {
     }
     expect(head).toBe(true);
     expect(beyond).toBe(true);
+  });
+
+  it('closes a distant person’s legs into one form gradually as the camera pulls back, never in one frame', () => {
+    const fine = Array.from({ length: (ROOM_POSITIONS - 1) * 100 + 1 }, (_, i) => i / 100);
+    const at = fine.map((v) => legsAt(v));
+    for (const who of PEOPLE) {
+      for (let i = 1; i < fine.length; i++) {
+        const [a, b] = [at[i - 1][who], at[i][who]];
+        // In a hundredth of a position, the legs close by a little, and only ever further as you step back.
+        expect(Math.abs(b - a), `${who} at ${fine[i]}`).toBeLessThan(0.11);
+        if (fine[i] > 2) expect(b, `${who} at ${fine[i]}`).toBeGreaterThanOrEqual(a);
+      }
+      // Closing takes more than a tenth of a position for anyone whose legs close at all.
+      const start = at.findIndex((l) => l[who] > 0);
+      const end = at.findIndex((l) => l[who] >= 1);
+      if (start >= 0) expect(fine[end] - fine[start], who).toBeGreaterThan(0.12);
+      // At the four positions, legs are either as posed or one form, never partway.
+      for (let p = 0; p < ROOM_POSITIONS; p++) expect([0, 1], `${who} at ${p}`).toContain(legsAt(p)[who]);
+      // As posed up to position 2; one form at position 3 for everyone but you.
+      for (let p = 0; p <= 2; p++) expect(legsAt(p)[who], `${who} at ${p}`).toBe(0);
+      expect(legsAt(3)[who], `${who} at 3`).toBe(who === 'you' ? 0 : 1);
+    }
+    // Partway closed, both legs are still drawn (one form only once they have fully met).
+    const midway = fine.find((v) => legsAt(v)['opposite'] > 0.3 && legsAt(v)['opposite'] < 0.7)!;
+    expect(midway).toBeDefined();
+    expect(parts(midway, 'opposite')).toEqual(expect.arrayContaining(['thigh-r', 'shin-r']));
+    expect(parts(3, 'opposite')).not.toContain('thigh-r');
   });
 
   it('keeps the room of the moment the picture’s subject from furthest back: the one tinted floor, and you clear to see', () => {

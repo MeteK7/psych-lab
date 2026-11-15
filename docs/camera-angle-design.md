@@ -73,6 +73,7 @@ Six steps, "Step x of 6: …", Stop on every step, keyboard paths throughout. Th
   - **Only the moment's room has a tinted floor.** The rooms around it are drawn by their walls on the ground's own tone, so from furthest back the room of the moment is still the picture's subject. The furthest view is also a little closer.
   - **A faint line where floors meet walls,** so the room's shape reads in light, and in forced colours, where walls and floor are both the page's ground.
   - **A quieter door:** a thin frame and a leaf in the wall's own shade.
+  - **Distant people's legs close together gradually** (2026-11-16). Far away, a person's legs are drawn as one form (a gap thinner than a pixel draws differently in SVG and canvas). They used to switch to one form in a single frame during the move from position 2 to 3. Now they close together over a narrow band of sizes, taking 0.14 to 0.28 of a position, depending on the person. The four still pictures are unchanged.
 - **What the system gained** (each in the capability log of `visual-system.md`): spatial geometry (S2), the `shaded` material (S1), the room (S3), the viewpoint figure (S9).
 - **In the exercise:** step 3 binds the viewpoint figure beside the native slider, exactly as the Lab does (`pages/lab/lab-room.ts`); steps 2 and 4 can show it still, at position 0 and at the chosen position, through the instrument slot. Every word comes from the exercise's content; the Lab passes fixed phrases.
 - **Not yet decided:** whether steps 2 and 4 need the figure at all. The words carry those steps without it.
