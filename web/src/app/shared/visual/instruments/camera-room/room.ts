@@ -15,7 +15,7 @@ import type { ColorRole, Facing, StyleRef, ThemeId } from '../../styling/vocabul
  *
  * Its policy (docs/visual-policy.md §8):
  *
- *   Scene:      camera-angle.room@1    Area theme: cognitive@1    Tier: instrument (a spatial view)
+ *   Scene:      camera-angle.room@2    Area theme: cognitive@1    Tier: instrument (a spatial view)
  *   Idea:       the same moment seen from further and further back, until you see yourself in it
  *               and the people and rooms around it.
  *   States:     one per viewpoint, continuous; at the four positions:
@@ -32,12 +32,19 @@ import type { ColorRole, Facing, StyleRef, ThemeId } from '../../styling/vocabul
  *               looks up at anyone or straight down, never rolls; token colours only; one label, "You".
  *   Must not:   make any position look better (no light, colour or framing reward for distance);
  *               show a face, an expression or any of the person's own words.
- *   Motion:     only the viewpoint moves (§3.12, a viewpoint move); nothing in the room moves.
+ *   Motion:     only the viewpoint moves (§3.12, a viewpoint move); nothing in the room moves, and
+ *               nothing appears at once: you enter from the picture's lower edge as the camera rises
+ *               out of your head, and what lies beyond the walls comes into view over their tops.
+ *   Version 2:  (2026-11-15, refinements to the approved @1) "You" from position 1; your forearms and
+ *               hands clearly in view at position 0; the first step reshaped so you no longer appear
+ *               all at once; the other rooms and the ground drawn when the camera is above the walls,
+ *               not at a fixed point; only the moment's room has a tinted floor; a faint line where
+ *               floors meet walls; a quieter door; the furthest view a little closer.
  *   Alt texts:  the exercise gives one per position.
  *   Assertions: `room.policy.spec.ts`.
  *   Review:     R2 in the Visual Lab; R3 and the psychology-trained reviewer in the exercise.
  */
-export const ROOM = { id: 'camera-angle.room', version: 1, theme: 'cognitive' as ThemeId } as const;
+export const ROOM = { id: 'camera-angle.room', version: 2, theme: 'cognitive' as ThemeId } as const;
 export const ROOM_SIZE = { width: 960, height: 540 };
 export const ROOM_POSITIONS = 4;
 
@@ -87,6 +94,8 @@ const SEAM_OVERLAP = 0.006;
 const WALL_HEIGHT = 2.6;
 /** The lowest the walls are drawn, from furthest back: an architect's cut. */
 const CUT_HEIGHT = 1.05;
+/** How far the camera must be from the middle of your head before the rest of you is drawn (metres). */
+const SELF_CLEARANCE = 0.3;
 /** The platform light (vocabulary LIGHT: from the upper left), as a direction in the room. */
 const LIGHT = normalize([-0.5, 0.8, -0.35]);
 
@@ -223,19 +232,46 @@ const ROOMS: readonly Room[] = [
   },
 ];
 
-/** The camera at each position: where it stands, what it looks at, its focal length (frame units). */
-const KEYS: readonly { pos: V3; target: V3; f: number }[] = [
-  { pos: [0, 1.14, 1.02], target: [0, 0.74, 2.9], f: 780 },
+interface Key {
+  pos: V3;
+  target: V3;
+  /** Focal length, in frame units. */
+  f: number;
+}
+
+/** The camera at each of the four positions: where it stands and what it looks at. */
+const POSITION_KEYS: readonly Key[] = [
+  // Your own eyes, looking a little down across the table: your forearms and hands in view.
+  { pos: [0, 1.14, 1.02], target: [0, 0.68, 2.9], f: 740 },
   { pos: [-0.7, 1.8, -0.2], target: [0.35, 0.85, 2.6], f: 640 },
   { pos: [-2.6, 2.25, -0.7], target: [0.6, 0.72, 2.4], f: 600 },
-  { pos: [-6.2, 10.5, -8.4], target: [2.2, 0.2, 3.4], f: 840 },
+  { pos: [-6.2, 10.5, -8.4], target: [2.0, 0.2, 3.1], f: 900 },
 ];
 
+/**
+ * Leaving your own eyes (halfway from position 0 to 1): the camera first rises out of your head,
+ * looking down at your own arms on the table, and only then steps back. So you come into the picture
+ * from its lower edge, head first, as the camera clears you, rather than appearing all at once.
+ */
+const LEAVING: Key = { pos: [-0.18, 1.6, 0.8], target: [0.1, 0.76, 2.4], f: 700 };
+
+const midway = (a: Key, b: Key, c: Key, d: Key): Key => {
+  // The point halfway along the smooth curve through four keys (Catmull-Rom at its middle).
+  const m = (p: number, q: number, r: number, s: number) => (-p + 9 * q + 9 * r - s) / 16;
+  const v = (k: 0 | 1 | 2, of: 'pos' | 'target') => m(a[of][k], b[of][k], c[of][k], d[of][k]);
+  return { pos: [v(0, 'pos'), v(1, 'pos'), v(2, 'pos')], target: [v(0, 'target'), v(1, 'target'), v(2, 'target')], f: m(a.f, b.f, c.f, d.f) };
+};
+
+/** The camera's path: a key at every half position, so each step has its own shape. */
+const [P0, P1, P2, P3] = POSITION_KEYS;
+const KEYS: readonly Key[] = [P0, LEAVING, P1, midway(P0, P1, P2, P3), P2, midway(P1, P2, P3, P3), P3];
+
 export function cameraAt(view: number): Camera {
+  const u = view * 2;
   return camera(
-    alongV(view, KEYS.map((k) => k.pos)),
-    alongV(view, KEYS.map((k) => k.target)),
-    along(view, KEYS.map((k) => k.f)),
+    alongV(u, KEYS.map((k) => k.pos)),
+    alongV(u, KEYS.map((k) => k.target)),
+    along(u, KEYS.map((k) => k.f)),
     ROOM_SIZE.width / 2,
     ROOM_SIZE.height / 2,
   );
@@ -377,7 +413,12 @@ function room(cam: Camera, r: Room, wallHeight: number, hideSelf: boolean): Scen
   const out: SceneElement[] = [];
   const { x0, x1, z0, z1 } = r;
   const group: RoomGroup = r.group;
-  const floor = face(cam, `${r.id}-floor`, [[x0, 0, z1], [x1, 0, z1], [x1, 0, z0], [x0, 0, z0]], [0, 1, 0], 'mid', group, 'lit');
+  // The room of the moment has the one tinted floor; the rooms around it lie on the ground's own tone,
+  // drawn by their walls alone. So from furthest back the moment's room is still the picture's subject.
+  const floor = face(cam, `${r.id}-floor`, [[x0, 0, z1], [x1, 0, z1], [x1, 0, z0], [x0, 0, z0]], [0, 1, 0], r.group === 'room' ? 'mid' : 'far', group, 'lit');
+  // Where the floor meets the walls: a faint line around the floor, so the room's shape reads where a
+  // wall and the floor are close in tone, and in forced colours, where both are the page's ground.
+  const edge: SceneElement[] = floor ? [{ ...floor, id: `${r.id}-floor-edge`, style: { role: 'far', line: 'hair' } }] : [];
   // Walls face into the room, so a wall between the camera and the room is never drawn.
   const h = wallHeight;
   const walls: { side: Side; pts: V3[]; normal: V3; top: [V3, V3] }[] = [
@@ -404,11 +445,11 @@ function room(cam: Camera, r: Room, wallHeight: number, hideSelf: boolean): Scen
         const pane = face(cam, `${r.id}-window-${i}`, outline, w.normal, 'far', group, 'lit');
         if (pane) fixtures.push({ ...pane, style: { role: 'ground', material: 'tonal' } }, { ...pane, id: `${r.id}-window-${i}-frame`, style: { role: 'far', line: 'fine' } });
       } else {
-        // A door: quiet, in the room's own steps (its frame the wall's shade, its leaf the floor's), so it
+        // A door: quiet, in the room's own steps (a thin frame in the floor's shade, its leaf the wall's), so it
         // reads as a way out without drawing the eye from the people.
-        const frame = face(cam, `${r.id}-door-${i}`, outline, w.normal, 'far', group, 'shade');
+        const frame = face(cam, `${r.id}-door-${i}`, outline, w.normal, 'mid', group, 'shade');
         const inner = [at(p + (q - p) * 0.06, f.y0, 0.012), at(q - (q - p) * 0.06, f.y0, 0.012), at(q - (q - p) * 0.06, y1 - 0.06, 0.012), at(p + (q - p) * 0.06, y1 - 0.06, 0.012)];
-        const leaf = face(cam, `${r.id}-door-${i}-leaf`, inner, w.normal, 'mid', group, 'shade');
+        const leaf = face(cam, `${r.id}-door-${i}-leaf`, inner, w.normal, 'far', group, 'shade');
         if (frame) fixtures.push(frame);
         if (leaf) fixtures.push(leaf);
       }
@@ -451,23 +492,33 @@ function room(cam: Camera, r: Room, wallHeight: number, hideSelf: boolean): Scen
     if (s) shadows.push(s);
   }
   // The floor, then its shadows, then the walls and what is on them, then what stands in the room.
-  return [...(floor ? [floor] : []), ...shadows, ...out, ...ordered];
+  return [...(floor ? [floor] : []), ...edge, ...shadows, ...out, ...ordered];
+}
+
+/** How high the walls are drawn: full height up to position 2, then cut lower and lower to position 3. */
+export function wallHeightAt(view: number): number {
+  const x = Math.min(1, Math.max(0, view - 2));
+  return WALL_HEIGHT - (WALL_HEIGHT - CUT_HEIGHT) * x * x * (3 - 2 * x);
 }
 
 export function composeRoom({ view, words }: RoomInput): Composed {
   const v = Math.min(Math.max(view, 0), ROOM_POSITIONS - 1);
   const cam = cameraAt(v);
-  const smooth = (x: number) => x * x * (3 - 2 * x);
-  const wallHeight = WALL_HEIGHT - (WALL_HEIGHT - CUT_HEIGHT) * smooth(Math.min(1, Math.max(0, v - 2)));
-  const hideSelf = length(sub(cam.pos, YOUR_HEAD)) < 0.5;
+  const wallHeight = wallHeightAt(v);
+  // While the camera is inside your head, only your forearms are drawn; by the time it is clear of it,
+  // the rest of you is still below the picture's lower edge (see LEAVING), so nothing appears at once.
+  const hideSelf = length(sub(cam.pos, YOUR_HEAD)) < SELF_CLEARANCE;
   const elements: SceneElement[] = [];
-  // The ground around the building, from outside only.
-  if (v > 2) {
-    const ground = face(cam, 'outside', [[-14, -0.01, 16], [20, -0.01, 16], [20, -0.01, -12], [-14, -0.01, -12]], [0, 1, 0], 'far', 'outside', 'lit');
+  // What lies beyond the room's walls (the ground outside, the other rooms) is drawn only once the
+  // camera is above the walls' tops. Below them, the walls hide all of it, so leaving it out changes
+  // nothing in the picture, and it comes into view over the walls as the camera rises, not at a step.
+  const seesOver = cam.pos[1] > wallHeight;
+  if (seesOver) {
+    const ground = face(cam, 'outside', [[-60, -0.01, 70], [70, -0.01, 70], [70, -0.01, -60], [-60, -0.01, -60]], [0, 1, 0], 'far', 'outside', 'lit');
     if (ground) elements.push(ground);
   }
-  // Rooms far to near, so a nearer room's walls hide what lies behind them; the others only from outside.
-  const rooms = (v > 2.02 ? ROOMS : ROOMS.filter((r) => r.id === 'ours')).slice();
+  // Rooms far to near, so a nearer room's walls hide what lies behind them.
+  const rooms = (seesOver ? ROOMS : ROOMS.filter((r) => r.id === 'ours')).slice();
   const centre = (r: Room): V3 => [(r.x0 + r.x1) / 2, 1, (r.z0 + r.z1) / 2];
   rooms.sort((p, q) => length(sub(cam.pos, centre(q))) - length(sub(cam.pos, centre(p))));
   for (const r of rooms) elements.push(...room(cam, r, wallHeight, hideSelf));
@@ -476,11 +527,19 @@ export function composeRoom({ view, words }: RoomInput): Composed {
   const youHead = yh[2] > 0.3 ? { x: onFrame(cam, yh)[0], y: onFrame(cam, yh)[1], r: (cam.f * POSES.seated.head.r) / yh[2] } : null;
   const labels: SceneElement[] = [];
   const head = youHead;
-  if (v >= 1.5 && head) {
-    const at: Point = [r1(head.x + head.r + 8), r1(head.y - head.r * 0.3)];
+  // From position 1 on (the design: "You" from one step back).
+  if (v >= 1 && head) {
+    // Beside your head, where nobody else is: up to its left while the third person is to your right
+    // (position 1), to its right once they are behind you to the left (from 1.5 on). Between the two it
+    // slides over your head, so it never jumps.
+    const k = Math.min(1, Math.max(0, (v - 1.25) / 0.25));
+    const side = k * k * (3 - 2 * k);
+    const left: Point = [head.x - head.r * 0.75 - 20, head.y - head.r * 0.85];
+    const right: Point = [head.x + head.r + 22, head.y - head.r * 0.3];
+    const at: Point = [r1(left[0] + (right[0] - left[0]) * side), r1(left[1] + (right[1] - left[1]) * side - Math.sin(side * Math.PI) * head.r * 0.5)];
     // It names you: every part of you in view.
     const yours = elements.filter((e) => e.id.startsWith('you-') && e.kind === 'shape' && e.style.role === 'subject').map((e) => e.id);
-    labels.push({ kind: 'label', id: 'you-label', text: 'you', at, align: 'start', halo: true, names: yours, purpose: purpose('label') });
+    labels.push({ kind: 'label', id: 'you-label', text: 'you', at, align: 'middle', halo: true, names: yours, purpose: purpose('label') });
   }
   return composeScene(
     {

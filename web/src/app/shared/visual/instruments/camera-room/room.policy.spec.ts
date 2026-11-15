@@ -1,12 +1,14 @@
+import { boundsOf } from '../../composition/bounds';
 import { lookupOf } from '../../composition/compose';
 import type { SceneElement } from '../../composition/scene';
 import { spacingWarnings } from '../../composition/spacing';
 import { validateScene } from '../../composition/validate';
+import { onFrame, toCamera } from '../../generation/spatial/camera';
 import { POSES } from '../../generation/spatial/figures';
 import { buildComposedFrame } from '../../integration/pipeline';
-import { ROOM, ROOM_POSITIONS, ROOM_SIZE, RoomWords, cameraAt, composeRoom, groupOf } from './room';
+import { ROOM, ROOM_POSITIONS, ROOM_SIZE, RoomWords, YOUR_HEAD, cameraAt, composeRoom, groupOf, wallHeightAt } from './room';
 
-// "Change the camera angle": camera-angle.room@1, a spatial view (room.ts, its policy header).
+// "Change the camera angle": camera-angle.room@2, a spatial view (room.ts, its policy header).
 // Asserted at every quarter of the camera's path, not only at the four positions.
 
 const WORDS: RoomWords = { you: 'You', alts: ['Through your own eyes.', 'One step back.', 'From across the room.', 'From further away.'] };
@@ -84,14 +86,91 @@ describe('camera-angle.room (policy)', () => {
       for (const e of elements(3)) if (e.id.startsWith(`${who}-s`) && e.kind === 'shape') expect(e.style.facing ?? 'base', e.id).toBe('base');
   });
 
-  it('carries only the words it is given: one label, "You", once you are in the picture', () => {
+  it('carries only the words it is given: one label, "You", from position 1 on, inside the picture', () => {
     for (const v of VIEWS) {
       const labels = elements(v).filter((e) => e.kind === 'label');
-      if (v < 1.5) expect(labels).toEqual([]);
-      else expect(labels.map((l) => (l.kind === 'label' ? l.text : ''))).toEqual(['you']);
+      if (v < 1) expect(labels, `view ${v}`).toEqual([]);
+      else {
+        expect(labels.map((l) => (l.kind === 'label' ? l.text : '')), `view ${v}`).toEqual(['you']);
+        const l = labels[0];
+        if (l.kind !== 'label') throw new Error('a label');
+        expect(l.at[0], `view ${v}`).toBeGreaterThan(0);
+        expect(l.at[0], `view ${v}`).toBeLessThan(ROOM_SIZE.width - 30);
+        expect(l.at[1], `view ${v}`).toBeGreaterThan(14);
+        expect(l.at[1], `view ${v}`).toBeLessThan(ROOM_SIZE.height);
+      }
       expect(composed(v).text['you']).toBe('You');
     }
     for (let p = 0; p < ROOM_POSITIONS; p++) expect(composed(p).text['alt']).toBe(WORDS.alts[p]);
+  });
+
+  it('through your own eyes, shows your forearms coming up from the lower edge on either side, well into the picture', () => {
+    const c = composed(0);
+    const arms = elements(0).filter((e) => e.id.startsWith('you-s'));
+    expect(arms).toHaveLength(1);
+    const box = boundsOf(c.scene, arms[0])!;
+    // From below the lower edge, up a fifth of the picture or more, on both sides of its middle.
+    expect(box.y + box.height).toBeGreaterThanOrEqual(ROOM_SIZE.height);
+    expect(box.y).toBeLessThan(ROOM_SIZE.height * 0.8);
+    expect(box.x).toBeLessThan(ROOM_SIZE.width / 2 - 100);
+    expect(box.x + box.width).toBeGreaterThan(ROOM_SIZE.width / 2 + 100);
+  });
+
+  it('is one coherent move: the camera never jumps, and nothing appears at once', () => {
+    const STEP = 0.01;
+    const fine = Array.from({ length: Math.round((ROOM_POSITIONS - 1) / STEP) + 1 }, (_, i) => Math.round(i * STEP * 100) / 100);
+    let head = false;
+    let beyond = false;
+    for (let i = 1; i < fine.length; i++) {
+      const [a, b] = [cameraAt(fine[i - 1]), cameraAt(fine[i])];
+      // No jump: in a hundredth of a position, the camera moves a little and turns a little.
+      const moved = Math.hypot(b.pos[0] - a.pos[0], b.pos[1] - a.pos[1], b.pos[2] - a.pos[2]);
+      expect(moved, `camera at ${fine[i]}`).toBeLessThan(0.45);
+      expect(a.ahead[0] * b.ahead[0] + a.ahead[1] * b.ahead[1] + a.ahead[2] * b.ahead[2], `turn at ${fine[i]}`).toBeGreaterThan(0.999);
+      expect(Math.abs(wallHeightAt(fine[i]) - wallHeightAt(fine[i - 1])), `walls at ${fine[i]}`).toBeLessThan(0.03);
+      // You come into the picture from its lower edge: when your head is first drawn, only its top shows.
+      const c = composed(fine[i]);
+      const yours = c.scene.layers[0].elements.filter((e) => e.id.startsWith('you-s') && e.id.includes('head'));
+      if (yours.length && !head) {
+        head = true;
+        expect(fine[i], 'your head first shows between positions 0 and 1').toBeLessThan(1);
+        // Where the top of your head is on the picture, from the camera and the pose.
+        const h = toCamera(b, YOUR_HEAD);
+        const top = onFrame(b, h)[1] - ((b.f * POSES.seated.head.r) / h[2]) * 1.12;
+        expect(top, `the top of your head when it first shows, at ${fine[i]}`).toBeGreaterThan(ROOM_SIZE.height - 30);
+      }
+      // What lies beyond the walls is drawn exactly when the camera is above their tops, where they hid it.
+      const over = b.pos[1] > wallHeightAt(fine[i]);
+      const drawn = c.scene.layers[0].elements.some((e) => e.id === 'outside' || /^(corridor|next|back)-/.test(e.id));
+      expect(drawn, `beyond the walls at ${fine[i]}`).toBe(over);
+      if (over && !beyond) {
+        beyond = true;
+        expect(fine[i]).toBeGreaterThan(2);
+      }
+    }
+    expect(head).toBe(true);
+    expect(beyond).toBe(true);
+  });
+
+  it('keeps the room of the moment the picture’s subject from furthest back: the one tinted floor, and you clear to see', () => {
+    const floors = elements(3).filter((e) => e.id.endsWith('-floor') && e.kind === 'shape');
+    expect(floors.map((e) => [e.id, e.kind === 'shape' ? e.style.role : null]).sort()).toEqual([
+      ['back-floor', 'far'],
+      ['corridor-floor', 'far'],
+      ['next-floor', 'far'],
+      ['ours-floor', 'mid'],
+    ]);
+    // You, at the furthest: every part drawn (not merged, as the most distant people are), tall enough to see.
+    const c = composed(3);
+    const yours = elements(3).filter((e) => e.id.startsWith('you-s'));
+    const boxes = yours.map((e) => boundsOf(c.scene, e)!);
+    const top = Math.min(...boxes.map((b) => b.y));
+    const bottom = Math.max(...boxes.map((b) => b.y + b.height));
+    expect(bottom - top).toBeGreaterThan(40);
+    expect(new Set(parts(3, 'you')).size).toBe(11);
+    // And you are near the middle of the picture, not pushed to an edge.
+    const middle = boxes.reduce((s, b) => s + b.x + b.width / 2, 0) / boxes.length;
+    expect(Math.abs(middle - ROOM_SIZE.width / 2)).toBeLessThan(ROOM_SIZE.width / 4);
   });
 
   it('never looks up at anyone, never straight down, and never rolls', () => {

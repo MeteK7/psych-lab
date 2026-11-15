@@ -885,7 +885,7 @@ test('Visual Lab: the room steps back by slider and drag, and keeps the slider i
   await expect(words).toHaveText('Through your own eyes');
   await expect(figure('light')).toHaveAttribute('role', 'img');
   await expect(figure('light')).toHaveAttribute('aria-label', /^Through your own eyes/);
-  await expect(page.locator('[data-room="source"]')).toHaveText(/^instrument:camera-angle\.room@1;theme:cognitive@\d+$/);
+  await expect(page.locator('[data-room="source"]')).toHaveText(/^instrument:camera-angle\.room@2;theme:cognitive@\d+$/);
   // Through your own eyes, only your forearms of you; from one step back, you; from furthest back, everyone.
   // A person's pieces are named by the parts they hold (`you-s2-forearm-l+forearm-r`).
   const pieces = (p: number, match: string) => page.locator(`figure[data-instrument="camera-angle.room-${p}-light"] [data-vis-id${match}]`);
@@ -893,7 +893,9 @@ test('Visual Lab: the room steps back by slider and drag, and keeps the slider i
   await expect(pieces(0, '^="you-s"][data-vis-id*="forearm"')).toHaveCount(1);
   await expect(pieces(1, '^="you-s"][data-vis-id*="head"')).toHaveCount(1);
   await expect(pieces(3, '*="head"')).toHaveCount(7);
-  await expect(page.locator('figure[data-instrument="camera-angle.room-2-light"] text')).toHaveText('You');
+  // "You" from position 1 on, never through your own eyes.
+  await expect(page.locator('figure[data-instrument="camera-angle.room-0-light"] text')).toHaveCount(0);
+  for (const p of [1, 2, 3]) await expect(page.locator(`figure[data-instrument="camera-angle.room-${p}-light"] text`)).toHaveText('You');
 
   // The keyboard on the native slider: the view moves and settles, and both panels say where it is.
   const before = await picture('light');

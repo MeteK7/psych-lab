@@ -50,8 +50,9 @@ export const POSES: Readonly<Record<PoseId, Pose>> = {
       part('neck', [0, 0.95, -0.07], [0, 1.04, -0.05], 0.05, 0.045),
       part('arm-l', [-0.19, 0.93, -0.07], [-0.23, 0.84, 0.22], 0.05, 0.045),
       part('arm-r', [0.19, 0.93, -0.07], [0.23, 0.84, 0.22], 0.05, 0.045),
-      part('forearm-l', [-0.23, 0.84, 0.22], [-0.09, 0.81, 0.52], 0.045, 0.04),
-      part('forearm-r', [0.23, 0.84, 0.22], [0.09, 0.81, 0.52], 0.045, 0.04),
+      // Forearms and hands as one form, resting on the table, the hands almost together in front.
+      part('forearm-l', [-0.23, 0.84, 0.22], [-0.07, 0.8, 0.6], 0.045, 0.04),
+      part('forearm-r', [0.23, 0.84, 0.22], [0.07, 0.8, 0.6], 0.045, 0.04),
     ],
   },
   // Seated, turned to a screen: both hands forward on its keyboard.

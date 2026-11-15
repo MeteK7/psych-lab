@@ -94,6 +94,7 @@ export class ViewpointFigure {
   private loop: number | null = null;
   private drag: { x: number; view: number; width: number } | null = null;
   private pending: number | null = null;
+  private unwatchResolution: () => void = () => undefined;
 
   /** Where the viewpoint is now, between positions while it moves. */
   view(): number {
@@ -120,6 +121,20 @@ export class ViewpointFigure {
         observer.observe(this.canvas().nativeElement);
         destroy.onDestroy(() => observer.disconnect());
       }
+      // The device pixel ratio changes when the window moves to another display, or the page is zoomed:
+      // paint again at the new ratio (as the canvas figure does).
+      const watch = () => {
+        if (typeof matchMedia !== 'function') return;
+        const query = matchMedia(`(resolution: ${globalThis.devicePixelRatio ?? 1}dppx)`);
+        const changed = () => {
+          query.removeEventListener('change', changed);
+          this.paint();
+          watch();
+        };
+        query.addEventListener?.('change', changed);
+        this.unwatchResolution = () => query.removeEventListener?.('change', changed);
+      };
+      watch();
     });
     // A new scheme, theme or set of words: colours read again, and the view painted again.
     afterRenderEffect(() => {
@@ -132,6 +147,7 @@ export class ViewpointFigure {
     destroy.onDestroy(() => {
       this.stop();
       unwatch();
+      this.unwatchResolution();
     });
   }
 
