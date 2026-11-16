@@ -39,6 +39,13 @@ import scienceCsNotEnoughJson from './science/cs-not-enough.v1.json';
 import scienceCsOtherReadingsJson from './science/cs-other-readings.v1.json';
 import scienceCsWhyItHappenedJson from './science/cs-why-it-happened.v1.json';
 import scienceSourcesCsJson from './science/sources-cs.v1.json';
+// Change the camera angle (docs/camera-angle-design.md): Try it only, development only until its
+// gates pass. v1 uses the working texts of the design doc §9.9 (provisional until the
+// psychology-trained reviewer and the content review decide). Its sources are the two Kross papers
+// read in full on 2026-11-16 (evidence-verification.md); Troy 2013 comes from sources-cs.v1.json.
+import csCameraAngleJson from './cs-camera-angle.v1.json';
+import scienceCsCameraAngleJson from './science/cs-camera-angle.v1.json';
+import scienceSourcesCameraAngleJson from './science/sources-camera-angle.v1.json';
 // MCII (docs/mcii-design.md): Try it only, development only until its gates pass.
 // v2: the likelihood questions say "your wish" instead of "it", and step 4 shows the wish.
 import mciiJson from './mcii.v2.json';
@@ -232,6 +239,7 @@ export const SCIENCE_SOURCES: ScienceSources = {
     ...SOURCES_V1.sources,
     ...(scienceSourcesCsJson as ScienceSources).sources,
     ...(scienceSourcesMciiJson as ScienceSources).sources,
+    ...(scienceSourcesCameraAngleJson as ScienceSources).sources,
   },
 };
 export const SCIENCE: ScienceContent[] = [
@@ -243,6 +251,7 @@ export const SCIENCE: ScienceContent[] = [
   scienceCsWhyItHappenedJson as ScienceContent,
   scienceCsNotEnoughJson as ScienceContent,
   scienceMciiJson as ScienceContent,
+  scienceCsCameraAngleJson as ScienceContent,
 ];
 
 export function scienceFor(experience: string | null | undefined): ScienceContent | undefined {
@@ -394,6 +403,48 @@ export interface CsNotEnoughContent extends Versioned {
   finish_label: string;
 }
 
+/** A choice with a fixed id, shown by its label. */
+export interface CsOption<T extends string = string> {
+  id: T;
+  label: string;
+}
+
+export interface CsCameraAngleContent extends Versioned {
+  safety: string;
+  moment: { intro: string; label: string; upset: RatingItem; high_note: string };
+  own_eyes: { prompt: string; short: string; skip_note: string; label: string; skip_label: string };
+  step_back: { stand_in: string; prompt: string; slider_label: string; drag_hint: string; positions: string[] };
+  /** The figure's own words: the label beside you, and the text alternative at each position. */
+  room: { you: string; alts: string[] };
+  from_here: {
+    /** Position 0: a neutral lead, then first-person options only (no question, no writing). */
+    close: { lead: string; options: CsCard[] };
+    /** Positions 1–3: the observer reflection, then what they notice. */
+    observer: { watch: string; watch_label: string; notice: string; hint: string; options: CsCard[]; own_choice: string; own_label: string };
+  };
+  now: {
+    vantage: { question: string; options: CsOption<'own_eyes' | 'both' | 'outside'>[] };
+    any_answer: string;
+    upset: RatingItem;
+    compared: string;
+    control: { question: string; options: CsOption<'yes' | 'partly' | 'no'>[] };
+  };
+  close: {
+    moment: string;
+    noticed: string;
+    wrote: string;
+    nothing_kept: string;
+    heavier: string;
+    stepped_back: string;
+    stayed_close: string;
+    control: string;
+    plan_link: string;
+  };
+  next_label: string;
+  finish_label: string;
+}
+
+export const CS_CAMERA_ANGLE = csCameraAngleJson as CsCameraAngleContent;
 export const CS_OTHER_READINGS = csOtherReadingsJson as CsOtherReadingsContent;
 export const CS_WHY_IT_HAPPENED = csWhyItHappenedJson as CsWhyItHappenedContent;
 export const CS_NOT_ENOUGH = csNotEnoughJson as CsNotEnoughContent;

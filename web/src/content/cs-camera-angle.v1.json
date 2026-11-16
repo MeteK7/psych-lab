@@ -1,0 +1,105 @@
+{
+  "id": "cs-camera-angle",
+  "version": "1",
+  "safety": "These exercises are for everyday situations, like learning, work or friends. They aren't for painful experiences such as loss, abuse or health worries, or for times of crisis. If that's where you are, talk to someone you trust or a support line. You can stop at any time.",
+  "moment": {
+    "intro": "Think of a recent everyday moment that still bothers you a little when you go back over it. Pick one that's uncomfortable, not overwhelming.",
+    "label": "The moment, in a few words (only you see this; it isn't saved)",
+    "upset": {
+      "label": "How upsetting does it feel right now?",
+      "min_label": "not at all",
+      "max_label": "extremely"
+    },
+    "high_note": "That sounds like a lot right now. This exercise is meant for smaller things. You can pick a lighter moment, carry on, or stop."
+  },
+  "own_eyes": {
+    "prompt": "Go back to the moment and see it as you saw it then, through your own eyes. What happened? What did you feel?",
+    "short": "Keep this short. Write it down, or just think it through.",
+    "skip_note": "If you'd rather not go back into it, skip this step. Nothing later depends on it.",
+    "label": "What happened, and what you felt (optional; only you see this; it isn't saved)",
+    "skip_label": "Skip this step"
+  },
+  "step_back": {
+    "stand_in": "The drawing isn't your moment. It's a stand-in: a room and a few people, to show where you're looking from. Picture your own.",
+    "prompt": "Take a few steps back, until you can see yourself in it, as if you were watching someone else. Stop wherever feels right. You can stay close.",
+    "slider_label": "Where you look from",
+    "drag_hint": "You can also drag across the picture.",
+    "positions": ["Through your own eyes", "One step back", "From across the room", "From further away"]
+  },
+  "room": {
+    "you": "You",
+    "alts": [
+      "Through your own eyes: the person across the table, your forearms at the bottom of the view.",
+      "One step back: you, from behind your shoulder, with the person across the table.",
+      "From across the room: the whole room, you and the person opposite at the table, and a third person at their own desk.",
+      "From further away: the room from above, its walls cut low, among other rooms: someone in the corridor, two people next door, someone in the room behind."
+    ]
+  },
+  "from_here": {
+    "close": {
+      "lead": "Looking at the moment through your own eyes:",
+      "options": [
+        { "id": "led_up", "text": "What led up to it" },
+        { "id": "that_day", "text": "What else was going on for me that day" },
+        { "id": "others", "text": "What the others may have been dealing with" },
+        { "id": "needed", "text": "What I needed just then" },
+        { "id": "could_do", "text": "Something I could do or say about it" },
+        { "id": "nothing", "text": "Nothing looks different from here" }
+      ]
+    },
+    "observer": {
+      "watch": "Watch it happen to the person in the picture. Why do you think they felt the way they did?",
+      "watch_label": "Your thoughts (optional; only you see this; it isn't saved)",
+      "notice": "What do you notice from here, if anything?",
+      "hint": "Tick any, or none.",
+      "options": [
+        { "id": "led_up", "text": "What led up to it" },
+        { "id": "that_day", "text": "What else was going on that day" },
+        { "id": "others", "text": "What the others may have been dealing with" },
+        { "id": "needed", "text": "What the person in the picture needed just then" },
+        { "id": "could_do", "text": "Something I could do or say about it" },
+        { "id": "nothing", "text": "Nothing looks different from here" }
+      ],
+      "own_choice": "Add your own",
+      "own_label": "In a few words (only you see this; it isn't saved)"
+    }
+  },
+  "now": {
+    "vantage": {
+      "question": "While you were answering just now, how did you see it?",
+      "options": [
+        { "id": "own_eyes", "label": "Mostly through my own eyes" },
+        { "id": "both", "label": "A bit of both" },
+        { "id": "outside", "label": "Mostly from the outside" }
+      ]
+    },
+    "any_answer": "Any answer is fine. People picture things differently.",
+    "upset": {
+      "label": "How upsetting does it feel right now?",
+      "min_label": "not at all",
+      "max_label": "extremely"
+    },
+    "compared": "Earlier you said {before}; now you say {now}. This isn't a score, and no direction is expected.",
+    "control": {
+      "question": "Can you do something about the situation itself?",
+      "options": [
+        { "id": "yes", "label": "Yes" },
+        { "id": "partly", "label": "Partly" },
+        { "id": "no", "label": "No" }
+      ]
+    }
+  },
+  "close": {
+    "moment": "The moment: “{moment}”",
+    "noticed": "What you noticed:",
+    "wrote": "What you wrote:",
+    "nothing_kept": "You didn't tick or write anything, and that's fine.",
+    "heavier": "Looking closely at something difficult can leave it lighter, the same or heavier. All three happen, and none says anything about you. If it stays heavy, talk to someone you trust or a support line.",
+    "stepped_back": "Stepping back doesn't change what happened, and it isn't a way to stop caring about it.",
+    "stayed_close": "You looked at it again from your own view. That's a complete way to do this exercise.",
+    "control": "You said you can do something about this. Planning a step might help more than looking at it again.",
+    "plan_link": "Plan your first step"
+  },
+  "next_label": "Next",
+  "finish_label": "Finish"
+}

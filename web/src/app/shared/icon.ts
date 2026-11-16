@@ -17,6 +17,8 @@ const PATHS = {
   causes: ['M4 4v16h16', 'M9 13a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z', 'M13 7a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z', 'M17 12a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z'],
   // A question in a speech bubble: not enough to go on.
   question: ['M4 5h16v11H10l-4 3.5V16H4z', 'M10 9a2 2 0 1 1 2.5 1.9c-.3.1-.5.4-.5.7v.4', 'M12 13.5h.01'],
+  // A camera: the same moment seen from another place.
+  camera: ['M4 8h3.5L9 6h6l1.5 2H20v11H4z', 'M12 10.5a3 3 0 1 1 0 6 3 3 0 0 1 0-6z'],
   // A path with a low wall on it, and a way over: the obstacle, then a plan.
   wall: ['M3 19h18', 'M9 13h6v6H9z', 'M5 19c1-9 13-9 14 0'],
   // Parts of a science explanation

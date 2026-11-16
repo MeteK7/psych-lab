@@ -1,10 +1,18 @@
 # Change the camera angle: design (Stage 1)
 
+> **Status (2026-11-16):** you approved `camera-angle.room@2` for the exercise (R2, `visual-reviews.md` entry 4), with one generic room. Your decisions are in §9.9:
+> - the figure first appears at step 3, with the stand-in line
+> - step 2 has an explicit skip
+> - someone who stays at position 0 gets a still figure and the options only at step 4
+> - the §9.4 and §9.5 proposals are the working texts for the first build
+>
+> The wordings remain provisional until the psychology-trained reviewer and the content review decide. **R1 of `shaded` was approved the same day, separately (`visual-reviews.md` entry 5), and you authorized Stage 2** (gate 1, §7). The main sources were rechecked on 2026-11-16 (§5, `evidence-verification.md`).
+>
 > **Status (2026-11-15):** you reviewed and approved `camera-angle.room@1`. A refinement pass made it `camera-angle.room@2` (§3, "Version 2"): the same room, positions and meaning, with the changes listed there, for your look. The six steps were reviewed too: the findings, proposed wordings and the decisions that need you or the psychology-trained reviewer are in §9. The step texts in §2 are unchanged until those are decided. Stage 2 is still not built.
 >
 > **Status (2026-11-14):** you rejected `camera-angle.view@1` in review (an ellipse on a slider read as a UI component, not as a change of perspective), compared three prototyped directions, and chose the room. The figure is now `camera-angle.room@1` (§3), built in the Visual System and in the Visual Lab for your R1 (the `shaded` material) and R2. The rest of this document (steps, texts, records, evidence, safety) is unchanged.
 
-> **The exercise isn't built.** Its steps, texts and records below are the design for Stage 2, which starts only after your verdict on the figure.
+> **Stage 2 is built (2026-11-16), development only and Try it only,** with the §9.9 decisions and working texts (content `cs-camera-angle.v1.json`). §2 below keeps the approved original texts for comparison; what the build shows is listed in §10.
 > - It is development-only and Try it only, like CS1–CS3, until its gates pass (§7).
 > - The CS proposal listed self-distancing as "What would you tell a friend?" (CS6), "Not separate: used as a lens inside CS1 and CS2" (`cognitive-shifts-proposal.md` §4). This exercise is a different variant: a change of visual vantage on your own moment, not advice to a friend. CS1's lens is unchanged.
 > - **Claim labels:** **[R]** supported by research (§5) · **[D]** a design choice of ours, not tested by any research.
@@ -19,6 +27,7 @@
 7. Release gates
 8. Questions for the reviewers
 9. Review before Stage 2: findings and open decisions
+10. What Stage 2 built (2026-11-16)
 
 ---
 
@@ -76,23 +85,26 @@ Six steps, "Step x of 6: …", Stop on every step, keyboard paths throughout. Th
   - **Distant people's legs close together gradually** (2026-11-16). Far away, a person's legs are drawn as one form (a gap thinner than a pixel draws differently in SVG and canvas). They used to switch to one form in a single frame during the move from position 2 to 3. Now they close together over a narrow band of sizes, taking 0.14 to 0.28 of a position, depending on the person. The four still pictures are unchanged.
 - **What the system gained** (each in the capability log of `visual-system.md`): spatial geometry (S2), the `shaded` material (S1), the room (S3), the viewpoint figure (S9).
 - **In the exercise:** step 3 binds the viewpoint figure beside the native slider, exactly as the Lab does (`pages/lab/lab-room.ts`); steps 2 and 4 can show it still, at position 0 and at the chosen position, through the instrument slot. Every word comes from the exercise's content; the Lab passes fixed phrases.
-- **Not yet decided:** whether steps 2 and 4 need the figure at all. The words carry those steps without it.
+- **Decided 2026-11-16 (§9.9):** no figure at step 2; it first appears at step 3, starting at position 0, and is shown still at step 4 at the chosen position.
 
 ## 4. What is recorded
 | | |
 |---|---|
-| **Saved** (Test mode and usability only; Try it keeps only `visual_source`) | upset before and after; position chosen (0–3); "easier to notice" card ids, "own" or "nothing"; vantage at step 5; controllability; completion; `visual_source` = `instrument:camera-angle.room@2;theme:cognitive@1` |
+| **Saved** (in a research record only; Try it keeps only `visual_source`. Exercises outside the experiment open in Try it only, so today nothing in this row except `visual_source` is ever saved) | upset before and after; position chosen (0–3); "easier to notice" card ids, "own" or "nothing"; vantage at step 5; controllability; completion; `visual_source` = `instrument:camera-angle.room@2;theme:cognitive@1` |
 | **Never saved** | the moment, anything written in steps 2 and 4, an own "easier to notice" |
 
 **What it can show:** whether people finish, where they stop, how far back they step, what they tick, and how the rating moves during the exercise. **What it can't show:** whether the exercise helps. The ratings are immediate and self-reported, and are labelled "how it feels right now".
 
 ## 5. Evidence
-Every source starts as "summary checked" and its line says "suggests". Each is read in full and logged in `evidence-verification.md` before release, or the line is dropped.
+Every source starts as "summary checked" and its line says "suggests". Each is read in full and logged in `evidence-verification.md` before release, or the line is dropped. The 2026-11-16 pass is logged there, with what each full-text reading changes here.
 
 | Finding | Source | Checked |
 |---|---|---|
-| Analysing a negative experience from a distanced view ("take a few steps back… watch the experience unfold") gave less distress straight afterwards than analysing it immersed, with less recounting and more making sense of it | Kross, Ayduk & Mischel 2005, *Psychol Sci* 16(9):709–715; Kross & Ayduk 2008, *PSPB* 34(7):924–938; Ayduk & Kross 2010, *JPSP* 98(5):809–829; review: Kross & Ayduk 2017, *Adv Exp Soc Psychol* 55:81–136 | Not yet checked; citation details to confirm |
-| Asking "why" helped from a distance, and tended towards going over it again when immersed | Kross, Ayduk & Mischel 2005 | Not yet checked |
+| Analysing a recalled experience of strong anger or sadness from a distanced view ("take a few steps back… watch the experience unfold") gave less distress straight afterwards than analysing it immersed, with less recounting and more making sense of it. The effects were small to moderate, in students | Kross, Ayduk & Mischel 2005, *Psychol Sci* 16(9):709–715; Kross & Ayduk 2008, *PSPB* 34(7):924–938 | **✔F both** (2026-11-16) |
+| A day or a week later, people who had analysed from a distance felt less low on thinking about it again, and had thought about it less often, than those who had analysed immersed (small effects). Straight afterwards, a neutral distraction did as well as stepping back | Kross & Ayduk 2008 | **✔F** |
+| People who spontaneously took a distanced view of a negative memory showed less reactivity (measured, not assigned) | Ayduk & Kross 2010, *JPSP* 98(5):809–829 | Abstract (✔A) |
+| Review of the method | Kross & Ayduk 2017, *Adv Exp Soc Psychol* 55:81–136 | Not checked (abstract not accessible); not cited |
+| Asking "why" helped only from a distance. From the immersed view it went with more reliving and more recounting than from a distance. Asking "what" did not help from either view, and up close "what" and "why" were not told apart | Kross, Ayduk & Mischel 2005 | **✔F** |
 | Across 230 comparisons, a distant perspective reduced emotional experience (g = 0.52), but less for self-conscious emotions such as shame and embarrassment (g = 0.29) | Moran & Eyal 2022, *Pers Soc Psychol Rev* 26(2) | Abstract |
 | Not always replicated: in 355 people writing about a conflict, distanced reflection raised positive feeling but didn't lower negative feeling | Nasarudin, Moeck & Koval 2023, *Cogn Emot* 37(7):1281–1289 | Abstract |
 | Third-person language is another route to distance | Kross et al. 2014, *JPSP* 106(2):304–324 | ✔F (on file) |
@@ -115,7 +127,7 @@ Every source starts as "summary checked" and its line says "suggests". Each is r
 - **Not therapy:** the About page says so; nothing here promises a benefit.
 
 ## 7. Release gates
-1. **R1** of the `shaded` material and **R2** of `camera-angle.room@2` in the Lab (you; `@1` approved 2026-11-15). The decisions in §9. Then Stage 2 is built on the development branch.
+1. **R2** of `camera-angle.room@2` in the Lab: **passed 2026-11-16** (you; `visual-reviews.md` entry 4). **R1** of the `shaded` material: **passed 2026-11-16**, reviewed separately (entry 5). You authorized the build the same day, with the §9.9 decisions and working texts: Stage 2 is built on the development branch.
 2. **Full texts** of every new source, logged in `evidence-verification.md`, or their lines dropped.
 3. **Content review** (as `cognitive-shifts-review-form.md`): the step texts, the "easier to notice" cards and the closing lines, for plausibility and for whether anything could feel invalidating.
 4. **R3 and the psychology-trained reviewer** (veto), in the test environment, before your merge.
@@ -193,3 +205,78 @@ A critical read of the six steps in §2, before any of them is built. Nothing he
 ### 9.8 What the review did not find
 - No claim that the exercise works, and no claim that this figure has been tested: §5's `similar_note` and "About this exercise" say it hasn't.
 - The immersed step asks only what happened and what was felt; "why" is asked only from the distance. Both are as designed and should stay.
+
+### 9.9 Decided by you, 2026-11-16
+Product decisions. Where a wording is given, it is a proposal that still goes to the psychology-trained reviewer and the content review (gate 3); the behaviour is decided.
+
+- **`room@2` is approved for the exercise** (R2, `visual-reviews.md` entry 4). The four positions read as the intended progression: your own eyes, then an observer's view, then the wider surroundings.
+- **Stage 2 waited for R1 of `shaded`**, a separate gate, not implied by the room's approval. R1 was approved the same day (`visual-reviews.md` entry 5), and you then authorized the build.
+- **One generic room** (§9.2). It is a stand-in, said explicitly where the figure first appears (step 3), so nobody takes it for a reconstruction of their own memory. Working line (§9.3): "The drawing isn't your moment. It's a stand-in: a room and a few people, to show where you're looking from. Picture your own."
+- **No figure at step 2** (§9.3). The person recalls the moment through their own eyes with no drawn stranger competing with their own picture. The figure first appears at step 3, at position 0.
+- **Step 2 has an explicit skip** (§9.1). A person can go on without going back into the moment or describing it. Making the field optional is not enough.
+  - Proposed line, under the prompt: "If you'd rather not go back into it, skip this step. Nothing later depends on it."
+  - Two buttons of equal weight, neither filled: "Next" and "Skip this step".
+  - A skip isn't recorded: in the record it looks the same as leaving the field empty, so it adds no new data.
+  - Step 6 shows back only what was written, so a skip leaves nothing missing.
+- **Step 4 depends on where the person stopped.**
+  - **At position 0 (stayed close): options only.** There is no person in the picture to watch, so the observer question doesn't fit.
+    - The figure still, at position 0.
+    - A neutral introductory sentence, not a question: "Looking at the moment through your own eyes:"
+    - The options in the first person: "What led up to it" · "What else was going on for me that day" · "What the others may have been dealing with" · "What I needed just then" · "Something I could do or say about it" · "Nothing looks different from here". This is the §9.4 set, reworded.
+    - "Nothing looks different from here" is kept, as a full answer.
+    - **No reflection question and no writing field of any kind**, including no "Add your own" field.
+  - **At positions 1 to 3 (stepped back): the observer path.**
+    - The figure still, at the chosen position.
+    - The observer reflection: "Watch it happen to the person in the picture. Why do you think they felt the way they did?", with its optional writing field.
+    - Then "What do you notice from here, if anything?", with the §9.4 options in the third person and the "Add your own" field.
+  - **Nothing invites them to move.** Step 3 stays as it is ("You can stay close"), and step 5's vantage question is asked either way.
+  - **Closing at position 0:** "You looked at it again from your own view. That's a complete way to do this exercise." It replaces the "Stepping back doesn't change what happened…" line, which wouldn't apply.
+  - **Why no question at position 0 [D]:** the 2005 study found "what" and "why" asked from the immersed view equally ineffective, so no research favours one question over the other there (§5, checked in full 2026-11-16). Leaving the question out avoids asking "why" up close, where it went with more reliving than from a distance, without claiming that a "what" question helps. It is a design choice, not a research finding.
+- **Working texts for the first build: the §9.4 and §9.5 proposals,** not the original §2 wording. They stay provisional until the psychology-trained reviewer and the content review (gate 3) decide; §2 is kept as the approved original for comparison.
+  - **Step 4, observer path:** "What do you notice from here, if anything?" and the rebalanced options (§9.4). "That it was one moment, not the whole picture" is dropped.
+  - **Step 5:** titled "Where you ended up"; the vantage question first; "Any answer is fine. People picture things differently."; and the neutral comparison: "Earlier you said {before}; now you say {now}. This isn't a score, and no direction is expected." (§9.5).
+- **The exercise's intention, to keep in every text and test:**
+  - Moving further back is not better, and staying close is a complete answer.
+  - The moment doesn't matter less from further away.
+  - No feeling or rating is expected at the end. The purpose is to look from another vantage point and perhaps notice more of the context.
+  - **Planned check:** a content test that no on-screen text uses improvement words ("better", "calmer", "less", "smaller", "lighter") about the moment or the person, except the closing's "lighter, the same or heavier".
+
+## 10. What Stage 2 built (2026-11-16)
+Development only (`release: 'development'`; the API refuses it in production) and Try it only (`experiment: null`). The texts are the §9.9 working texts, provisional until the psychology-trained reviewer and the content review decide; a change to them is a new content version.
+
+**Where it lives**
+- **Area:** Cognitive shifts, a fourth topic, "When you keep replaying a moment".
+- **Card:** "Change the camera angle", method "Stepping back (self-distancing)", about 6 minutes.
+
+**The steps as built**
+| Step | Id | What it shows | Reported by the step (a research record keeps it; Try it keeps only `visual_source`) |
+|---|---|---|---|
+| 1 · The moment | `cam_moment` | The safety line; the moment in a few words; the upset scale; at 8 or more, the note (never blocking) | `cam_upset_pre` |
+| 2 · Through your own eyes | `cam_own_eyes` | No figure. The prompt, "keep this short", the skip line, an optional multi-line field; "Next" and "Skip this step" as equal buttons | Nothing, whether skipped or not |
+| 3 · Step back | `cam_step_back` | The stand-in line; the prompt; the native slider "Where you look from" beside the moving room, loaded on demand (a drag across the picture works too) | `position` (0–3); `visual_source` once the figure has loaded |
+| 4 · From here | `cam_from_here` | The room still, at the position chosen. At 0: the lead "Looking at the moment through your own eyes:" and the first-person options only. At 1–3: the observer question with its optional field, then "What do you notice from here, if anything?", the options and "Add your own" | `noticed`: option ids in screen order, plus "own" |
+| 5 · Where you ended up | `cam_now` | The vantage question first; "Any answer is fine…"; the upset scale; after rating, the neutral comparison; can you do something about it | `cam_upset_post`; `vantage`; `control` |
+| 6 · What you're keeping | `cam_close` | The moment, what was ticked and written (a skipped step 2 shows nothing); "lighter, the same or heavier"; the line for having stayed close or stepped back; the plan line if Yes or Partly. The done screen offers "Plan your first step" in that case | Nothing |
+
+**Files**
+- **Exercise:** `web/src/app/experiences/cognitive-shifts/cs-camera-angle.ts`; its state in `cs-store.ts`; its rules in `cs-logic.ts` (`HIGH_UPSET`, `stayedClose`, `canAct`, `noticedRecord`).
+- **Shared:** `shared/text-area.ts` (the multi-line field, no length cap); `shared/visual/integration/viewpoint-slot.ts` (loads the moving figure on demand, holds its space, reports what it drew); a `camera` icon in `shared/icon.ts`.
+- **Content:** `content/cs-camera-angle.v1.json`; `content/science/cs-camera-angle.v1.json`, with `science/sources-camera-angle.v1.json` (the two Kross papers, read in full). The science text cites only sources read in full, plus Troy 2013 from CS1.
+- **Wiring:** `experiences/registry.ts`, `areas.ts`, `flow/conditions.ts`, `flow/session-record.ts`, `flow/session-page.ts`, `api/types.ts`; the API's `schemas.py` and `models.py`; migration `0007` widens the allowed-exercise check, as `0006` did for MCII.
+
+**Tests**
+- **Unit:**
+  - both paths run through the session page: stepped back, and stayed close with step 2 skipped
+  - nothing typed in any saved record
+  - Try it sends only `visual_source`
+  - never opens outside Try it
+  - the rules
+  - the content: no internal words; no improvement words about the moment except the two checked exceptions; no question and no field at position 0
+  - the science explanation's sources and limits
+- **API:** saved in Try it with its picture; a position refused in Try it; refused in the experiment, with a reveal, and in production.
+- **Browser, keyboard only:**
+  - both paths, with an axe scan on every step, light and dark at step 3
+  - reduced motion: the picture cuts
+  - the area lists four exercises
+
+**Still open before release** (§7): gates 2–5, the psychology-trained reviewer's §9 decisions, and R3 in the test environment.

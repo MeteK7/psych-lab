@@ -437,6 +437,148 @@ describe('Cognitive shifts exercises', () => {
     expect(JSON.stringify(run.bodies)).not.toContain('PRIVATE');
   });
 
+  describe('Change the camera angle (camera-angle-design.md §2, §9.9)', () => {
+    const text = (run: Run) => root(run).textContent ?? '';
+    const field = (run: Run, label: string) =>
+      Array.from(root(run).querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input[type="text"], textarea')).find((f) =>
+        (f.closest('label, app-text-area')?.textContent ?? '').includes(label),
+      ) as HTMLInputElement;
+    const box = (run: Run, label: string) =>
+      Array.from(root(run).querySelectorAll<HTMLInputElement>('input[type="checkbox"], input[type="radio"]')).find(
+        (i) => i.closest('label')?.textContent?.trim() === label,
+      ) ?? null;
+
+    async function moment(run: Run, rating: number): Promise<void> {
+      await press(run, 'Begin');
+      expect(heading(run)).toBe('Step 1 of 6: The moment');
+      expect(text(run)).toContain("They aren't for painful experiences");
+      await type(run, field(run, 'The moment, in a few words'), 'PRIVATE moment');
+      await rate(run, rating);
+    }
+
+    it('steps back to the observer path: a "why" from the distance, what was noticed, and a plan when it can be acted on', async () => {
+      const run = start('cs_camera_angle');
+      await run.fixture.whenStable();
+      await moment(run, 9);
+      // At 8 or more, a note under the scale; it never blocks.
+      expect(text(run)).toContain('This exercise is meant for smaller things.');
+      await press(run, 'Next');
+
+      expect(heading(run)).toBe('Step 2 of 6: Through your own eyes');
+      // No figure yet: a drawn stranger would compete with the person's own picture.
+      expect(root(run).querySelector('app-vis-viewpoint-slot, app-vis-instrument-slot')).toBeNull();
+      // "Next" and "Skip this step" are two equal answers: neither is the filled one.
+      for (const label of ['Next', 'Skip this step']) expect(button(run, label).classList.contains('primary')).toBe(false);
+      await type(run, root(run).querySelector('textarea') as unknown as HTMLInputElement, 'PRIVATE own eyes');
+      await press(run, 'Next');
+
+      expect(heading(run)).toBe('Step 3 of 6: Step back');
+      expect(text(run)).toContain("The drawing isn't your moment.");
+      expect(text(run)).toContain('You can stay close.');
+      expect(root(run).querySelector('app-vis-viewpoint-slot')).not.toBeNull();
+      const slider = root(run).querySelector<HTMLInputElement>('input[type="range"]')!;
+      expect(slider.value).toBe('0');
+      await slide(run, slider, 2);
+      expect(slider.getAttribute('aria-valuetext')).toBe('From across the room');
+      expect(root(run).querySelector('output')?.textContent?.trim()).toBe('From across the room');
+      await press(run, 'Next');
+
+      expect(heading(run)).toBe('Step 4 of 6: From here');
+      expect(root(run).querySelector('app-vis-instrument-slot')?.getAttribute('aria-label')).toMatch(/^From across the room/);
+      expect(text(run)).toContain('Watch it happen to the person in the picture. Why do you think they felt the way they did?');
+      expect(text(run)).toContain('What do you notice from here, if anything?');
+      await type(run, root(run).querySelector('textarea') as unknown as HTMLInputElement, 'PRIVATE why');
+      await check(run, box(run, 'What led up to it'));
+      await check(run, box(run, 'Nothing looks different from here'));
+      await type(run, field(run, 'Add your own'), 'PRIVATE own notice');
+      await press(run, 'Next');
+
+      expect(heading(run)).toBe('Step 5 of 6: Where you ended up');
+      await check(run, box(run, 'A bit of both'));
+      expect(text(run)).toContain('Any answer is fine.');
+      expect(text(run)).not.toContain('Earlier you said');
+      await rate(run, 4);
+      expect(text(run)).toContain("Earlier you said 9; now you say 4. This isn't a score, and no direction is expected.");
+      await check(run, box(run, 'Yes'));
+      await press(run, 'Next');
+
+      expect(heading(run)).toBe("Step 6 of 6: What you're keeping");
+      for (const shown of ['PRIVATE moment', 'What led up to it', 'Nothing looks different from here', 'PRIVATE own notice', 'PRIVATE own eyes', 'PRIVATE why']) {
+        expect(text(run)).toContain(shown);
+      }
+      expect(text(run)).toContain('lighter, the same or heavier');
+      expect(text(run)).toContain("Stepping back doesn't change what happened");
+      expect(text(run)).not.toContain('a complete way to do this exercise');
+      expect(text(run)).toContain('Planning a step might help more');
+      await press(run, 'Finish');
+      expect(root(run).querySelector('a.primary-link')?.textContent?.trim()).toBe('Plan your first step');
+
+      const saved = last(run);
+      expect(saved.status).toBe('completed');
+      expect(saved.ratings).toEqual({ cam_upset_pre: 9, cam_upset_post: 4 });
+      expect(saved.steps?.map((s) => s.step)).toEqual(['cam_moment', 'cam_own_eyes', 'cam_step_back', 'cam_from_here', 'cam_now', 'cam_close']);
+      expect(saved.steps?.[2].result).toMatchObject({ position: 2 });
+      expect(saved.steps?.[3].result).toEqual({ noticed: ['led_up', 'nothing', 'own'] });
+      expect(saved.steps?.[4].result).toEqual({ vantage: 'both', control: 'yes' });
+      expect(saved.content_versions).toMatchObject({ 'cs-camera-angle': '1' });
+      expect(JSON.stringify(run.bodies)).not.toContain('PRIVATE');
+    });
+
+    it('lets the person skip going back in, and stay close: options only, no question, no writing, nothing missing', async () => {
+      const run = start('cs_camera_angle');
+      await run.fixture.whenStable();
+      await moment(run, 3);
+      expect(text(run)).not.toContain('This exercise is meant for smaller things.');
+      await press(run, 'Next');
+
+      // Typed, then skipped: the text isn't kept or shown back, and the record is the same as a blank Next.
+      await type(run, root(run).querySelector('textarea') as unknown as HTMLInputElement, 'PRIVATE typed then skipped');
+      await press(run, 'Skip this step');
+      expect(last(run).steps?.[1]).toMatchObject({ step: 'cam_own_eyes', result: {} });
+
+      expect(heading(run)).toBe('Step 3 of 6: Step back');
+      await press(run, 'Next'); // stays at position 0
+
+      expect(heading(run)).toBe('Step 4 of 6: From here');
+      expect(root(run).querySelector('app-vis-instrument-slot')?.getAttribute('aria-label')).toMatch(/^Through your own eyes/);
+      const legend = root(run).querySelector('legend')?.textContent?.trim();
+      expect(legend).toBe('Looking at the moment through your own eyes:');
+      expect(text(run)).not.toContain('?');
+      expect(root(run).querySelectorAll('textarea, input[type="text"]')).toHaveLength(0);
+      expect(text(run)).toContain('What I needed just then');
+      expect(text(run)).toContain('Nothing looks different from here');
+      await check(run, box(run, 'What I needed just then'));
+      await press(run, 'Next');
+
+      await check(run, box(run, 'Mostly through my own eyes'));
+      await rate(run, 3);
+      await check(run, box(run, 'No'));
+      await press(run, 'Next');
+
+      expect(text(run)).toContain('What I needed just then');
+      expect(text(run)).not.toContain('PRIVATE typed then skipped');
+      expect(text(run)).toContain("You looked at it again from your own view. That's a complete way to do this exercise.");
+      expect(text(run)).not.toContain("Stepping back doesn't change what happened");
+      expect(text(run)).not.toContain('Planning a step');
+      await press(run, 'Finish');
+      expect(root(run).querySelector('a.primary-link')).toBeNull();
+
+      const saved = last(run);
+      expect(saved.steps?.[2].result).toMatchObject({ position: 0 });
+      expect(saved.steps?.[3].result).toEqual({ noticed: ['needed'] });
+      expect(JSON.stringify(run.bodies)).not.toContain('PRIVATE');
+    });
+
+    it('never opens outside Try it', async () => {
+      for (const [mode, reveal] of [['self_use', 'x'], ['dev', 'x'], ['try', 'x']] as const) {
+        const run = start('cs_camera_angle', mode, reveal);
+        await run.fixture.whenStable();
+        expect(root(run).textContent).toContain('This exercise link is incomplete.');
+        TestBed.resetTestingModule();
+      }
+    });
+  });
+
   it('never opens outside Try it', async () => {
     for (const [mode, reveal] of [['self_use', 'x'], ['dev', 'x'], ['try', 'x']] as const) {
       const run = start('cs_other_readings', mode, reveal);
@@ -447,7 +589,7 @@ describe('Cognitive shifts exercises', () => {
   });
 
   it('in Try it, sends only that each exercise ran: no cards, places or ratings', async () => {
-    for (const condition of ['cs_other_readings', 'cs_why_it_happened', 'cs_not_enough_to_go_on']) {
+    for (const condition of ['cs_other_readings', 'cs_why_it_happened', 'cs_not_enough_to_go_on', 'cs_camera_angle']) {
       TestBed.resetTestingModule();
       const run = start(condition, 'try', undefined, sinkFor('try'));
       await run.fixture.whenStable();

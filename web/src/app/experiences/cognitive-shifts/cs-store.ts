@@ -46,4 +46,19 @@ export class CsStore {
   /** The person's own extra reading; its text is never saved. */
   readonly cs3Own = signal<Pick | null>(null);
   readonly cs3Find = signal<string | null>(null);
+
+  // Change the camera angle (docs/camera-angle-design.md). Everything written stays here.
+  readonly camMoment = signal('');
+  readonly camUpsetBefore = signal<number | null>(null);
+  /** Step 2: what happened and what was felt; empty when skipped or left blank. */
+  readonly camOwnEyes = signal('');
+  /** Step 3: where the person stopped, 0 (own eyes) to 3 (furthest back). */
+  readonly camPosition = signal(0);
+  /** Step 4, observer path: the reflection on why. */
+  readonly camWatch = signal('');
+  /** Step 4: the options ticked, by id. */
+  readonly camNoticed = signal<string[]>([]);
+  /** Step 4, observer path: "Add your own", its text never saved. */
+  readonly camOwnNotice = signal('');
+  readonly camControl = signal<'yes' | 'partly' | 'no' | null>(null);
 }

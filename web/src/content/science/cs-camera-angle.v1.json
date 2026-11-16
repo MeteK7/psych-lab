@@ -1,0 +1,41 @@
+{
+  "id": "science-cs-camera-angle",
+  "version": "1",
+  "experience": "cs_camera_angle",
+  "why": "When a moment keeps replaying, you tend to go back into it from inside: the same words, the same feeling, again. Looking at it from further back, as if it were happening to someone else, can make room to ask why it went as it did without being pulled back into it.\n\nThis is practice at looking at a moment from more than one place. Staying close is an answer too: further back isn't better.",
+  "what_you_do": "You go back to a moment through your own eyes, step back as far as feels right, and look at it from there.",
+  "method": {
+    "name": "Stepping back (self-distancing)",
+    "text": "People usually go back over a difficult moment from inside it, through their own eyes. Self-distancing means looking at it from further back, as an observer would, and seeing yourself in it. It isn't pushing the moment away or caring about it less: the feelings stay in view, from another place."
+  },
+  "research": [
+    {
+      "layer": "method",
+      "text": "Two experiments found that people who recalled a moment of strong anger and asked why they felt as they did, while watching it happen to themselves from a distance, felt less angry straight afterwards than people who went over it from inside, or who only went over what they felt. They also went over the events less and made more sense of them.",
+      "who": "288 US university students · recalled anger, guided by recorded instructions, measured straight afterwards",
+      "sources": ["kross-2005"]
+    },
+    {
+      "layer": "method",
+      "text": "Two experiments found the same for moments of strong sadness. A day or a week later, people who had looked from a distance felt less low when they thought about it again, and had thought about it less often in between, than people who had looked from inside it. The differences were small.",
+      "who": "469 people at one US university · recalled sadness, guided by recorded instructions; asked again after a day or a week",
+      "sources": ["kross-ayduk-2008"]
+    },
+    {
+      "layer": "method",
+      "text": "Research with 170 adults suggests that seeing a situation differently isn't always helpful: skill at it went with fewer depressive symptoms under stress people couldn't control, but more under stress they could. So this exercise asks whether you can act on the situation.",
+      "who": "170 adults · measured, not an experiment",
+      "sources": ["troy-2013"]
+    }
+  ],
+  "similar_note": "In the experiments above, people heard instructions and pictured the moment themselves. No research has tested an on-screen picture like this one, or looking from inside and then from further back, one after the other.",
+  "about_this_exercise": "This exercise uses stepping back, but this version hasn't been tested itself. The research above used recorded instructions and strong recalled feelings, not a drawing and everyday moments.",
+  "limits": [
+    "The differences measured were small, and lasted up to a week at most.",
+    "The research used strong anger or sadness in students, not small everyday moments.",
+    "Straight afterwards, a neutral distraction lowered low mood as much as looking from a distance did.",
+    "It isn't for painful experiences such as trauma: the researchers themselves say looking from a distance may not suit them.",
+    "Seeing it from further back doesn't change the situation; if you can act on it, planning a step may matter more.",
+    "Before-and-after ratings show how it feels now, not whether the exercise works."
+  ]
+}

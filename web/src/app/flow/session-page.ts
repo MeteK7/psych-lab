@@ -8,6 +8,7 @@ import { ApiService } from '../api/api.service';
 import { ExerciseId, Mode, Status } from '../api/types';
 import { AREAS } from '../areas';
 import { ActionBridge } from '../experiences/action-bridge/action-bridge';
+import { CsCameraAngle } from '../experiences/cognitive-shifts/cs-camera-angle';
 import { CsNotEnough } from '../experiences/cognitive-shifts/cs-not-enough';
 import { CsOtherReadings } from '../experiences/cognitive-shifts/cs-other-readings';
 import { CsStore } from '../experiences/cognitive-shifts/cs-store';
@@ -33,6 +34,7 @@ type SaveState = 'idle' | 'saving' | 'error';
   selector: 'app-session-page',
   imports: [
     ActionBridge,
+    CsCameraAngle,
     CsNotEnough,
     CsOtherReadings,
     CsWhyItHappened,
@@ -151,6 +153,11 @@ type SaveState = 'idle' | 'saving' | 'error';
                   <app-cs-not-enough [stage]="s" (completed)="onCompleted($event)" />
                 }
               }
+              @case ('cam') {
+                @defer (on immediate) {
+                  <app-cs-camera-angle [stage]="s" (completed)="onCompleted($event)" />
+                }
+              }
             }
           }
         }
@@ -246,7 +253,9 @@ export class SessionPage {
   protected readonly step = computed(() => this.steps()[this.index()]);
   protected readonly stepName = computed(() => STEP_NAMES[this.step()]);
   protected readonly csGroup = computed(() => {
-    const prefix = this.step()?.slice(0, 4);
+    const step = this.step();
+    if (step?.startsWith('cam_')) return 'cam';
+    const prefix = step?.slice(0, 4);
     return prefix === 'cs1_' || prefix === 'cs2_' || prefix === 'cs3_' ? prefix.slice(0, 3) : null;
   });
   protected readonly mciiStage = computed(() => {

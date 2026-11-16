@@ -79,6 +79,13 @@ export const AREAS: Area[] = [
         experiences: ['cs_not_enough_to_go_on'],
         hasExperiment: false,
       },
+      {
+        // docs/camera-angle-design.md §1.
+        title: 'When you keep replaying a moment',
+        text: 'For a moment that still stings when you go back over it.',
+        experiences: ['cs_camera_angle'],
+        hasExperiment: false,
+      },
     ],
   },
   {

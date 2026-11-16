@@ -166,6 +166,25 @@ export const EXERCISES: ExerciseInfo[] = [
     area: 'cognitive-shifts',
     release: 'development',
   },
+  // docs/camera-angle-design.md: development only until its gates pass (§7).
+  {
+    value: 'cs_camera_angle',
+    label: 'Change the camera angle',
+    description: 'Go back over a moment, then step back and look at it as an observer would.',
+    summary: [
+      'Pick a moment that still bothers you a little.',
+      'Go back to it through your own eyes, or skip that.',
+      'Step back as far as feels right, or stay close.',
+      'Look at it from there.',
+    ],
+    minutes: 6,
+    experimental: false,
+    method: { name: 'Stepping back (self-distancing)', icon: 'camera' },
+    steps: ['cam_moment', 'cam_own_eyes', 'cam_step_back', 'cam_from_here', 'cam_now', 'cam_close'],
+    experiment: null,
+    area: 'cognitive-shifts',
+    release: 'development',
+  },
   {
     value: 'mcii',
     label: "Your wish, and what's in the way",
