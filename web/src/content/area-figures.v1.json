@@ -1,0 +1,33 @@
+{
+  "id": "area_figures",
+  "version": "1",
+  "cards": {
+    "cs_other_readings": {
+      "alt": "One situation seen through three lenses, with the readings they give sorted by how well they fit."
+    },
+    "cs_why_it_happened": {
+      "alt": "A setback, with its possible causes placed on a map. One cause is circled as something to change."
+    },
+    "cs_not_enough_to_go_on": {
+      "alt": "Three known facts and two empty places for what isn't known yet, one being filled. They lead to two readings the facts can't yet tell apart."
+    },
+    "cs_camera_angle": {
+      "alt": "A moment seen by a camera close up, and by a second camera that has stepped back and sees the whole scene."
+    },
+    "action_bridge": {
+      "alt": "A route towards a goal, with the first short step drawn in and a time set for it."
+    },
+    "goal_restatement": {
+      "alt": "A written goal with today's part of it marked, leading towards a flag."
+    },
+    "state_reset+action_bridge": {
+      "alt": "A picture held in mind, a moving dot to follow, then a first step."
+    },
+    "game_only+action_bridge": {
+      "alt": "A moving dot to follow, then a first step."
+    },
+    "mcii": {
+      "alt": "A path from now to a wish, with a low wall in the way."
+    }
+  }
+}

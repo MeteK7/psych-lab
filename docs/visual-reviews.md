@@ -153,3 +153,41 @@ None. The sheet's shaded figures are checked by the parity suite (`sheet.shaded.
 
 ### Next
 Stage 2 of "Change the camera angle" was authorized the same day (`camera-angle-design.md` §7, gate 1).
+
+---
+
+## Entry 6 · R1 Visual language · theme `cognitive@2` (soft blue)
+
+| | |
+|---|---|
+| **Date** | 2026-11-16 |
+| **Review** | R1 Visual language: the Cognitive shifts area ramp (`visual-language.md` §3.2–§3.3) |
+| **Reviewers** | You |
+| **Item** | Theme `cognitive@2`: the `cognitive` ramp in `styling/tokens.css`, which every Cognitive shifts figure and instrument takes its colour from. Theme version 1 → 2 |
+| **Seen** | Chat previews of the Cognitive shifts area page and its four card figures in the soft blue, light and dark. You then approved the plan that names the ramp values |
+
+### What you asked for
+Replace violet everywhere in Cognitive shifts with a calm, peaceful blue: soft, gentle and reassuring, with nothing aggressive, oversaturated or electric. Use subtle variations for lines, dots and frames, and keep text clearly readable.
+
+### What changed
+| Step | 050 | 100 | 200 | 300 | 400 | 600 | 700 | 800 | 900 | 950 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Was (violet) | `#f8f5ff` | `#f0e9ff` | `#e0d3fb` | `#c9b5f1` | `#b093e4` | `#7955b0` | `#614190` | `#49316c` | `#312249` | `#221832` |
+| Now (soft blue) | `#f4f8fc` | `#e6eff8` | `#cddff0` | `#a9c7e4` | `#84abd2` | `#4a78a8` | `#3a6190` | `#2d4b6f` | `#20354f` | `#172638` |
+
+- **Hue and chroma:** OKLCH *H* ≈ 250, peak *C* ≈ 0.09 (computed). Action's peak is 0.16 and the UI accent's is 0.18, so controls stay the strongest colour on the page (`visual-language.md` §3.2).
+- **Contrast:** the subject line (600) is 4.6:1 on white and 4.3:1 on the area's lightest tone; in dark, 300 is 10.1:1 on the page. `styling.spec.ts` checks every pair and passes.
+- **Unchanged:** the page's own tokens (links, buttons, borders, text), every role mapping, and every other area.
+
+### Verdict
+**Approve** (yours), for the direction and the values, as given in chat on 2026-11-16 and in the approved plan.
+
+### Baselines re-captured, not yet seen by you
+`cs2.cause-map@1` is drawn in the `cognitive` theme, so its 15 approved images (entry 3) were captured again under `cognitive@2`. Four changed: `start` and `placing`, light and dark, where the cause being placed is drawn in the area colour (`cs2-cause-map-{start,placing}-{light,dark}-win32.png`). The other eleven draw no area colour and are unchanged. The composition and the file names are unchanged; only the colour moved. The geometry is the one entry 3 accepted. **Still needed:** look at the cause map, and at `camera-angle.room@3` (which has no baselines), in the Lab, in the new blue. If either reads wrong, the ramp steps change here and the images are captured again.
+
+### Found by the parity suite, and fixed: `camera-angle.room@3`
+At ×1.5, `room.3` (light) had one pixel that differed by 4 between SVG and canvas; the tolerance is 3. Two faces of one piece of furniture, in the same tone, met edge to edge over a person, and anti-aliasing left a hairline of the person showing through the seam. With violet the hairline crossed the edge detector's threshold and was skipped; in the soft blue it doesn't. The cause was the seam, not the ramp. **Fix, at your request (2026-11-16):** every face of the room now reaches a third of a unit past its own edges (`FACE_GROW` in `room.ts`), so neighbouring faces overlap instead of meeting. That's `camera-angle.room@3`. Nothing else changes, and a third of a unit is too small to see. The whole parity suite passes. **Still needed:** a look at `room@3` in the Lab. It's a new version of the composition entry 4 accepted at `@2`, and entry 4's verdict doesn't cover it until you've looked.
+
+### Next
+The nine card figures (`visual-system.md` §17, row 13) are waiting for your R2. None has baselines until you accept it.
+

@@ -51,6 +51,8 @@ import scienceSourcesCameraAngleJson from './science/sources-camera-angle.v1.jso
 import mciiJson from './mcii.v2.json';
 import scienceMciiJson from './science/mcii.v1.json';
 import scienceSourcesMciiJson from './science/sources-mcii.v1.json';
+// Area pages: the text alternative of each exercise card's figure (see AREA_FIGURES below).
+import areaFiguresJson from './area-figures.v1.json';
 
 export interface Versioned {
   id: string;
@@ -531,3 +533,13 @@ export interface MciiContent extends Versioned {
 }
 
 export const MCII = mciiJson as MciiContent;
+
+// Area pages (docs/plan.md, the area page card): the text alternative of each exercise card's
+// figure. Versioned apart from the exercises' own content, so no exercise version changes.
+
+export interface AreaFiguresContent extends Versioned {
+  /** Keyed by exercise id. */
+  cards: Record<string, { alt: string }>;
+}
+
+export const AREA_FIGURES: AreaFiguresContent = areaFiguresJson;

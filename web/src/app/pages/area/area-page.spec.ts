@@ -102,6 +102,25 @@ describe('AreaPage', () => {
       expect(notes[0].closest('section')).toBeNull();
     });
 
+    it('gives a topic with several exercises the full width, and one with a single exercise one column', async () => {
+      const fixture = create('action-growth', 'development');
+      await fixture.whenStable();
+      const sections = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.topics > section'));
+      expect(sections.map((s) => s.classList.contains('wide'))).toEqual([true, false]);
+    });
+
+    it('closes the page with My experiment, after every topic, so the exercises stay together', async () => {
+      const fixture = create('action-growth', 'development');
+      await fixture.whenStable();
+      const root = fixture.nativeElement as HTMLElement;
+      const experiment = root.querySelector('section.experiment');
+      expect(experiment?.querySelector('h2')?.textContent).toBe('Want to know what works for you?');
+      expect(experiment?.closest('.topics')).toBeNull();
+      const topics = root.querySelector('.topics')!;
+      expect(topics.compareDocumentPosition(experiment!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(root.querySelectorAll('section.experiment')).toHaveLength(1);
+    });
+
     it('leaves no empty section in the production build', async () => {
       const fixture = create('action-growth', 'production');
       await fixture.whenStable();
@@ -136,6 +155,20 @@ describe('AreaPage', () => {
       expect(root.textContent).not.toContain('Open My experiment');
       const ids = Array.from(root.querySelectorAll('h2[id]')).map((h) => h.id);
       expect(new Set(ids).size).toBe(ids.length); // one heading id per topic
+    });
+
+    it('lays its four one-exercise topics out side by side, each card with its figure above the title', async () => {
+      const fixture = create('cognitive-shifts', 'development');
+      await fixture.whenStable();
+      const root = fixture.nativeElement as HTMLElement;
+      const sections = Array.from(root.querySelectorAll('.topics > section'));
+      expect(sections).toHaveLength(4);
+      expect(sections.some((s) => s.classList.contains('wide'))).toBe(false);
+      for (const card of Array.from(root.querySelectorAll('.experiences .card'))) {
+        // The figure comes first, before the title; the minutes sit with the method, not in the description.
+        expect(card.firstElementChild?.tagName.toLowerCase()).toBe('app-visual-slot');
+        expect(card.querySelector('.meta')?.textContent).toMatch(/About \d+ minutes/);
+      }
     });
 
     it('is not found in the production build', async () => {

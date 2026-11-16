@@ -9,7 +9,7 @@ import { expectNoSeriousA11yIssues } from './helpers';
 // forced colours. The screenshot baselines are the ones named by an accepted entry in
 // docs/visual-reviews.md (docs/visual-system.md §10): update them only together with such an entry.
 
-const STATES = 4; // mcii.path
+const STATES = 4 + 9; // mcii.path, and the nine card figures (one state each)
 const TRANSITIONS = 3; // mcii.path: future → contrast, contrast → plan, contrast → aside
 const CAUSE_SETS = 5; // cs2.cause-map: the answer sets in the Lab
 const ROUND_SETS = 3; // state-reset.rounds: first, middle, last
@@ -46,9 +46,11 @@ for (const [name, media] of [
     await expect(page.getByRole('list', { name: 'Validation problems' })).toHaveCount(0);
     // The purpose of every element is explained.
     await expect(page.getByRole('table').first().getByRole('row')).toHaveCount(1 + 11); // mcii.path
-    await expect(page.getByRole('table').nth(1).getByRole('row')).toHaveCount(1 + 7); // cs2.cause-map
-    await expect(page.getByRole('table').nth(2).getByRole('row')).toHaveCount(1 + 1); // state-reset.rounds
-    await expect(page.getByRole('table').nth(3).getByRole('row')).toHaveCount(1 + 4); // state-reset.tracking
+    // Then the nine card figures' tables, one per scene, after mcii.path's.
+    const CARD_TABLES = 9;
+    await expect(page.getByRole('table').nth(1 + CARD_TABLES).getByRole('row')).toHaveCount(1 + 7); // cs2.cause-map
+    await expect(page.getByRole('table').nth(2 + CARD_TABLES).getByRole('row')).toHaveCount(1 + 1); // state-reset.rounds
+    await expect(page.getByRole('table').nth(3 + CARD_TABLES).getByRole('row')).toHaveCount(1 + 4); // state-reset.tracking
     // Every figure draws something.
     for (const count of await page.locator('app-vis-svg svg').evaluateAll((els) => els.map((e) => e.childElementCount))) {
       expect(count).toBeGreaterThan(0);
@@ -885,7 +887,7 @@ test('Visual Lab: the room steps back by slider and drag, and keeps the slider i
   await expect(words).toHaveText('Through your own eyes');
   await expect(figure('light')).toHaveAttribute('role', 'img');
   await expect(figure('light')).toHaveAttribute('aria-label', /^Through your own eyes/);
-  await expect(page.locator('[data-room="source"]')).toHaveText(/^instrument:camera-angle\.room@2;theme:cognitive@\d+$/);
+  await expect(page.locator('[data-room="source"]')).toHaveText(/^instrument:camera-angle\.room@3;theme:cognitive@\d+$/);
   // Through your own eyes, only your forearms of you; from one step back, you; from furthest back, everyone.
   // A person's pieces are named by the parts they hold (`you-s2-forearm-l+forearm-r`).
   const pieces = (p: number, match: string) => page.locator(`figure[data-instrument="camera-angle.room-${p}-light"] [data-vis-id${match}]`);
