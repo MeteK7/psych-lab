@@ -1,4 +1,14 @@
-import { changeOrder, firstReadingClose, fitNote, offersPlan, reflections } from './cs-logic';
+import {
+  canAct,
+  changeOrder,
+  firstReadingClose,
+  fitNote,
+  highUpset,
+  noticedRecord,
+  offersPlan,
+  reflections,
+  stayedClose,
+} from './cs-logic';
 
 describe('Cognitive shifts rules', () => {
   describe('CS1 close for a first reading that still fits', () => {
@@ -50,6 +60,34 @@ describe('Cognitive shifts rules', () => {
 
     it('takes seriously a first reading that nothing else fits', () => {
       expect(fitNote(0)).toEqual({ key: 'note_none', n: 1 });
+    });
+  });
+
+  describe('Change the camera angle', () => {
+    it('notes a high upset rating from 8, and never otherwise', () => {
+      expect(highUpset(null)).toBe(false);
+      expect(highUpset(7)).toBe(false);
+      expect(highUpset(8)).toBe(true);
+      expect(highUpset(10)).toBe(true);
+    });
+
+    it('takes position 0 as staying close, and any step back as the observer path', () => {
+      expect(stayedClose(0)).toBe(true);
+      for (const p of [1, 2, 3]) expect(stayedClose(p)).toBe(false);
+    });
+
+    it('suggests a plan only when the person can do something about it', () => {
+      expect(canAct('yes')).toBe(true);
+      expect(canAct('partly')).toBe(true);
+      expect(canAct('no')).toBe(false);
+      expect(canAct(null)).toBe(false);
+    });
+
+    it('records what was noticed by id, in screen order, and only that an own one was added', () => {
+      const order = ['led_up', 'that_day', 'nothing'];
+      expect(noticedRecord(order, ['nothing', 'led_up'], '')).toEqual(['led_up', 'nothing']);
+      expect(noticedRecord(order, [], 'PRIVATE words')).toEqual(['own']);
+      expect(noticedRecord(order, ['stale'], '   ')).toEqual([]);
     });
   });
 

@@ -84,6 +84,10 @@ export function buildFrame(scene: SceneDefinition, state: StateName, text: TextL
         case 'generated': {
           const shape = element.kind === 'shape' ? element.geometry : ({ type: 'path', d: generatedPath(scene, element) } as const);
           let paint: DrawPaint = withBox(scene, element, resolveStyle(element.style, target.emphasis));
+          // A shadow drawn in perspective (a closed path, in a spatial view) is flat in the shadow
+          // tone: a radial fade belongs to an ellipse, and a path's box would stretch it (both backends agree).
+          if (element.style.material === 'shadow' && shape.type === 'path' && paint.gradient)
+            paint = { fill: paint.gradient.stops[0].colour, stroke: 'none', width: 0, dash: null };
           if (element.style.grain) paint = { ...paint, grain: GRAIN.opacity };
           const edge = element.style.edge === 'top' ? topEdge(scene, element) : null;
           if (!edge) {

@@ -41,6 +41,15 @@ describe('resolveStyle', () => {
     expect(resolveFocus()).toEqual({ fill: 'none', stroke: 'var(--vis-focus)', width: 2, dash: null });
   });
 
+  it('fills shaded surfaces in their facing’s tone, with no line', () => {
+    expect(resolveStyle({ role: 'far', material: 'shaded', facing: 'lit' })).toEqual({ fill: 'var(--vis-far-face-lit)', stroke: 'none', width: 0, dash: null });
+    expect(resolveStyle({ role: 'subject', material: 'shaded' }).fill).toBe('var(--vis-subject-face)');
+    expect(resolveStyle({ role: 'context', material: 'shaded', facing: 'shade' }).fill).toBe('var(--vis-context-face-shade)');
+    expect(resolveStyle({ role: 'subject', material: 'shaded' })).toEqual({ fill: 'var(--vis-subject-face)', stroke: 'none', width: 0, dash: null });
+    // No emphasis: a surface in space keeps its tone.
+    expect(resolveStyle({ role: 'subject', material: 'shaded' }, 'receded')).toEqual(resolveStyle({ role: 'subject', material: 'shaded' }));
+  });
+
   it('gives labels their tone and size', () => {
     expect(resolveLabel()).toEqual({ fill: 'var(--vis-label)', size: 14 });
     expect(resolveLabel('label-soft')).toEqual({ fill: 'var(--vis-label-soft)', size: 13 });
@@ -103,6 +112,11 @@ const PAIRS: [fg: string, bg: string, min: number][] = [
   ...['ground', 'far', 'mid'].map((bg) => ['label-soft', bg, 4.5] as [string, string, number]),
   // The focus ring sits just outside a target, on whatever is behind it (M4).
   ...['ground', 'far', 'mid', 'near'].map((bg) => ['focus', bg, 3] as [string, string, number]),
+  // A spatial view (`shaded`, 2026-11-14): people and the person themself, in every tone, on the walls
+  // in every tone and on the floor (always lit, as it faces up).
+  ...['context-face-lit', 'context-face', 'context-face-shade', 'subject-face-lit', 'subject-face', 'subject-face-shade'].flatMap((fg) =>
+    ['far-face-lit', 'far-face', 'far-face-shade', 'mid-face-lit'].map((bg) => [fg, bg, 3] as [string, string, number]),
+  ),
 ];
 
 describe('tokens.css', () => {

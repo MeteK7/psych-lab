@@ -98,3 +98,58 @@ In `web/e2e/visual-lab.spec.ts-snapshots/`, checked by `e2e/visual-lab.spec.ts` 
 
 ### Next
 The instrument is already integrated into CS2 on the development branch. R3 and the psychology-trained reviewer's review happen in the test environment, before you merge. CS2's own release gates (the content review and full texts; `cognitive-shifts-design.md` §9) are unchanged.
+
+---
+
+## Entry 4 · R2 Composition · `camera-angle.room@2` (spatial view)
+
+| | |
+|---|---|
+| **Date** | 2026-11-16 |
+| **Review** | R2 Composition, in the Visual Lab |
+| **Reviewers** | You (visual quality, concept, product fit) |
+| **Still needed** | **R1 of the `shaded` material**: a separate gate, not implied by this verdict. Then R3 (you, in the integrated exercise) and the psychology-trained reviewer (psychological suitability, with a veto; `visual-policy.md` §7 and §9.2), in the test environment, before your merge to production |
+| **Item** | Instrument `camera-angle.room@2`, theme `cognitive@1`, drawn moving by the viewpoint figure (`camera-angle-design.md` §3) |
+| **Seen** | The four positions, in light and dark |
+
+### How it got here
+| Version | Your review | What changed |
+|---|---|---|
+| `camera-angle.view@1` | An ellipse on a slider read as a UI component, not as a change of perspective. Rejected 2026-11-14 | Three directions prototyped in the Lab; you chose the room |
+| `room@1` | Approved 2026-11-15 | A refinement pass: "You" from position 1, the forearms, one coherent move out of your own eyes, what lies beyond the walls, the moment's room as the subject, the floor edges, a quieter door, and distant people's legs closing gradually |
+| `room@2` | Approved for the exercise | — |
+
+### Verdict
+**Accept** (yours). The four positions communicate the intended progression: your own eyes, then an observer's view, then a wider view of the surroundings. **One generic room** is kept rather than several settings. The stand-in explanation must be explicit where the figure first appears, so people don't take the drawing for a reproduction of their own memory (`camera-angle-design.md` §9.9).
+
+### Baselines approved
+None in this entry. The room's still positions are checked by the parity suite (`room.0`–`room.3`), which compares SVG with canvas, not against approved images. No screenshot baselines were proposed or approved.
+
+### Next
+R1 of `shaded`. Stage 2 is not authorized by this verdict (`camera-angle-design.md` §7, gate 1).
+
+---
+
+## Entry 5 · R1 Visual language · the `shaded` material
+
+| | |
+|---|---|
+| **Date** | 2026-11-16 |
+| **Review** | R1 Visual language, the `shaded` material (`visual-language.md` §5), reviewed separately from the room (entry 4) |
+| **Reviewers** | You |
+| **Item** | The material and its tokens, `--vis-{far,mid,near,context,subject}-face{-lit,,-shade}`, in light and dark |
+| **Seen** | The review sheet's "Shaded surfaces" in all five areas, light and dark, and the room at position 2 in light and dark (as images captured from the Lab) |
+
+### Verdict
+**Approve** (yours), as built:
+- walls, floor and furniture tinted in the area colour
+- other people neutral
+- you in the area colour
+
+No token changes.
+
+### Baselines approved
+None. The sheet's shaded figures are checked by the parity suite (`sheet.shaded.<area>`), not against approved images.
+
+### Next
+Stage 2 of "Change the camera angle" was authorized the same day (`camera-angle-design.md` §7, gate 1).

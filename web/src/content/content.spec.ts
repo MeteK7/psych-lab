@@ -1,4 +1,4 @@
-import { ACTION_BRIDGE, GOAL_RESTATEMENT, MCII, RATINGS, STATE_RESET, STATE_RESET_SOUND } from '.';
+import { ACTION_BRIDGE, CS_CAMERA_ANGLE, GOAL_RESTATEMENT, MCII, RATINGS, STATE_RESET, STATE_RESET_SOUND } from '.';
 
 const ALL = [ACTION_BRIDGE, GOAL_RESTATEMENT, RATINGS, STATE_RESET, STATE_RESET_SOUND];
 
@@ -43,6 +43,43 @@ describe('on-screen wording', () => {
       const texts = strings(shown).filter((t) => !/^[a-z_]+$/.test(t));
       for (const text of texts) expect(text, `${c.id}: "${text}"`).not.toMatch(forbidden);
     }
+  });
+
+  it('keeps "Change the camera angle" free of internal words too', () => {
+    const forbidden = /\b(stud(y|ying|ies)|phases?|sessions?|immersed|distanced|self-distancing)\b/i;
+    const { id: _id, version: _version, ...shown } = CS_CAMERA_ANGLE;
+    for (const text of strings(shown).filter((t) => !/^[a-z_]+$/.test(t))) expect(text).not.toMatch(forbidden);
+  });
+
+  it('never suggests that stepping back makes the moment better, smaller or matter less (camera-angle-design.md §9.9)', () => {
+    const improvement = /\b(better|calmer|less|smaller|lighter|relief|feel good)\b/i;
+    // Two exceptions, each checked for what it says:
+    // - the closing names all three outcomes, "lighter, the same or heavier";
+    // - the high-upset note suggests picking a different, smaller moment, not that this one gets smaller.
+    const allowed = [CS_CAMERA_ANGLE.close.heavier, CS_CAMERA_ANGLE.moment.high_note];
+    expect(allowed[0]).toMatch(/lighter, the same or heavier/);
+    expect(allowed[1]).toMatch(/meant for smaller things\. You can pick a lighter moment, carry on, or stop\./);
+    const { id: _id, version: _version, ...shown } = CS_CAMERA_ANGLE;
+    for (const text of strings(shown)) {
+      if (allowed.includes(text)) continue;
+      expect(text).not.toMatch(improvement);
+    }
+  });
+
+  it('asks no question of someone who stayed close, and gives them no field (camera-angle-design.md §9.9)', () => {
+    const close = CS_CAMERA_ANGLE.from_here.close;
+    expect(close.lead).not.toMatch(/\?/);
+    expect(Object.keys(close).sort()).toEqual(['lead', 'options']);
+    expect(close.options.map((o) => o.text)).toContain('Nothing looks different from here');
+    expect(CS_CAMERA_ANGLE.from_here.observer.options.map((o) => o.text)).toContain('Nothing looks different from here');
+    // The two option sets carry the same ids, so the record means the same on either path.
+    expect(close.options.map((o) => o.id)).toEqual(CS_CAMERA_ANGLE.from_here.observer.options.map((o) => o.id));
+  });
+
+  it('gives the figure one word per position, a text alternative per position, and a stand-in line', () => {
+    expect(CS_CAMERA_ANGLE.step_back.positions).toHaveLength(4);
+    expect(CS_CAMERA_ANGLE.room.alts).toHaveLength(4);
+    expect(CS_CAMERA_ANGLE.step_back.stand_in).toMatch(/isn't your moment/);
   });
 
   it('gives both dot variants the same practice round and the same keys', () => {

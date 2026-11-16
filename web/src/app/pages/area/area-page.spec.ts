@@ -112,7 +112,7 @@ describe('AreaPage', () => {
   });
 
   describe('Cognitive shifts (development only)', () => {
-    it('lists its three exercises with their methods and fixed durations in the development build', async () => {
+    it('lists its four exercises with their methods and fixed durations in the development build', async () => {
       const fixture = create('cognitive-shifts', 'development');
       await fixture.whenStable();
       const root = fixture.nativeElement as HTMLElement;
@@ -121,13 +121,17 @@ describe('AreaPage', () => {
         'Other ways to read it',
         'Why did it happen?',
         'Not enough to go on',
+        'Change the camera angle',
       ]);
       expect(cards.map((c) => c.querySelector('a.method')?.textContent?.split(':')[0].trim())).toEqual([
         'Reappraisal',
         'Attributional reframing',
         'Perspective-getting',
+        'Stepping back (self-distancing)',
       ]);
-      expect(cards.map((c) => /About (\d+) minutes/.exec(c.textContent ?? '')?.[1])).toEqual(['5', '5', '4']);
+      expect(cards.map((c) => /About (\d+) minutes/.exec(c.textContent ?? '')?.[1])).toEqual(['5', '5', '4', '6']);
+      // Its own topic (camera-angle-design.md §1).
+      expect(root.textContent).toContain('When you keep replaying a moment');
       expect(root.textContent).toContain('without anything you write');
       expect(root.textContent).not.toContain('Open My experiment');
       const ids = Array.from(root.querySelectorAll('h2[id]')).map((h) => h.id);

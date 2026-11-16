@@ -26,6 +26,12 @@ export type StepId =
   | 'cs3_fit'
   | 'cs3_find'
   | 'cs3_after'
+  | 'cam_moment'
+  | 'cam_own_eyes'
+  | 'cam_step_back'
+  | 'cam_from_here'
+  | 'cam_now'
+  | 'cam_close'
   // MCII: one step per screen; the exercise keeps its state in MciiStore.
   | 'mcii_wish'
   | 'mcii_outcome'
@@ -64,6 +70,12 @@ export const STEP_NAMES: Record<StepId, string> = {
   cs3_fit: 'Could these explain it?',
   cs3_find: 'Can you find out?',
   cs3_after: 'Your first reading, looked at again',
+  cam_moment: 'The moment',
+  cam_own_eyes: 'Through your own eyes',
+  cam_step_back: 'Step back',
+  cam_from_here: 'From here',
+  cam_now: 'Where you ended up',
+  cam_close: "What you're keeping",
   mcii_wish: 'Your wish',
   mcii_outcome: 'The best part',
   mcii_obstacle: "What's in the way",

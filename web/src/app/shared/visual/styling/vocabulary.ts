@@ -35,9 +35,19 @@ export type DashPattern = keyof typeof DASHES;
  *   shaded side one step darker; with its line.
  * - `translucent` (M3): the area colour, partly see-through, with its line. Where two overlap, the
  *   overlap is its own shape in the `overlap` material, with a defined tone, never left to blending.
- * - `shadow` (M3): a contact shadow, a soft radial fade on an ellipse under an object; no line.
+ * - `shadow` (M3): a contact shadow, a soft radial fade on an ellipse under an object; no line. On a
+ *   closed path (an ellipse on the floor, drawn in perspective) it is flat in the shadow tone.
+ * - `shaded` (2026-11-14, a spatial view): a surface in space, filled flat in one of three tones by
+ *   which way it faces the platform light (`facing`), with no line: faces meet edge to edge. For the
+ *   walls (`far`), the floor (`mid`), furniture (`near`), people (`context`) and the person themself
+ *   (`subject`).
  */
-export const MATERIALS = ['line', 'tonal', 'solid', 'lit', 'translucent', 'overlap', 'shadow'] as const;
+export const MATERIALS = ['line', 'tonal', 'solid', 'lit', 'translucent', 'overlap', 'shadow', 'shaded'] as const;
+
+/** Which way a `shaded` surface faces the platform light: towards it, across it, or away. */
+export type Facing = 'lit' | 'base' | 'shade';
+/** The roles a `shaded` surface can take. */
+export const SHADED_ROLES = ['far', 'mid', 'near', 'context', 'subject'] as const;
 
 /** The one platform light (§6): from the upper left, the same in every scene, area and scheme. */
 export const LIGHT = { azimuth: 315, elevation: 45 } as const;
@@ -89,6 +99,8 @@ export interface StyleRef {
   edge?: 'top';
   /** A faint grain over the fill (§5): the ground and planes only, never the subject or text. Off unless asked for. */
   grain?: boolean;
+  /** For the `shaded` material: which way the surface faces the platform light. Default `base`. */
+  facing?: Facing;
 }
 
 /** The smallest pointer target in scene units (1 unit = 1 CSS px at design width), WCAG 2.5.8 (M4). */
@@ -167,6 +179,27 @@ export const MOVE_CHANGE = { duration: 'moderate', easing: 'move' } as const sat
   duration: MotionDuration;
   easing: MotionEasing;
 };
+
+/**
+ * A viewpoint move (2026-11-14, visual-policy.md §3.12): a spatial view's camera moving to a new
+ * position, as one movement of the whole view. One position takes `perPosition` ms, each further
+ * one `extra`, never more than `max` in all (so at most `slow` per position and 1.6 s in all); a
+ * move of less than one position (settling after a drag) takes its share, at least `min`.
+ */
+export const VIEWPOINT_MOVE = { perPosition: 600, extra: 400, max: 1600, min: 150, easing: 'move' } as const satisfies {
+  perPosition: number;
+  extra: number;
+  max: number;
+  min: number;
+  easing: MotionEasing;
+};
+
+/** How long a viewpoint move over `positions` (whole or part) takes. */
+export function viewpointMoveMs(positions: number): number {
+  const p = Math.abs(positions);
+  const { perPosition, extra, max, min } = VIEWPOINT_MOVE;
+  return Math.max(min, Math.min(max, perPosition * Math.min(1, p) + extra * Math.max(0, p - 1)));
+}
 
 /** An element that stays but changes emphasis eases between the two paints (§3.7). */
 export const EMPHASIS_CHANGE = { duration: 'moderate', easing: 'move' } as const satisfies {

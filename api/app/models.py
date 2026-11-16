@@ -39,6 +39,8 @@ EXERCISES = CONDITIONS + (
     "cs_not_enough_to_go_on",
     # MCII (docs/mcii-design.md): never part of the experiment.
     "mcii",
+    # Change the camera angle (docs/camera-angle-design.md): never part of the experiment.
+    "cs_camera_angle",
 )
 STATUSES = ("in_progress", "completed", "aborted")
 

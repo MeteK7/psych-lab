@@ -3,10 +3,10 @@ import { spacingWarnings } from '../../shared/visual/composition/spacing';
 import { validateScene } from '../../shared/visual/composition/validate';
 import { buildComposedFrame } from '../../shared/visual/integration/pipeline';
 import { LINE_ORDER, MATERIALS, THEMES } from '../../shared/visual/styling/vocabulary';
-import { AREAS, depthFigure, linesFigure, materialsFigure, typeFigure } from './lab-sheet-figures';
+import { AREAS, depthFigure, linesFigure, materialsFigure, shadedFigure, typeFigure } from './lab-sheet-figures';
 
 describe('Visual Lab: the visual-language review sheet (M3 stage C)', () => {
-  const figures = [linesFigure(), typeFigure(), ...AREAS.flatMap((a) => [materialsFigure(a.theme), depthFigure(a.theme)])];
+  const figures = [linesFigure(), typeFigure(), ...AREAS.flatMap((a) => [materialsFigure(a.theme), depthFigure(a.theme), shadedFigure(a.theme)])];
 
   it('covers every area', () => {
     expect(AREAS.map((a) => a.theme).sort()).toEqual(Object.keys(THEMES).sort());
@@ -24,7 +24,7 @@ describe('Visual Lab: the visual-language review sheet (M3 stage C)', () => {
     expect(lines.map((e) => (e.kind === 'shape' ? e.style.line : null)).slice(0, LINE_ORDER.length)).toEqual([...LINE_ORDER]);
     expect(lines.map((e) => (e.kind === 'shape' ? e.style.dash : null)).filter(Boolean)).toEqual(['intended', 'tentative']);
     const used = new Set<string>();
-    for (const composed of [materialsFigure('action'), depthFigure('action')])
+    for (const composed of [materialsFigure('action'), depthFigure('action'), shadedFigure('action')])
       for (const e of composed.scene.layers.flatMap((l) => l.elements)) if (e.kind !== 'label') used.add(e.style.material ?? 'line');
     expect([...used].sort()).toEqual([...MATERIALS].sort());
   });

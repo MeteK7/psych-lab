@@ -23,6 +23,10 @@ import { join } from 'node:path';
 //   pixel criteria;
 // - every label, mark smaller than 24 × 24 units and subject is visibly drawn by both.
 
+// Each case is drawn twice, one above the other: the viewport holds two of the largest case (the
+// camera angle's room, 960 × 540) and the gap between them.
+test.use({ viewport: { width: 1100, height: 1200 } });
+
 /** Measured: the largest difference inside fills between the backends was below this (see the fill test). */
 const INTERIOR = 3;
 const EDGE = 16;

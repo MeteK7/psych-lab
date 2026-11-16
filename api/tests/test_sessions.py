@@ -225,6 +225,66 @@ def test_mcii_is_refused_in_production_until_released(client: TestClient, n1_set
         n1_settings.app_env = "development"
 
 
+# ---------- Change the camera angle ----------
+
+
+def test_camera_angle_is_saved_in_try_mode_with_its_picture(client: TestClient) -> None:
+    # An explicit save: the migration comparison may not notice a missing check-constraint value.
+    step = {
+        "step": "cam_step_back",
+        "content_id": "cs-camera-angle",
+        "content_version": "1",
+        "started_at": "2026-11-16T18:00:00+00:00",
+        "ended_at": "2026-11-16T18:01:00+00:00",
+        "result": {"visual_source": "instrument:camera-angle.room@2;theme:cognitive@1"},
+    }
+    body = session_body(
+        mode="try", condition="cs_camera_angle", content_versions={"cs-camera-angle": "1"}, steps=[step]
+    )
+    response = client.put(f"/api/sessions/{uuid.uuid4()}", json=body)
+    assert response.status_code == 201
+    assert response.json()["condition"] == "cs_camera_angle"
+
+
+def test_camera_angle_keeps_no_position_in_try_mode(client: TestClient) -> None:
+    step = {
+        "step": "cam_step_back",
+        "content_id": "cs-camera-angle",
+        "content_version": "1",
+        "started_at": "2026-11-16T18:00:00+00:00",
+        "ended_at": "2026-11-16T18:01:00+00:00",
+        "result": {"position": 2},
+    }
+    body = session_body(mode="try", condition="cs_camera_angle", steps=[step])
+    response = client.put(f"/api/sessions/{uuid.uuid4()}", json=body)
+    assert response.status_code == 422
+    assert "Try it keeps no answers" in response.text
+
+
+@pytest.mark.parametrize("mode", ["self_use", "dev"])
+def test_camera_angle_never_runs_in_the_experiment(client: TestClient, mode: str) -> None:
+    body = session_body(mode=mode, condition="cs_camera_angle")
+    response = client.put(f"/api/sessions/{uuid.uuid4()}", json=body)
+    assert response.status_code == 422
+    assert "only in Try it" in response.text
+
+
+def test_camera_angle_never_has_a_reveal(client: TestClient) -> None:
+    body = session_body(mode="try", condition="cs_camera_angle", n1_reveal_id=str(uuid.uuid4()))
+    assert client.put(f"/api/sessions/{uuid.uuid4()}", json=body).status_code == 422
+
+
+def test_camera_angle_is_refused_in_production_until_released(
+    client: TestClient, n1_settings: Any
+) -> None:
+    body = session_body(mode="try", condition="cs_camera_angle", content_versions={})
+    n1_settings.app_env = "production"
+    try:
+        assert client.put(f"/api/sessions/{uuid.uuid4()}", json=body).status_code == 403
+    finally:
+        n1_settings.app_env = "development"
+
+
 # ---------- Try it keeps no answers (M1) ----------
 
 
@@ -274,6 +334,7 @@ EXERCISES = [
     "cs_why_it_happened",
     "cs_not_enough_to_go_on",
     "mcii",
+    "cs_camera_angle",
 ]
 
 
