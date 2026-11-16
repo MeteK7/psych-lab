@@ -232,6 +232,51 @@ Also checked for the proposal (not cited on screen): Menne-Lothmann 2014 (PMID 2
 - **WOOP trademark:** no statement found. The site's notice page didn't load, and registers weren't searched. A question for a qualified adviser before using the name beyond attribution.
 - **To upgrade to ✔F if you can get the PDFs:** Kizilcec & Cohen 2017, Cross & Sheffield 2019, Abdulla & Woods 2021, Fritzsche 2016.
 
+## Change the camera angle (`camera-angle-design.md`): source verification, 2026-11-16
+
+Levels, kept apart: **✔F** the full article was read, and the sections read are listed. **✔A** only the abstract was read; the text may say "suggests", never "found". **◐** not checked; not cited anywhere on screen. The release gate is unchanged: every source cited in the science text is ✔F before release, or its line is dropped.
+
+| Source | Status | What was read |
+|---|---|---|
+| Kross, Ayduk & Mischel (2005), "When asking 'why' does not hurt", *Psychol. Sci.* 16(9), 709–715. PDF on the second author's lab site (rascl.studentorg.berkeley.edu) | **✔F** | The whole article: introduction, both studies' method and results, Figure 1, Table 1, discussion |
+| Kross & Ayduk (2008), "Facilitating adaptive emotional analysis", *Pers. Soc. Psychol. Bull.* 34(7), 924–938, DOI 10.1177/0146167208315938. PDF on the same site | **✔F** | The whole article: both studies' method and results, Tables 1–2, Figures 1–3, discussion, caveats, notes |
+| Ayduk & Kross (2010), "From a distance", *J. Pers. Soc. Psychol.* 98(5), 809–829, DOI 10.1037/a0019205. Author manuscript in PubMed Central (PMC2881638) | **✔A** | The abstract and the samples of Studies 1–3, through an automatic summary of the first half of the manuscript, not read directly. The full text is open and still to be read |
+| Kross & Ayduk (2017), "Self-distancing: theory, research, and current directions", in Olson & Zanna (Eds.), *Adv. Exp. Soc. Psychol.* 55, 81–136 | **◐** | Citation details confirmed from a citing article. The publisher's page refused automated access (HTTP 403), and no abstract was found elsewhere. Not cited |
+
+Not rechecked in this pass (status as in the design doc §5): Moran & Eyal 2022, Nasarudin et al. 2023, Grossmann et al. 2021, Kenny et al. 2009, Wisco et al. 2015 (all ✔A); Kross et al. 2014 and Troy et al. 2013 (on file from CS1).
+
+### Kross, Ayduk & Mischel 2005 (✔F)
+- **Who and what:** undergraduates, guided alone by taped instructions. They recalled an interpersonal experience of overwhelming anger and hostility. Study 1: 155 people. Study 2: 133 people, 10 excluded for not following instructions.
+- **Study 1 design:** 2 × 2. Perspective: self-immersed (relive it as if it were happening again) or self-distanced (take a few steps back and watch it happen to "the distant you"). Focus: what was felt, or why (the reasons underlying the feelings). About 39 people in each group.
+- **Study 1 result:** measured straight afterwards. The distanced-why group, against the average of the other three: less implicit anger (d = 0.45), less explicit anger (d = 0.69), less negative affect (d = 0.59).
+- **The other three groups** (immersed-what, immersed-why, distanced-what) were reported as equally ineffective, and were not compared with each other. There was no group that did not reflect. So Study 1 does not show that asking "why" up close raises distress, or that asking "what" up close is better than asking "why" up close. It shows that "what" did not help even from a distance.
+- **Study 2 design:** distanced-why against immersed-why only.
+- **Study 2 result:** reliving of the original emotions, self-rated on 1–7, was lower from a distance: 3.90 against 4.58, d = 0.46. The immersed group's written thoughts had more concrete recounting and blame (d = 0.50) and marginally fewer insight and closure statements (p = .07). That difference in thoughts accounted for the effect on reliving. Whether the conflict was resolved made no difference to the effect.
+- **Limits:** students; anger only; one session; measured straight afterwards. The authors say the long-term effect was not tested.
+
+### Kross & Ayduk 2008 (✔F)
+- **Who and what:** people affiliated with one US university, guided by taped instructions. They recalled an experience of overwhelming sadness and depression. Then one of three: analyse the feelings immersed, analyse them from a distance (the same two instructions as in 2005), or a neutral distraction task. Analysis lasted 30 seconds.
+- **Study 1** (141 people): depressed feeling straight afterwards was higher after immersed analysis than after distanced analysis (η² = .04) or distraction (η² = .06). Distanced analysis and distraction did not differ. Distanced analysis went with less recounting and more reconstruing, which accounted for its effect.
+- **Study 2** (328 recruited; came back after 1 day or 7 days; 42 did not return, most from the 7-day group): the straight-afterwards result repeated (η² = .02). On coming back and thinking about the same experience with no instruction:
+  - depressed feeling was lower after distanced than after immersed analysis (η² = .02), and marginally lower than after distraction (p = .08)
+  - fewer recurring thoughts about the experience in between, against both other groups (η² = .03 and .02).
+- **Caveats the authors give:**
+  - The reverse path (feeling shaping thoughts) was also significant.
+  - It is unknown whether the findings hold for clinical groups or beyond a week.
+  - For trauma or phobia, where facing the feeling is the treatment, analysing from a distance might get in the way.
+- **Limits:** the effects are small; one university; depressive experiences only.
+
+### Ayduk & Kross 2010 (✔A)
+- The abstract suggests that people who spontaneously took a distanced view of a negative memory showed less emotional and cardiovascular reactivity, and less intrusive thinking later, through less recounting and more reconstruing. Three studies of Berkeley undergraduates and dating couples (56, 71 and 53 couples).
+- The distance was measured, not assigned, so this is an association, not an effect of an instruction.
+
+### What this changes in `camera-angle-design.md`
+1. **Supported as written [R]:** the immersed view was the comparison condition; "why" asked from a distance is the combination that helped; less recounting and more making sense of it from a distance.
+2. **Corrected in §5:** "tended towards going over it again when immersed" overstated Study 1. What was found: from the immersed view, asking why went with more reliving and more recounting than asking why from a distance.
+3. **Not supported:** that a "what" question is better than a "why" question for someone who stays close. The two were equally ineffective in 2005. A different question at position 0 is a design choice [D], justified by there being no person in the picture to watch, not by research.
+4. **To add to the science text's limits:** the studies used strong recalled feelings (anger, sadness) in students, not mild everyday moments; straight afterwards, a neutral distraction did as well as stepping back; the effects are small.
+5. **Still supports the safety line:** the 2008 authors themselves say distance might not suit trauma.
+
 ## Memory reconsolidation (future candidate, plan §3.2): sources to verify
 **Status:** nothing here has been checked; every entry is **◐** until it is read. Titles and details come from memory. Each is confirmed (exact title, DOI, sample, outcome) when obtained, and anything that can't be found is removed, not cited.
 
