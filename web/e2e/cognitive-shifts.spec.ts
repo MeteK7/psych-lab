@@ -247,7 +247,7 @@ test.describe('Change the camera angle, keyboard only', () => {
     // Try it keeps only that it ran, when, and which picture was drawn.
     expect(saved.ratings).toBeNull();
     expect(saved.steps.find((s) => s.step === 'cam_step_back')?.result).toEqual({
-      visual_source: expect.stringMatching(/^instrument:camera-angle\.room@2;theme:cognitive@\d+$/),
+      visual_source: expect.stringMatching(/^instrument:camera-angle\.room@3;theme:cognitive@\d+$/),
     });
     expect(JSON.stringify(saved)).not.toContain('PRIVATE');
   });

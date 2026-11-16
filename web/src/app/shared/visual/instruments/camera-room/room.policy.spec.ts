@@ -8,7 +8,7 @@ import { POSES } from '../../generation/spatial/figures';
 import { buildComposedFrame } from '../../integration/pipeline';
 import { ROOM, ROOM_POSITIONS, ROOM_SIZE, RoomWords, YOUR_HEAD, cameraAt, composeRoom, groupOf, legsAt, wallHeightAt } from './room';
 
-// "Change the camera angle": camera-angle.room@2, a spatial view (room.ts, its policy header).
+// "Change the camera angle": camera-angle.room@3, a spatial view (room.ts, its policy header).
 // Asserted at every quarter of the camera's path, not only at the four positions.
 
 const WORDS: RoomWords = { you: 'You', alts: ['Through your own eyes.', 'One step back.', 'From across the room.', 'From further away.'] };

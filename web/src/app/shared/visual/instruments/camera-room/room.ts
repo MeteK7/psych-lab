@@ -15,7 +15,7 @@ import type { ColorRole, Facing, StyleRef, ThemeId } from '../../styling/vocabul
  *
  * Its policy (docs/visual-policy.md §8):
  *
- *   Scene:      camera-angle.room@2    Area theme: cognitive@1    Tier: instrument (a spatial view)
+ *   Scene:      camera-angle.room@3    Area theme: cognitive@2    Tier: instrument (a spatial view)
  *   Idea:       the same moment seen from further and further back, until you see yourself in it
  *               and the people and rooms around it.
  *   States:     one per viewpoint, continuous; at the four positions:
@@ -41,11 +41,14 @@ import type { ColorRole, Facing, StyleRef, ThemeId } from '../../styling/vocabul
  *               not at a fixed point; only the moment's room has a tinted floor; a faint line where
  *               floors meet walls; a quieter door; the furthest view a little closer. Distant people's
  *               legs close into one form gradually, not in one frame (2026-11-16; stills unchanged).
+ *   Version 3:  (2026-11-16) every face reaches a third of a unit past its edges, so faces that meet
+ *               edge to edge overlap: no hairline of what lies behind shows between two faces of one
+ *               tone (found by the parity suite at ×1.5 under cognitive@2). Nothing else changes.
  *   Alt texts:  the exercise gives one per position.
  *   Assertions: `room.policy.spec.ts`.
  *   Review:     R2 in the Visual Lab; R3 and the psychology-trained reviewer in the exercise.
  */
-export const ROOM = { id: 'camera-angle.room', version: 2, theme: 'cognitive' as ThemeId } as const;
+export const ROOM = { id: 'camera-angle.room', version: 3, theme: 'cognitive' as ThemeId } as const;
 export const ROOM_SIZE = { width: 960, height: 540 };
 export const ROOM_POSITIONS = 4;
 
@@ -302,6 +305,43 @@ function inView(points: readonly (readonly [number, number])[], margin = 0): boo
   return Math.max(...xs) + margin >= 0 && Math.min(...xs) - margin <= ROOM_SIZE.width && Math.max(...ys) + margin >= 0 && Math.min(...ys) - margin <= ROOM_SIZE.height;
 }
 
+/**
+ * How far every face reaches past its own edges on the picture (units), so neighbouring faces overlap
+ * instead of meeting edge to edge. Where two faces of one tone meet edge to edge, anti-aliasing leaves
+ * a hairline of whatever is behind them, which SVG and canvas blend differently (version 3). A third of
+ * a unit closes it and is too small to see.
+ */
+const FACE_GROW = 0.35;
+
+/** A convex polygon on the picture, each edge moved `by` units outward (a mitred offset, capped at 4 × `by`). */
+function grow(points: readonly Point[], by: number): Point[] {
+  const n = points.length;
+  let area = 0;
+  for (let i = 0; i < n; i++) {
+    const [x0, y0] = points[i];
+    const [x1, y1] = points[(i + 1) % n];
+    area += x0 * y1 - x1 * y0;
+  }
+  if (Math.abs(area) < 1e-6) return [...points];
+  const side = area > 0 ? 1 : -1;
+  // Each edge's outward normal.
+  const normals = points.map((p, i) => {
+    const q = points[(i + 1) % n];
+    const [dx, dy] = [q[0] - p[0], q[1] - p[1]];
+    const len = Math.hypot(dx, dy) || 1;
+    return [(side * dy) / len, (-side * dx) / len] as const;
+  });
+  return points.map((p, i) => {
+    const a = normals[(i + n - 1) % n];
+    const b = normals[i];
+    const [mx, my] = [a[0] + b[0], a[1] + b[1]];
+    const cos = (mx * a[0] + my * a[1]) / (Math.hypot(mx, my) || 1);
+    const reach = Math.min(by / Math.max(cos, 1e-6), 4 * by);
+    const len = Math.hypot(mx, my) || 1;
+    return [p[0] + (mx / len) * reach, p[1] + (my / len) * reach] as Point;
+  });
+}
+
 /** A face on the frame, if it turns to the camera and any of it is in front of it and in view. */
 function face(cam: Camera, id: string, pts: readonly V3[], normal: V3, role: ColorRole, group: RoomGroup, facing?: Facing): Shape | null {
   const centre = pts.reduce<V3>((s, p) => [s[0] + p[0] / pts.length, s[1] + p[1] / pts.length, s[2] + p[2] / pts.length], [0, 0, 0]);
@@ -310,7 +350,7 @@ function face(cam: Camera, id: string, pts: readonly V3[], normal: V3, role: Col
   if (clipped.length < 3) return null;
   const onFrameAt = clipped.map((c) => onFrame(cam, c));
   if (!inView(onFrameAt)) return null;
-  return { kind: 'shape', id, geometry: { type: 'path', d: polygonPath(onFrameAt) }, style: style(role, facing ?? facingOf(normal)), purpose: purpose(group) };
+  return { kind: 'shape', id, geometry: { type: 'path', d: polygonPath(grow(onFrameAt, FACE_GROW)) }, style: style(role, facing ?? facingOf(normal)), purpose: purpose(group) };
 }
 
 function depthOf(cam: Camera, pts: readonly V3[]): number {

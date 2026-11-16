@@ -60,7 +60,7 @@ Six steps, "Step x of 6: …", Stop on every step, keyboard paths throughout. Th
 **New shared control:** a multi-line text field with no length cap, labelled like the existing fields, in `shared/`. Nothing typed in it is saved or reaches a visual.
 
 ## 3. The figure
-`camera-angle.room@2` (`web/src/app/shared/visual/instruments/camera-room/room.ts`), drawn moving by the viewpoint figure (`integration/viewpoint-figure.ts`). Its policy header there is normative; this is the summary. It replaces `camera-angle.view@1`, which you rejected on 2026-11-14, after comparing three prototyped directions; you chose this one.
+`camera-angle.room@3` (`web/src/app/shared/visual/instruments/camera-room/room.ts`; `@3` only closes hairline seams between faces of the approved `@2`, 2026-11-16, `visual-reviews.md` entry 6), drawn moving by the viewpoint figure (`integration/viewpoint-figure.ts`). Its policy header there is normative; this is the summary. It replaces `camera-angle.view@1`, which you rejected on 2026-11-14, after comparing three prototyped directions; you chose this one.
 - **Tier:** instrument, a **spatial view** (`visual-policy.md` §3.4): a real room in constructed perspective, and a camera that steps back through it along one path. **Theme:** Cognitive. **Frame:** 960 × 540.
 - **The idea in one sentence:** the same moment seen from further and further back, until you see yourself in it and the people and rooms around it.
 - **Why a camera in a room:** it is the research instruction itself ("take a few steps back and watch it happen to you"), and the step from 0 to 1 is exactly the change from a field view to an observer view: you appear. The moment is never shrunk as a shape; it is seen from further away, with more of its surroundings in view.
