@@ -24,16 +24,19 @@ ExerciseId = Literal[
     "cs_why_it_happened",
     "cs_not_enough_to_go_on",
     "mcii",
+    "cs_camera_angle",
 ]
 EXPERIMENT_CONDITIONS: tuple[str, ...] = get_args(Condition)
 NON_EXPERIMENT_MODES = ("try", "usability")
 # Saved in the development build only, until their release gates pass
-# (docs/cognitive-shifts-design.md section 9, docs/mcii-design.md section 7).
+# (docs/cognitive-shifts-design.md section 9, docs/mcii-design.md section 7,
+# docs/camera-angle-design.md section 7).
 DEVELOPMENT_ONLY_EXERCISES = (
     "cs_other_readings",
     "cs_why_it_happened",
     "cs_not_enough_to_go_on",
     "mcii",
+    "cs_camera_angle",
 )
 Status = Literal["in_progress", "completed", "aborted"]
 # Try it keeps only that an exercise ran, and when (docs/product-model.md, M1; decision
