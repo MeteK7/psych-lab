@@ -5,7 +5,8 @@
  */
 
 /** Area themes and their versions. A theme change bumps its version, which is recorded with a shown visual. */
-export const THEMES = { action: 1, cognitive: 1, attention: 1, regulation: 1, recovery: 1 } as const;
+// cognitive@2 (2026-11-16): soft blue instead of violet (docs/visual-reviews.md, entry 6).
+export const THEMES = { action: 1, cognitive: 2, attention: 1, regulation: 1, recovery: 1 } as const;
 export type ThemeId = keyof typeof THEMES;
 
 /**

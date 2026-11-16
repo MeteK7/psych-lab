@@ -18,10 +18,12 @@
   --vis-a-400: #76a3fa; --vis-a-600: #3766c7; --vis-a-700: #274fa4; --vis-a-800: #1d3c7c;
   --vis-a-900: #152953; --vis-a-950: #0f1d39;
 }
+/* Cognitive shifts, version 2 (2026-11-16): a calm, soft blue instead of violet, at about hue 210,
+   lighter and less saturated than Action's blue and bluer than Attention's grey teal. */
 :host([data-vis-theme='cognitive']) {
-  --vis-a-050: #f8f5ff; --vis-a-100: #f0e9ff; --vis-a-200: #e0d3fb; --vis-a-300: #c9b5f1;
-  --vis-a-400: #b093e4; --vis-a-600: #7955b0; --vis-a-700: #614190; --vis-a-800: #49316c;
-  --vis-a-900: #312249; --vis-a-950: #221832;
+  --vis-a-050: #f4f8fc; --vis-a-100: #e6eff8; --vis-a-200: #cddff0; --vis-a-300: #a9c7e4;
+  --vis-a-400: #84abd2; --vis-a-600: #4a78a8; --vis-a-700: #3a6190; --vis-a-800: #2d4b6f;
+  --vis-a-900: #20354f; --vis-a-950: #172638;
 }
 :host([data-vis-theme='attention']) {
   --vis-a-050: #f2f8fb; --vis-a-100: #e4eff4; --vis-a-200: #cbdee8; --vis-a-300: #a9c6d5;

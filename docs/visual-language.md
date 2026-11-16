@@ -54,7 +54,7 @@ Every ramp, neutral and area, shares the same eleven lightness steps (OKLCH *L*)
 |---|---|---|---|---|
 | `neutral` | All | 262.8 | 0.012 | A grey with a slight bias towards the platform accent, matching the existing neutrals (`--muted` is *H* ≈ 271, *C* 0.010) [F] |
 | `action` | Action and growth | 262.8 | 0.16 | The hue of the existing `--accent` (#2457c5: *L* 0.49, *C* 0.181, *H* 262.8) [F]. Action is the platform's first area, so its figures share the accent's hue, one step softer |
-| `cognitive` | Cognitive shifts | 300 | 0.14 | Violet: next to the accent, distinct from it, reflective rather than urgent |
+| `cognitive` | Cognitive shifts | ≈ 250 | ≈ 0.09 | A calm, soft blue (version 2, 2026-11-16, your decision; `visual-reviews.md` entry 6): reassuring and clear, never electric. Between Attention's slate (229) and Action's blue (263) in hue, and lighter and less saturated than Action's. It replaced violet (*H* 300, *C* 0.14). Its steps were chosen by hand for softness, not computed from §3.1 |
 | `attention` | Attention | 230 | 0.06 | Slate, deliberately low in chroma: stimuli take their colours from their protocol, and illustrations around them stay quiet |
 | `regulation` | Emotional regulation | 178 | 0.10 | Sage teal: calm, low-arousal, and not the green of "good" |
 | `recovery` | Recovery after setbacks | 68 | 0.12 | Ochre: warm, morning-like; deliberately away from red and alarm |
@@ -68,7 +68,7 @@ Every ramp, neutral and area, shares the same eleven lightness steps (OKLCH *L*)
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | neutral | `#f6f7f8` | `#ecedef` | `#d9dbde` | `#bec1c6` | `#a1a5ab` | `#82868e` | `#686c73` | `#52555b` | `#3d4044` | `#2a2b2e` | `#1d1e20` |
 | action | `#f3f7ff` | `#e4edff` | `#c8dbff` | `#a0c1ff` | `#76a3fa` | `#5082e5` | `#3766c7` | `#274fa4` | `#1d3c7c` | `#152953` | `#0f1d39` |
-| cognitive | `#f8f5ff` | `#f0e9ff` | `#e0d3fb` | `#c9b5f1` | `#b093e4` | `#9470cd` | `#7955b0` | `#614190` | `#49316c` | `#312249` | `#221832` |
+| cognitive | `#f4f8fc` | `#e6eff8` | `#cddff0` | `#a9c7e4` | `#84abd2` | `#6791bd` | `#4a78a8` | `#3a6190` | `#2d4b6f` | `#20354f` | `#172638` |
 | attention | `#f2f8fb` | `#e4eff4` | `#cbdee8` | `#a9c6d5` | `#84abbf` | `#608da4` | `#457388` | `#345b6e` | `#264452` | `#1b2e37` | `#132026` |
 | regulation | `#effaf7` | `#def2ed` | `#c0e4db` | `#96cfc1` | `#65b6a5` | `#2f9a86` | `#007e6c` | `#006455` | `#004b40` | `#05332b` | `#07241e` |
 | recovery | `#fef5ed` | `#f9eadb` | `#f1d6ba` | `#e1b88d` | `#cf985b` | `#b57727` | `#975d00` | `#784900` | `#5b3600` | `#3f2503` | `#2b1a05` |
@@ -77,7 +77,7 @@ Every ramp, neutral and area, shares the same eleven lightness steps (OKLCH *L*)
 
 The steps where the requested chroma didn't fit sRGB and was reduced:
 - the lightest action steps (050–300)
-- cognitive and curiosity 050
+- curiosity 050
 - regulation 600–800
 - recovery 600–800
 
@@ -302,7 +302,7 @@ Figures set `forced-color-adjust: none` and map every role to a system colour ex
 ---
 
 ## 13. Questions for your review
-1. **Hues:** do the five area hues fit their areas? The ones to look at most closely are Recovery (ochre: warm and morning-like, but brown in its darker steps) and Cognitive shifts (violet).
+1. **Hues:** do the five area hues fit their areas? The one to look at most closely is Recovery (ochre: warm and morning-like, but brown in its darker steps). Cognitive shifts is settled: a soft blue since 2026-11-16 (entry 6 in `visual-reviews.md`).
 2. **The relation to the UI accent:** should Action share the UI accent's hue, one step softer, with every figure kept below the accent's chroma?
 3. **Dark-mode planes:** in dark mode the planes are deep tones of the area hue (navy, deep teal, umber). Should they be more neutral instead?
 4. **Line weights:** is the gradient from 1 px (far) to 3 px (focal) right? It matches the existing MCII figure's heaviest line.
