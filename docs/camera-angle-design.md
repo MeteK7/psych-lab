@@ -1,21 +1,21 @@
-# Change the camera angle: design (Stage 1)
+# Change the camera angle: design and build
 
-> **Status (2026-11-16):** you approved `camera-angle.room@2` for the exercise (R2, `visual-reviews.md` entry 4), with one generic room. Your decisions are in §9.9:
-> - the figure first appears at step 3, with the stand-in line
-> - step 2 has an explicit skip
-> - someone who stays at position 0 gets a still figure and the options only at step 4
-> - the §9.4 and §9.5 proposals are the working texts for the first build
->
-> The wordings remain provisional until the psychology-trained reviewer and the content review decide. **R1 of `shaded` was approved the same day, separately (`visual-reviews.md` entry 5), and you authorized Stage 2** (gate 1, §7). The main sources were rechecked on 2026-11-16 (§5, `evidence-verification.md`).
->
-> **Status (2026-11-15):** you reviewed and approved `camera-angle.room@1`. A refinement pass made it `camera-angle.room@2` (§3, "Version 2"): the same room, positions and meaning, with the changes listed there, for your look. The six steps were reviewed too: the findings, proposed wordings and the decisions that need you or the psychology-trained reviewer are in §9. The step texts in §2 are unchanged until those are decided. Stage 2 is still not built.
->
-> **Status (2026-11-14):** you rejected `camera-angle.view@1` in review (an ellipse on a slider read as a UI component, not as a change of perspective), compared three prototyped directions, and chose the room. The figure is now `camera-angle.room@1` (§3), built in the Visual System and in the Visual Lab for your R1 (the `shaded` material) and R2. The rest of this document (steps, texts, records, evidence, safety) is unchanged.
-
-> **Stage 2 is built (2026-11-16), development only and Try it only,** with the §9.9 decisions and working texts (content `cs-camera-angle.v1.json`). §2 below keeps the approved original texts for comparison; what the build shows is listed in §10.
-> - It is development-only and Try it only, like CS1–CS3, until its gates pass (§7).
-> - The CS proposal listed self-distancing as "What would you tell a friend?" (CS6), "Not separate: used as a lens inside CS1 and CS2" (`cognitive-shifts-proposal.md` §4). This exercise is a different variant: a change of visual vantage on your own moment, not advice to a friend. CS1's lens is unchanged.
+> **Where it stands (2026-11-16): the exercise is built.** It is under Cognitive shifts, in the topic "When you keep replaying a moment", in the development build only, and runs as practice (Try it) only, like CS1–CS3 and MCII. What the build shows is in §10.
+> - **Done:** the figure (`camera-angle.room@2`, R2 accepted) and the `shaded` material (R1 approved), both on 2026-11-16 (`visual-reviews.md` entries 4 and 5); your decisions in §9.9; the build.
+> - **Its texts are working texts** (§9.9), provisional until the psychology-trained reviewer and the content review decide. §2 keeps the original approved texts for comparison.
+> - **Before release** (§7): the full texts of the remaining sources, the content review (`camera-angle-review-form.md`), your R3 and the psychology-trained reviewer in the test environment, then the "safe unsupervised" rating.
 > - **Claim labels:** **[R]** supported by research (§5) · **[D]** a design choice of ours, not tested by any research.
+> - The CS proposal listed self-distancing as "What would you tell a friend?" (CS6), "Not separate: used as a lens inside CS1 and CS2" (`cognitive-shifts-proposal.md` §4). This exercise is a different variant: a change of visual vantage on your own moment, not advice to a friend. CS1's lens is unchanged.
+> - **"The build"** here means building this exercise; it is not the platform's Stage 2 in `plan.md`.
+
+**History**
+- **2026-11-16:**
+  - You approved `room@2` (R2) and, separately, the `shaded` material (R1).
+  - You decided the open points in §9.9, and the working texts.
+  - The main sources were rechecked (§5, `evidence-verification.md`).
+  - You authorized the build, and it was built.
+- **2026-11-15:** You approved `camera-angle.room@1`. A refinement pass made it `room@2` (§3, "Version 2"), and the six steps were reviewed (§9).
+- **2026-11-14:** You rejected `camera-angle.view@1` (an ellipse on a slider read as a UI component, not as a change of perspective), compared three prototyped directions, and chose the room.
 
 ## Contents
 1. What it is for
@@ -26,8 +26,8 @@
 6. Safety
 7. Release gates
 8. Questions for the reviewers
-9. Review before Stage 2: findings and open decisions
-10. What Stage 2 built (2026-11-16)
+9. Review of the six steps: findings and decisions
+10. What the build contains (2026-11-16)
 
 ---
 
@@ -96,28 +96,31 @@ Six steps, "Step x of 6: …", Stop on every step, keyboard paths throughout. Th
 **What it can show:** whether people finish, where they stop, how far back they step, what they tick, and how the rating moves during the exercise. **What it can't show:** whether the exercise helps. The ratings are immediate and self-reported, and are labelled "how it feels right now".
 
 ## 5. Evidence
-Every source starts as "summary checked" and its line says "suggests". Each is read in full and logged in `evidence-verification.md` before release, or the line is dropped. The 2026-11-16 pass is logged there, with what each full-text reading changes here.
+Every source starts as "summary checked" and its line says "suggests". Each is read in full and logged in `evidence-verification.md` before release, or the line is dropped. Both 2026-11-16 passes are logged there, with what each reading changes here. **On screen** (the science explanation) only sources read in full are cited, plus Troy 2013 from CS1; the rows marked *background* below are not on screen.
 
 | Finding | Source | Checked |
 |---|---|---|
 | Analysing a recalled experience of strong anger or sadness from a distanced view ("take a few steps back… watch the experience unfold") gave less distress straight afterwards than analysing it immersed, with less recounting and more making sense of it. The effects were small to moderate, in students | Kross, Ayduk & Mischel 2005, *Psychol Sci* 16(9):709–715; Kross & Ayduk 2008, *PSPB* 34(7):924–938 | **✔F both** (2026-11-16) |
 | A day or a week later, people who had analysed from a distance felt less low on thinking about it again, and had thought about it less often, than those who had analysed immersed (small effects). Straight afterwards, a neutral distraction did as well as stepping back | Kross & Ayduk 2008 | **✔F** |
-| People who spontaneously took a distanced view of a negative memory showed less reactivity (measured, not assigned) | Ayduk & Kross 2010, *JPSP* 98(5):809–829 | Abstract (✔A) |
-| Review of the method | Kross & Ayduk 2017, *Adv Exp Soc Psychol* 55:81–136 | Not checked (abstract not accessible); not cited |
+| People who spontaneously took a distanced view while reflecting on a negative memory reported less emotional reactivity, and in one study less cardiovascular reactivity. Over about 7 weeks they also reported less reactivity and fewer intrusive thoughts. This went with less recounting and more reconstruing, not with avoidance. The distance was measured, not assigned, so it is an association. The authors separate distance while *recalling* a memory (linked to avoidance in PTSD) from distance while *reflecting* on it | Ayduk & Kross 2010, *JPSP* 98(5):809–829 | **✔F** (author manuscript; 2026-11-16; sections in the log) · background |
+| Review of the method | Kross & Ayduk 2017, *Adv Exp Soc Psychol* 55:81–136 | Not checked (not openly accessible) · background |
 | Asking "why" helped only from a distance. From the immersed view it went with more reliving and more recounting than from a distance. Asking "what" did not help from either view, and up close "what" and "why" were not told apart | Kross, Ayduk & Mischel 2005 | **✔F** |
-| Across 230 comparisons, a distant perspective reduced emotional experience (g = 0.52), but less for self-conscious emotions such as shame and embarrassment (g = 0.29) | Moran & Eyal 2022, *Pers Soc Psychol Rev* 26(2) | Abstract |
-| Not always replicated: in 355 people writing about a conflict, distanced reflection raised positive feeling but didn't lower negative feeling | Nasarudin, Moeck & Koval 2023, *Cogn Emot* 37(7):1281–1289 | Abstract |
+| Across 230 comparisons, a distant perspective reduced emotional experience (g = 0.52), but less for self-conscious emotions such as shame and embarrassment (g = 0.29) | Moran & Eyal 2022, *Pers Soc Psychol Rev* 26(2) | Abstract (✔A); full text not openly accessible · background |
+| Not always replicated: 355 online adults wrote once about an interpersonal conflict in the third person ("you", "she", their name) or the first person. Writing in the third person raised positive feeling but didn't lower negative feeling more than writing in the first person did. This was **distance by pronouns, not a visual vantage point** | Nasarudin, Moeck & Koval 2023, *Cogn Emot* 37(7):1281–1289 | **Preprint read in full** (2026-11-16); the published version not read · background |
 | Third-person language is another route to distance | Kross et al. 2014, *JPSP* 106(2):304–324 | ✔F (on file) |
-| Third-person reflection over weeks raised wise reasoning about conflicts | Grossmann et al. 2021, *Psychol Sci* 32(3):381–394 | Abstract |
-| An observer view of a trauma memory went with more severe PTSD symptoms 12 months later, possibly as avoidance | Kenny et al. 2009, *Psychol Sci* 20(9):1049–1052 | Abstract |
-| In veterans with PTSD, distancing lowered physiological but not felt reactivity | Wisco et al. 2015, *Clin Psychol Sci* 3(6):956–963 | Abstract |
+| Writing daily diary reflections in the third person for one or four weeks raised wise reasoning about later conflicts, compared with the first person (small to moderate effects, North American adults). Again distance by pronouns, practised over time | Grossmann et al. 2021, *Psychol Sci* 32(3):381–394 | Preprint, read in part (abstract, introduction, Study 1's sample and procedure, general discussion) · background |
+| An observer view of a trauma memory went with more severe PTSD symptoms 12 months later, possibly as avoidance | Kenny et al. 2009, *Psychol Sci* 20(9):1049–1052 | Abstract (✔A); full text not openly accessible · background (the reason for the safety line) |
+| 48 US veterans with PTSD analysed why they felt as they did about their worst trauma, from a distance or immersed. From a distance, heart rate and skin conductance didn't rise; immersed, they did. Felt distress rose equally in both. The authors suggest the effect on feelings may not extend to trauma memories, and that distancing in therapy could be harmful as well as helpful | Wisco et al. 2015, *Clin Psychol Sci* 3(6):956–963 | **✔F** (2026-11-16) · background (supports the safety line) |
 | Reappraisal skill went with more depressive symptoms when the stress was controllable | Troy, Shallcross & Mauss 2013 | On file (CS1) |
 
-**Science text** (`content/science/cs-camera-angle.v1.json`, Stage 2): the three layers, with a `who` line per finding.
-- **Research on the method:** Kross 2005/2008, Moran & Eyal 2022, Nasarudin 2023.
-- **`similar_note`:** "No research has tested an on-screen picture like this one, or both views one after the other."
-- **About this exercise:** "This exercise uses stepping back, but this version hasn't been tested itself."
-- **Limits:** effects measured were short-term; smaller for embarrassment and shame; not for painful memories (Kenny 2009); if you can act on it, planning a step may matter more (Troy 2013).
+**Science text as built** (`content/science/cs-camera-angle.v1.json`, v1):
+- **Research on the method:** Kross 2005 and Kross & Ayduk 2008 (read in full), and Troy 2013 (from CS1). The sources at abstract level were left out of v1.
+- **`similar_note`:** no research has tested an on-screen picture like this one, or both views one after the other.
+- **About this exercise:** this version hasn't been tested itself.
+- **Limits:** small, short-term differences; strong feelings in students, not everyday moments; distraction did as well straight afterwards; not for trauma; if you can act on it, planning a step may matter more; ratings show how it feels now.
+- **Candidates for v2, now checked** (each your decision, after the content review):
+  - "not always replicated" (Nasarudin 2023, preprint read in full, distance by pronouns)
+  - "less for embarrassment and shame" (Moran & Eyal 2022, abstract only, so it would need a full reading first)
 
 ## 6. Safety
 - **The shared safety line,** word for word: "These exercises are for everyday situations, like learning, work or friends. They aren't for painful experiences such as loss, abuse or health worries, or for times of crisis. If that's where you are, talk to someone you trust or a support line. You can stop at any time."
@@ -127,9 +130,9 @@ Every source starts as "summary checked" and its line says "suggests". Each is r
 - **Not therapy:** the About page says so; nothing here promises a benefit.
 
 ## 7. Release gates
-1. **R2** of `camera-angle.room@2` in the Lab: **passed 2026-11-16** (you; `visual-reviews.md` entry 4). **R1** of the `shaded` material: **passed 2026-11-16**, reviewed separately (entry 5). You authorized the build the same day, with the §9.9 decisions and working texts: Stage 2 is built on the development branch.
-2. **Full texts** of every new source, logged in `evidence-verification.md`, or their lines dropped.
-3. **Content review** (as `cognitive-shifts-review-form.md`): the step texts, the "easier to notice" cards and the closing lines, for plausibility and for whether anything could feel invalidating.
+1. **R2** of `camera-angle.room@2` in the Lab: **passed 2026-11-16** (you; `visual-reviews.md` entry 4). **R1** of the `shaded` material: **passed 2026-11-16**, reviewed separately (entry 5). You authorized the build the same day, with the §9.9 decisions and working texts, and it is built on the development branch (§10).
+2. **Full texts** of every new source, logged in `evidence-verification.md`, or their lines dropped. **State 2026-11-16:** everything on screen cites only sources read in full, plus Troy 2013 from CS1. Of the background sources in §5, three are read (Ayduk & Kross 2010, Wisco et al. 2015 in full; Nasarudin et al. 2023 as a full preprint), one in part (Grossmann et al. 2021, preprint). Three are not openly accessible (Moran & Eyal 2022 and Kenny et al. 2009 at abstract level; Kross & Ayduk 2017 not checked) and stay off screen unless you obtain them.
+3. **Content review** (`camera-angle-review-form.md`, written 2026-11-16): every on-screen text and the picture, for plausibility and for whether anything could feel invalidating or pushy; at least 3 reviewers, one with psychology training who holds the safety veto and the veto on the figures. Not started.
 4. **R3 and the psychology-trained reviewer** (veto), in the test environment, before your merge.
 5. **The "safe unsupervised" flag** only after the content review.
 
@@ -142,7 +145,7 @@ Every source starts as "summary checked" and its line says "suggests". Each is r
 - Is 8 the right threshold for the high-upset note, and is its wording right?
 - Should step 2 be skippable altogether, for someone who would rather not go back in?
 
-## 9. Review before Stage 2: findings and open decisions (2026-11-15)
+## 9. Review of the six steps: findings and decisions (2026-11-15, decided 2026-11-16 in §9.9)
 A critical read of the six steps in §2, before any of them is built. Nothing here changes §2: each item gives the finding, a proposed wording where there is one, and who decides. **PR** marks a decision for the psychology-trained reviewer; **You** marks a product decision.
 
 ### 9.1 Step 2, through your own eyes: should it be skippable?
@@ -155,7 +158,7 @@ A critical read of the six steps in §2, before any of them is built. Nothing he
 ### 9.2 Does the room work for moments that aren't a conversation at a table?
 - **Finding:** it fits face-to-face moments (a remark in a meeting, an argument). It fits poorly a message read alone, a mistake nobody saw, a moment in a crowd or on a call. Position 0 always shows someone opposite; step 4 offers "the other people".
 - **Kept within the approved design:** one room, as a stand-in, said plainly (9.3). The position names stay ("From across the room" is the figure's word, not a claim about the person's moment).
-- **Decides: You,** with PR: one stand-in room for Stage 2 (recommended), with a usability question on whether it got in the way; or, later and as its own proposal, a small choice of settings.
+- **Decides: You,** with PR: one stand-in room for the first build (recommended; decided in §9.9), with a usability question on whether it got in the way; or, later and as its own proposal, a small choice of settings.
 
 ### 9.3 Is it clear the drawing is a sketch, not their memory?
 - **Finding:** not early enough. "The drawing is only a sketch" is in the middle of step 3's paragraph, after the figure has already been shown at step 2.
@@ -210,7 +213,7 @@ A critical read of the six steps in §2, before any of them is built. Nothing he
 Product decisions. Where a wording is given, it is a proposal that still goes to the psychology-trained reviewer and the content review (gate 3); the behaviour is decided.
 
 - **`room@2` is approved for the exercise** (R2, `visual-reviews.md` entry 4). The four positions read as the intended progression: your own eyes, then an observer's view, then the wider surroundings.
-- **Stage 2 waited for R1 of `shaded`**, a separate gate, not implied by the room's approval. R1 was approved the same day (`visual-reviews.md` entry 5), and you then authorized the build.
+- **The build waited for R1 of `shaded`**, a separate gate, not implied by the room's approval. R1 was approved the same day (`visual-reviews.md` entry 5), and you then authorized the build.
 - **One generic room** (§9.2). It is a stand-in, said explicitly where the figure first appears (step 3), so nobody takes it for a reconstruction of their own memory. Working line (§9.3): "The drawing isn't your moment. It's a stand-in: a room and a few people, to show where you're looking from. Picture your own."
 - **No figure at step 2** (§9.3). The person recalls the moment through their own eyes with no drawn stranger competing with their own picture. The figure first appears at step 3, at position 0.
 - **Step 2 has an explicit skip** (§9.1). A person can go on without going back into the moment or describing it. Making the field optional is not enough.
@@ -241,7 +244,7 @@ Product decisions. Where a wording is given, it is a proposal that still goes to
   - No feeling or rating is expected at the end. The purpose is to look from another vantage point and perhaps notice more of the context.
   - **Planned check:** a content test that no on-screen text uses improvement words ("better", "calmer", "less", "smaller", "lighter") about the moment or the person, except the closing's "lighter, the same or heavier".
 
-## 10. What Stage 2 built (2026-11-16)
+## 10. What the build contains (2026-11-16)
 Development only (`release: 'development'`; the API refuses it in production) and Try it only (`experiment: null`). The texts are the §9.9 working texts, provisional until the psychology-trained reviewer and the content review decide; a change to them is a new content version.
 
 **Where it lives**

@@ -277,6 +277,68 @@ Not rechecked in this pass (status as in the design doc §5): Moran & Eyal 2022,
 4. **To add to the science text's limits:** the studies used strong recalled feelings (anger, sadness) in students, not mild everyday moments; straight afterwards, a neutral distraction did as well as stepping back; the effects are small.
 5. **Still supports the safety line:** the 2008 authors themselves say distance might not suit trauma.
 
+
+### Second pass, 2026-11-16: the background sources
+Same levels as above. Full texts were read as text taken directly from the article (PubMed Central pages, or the authors' preprint files on OSF), not through a summary.
+
+| Source | Status | What was read |
+|---|---|---|
+| Ayduk & Kross (2010), *J. Pers. Soc. Psychol.* 98(5), 809–829. Author manuscript, PubMed Central PMC2881638 | **✔F** (author manuscript) | Abstract; introduction; Study 1's sample, procedure and measures; each study's summary; general discussion; caveats. The results sections of Studies 1–3 were read only through their summaries |
+| Wisco, Marx, Sloan, Gorman, Kulish & Pineles (2015), "Self-distancing from trauma memories reduces physiological but not subjective emotional reactivity among Veterans with posttraumatic stress disorder", *Clin. Psychol. Sci.* 3(6), 956–963. PubMed Central PMC4667807 | **✔F** | The whole article: introduction, method, results, discussion, limitations, notes |
+| Nasarudin, Moeck & Koval, "Re-appraising stressors from a distance", preprint (PsyArXiv, doi 10.31234/osf.io/p587d), published 2023 in *Cogn. Emot.* 37(7) | **Full preprint** (not peer reviewed; the published version not read) | The whole preprint: introduction, method, results, discussion |
+| Grossmann, Dorfman, Oakes, Santos, Vohs & Scholer, "Training for wisdom: the distanced-self-reflection diary method", preprint (PsyArXiv, doi 10.31234/osf.io/a5fgu), published 2021 in *Psychol. Sci.* 32(3) | **Preprint, in part** | Abstract, statement of relevance, introduction, Study 1's sample and procedure, general discussion with its caveats. Results not read |
+| Moran & Eyal (2022), *Pers. Soc. Psychol. Rev.* 26(2) | **✔A** | Not openly accessible: the publisher refused access, and there is no open copy in Europe PMC |
+| Kenny et al. (2009), "Distant memories: a prospective study of vantage point of trauma memories", *Psychol. Sci.* 20(9) | **✔A** | Not openly accessible: no open copy in Europe PMC |
+
+### Ayduk & Kross 2010 (✔F, author manuscript)
+- **What it is:** three studies that *measured* how much people spontaneously took a distanced view while reflecting on a negative memory. Nothing was assigned, so these are associations.
+- **Who:**
+  - Study 1: 56 Berkeley undergraduates, a rejection memory, followed up after about 7 weeks
+  - Study 2: an anger memory, with heart and blood-pressure measures
+  - Study 3: 53 dating couples, a 21-day diary and a filmed conflict discussion
+- **Found:**
+  - More distance went with less felt reactivity in all three studies, and less cardiovascular reactivity in Study 2.
+  - In Study 1, it went with less reactivity and less intrusive thinking about 7 weeks later.
+  - This went through less recounting and more reconstruing, not through avoidance. Distance was unrelated to avoidance in all three studies.
+  - In couples, more distance went with more problem-solving and less returning of hostility.
+- **The authors' point that matters here:** in PTSD, distance while *recalling* a memory has been linked to avoidance. Their work concerns distance while *reflecting* on a memory already recalled, and they suggest the two may work differently. The step 5 vantage question uses their measure's wording almost exactly: "saw the event replay through their own eyes vs. watched the event unfold as an observer".
+
+### Wisco et al. 2015 (✔F)
+- **Who and what:** 48 US military veterans with PTSD, mostly men, aged about 54, randomly assigned. Each analysed why they felt as they did about their worst trauma for about 90 seconds, immersed or distanced (the Kross 2005 instructions).
+- **Found:**
+  - Immersed, heart rate and skin conductance rose; distanced, they didn't (η²p ≈ .10).
+  - Felt arousal, negative feeling and re-experiencing rose equally in both groups.
+- **The authors:**
+  - The effect on feelings "may not extend to extremely distressing memories".
+  - Spontaneous distancing has been linked to PTSD risk (Kenny 2009), so distancing in therapy "might be harmful rather than helpful" until tested.
+  - Short-term only.
+- **For this exercise:** it supports keeping trauma out (the safety line) and making no claim about strong memories.
+
+### Nasarudin, Moeck & Koval (full preprint)
+- **Who and what:** 355 US adults online (MTurk). They recalled an unresolved interpersonal conflict, then wrote about it once in the third person ("you", "she", their name) or the first person.
+- **Found:**
+  - Positive feeling rose after third-person writing and not after first-person writing.
+  - Negative feeling fell a little in both, with no difference between them.
+  - Third-person writing also raised how "advantageous" the event seemed.
+- **Matters here:** this is distance by **pronouns, written once**, not a visual vantage point. It is a limit on the method's evidence, not a test of this exercise.
+
+### Grossmann et al. (preprint, in part)
+- **Who and what:** two experiments, 555 North American adults. Daily diary reflections on the day's main social event, in the third person or the first person, for four weeks (Study 1) or one week (Study 2).
+- **Found:** wise reasoning about a later conflict rose more after third-person reflection. Wise reasoning here means intellectual humility, seeing other viewpoints and looking for a resolution. The effects were small to moderate.
+- **The authors' caveats:**
+  - English-speaking North America only
+  - independent replication awaited
+  - it may not work uniformly
+  - no no-diary control
+- **Matters here:** repeated practice with pronouns, not one visual step back. Background only.
+
+### What this second pass changes
+- **Nothing on screen.** The science explanation v1 cites none of these sources.
+- **The design doc's §5** now gives each source its level, and corrects two summaries:
+  - Nasarudin is distance by pronouns, not a visual step back.
+  - Wisco: physiology fell, felt distress didn't.
+- **For a later content version, your decision:** a "not always replicated" limit could cite Nasarudin, if the full preprint counts as full text. That is for you to say, since the published version wasn't read.
+
 ## Memory reconsolidation (future candidate, plan §3.2): sources to verify
 **Status:** nothing here has been checked; every entry is **◐** until it is read. Titles and details come from memory. Each is confirmed (exact title, DOI, sample, outcome) when obtained, and anything that can't be found is removed, not cited.
 
