@@ -86,6 +86,7 @@ describe('Science explanations of exercises outside the experiment (cognitive-sh
 
   it('exist for all of them', () => {
     expect(cs.map((s) => s.experience).sort()).toEqual([
+      'cs_camera_angle',
       'cs_not_enough_to_go_on',
       'cs_other_readings',
       'cs_why_it_happened',
@@ -122,6 +123,22 @@ describe('Science explanations of exercises outside the experiment (cognitive-sh
       expect(s.similar_note, s.id).toBeUndefined();
       expect(s.why, s.id).toBeUndefined();
     }
+  });
+});
+
+describe('"Change the camera angle" science explanation (camera-angle-design.md §5)', () => {
+  const cam = scienceFor('cs_camera_angle')!;
+
+  it('cites only the sources read in full for the method, and says the picture is untested', () => {
+    const kross = cam.research.filter((r) => r.sources.some((k) => k.startsWith('kross-')));
+    expect(kross.length).toBeGreaterThan(0);
+    for (const r of kross) for (const k of r.sources) expect(SCIENCE_SOURCES.sources[k].evidence, k).toBe('full_text');
+    expect(cam.similar_note).toMatch(/No research has tested an on-screen picture like this one/);
+  });
+
+  it('keeps its limits: small, short-term, strong feelings in students, distraction as good straight afterwards, not for trauma', () => {
+    const limits = cam.limits.join(' ');
+    for (const point of [/small/, /students/, /distraction/, /trauma/]) expect(limits).toMatch(point);
   });
 });
 

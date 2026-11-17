@@ -9,6 +9,7 @@ import {
   MOTION_EFFECTS,
   NOT_ON_NEAR,
   PLANE_ROLES,
+  SHADED_ROLES,
   StyleRef,
   THEMES,
 } from '../styling/vocabulary';
@@ -106,11 +107,15 @@ function materialProblems(scene: SceneDefinition): string[] {
     if (e.kind === 'label') continue;
     const where = `element '${e.id}'`;
     const m = material(e);
-    if ((m === 'lit' || m === 'translucent' || m === 'overlap' || m === 'shadow') && !closed(e))
+    if ((m === 'lit' || m === 'translucent' || m === 'overlap' || m === 'shadow' || m === 'shaded') && !closed(e))
       problems.push(`${where}: '${m}' fills a form; this is an open line`);
     if (m === 'lit' && e.style.role !== 'subject') problems.push(`${where}: 'lit' is for the subject; a plane or context stays flat`);
+    if (m === 'shaded' && !(SHADED_ROLES as readonly string[]).includes(e.style.role))
+      problems.push(`${where}: 'shaded' is for surfaces in space: walls (far), floor (mid), furniture (near), people (context) or the person themself (subject)`);
+    if (e.style.facing && m !== 'shaded') problems.push(`${where}: 'facing' belongs to the shaded material`);
     if (m === 'shadow') {
-      if (e.kind !== 'shape' || (e.geometry.type !== 'ellipse' && e.geometry.type !== 'circle'))
+      // An ellipse or circle; or, in a spatial view, an ellipse on the floor drawn in perspective (a closed path).
+      if (e.kind !== 'shape' || !(e.geometry.type === 'ellipse' || e.geometry.type === 'circle' || (e.geometry.type === 'path' && closed(e))))
         problems.push(`${where}: a shadow is an ellipse under its object`);
       const target = e.grounds ? order[index.get(e.grounds) ?? -1] : undefined;
       if (!e.grounds) problems.push(`${where}: a shadow names the object it sits under ('grounds')`);

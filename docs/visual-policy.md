@@ -96,6 +96,7 @@ Where a rule is a design judgement rather than a measured fact, it is marked [J]
 
 **Rules:**
 - **Planes:** at most four depth planes (`far`, `mid`, `near`, `subject`) plus annotation.
+- **A spatial view** (§3.4) uses a true perspective projection instead of planes. Its depth cues stay calm: overlap, light and scale; no fog, blur or exaggerated lens. (Added 2026-11-14, for `camera-angle.room`.)
 - **Depth cues, in order of preference:**
   1. **Overlap:** nearer forms occlude farther ones.
   2. **Aerial perspective:** farther planes move towards the ground colour in lightness and lose chroma. This is built into the S1 plane roles (`visual-language.md` §7).
@@ -117,6 +118,7 @@ Where a rule is a design judgement rather than a measured fact, it is marked [J]
 
 **Rules:**
 - **One viewpoint per scene,** kept in every state.
+  - **A composition whose idea is the viewpoint** (a spatial view) may move its viewpoint along one declared path through a constructed space, between declared positions, and the person decides where it stops. It never looks up at anyone, never looks straight down, and never rotates about the line of sight. Every other figure keeps one viewpoint. (Added 2026-11-14, for `camera-angle.room`; it replaces the 2026-11-13 sentence on viewing distance, written for the rejected `camera-angle.view`.)
 - **Eye level [J]:** at or slightly above the horizon, looking slightly down on a landscape.
   - The person looks *over* the path, never up at an obstacle.
   - This supports the MCII policy that the obstacle stays low and surmountable [F: `mcii-design.md` §5].
@@ -268,6 +270,7 @@ Where a rule is a design judgement rather than a measured fact, it is marked [J]
   - motion in response to a choice in progress, with one exception (M5): in a figure a person moves, the step that follows their own input (a key, a click, Escape, a snapped step while dragging) glides quickly (`quick`, 150 ms), so the step can be followed. Nothing else in the figure moves at the same time; while dragging, the handle is never more than one such glide behind the pointer's snapped value; under reduced motion it moves at once
   - motion that delays the person or the focus move
 - **Reduced motion:** the final state appears at once. If a motion carries meaning, it switches to a different representation.
+- **A viewpoint move** (a spatial view, §3.4) is one movement of the whole view, not of its elements: eased, at most the `slow` duration (900 ms) per position and 1.6 s in all. It follows the person's drag directly, is a cut under reduced motion or when the watchdog drops the tier, and nothing in the view moves on its own during it. (Added 2026-11-14.)
 
 **Typical failures:**
 - everything animating on every step
@@ -288,6 +291,7 @@ The aim is visuals that are **simple to read and sophisticated to look at.** The
 - **The removal test:** for each element, ask whether removing it would change the meaning. If not, remove it. (Revision 1 also kept elements that only "weaken the space or light"; under principle 6, space and light aren't reasons on their own.)
 - **The detail gradient [J]:** detail concentrates at the focal element and falls off towards the edges and background.
 - **The element budget [J]:** an illustration state shows at most about seven distinct forms (planes count as one each). More needs a reason in the scene policy.
+  - A spatial view (§3.4), whose idea is its surroundings, may exceed it. Its elements are named in groups (the room, the table, each person, the rooms around), each group with one purpose. (Added 2026-11-14.)
 - **Where sophistication comes from:**
   - proportion
   - tonal depth
@@ -342,7 +346,8 @@ The aim is visuals that are **simple to read and sophisticated to look at.** The
 - **Focus:** visuals never take or move focus.
 
 ## 7. Never used
-- **Characters:** mascots, faces, characters, avatars.
+- **Characters:** mascots, faces, expressions, cartoon or stylised characters, avatars.
+  - **Exception (2026-11-14): people in a situation.** Where an exercise's idea is about people in a situation, a figure may show a person: faceless, unexpressive, of one neutral build, built from the system's own rounded forms, with no clothing, hair, age or gender cues. The person themself is told apart by the area colour and a label, never by size or detail. First used by `camera-angle.room`; the psychology-trained reviewer's veto applies.
 - **Reward imagery:** confetti, stars, badges, trophies, medals, summits, finish lines, fireworks, rewards of any kind.
 - **Styles:** cartoon or childish styling; stock-illustration styling (blob people, generic tech gradients).
 - **Effects:** glossy or skeuomorphic effects, decorative particles, celebratory motion.

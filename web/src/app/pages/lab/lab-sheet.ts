@@ -5,7 +5,7 @@ import { TextLookup } from '../../shared/visual/composition/scene';
 import { spacingWarnings } from '../../shared/visual/composition/spacing';
 import { SceneFigure, SurfaceScheme } from '../../shared/visual/integration/scene-figure';
 import { GRAIN, LIGHT } from '../../shared/visual/styling/vocabulary';
-import { AREAS, depthFigure, linesFigure, materialsFigure, typeFigure } from './lab-sheet-figures';
+import { AREAS, depthFigure, linesFigure, materialsFigure, shadedFigure, typeFigure } from './lab-sheet-figures';
 import { LabSwatches, NEUTRAL_STEPS, Swatch } from './lab-swatches';
 
 /** The roles in the order visual-language.md §3.4 and §5 give them, with what each is for. */
@@ -136,6 +136,9 @@ const ROLES: readonly { token: string; about: string; opacity?: number }[] = [
                 <figure role="img" [attr.aria-label]="alt(area.depth)" [attr.data-sheet]="'depth-' + area.theme + '-' + scheme">
                   <app-vis-scene [scene]="area.depth.scene" state="shown" [text]="text(area.depth)" [scheme]="scheme" />
                 </figure>
+                <figure role="img" [attr.aria-label]="alt(area.shaded)" [attr.data-sheet]="'shaded-' + area.theme + '-' + scheme">
+                  <app-vis-scene [scene]="area.shaded.scene" state="shown" [text]="text(area.shaded)" [scheme]="scheme" />
+                </figure>
               </div>
             </div>
           }
@@ -178,7 +181,7 @@ export class LabSheet {
   protected readonly lines = linesFigure();
   protected readonly type = typeFigure();
   protected readonly typeWarnings = spacingWarnings(this.type.scene, lookupOf(this.type));
-  protected readonly specimens = AREAS.map((a) => ({ ...a, materials: materialsFigure(a.theme), depth: depthFigure(a.theme) }));
+  protected readonly specimens = AREAS.map((a) => ({ ...a, materials: materialsFigure(a.theme), depth: depthFigure(a.theme), shaded: shadedFigure(a.theme) }));
 
   protected text(composed: Composed): TextLookup {
     return lookupOf(composed);

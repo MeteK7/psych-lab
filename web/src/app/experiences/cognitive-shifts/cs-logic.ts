@@ -54,6 +54,39 @@ export function fitNote(othersTicked: number): { key: 'note_some' | 'note_none';
   return othersTicked > 0 ? { key: 'note_some', n: othersTicked + 1 } : { key: 'note_none', n: 1 };
 }
 
+// ---------- Change the camera angle (docs/camera-angle-design.md §2, §9.9) ----------
+
+/**
+ * Step 1: at this rating or above, a note under the scale suggests a lighter moment. It never
+ * blocks. The threshold is the psychology-trained reviewer's to set (design doc §6).
+ */
+export const HIGH_UPSET = 8;
+
+export function highUpset(rating: number | null): boolean {
+  return rating !== null && rating >= HIGH_UPSET;
+}
+
+/**
+ * Step 4 follows where the person stopped: at position 0 there is no one in the picture to watch,
+ * so they get a neutral lead and the options only; from position 1 on, the observer reflection.
+ */
+export function stayedClose(position: number): boolean {
+  return position === 0;
+}
+
+/** Steps 5–6: a plan is suggested only when the person can do something about the situation. */
+export function canAct(control: 'yes' | 'partly' | 'no' | null): boolean {
+  return control === 'yes' || control === 'partly';
+}
+
+/**
+ * Step 4's record: the ids of the options ticked, in their on-screen order, plus "own" when the
+ * person added their own (its text is never reported).
+ */
+export function noticedRecord(order: readonly string[], ticked: readonly string[], own: string): string[] {
+  return [...order.filter((id) => ticked.includes(id)), ...(own.trim() ? ['own'] : [])];
+}
+
 /** CS3: a plan link is offered only for something the person can do: asking or checking. */
 export function offersPlan(choice: string | null): boolean {
   return choice === 'ask' || choice === 'check';

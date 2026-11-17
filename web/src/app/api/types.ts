@@ -13,6 +13,7 @@ export type ExerciseId =
   | 'cs_other_readings'
   | 'cs_why_it_happened'
   | 'cs_not_enough_to_go_on'
+  | 'cs_camera_angle'
   | 'mcii';
 export type Status = 'in_progress' | 'completed' | 'aborted';
 

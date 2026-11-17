@@ -105,6 +105,64 @@ export function materialsFigure(theme: ThemeId): Composed {
   );
 }
 
+/**
+ * The `shaded` material in one area (2026-11-14, a spatial view): each role as a small block seen
+ * from above, its top lit, its left face across the light and its right face in shade; people and
+ * the person themself with a head.
+ */
+export function shadedFigure(theme: ThemeId): Composed {
+  const roles = [
+    { id: 'walls', role: 'far' },
+    { id: 'floor', role: 'mid' },
+    { id: 'furniture', role: 'near' },
+    { id: 'people', role: 'context' },
+    { id: 'you', role: 'subject' },
+  ] as const;
+  const P = (pts: [number, number][]) => `M${pts.map(([x, y]) => `${x} ${y}`).join('L')}Z`;
+  const forms: SceneElement[] = [];
+  const names: SceneElement[] = [];
+  const text: Record<string, string> = {};
+  roles.forEach(({ id, role }, i) => {
+    const cx = 56 + i * 92;
+    const cy = 84;
+    const s = 22;
+    const block = (facing: 'lit' | 'base' | 'shade', pts: [number, number][]): SceneElement => ({
+      kind: 'shape',
+      id: `${id}-${facing}`,
+      geometry: { type: 'path', d: P(pts) },
+      style: { role, material: 'shaded', facing },
+      purpose: REFERENCE,
+    });
+    forms.push(
+      block('base', [[cx - s, cy - s], [cx, cy - s / 2], [cx, cy + s], [cx - s, cy + s / 2]]),
+      block('shade', [[cx, cy - s / 2], [cx + s, cy - s], [cx + s, cy + s / 2], [cx, cy + s]]),
+      block('lit', [[cx, cy - 1.5 * s], [cx + s, cy - s], [cx, cy - s / 2], [cx - s, cy - s]]),
+    );
+    const named = [`${id}-base`, `${id}-shade`, `${id}-lit`];
+    if (role === 'context' || role === 'subject') {
+      // A head, as the room draws one: one form, flat in the base tone.
+      forms.push({ kind: 'shape', id: `${id}-head`, geometry: { type: 'ellipse', cx, cy: cy - 1.5 * s - 14, rx: 11, ry: 12 }, style: { role, material: 'shaded', facing: 'base' }, purpose: REFERENCE });
+      named.push(`${id}-head`);
+    }
+    names.push(label(`${id}-name`, cx, 132, named, { align: 'middle' }));
+    text[`${id}-name`] = id;
+  });
+  return composeScene(
+    {
+      id: `reference.sheet.shaded.${theme}`,
+      version: 1,
+      theme,
+      size: { width: 480, height: 140 },
+      layers: [
+        { id: 'forms', plane: 'subject', elements: forms },
+        { id: 'names', plane: 'annotation', elements: names },
+      ],
+      alt: `Review sheet: shaded surfaces in the ${theme} area: walls, floor, furniture, people and you, each lit, across and in shade`,
+    },
+    text,
+  );
+}
+
 /** Depth in one area: far, middle and near planes by their top edge, and a lit subject with its contact shadow. */
 export function depthFigure(theme: ThemeId): Composed {
   return depth(`sheet.depth.${theme}`, `planes in depth with a lit subject, in the ${theme} area`, false, theme);

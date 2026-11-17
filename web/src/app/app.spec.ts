@@ -1,7 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 
 import { App } from './app';
 
@@ -71,3 +72,32 @@ describe('App', () => {
   });
 });
 
+
+describe('App page width', () => {
+  @Component({ template: '' })
+  class Blank {}
+
+  it('gives the area pages the wide column, and every other page the usual one', async () => {
+    TestBed.configureTestingModule({
+      imports: [App],
+      providers: [
+        provideRouter([
+          { path: '', component: Blank },
+          { path: 'areas/:id', component: Blank, data: { wide: true } },
+        ]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    const fixture = TestBed.createComponent(App);
+    const root = fixture.nativeElement as HTMLElement;
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/areas/cognitive-shifts');
+    await fixture.whenStable();
+    expect(root.querySelector('main')?.classList.contains('wide')).toBe(true);
+    expect(root.querySelector('footer')?.classList.contains('wide')).toBe(true);
+    await router.navigateByUrl('/');
+    await fixture.whenStable();
+    expect(root.querySelector('main')?.classList.contains('wide')).toBe(false);
+  });
+});

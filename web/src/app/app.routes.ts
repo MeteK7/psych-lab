@@ -10,7 +10,8 @@ import { exerciseAvailable, inBooth, notInBooth } from './shared/access';
 
 export const routes: Routes = [
   { path: '', component: HomePage, title: 'Home' },
-  { path: 'areas/:id', component: AreaPage, title: 'Area' },
+  // Wide: an area's cards use the window's width, four to a row when they fit (app.css, main.wide).
+  { path: 'areas/:id', component: AreaPage, title: 'Area', data: { wide: true } },
   { path: 'experiment', component: ExperimentPage, title: 'My experiment', canActivate: [notInBooth] },
   { path: 'records', component: RecordsPage, title: 'My records', canActivate: [notInBooth] },
   { path: 'about', component: AboutPage, title: 'About' },

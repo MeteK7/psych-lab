@@ -46,6 +46,12 @@ main {
   padding: 1.5rem 1rem;
 }
 
+/* The area pages use more of a large window, so their cards can sit four to a row. */
+main.wide,
+footer.wide {
+  max-width: 90rem;
+}
+
 .skip-link {
   position: absolute;
   left: -999px;

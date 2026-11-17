@@ -18,10 +18,12 @@
   --vis-a-400: #76a3fa; --vis-a-600: #3766c7; --vis-a-700: #274fa4; --vis-a-800: #1d3c7c;
   --vis-a-900: #152953; --vis-a-950: #0f1d39;
 }
+/* Cognitive shifts, version 2 (2026-11-16): a calm, soft blue instead of violet, at about hue 210,
+   lighter and less saturated than Action's blue and bluer than Attention's grey teal. */
 :host([data-vis-theme='cognitive']) {
-  --vis-a-050: #f8f5ff; --vis-a-100: #f0e9ff; --vis-a-200: #e0d3fb; --vis-a-300: #c9b5f1;
-  --vis-a-400: #b093e4; --vis-a-600: #7955b0; --vis-a-700: #614190; --vis-a-800: #49316c;
-  --vis-a-900: #312249; --vis-a-950: #221832;
+  --vis-a-050: #f4f8fc; --vis-a-100: #e6eff8; --vis-a-200: #cddff0; --vis-a-300: #a9c7e4;
+  --vis-a-400: #84abd2; --vis-a-600: #4a78a8; --vis-a-700: #3a6190; --vis-a-800: #2d4b6f;
+  --vis-a-900: #20354f; --vis-a-950: #172638;
 }
 :host([data-vis-theme='attention']) {
   --vis-a-050: #f2f8fb; --vis-a-100: #e4eff4; --vis-a-200: #cbdee8; --vis-a-300: #a9c6d5;
@@ -60,6 +62,15 @@
   --vis-grain: var(--text);
   /* Focus (M4): a figure that is itself the control shows the page's own focus colour. */
   --vis-focus: var(--accent);
+  /* Shaded surfaces in a spatial view (2026-11-14), each role in three tones by which way a face
+     turns to the platform light: walls (far) and floor (mid) light, so people read on them;
+     furniture (near) a step darker; other people (context) neutral; the person themself (subject)
+     in the area colour, at 3:1 or more on the walls and floor. */
+  --vis-far-face-lit: var(--vis-a-050); --vis-far-face: var(--vis-a-050); --vis-far-face-shade: var(--vis-a-100);
+  --vis-mid-face-lit: var(--vis-a-100); --vis-mid-face: var(--vis-a-100); --vis-mid-face-shade: var(--vis-a-200);
+  --vis-near-face-lit: var(--vis-a-200); --vis-near-face: var(--vis-a-300); --vis-near-face-shade: var(--vis-a-400);
+  --vis-context-face-lit: var(--vis-n-500); --vis-context-face: var(--vis-n-600); --vis-context-face-shade: var(--vis-n-700);
+  --vis-subject-face-lit: var(--vis-a-600); --vis-subject-face: var(--vis-a-700); --vis-subject-face-shade: var(--vis-a-800);
 }
 
 /* Roles, dark: farther planes move towards the dark ground, as they move towards white in light. */
@@ -76,6 +87,11 @@
     --vis-overlap: color-mix(in srgb, var(--vis-a-600) 64%, transparent);
     --vis-shadow: color-mix(in srgb, black 35%, transparent);
     --vis-shadow-edge: color-mix(in srgb, black 0%, transparent);
+    --vis-far-face-lit: var(--vis-a-900); --vis-far-face: var(--vis-a-950); --vis-far-face-shade: var(--vis-a-950);
+    --vis-mid-face-lit: var(--vis-a-800); --vis-mid-face: var(--vis-a-900); --vis-mid-face-shade: var(--vis-a-950);
+    --vis-near-face-lit: var(--vis-a-700); --vis-near-face: var(--vis-a-800); --vis-near-face-shade: var(--vis-a-900);
+    --vis-context-face-lit: var(--vis-n-200); --vis-context-face: var(--vis-n-300); --vis-context-face-shade: var(--vis-n-400);
+    --vis-subject-face-lit: var(--vis-a-200); --vis-subject-face: var(--vis-a-300); --vis-subject-face-shade: var(--vis-a-400);
   }
 }
 :host([data-vis-scheme='dark']) {
@@ -90,6 +106,11 @@
   --vis-overlap: color-mix(in srgb, var(--vis-a-600) 64%, transparent);
   --vis-shadow: color-mix(in srgb, black 35%, transparent);
   --vis-shadow-edge: color-mix(in srgb, black 0%, transparent);
+  --vis-far-face-lit: var(--vis-a-900); --vis-far-face: var(--vis-a-950); --vis-far-face-shade: var(--vis-a-950);
+  --vis-mid-face-lit: var(--vis-a-800); --vis-mid-face: var(--vis-a-900); --vis-mid-face-shade: var(--vis-a-950);
+  --vis-near-face-lit: var(--vis-a-700); --vis-near-face: var(--vis-a-800); --vis-near-face-shade: var(--vis-a-900);
+  --vis-context-face-lit: var(--vis-n-200); --vis-context-face: var(--vis-n-300); --vis-context-face-shade: var(--vis-n-400);
+  --vis-subject-face-lit: var(--vis-a-200); --vis-subject-face: var(--vis-a-300); --vis-subject-face-shade: var(--vis-a-400);
 }
 
 /* Forced colours (§3.6): every role mapped to a system colour, so weight and dashes keep their meaning. */
@@ -107,5 +128,11 @@
     --vis-translucent: Canvas; --vis-overlap: GrayText;
     --vis-shadow: Canvas; --vis-shadow-edge: Canvas; --vis-grain: Canvas;
     --vis-focus: Highlight;
+    /* Shaded surfaces by role: the room Canvas, furniture GrayText, people (you too) CanvasText. */
+    --vis-far-face-lit: Canvas; --vis-far-face: Canvas; --vis-far-face-shade: Canvas;
+    --vis-mid-face-lit: Canvas; --vis-mid-face: Canvas; --vis-mid-face-shade: Canvas;
+    --vis-near-face-lit: GrayText; --vis-near-face: GrayText; --vis-near-face-shade: GrayText;
+    --vis-context-face-lit: CanvasText; --vis-context-face: CanvasText; --vis-context-face-shade: CanvasText;
+    --vis-subject-face-lit: CanvasText; --vis-subject-face: CanvasText; --vis-subject-face-shade: CanvasText;
   }
 }

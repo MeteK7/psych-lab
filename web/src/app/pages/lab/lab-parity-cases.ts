@@ -3,17 +3,18 @@ import { composeCauseMap } from '../../shared/visual/instruments/cause-map/cause
 import { composeGuideDays } from '../../shared/visual/instruments/guide-days/guide-days';
 import { composeRounds } from '../../shared/visual/instruments/rounds/rounds';
 import { composeTracking, composeTrackingPreview } from '../../shared/visual/instruments/tracking/tracking';
+import { ROOM_POSITIONS, composeRoom } from '../../shared/visual/instruments/camera-room/room';
 import { LiveInput, buildChangeTimeline, buildComposedFrame, buildFrame, buildTimeline } from '../../shared/visual/integration/pipeline';
 import type { ResolvedFrame, ResolvedTimeline } from '../../shared/visual/integration/frame-figure';
 import { SCENES } from '../../shared/visual/scenes';
 import { resolveStyle } from '../../shared/visual/styling/resolve';
 import { INPUT_CHANGE, THEMES, ThemeId } from '../../shared/visual/styling/vocabulary';
 import { LAYOUTS, referenceCompositions } from './lab-generators';
-import { CAUSE_AXES, CAUSE_SETS, PREVIEW_LABELS, RING_RADIUS, ROUNDS_TOTAL, ROUND_SETS, trackingStill } from './lab-instrument-sets';
+import { CAUSE_AXES, CAUSE_SETS, PREVIEW_LABELS, RING_RADIUS, ROOM_WORDS, ROUNDS_TOTAL, ROUND_SETS, trackingStill } from './lab-instrument-sets';
 import { choiceFigure, fieldFigure, ratingFigure } from './lab-interaction-figures';
 import { MATERIALS_REFERENCES } from './lab-materials';
 import { BAR_SETS, barsFigure, routeFigure, setFigure } from './lab-motion-figures';
-import { AREAS, depthFigure, linesFigure, materialsFigure, typeFigure } from './lab-sheet-figures';
+import { AREAS, depthFigure, linesFigure, materialsFigure, shadedFigure, typeFigure } from './lab-sheet-figures';
 
 /**
  * The parity suite's cases (milestone M6): every scene state, every instrument answer set and every
@@ -122,6 +123,8 @@ export function parityCases(): ParityCase[] {
   // The authoring guide's worked example, as still frames and as a change of number (the bar glides).
   for (const days of [0, 3, 7]) cases.push(composed(`guide.days.${days}`, 'Instruments', `reference.guide.days: ${days} of 7 days`, composeGuideDays({ days, barLabel: GUIDE_BAR })));
   cases.push(change('change.guide-days', 'Changes', 'reference.guide.days: a day added (the bar glides, a mark fills)', composeGuideDays({ days: 3, barLabel: GUIDE_BAR }), composeGuideDays({ days: 4, barLabel: GUIDE_BAR }), true));
+  // "Change the camera angle": the room at each of its four positions, as still frames (a viewpoint move isn't a timeline: each of its frames is a still).
+  for (let view = 0; view < ROOM_POSITIONS; view++) cases.push(composed(`room.${view}`, 'Instruments', `camera-angle.room: position ${view}`, composeRoom({ view, words: ROOM_WORDS })));
   referenceCompositions().forEach((c, i) => cases.push(composed(`generators.${i}.${c.scene.id}`, 'Generators', c.scene.id, c)));
   for (const l of LAYOUTS) cases.push(composed(`layouts.${l.id}`, 'Layouts', l.name, l.composed));
   for (const m of MATERIALS_REFERENCES) cases.push(composed(`materials.${m.id}`, 'Materials', m.name, m.composed));
@@ -130,6 +133,7 @@ export function parityCases(): ParityCase[] {
   for (const a of AREAS) {
     cases.push(composed(`sheet.materials.${a.theme}`, 'Review sheet', `Materials, ${a.name}`, materialsFigure(a.theme)));
     cases.push(composed(`sheet.depth.${a.theme}`, 'Review sheet', `Depth, ${a.name}`, depthFigure(a.theme)));
+    cases.push(composed(`sheet.shaded.${a.theme}`, 'Review sheet', `Shaded surfaces, ${a.name}`, shadedFigure(a.theme)));
   }
   cases.push(composed('interaction.rating', 'Interaction', 'A mark on a scale', ratingFigure(3)));
   cases.push(composed('interaction.rating-focus', 'Interaction', 'A mark on a scale, with the focus ring, being moved', ratingFigure(3), { focus: 'mark', emphasis: { mark: 'focal' } }));

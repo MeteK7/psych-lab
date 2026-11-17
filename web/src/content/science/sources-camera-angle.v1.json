@@ -1,0 +1,18 @@
+{
+  "id": "science-sources-camera-angle",
+  "version": "1",
+  "sources": {
+    "kross-2005": {
+      "citation": "Kross, Ayduk & Mischel, 2005",
+      "title": "When asking “why” does not hurt: Distinguishing rumination from reflective processing of negative emotions. Psychological Science, 16(9), 709–715",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/16137257/",
+      "evidence": "full_text"
+    },
+    "kross-ayduk-2008": {
+      "citation": "Kross & Ayduk, 2008",
+      "title": "Facilitating adaptive emotional analysis: Distinguishing distanced-analysis of depressive experiences from immersed-analysis and distraction. Personality and Social Psychology Bulletin, 34(7), 924–938",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/18469151/",
+      "evidence": "full_text"
+    }
+  }
+}

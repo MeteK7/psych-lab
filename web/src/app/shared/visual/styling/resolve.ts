@@ -103,6 +103,14 @@ export function resolveStyle(style: StyleRef, emphasis: Emphasis = 'normal'): Pa
 
   // Solid: a small mark filled in the line colour, with its emphasis (dots, the centre of a marker).
   if (material === 'solid') return { fill: line, stroke: NONE, width: 0, dash: null };
+  // Shaded: a surface in space, flat in its facing's tone, with no line: faces meet edge to edge,
+  // and a spatial view is drawn every frame while it moves, where outlines would double the cost of
+  // painting it. In forced colours the faces take system colours by role (walls and floor Canvas,
+  // furniture GrayText, people CanvasText), so the space stays legible. No emphasis.
+  if (material === 'shaded') {
+    const face = token(`${role}-face${style.facing === 'lit' ? '-lit' : style.facing === 'shade' ? '-shade' : ''}`);
+    return { fill: face, stroke: NONE, width: 0, dash: null };
+  }
   // Shadow: the shadow tone held across the middle (where the object stands, mostly hidden by it),
   // then a soft fade to nothing at the edge; no line, no emphasis.
   if (material === 'shadow')

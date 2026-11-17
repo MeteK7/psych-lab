@@ -20,10 +20,10 @@
     <ng-container *ngComponentOutlet="component; inputs: { seconds: booth.idle_seconds }" />
   }
 }
-<main id="main" tabindex="-1">
-  <router-outlet />
+<main id="main" tabindex="-1" [class.wide]="wide()">
+  <router-outlet (activate)="onActivate()" />
 </main>
-<footer>
+<footer [class.wide]="wide()">
   Local prototype · your data stays on this computer ·
   <a routerLink="/about" routerLinkActive="active" ariaCurrentWhenActive="page">About</a>
 </footer>
