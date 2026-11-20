@@ -34,6 +34,13 @@ export const routes: Routes = [
     title: 'Rendering parity',
     canActivate: [notInBooth],
   },
+  // The representation study (docs/visual-study): study code, development build only (the page checks).
+  {
+    path: 'lab/study',
+    loadComponent: () => import('./pages/lab/study/study-page').then((m) => m.StudyPage),
+    title: 'Representation study',
+    canActivate: [notInBooth],
+  },
   {
     path: 'lab',
     loadComponent: () => import('./pages/lab/lab-page').then((m) => m.LabPage),
