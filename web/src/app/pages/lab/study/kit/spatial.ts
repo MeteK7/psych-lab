@@ -40,6 +40,66 @@ export function cameraOn(keys: readonly Key[], t: number): Camera {
   return camera(alongV(t, keys.map((k) => k.pos)), alongV(t, keys.map((k) => k.target)), along(t, keys.map((k) => k.f)), FRAME.width / 2, FRAME.height / 2);
 }
 
+/** The box the points take on the frame, seen by a camera; null if any is behind it. */
+function extentOn(cam: Camera, points: readonly V3[]): { x0: number; x1: number; y0: number; y1: number } | null {
+  const on: Pt[] = [];
+  for (const p of points) {
+    const c = toCamera(cam, p);
+    if (c[2] < 0.2) return null;
+    on.push(onFrame(cam, c));
+  }
+  return { x0: Math.min(...on.map((p) => p[0])), x1: Math.max(...on.map((p) => p[0])), y0: Math.min(...on.map((p) => p[1])), y1: Math.max(...on.map((p) => p[1])) };
+}
+
+/**
+ * The framing rule (S7, revision 2): a camera looking at `target` from direction `from` (pointing
+ * from the target towards the camera), at the distance that makes `points` fill `fill` of the
+ * frame's height, or `fillWidth` of its width if that is reached first, and then turned so their
+ * box sits at the frame's centre. People keep a human scale: nothing cropped, nothing oversized.
+ */
+export function framedKey(points: readonly V3[], target: V3, from: V3, f = 720, fill = 0.5, fillWidth = 0.78): Key {
+  const dir = normalize(from);
+  const at = (d: number): V3 => [target[0] + dir[0] * d, target[1] + dir[1] * d, target[2] + dir[2] * d];
+  const share = (d: number) => {
+    const e = extentOn(camera(at(d), target, f, FRAME.width / 2, FRAME.height / 2), points);
+    return e ? Math.max((e.y1 - e.y0) / (FRAME.height * fill), (e.x1 - e.x0) / (FRAME.width * fillWidth)) : Infinity;
+  };
+  let [near, far] = [0.5, 80];
+  for (let i = 0; i < 40; i++) {
+    const mid = (near + far) / 2;
+    if (share(mid) > 1) near = mid;
+    else far = mid;
+  }
+  const pos = at(far);
+  // Re-aim at the box's centre, so the subjects sit in the middle of the frame.
+  const e = extentOn(camera(pos, target, f, FRAME.width / 2, FRAME.height / 2), points)!;
+  const cam = camera(pos, target, f, FRAME.width / 2, FRAME.height / 2);
+  const dx = ((e.x0 + e.x1) / 2 - FRAME.width / 2) / f;
+  const dy = ((e.y0 + e.y1) / 2 - FRAME.height / 2) / f;
+  const look: V3 = [
+    cam.ahead[0] + cam.right[0] * dx - cam.up[0] * dy,
+    cam.ahead[1] + cam.right[1] * dx - cam.up[1] * dy,
+    cam.ahead[2] + cam.right[2] * dx - cam.up[2] * dy,
+  ];
+  return { pos, target: [pos[0] + look[0] * far, pos[1] + look[1] * far, pos[2] + look[2] * far], f };
+}
+
+/**
+ * The framing rule from a fixed eye (your own eyes): aimed at the points' centre, with the focal
+ * length that makes them fill `fill` of the frame's height, within a natural range of lenses.
+ */
+export function aimedKey(eye: V3, points: readonly V3[], fill = 0.62): Key {
+  const centre: V3 = [0, 1, 2].map((k) => points.reduce((s, p) => s + p[k], 0) / points.length) as unknown as V3;
+  let [lo, hi] = [300, 1100];
+  for (let i = 0; i < 30; i++) {
+    const f = (lo + hi) / 2;
+    const e = extentOn(camera(eye, centre, f, FRAME.width / 2, FRAME.height / 2), points);
+    if (!e || e.y1 - e.y0 > FRAME.height * fill || e.x1 - e.x0 > FRAME.width * 0.8) hi = f;
+    else lo = f;
+  }
+  return { pos: eye, target: centre, f: lo };
+}
+
 /** Whether any of these points (grown by `margin`) is on the frame. */
 function inView(points: readonly Pt[], margin = 0): boolean {
   const xs = points.map((p) => p[0]);

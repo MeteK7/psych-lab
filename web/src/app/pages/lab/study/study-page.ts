@@ -11,7 +11,7 @@ import { ROOM_WORDS } from '../lab-instrument-sets';
 import { LabOverlay } from '../lab-overlay';
 import { CASES } from './cases';
 import { Axes, Figure } from './idioms/contract';
-import { Direction, directions } from './figures';
+import { Direction, directions, PackId, UnscaledVariant, unscaledVariants } from './figures';
 import { StudyFigure } from './study-figure';
 
 type Scheme = 'light' | 'dark';
@@ -71,6 +71,7 @@ export function axesApart(a: Axes, b: Axes): number {
         <li>Nothing here is the engine's: shared/visual/ is untouched, and no exercise uses any of it.</li>
         <li>A sequence plays once when asked; the slider scrubs it. A viewpoint moves with its slider. With reduced motion, sequences show their last frame and moves cut.</li>
         <li>For forced colours, turn on a Windows contrast theme.</li>
+        <li>Style pack: {{ pack }}{{ pack === 'areas' ? ' (add ?pack=subjects for the second pack)' : ' (education in the regulation ramp, planning in the action ramp)' }}.</li>
       </ul>
       <div class="controls" role="group" aria-label="Show">
         <label class="tier">Schemes
@@ -88,6 +89,7 @@ export function axesApart(a: Axes, b: Axes): number {
             <option value="canvas">Canvas</option><option value="svg">SVG</option>
           </select>
         </label>
+        <label class="tier"><input type="checkbox" [checked]="unscaled()" (change)="unscaled.set($any($event.target).checked)" data-study-unscaled /> R4-4 evaluation</label>
         <label class="tier"><input type="checkbox" [checked]="reduce()" (change)="reduce.set($any($event.target).checked)" /> Reduced motion</label>
       </div>
       <app-lab-overlay />
@@ -108,6 +110,31 @@ export function axesApart(a: Axes, b: Axes): number {
           }
         </div>
       </section>
+
+      @if (unscaled()) {
+        <section class="case" aria-labelledby="study-r44">
+          <h2 id="study-r44">R4-4: amounts the text doesn't give</h2>
+          <p class="note muted">Each figure below is finished and differs only in how an unspecified amount is drawn. Adopted (2026-11-21): <strong>range</strong> in the kinetic idiom. The spatial and field idioms keep the constant provisionally; R4-4 stays open for them.</p>
+          <ul class="tight small">
+            <li><strong>constant</strong> asserts a size: a fixed distance, height or width, which reads as a measurement.</li>
+            <li><strong>labelled</strong> asserts the same size, then withdraws it in words ("not to scale"). The figure still shows one amount.</li>
+            <li><strong>range</strong> asserts only the direction and the least visible difference: later, or taller. The rest is drawn open (tentative), with no far end. A stated amount (M3's "two days") still needs a scale, so its width stays a constant.</li>
+            <li><strong>break</strong> asserts a size and marks the line as cut. It may read as an interruption (a pause, a stop), which the account does not report.</li>
+          </ul>
+          @for (v of unscaledSet; track $index) {
+            @if (v.treatment === 'constant') { <h3 [id]="'study-r44-' + v.case.id + '-' + v.idiom">{{ v.case.id }} · {{ v.idiom }} <span class="meta">· “{{ v.case.text }}”</span></h3> }
+            @for (scheme of schemes(); track scheme) {
+              <div class="panel" [class]="scheme">
+                <span class="tag">{{ v.case.id }} · {{ v.idiom }} · {{ v.treatment }} · {{ scheme }}</span>
+                <app-study-figure [figure]="v.figure" [scheme]="scheme" [backend]="backend()" [reduce]="reduce()" [tag]="v.case.id + '-' + v.idiom + '-r44-' + v.treatment + '-' + scheme" />
+              </div>
+            }
+            @if (unscaledProblems(v).length) {
+              <ul class="problems" aria-label="Validation problems">@for (p of unscaledProblems(v); track p) { <li>{{ p }}</li> }</ul>
+            }
+          }
+        </section>
+      }
 
       @for (c of cases; track c.id) {
         <section class="case" [attr.aria-labelledby]="'study-' + c.id">
@@ -175,13 +202,19 @@ export function axesApart(a: Axes, b: Axes): number {
 export class StudyPage {
   protected readonly env = inject(AppEnvironment);
   protected readonly cases = CASES;
-  private readonly all = directions();
   /** `?schemes=light&versions=finished&backend=svg` starts the page that way (the measurement script uses it). */
   private readonly query = inject(ActivatedRoute).snapshot.queryParamMap;
+  /** `?pack=subjects` draws every case in the second style pack (pass C). */
+  protected readonly pack: PackId = this.query.get('pack') === 'subjects' ? 'subjects' : 'areas';
+  private readonly all = directions(this.pack);
   protected readonly shown = signal<'both' | Scheme>((this.query.get('schemes') as Scheme | null) ?? 'both');
   protected readonly versions = signal<'both' | 'rules' | 'finished'>((this.query.get('versions') as 'rules' | 'finished' | null) ?? 'both');
   protected readonly backend = signal<'canvas' | 'svg'>(this.query.get('backend') === 'svg' ? 'svg' : 'canvas');
   protected readonly reduce = signal(false);
+  /** `?unscaled=1` opens the R4-4 evaluation section. */
+  protected readonly unscaled = signal(this.query.get('unscaled') === '1');
+  protected readonly unscaledSet = unscaledVariants();
+  private readonly checkedUnscaled = new Map<UnscaledVariant, string[]>();
   protected readonly roomWords = ROOM_WORDS;
   protected readonly mcii = SCENES.find((s) => s.scene.id === 'mcii.path')!;
   protected readonly mciiText = this.mcii.text;
@@ -202,6 +235,12 @@ export class StudyPage {
       p = [...problemsOf(d.rules).map((x) => `by the rules, ${x}`), ...problemsOf(d.finished).map((x) => `finished, ${x}`)];
       this.checked.set(d, p);
     }
+    return p;
+  }
+
+  protected unscaledProblems(v: UnscaledVariant): string[] {
+    let p = this.checkedUnscaled.get(v);
+    if (!p) this.checkedUnscaled.set(v, (p = problemsOf(v.figure)));
     return p;
   }
 
