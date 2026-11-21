@@ -1,6 +1,6 @@
 # The representation study (Stage 1), first slice
 
-> **Status (2026-11-17):** first slice built: passes A and B done and measured; the twelve figures wait for your scoring (`findings-slice-1.md` §6). It tests the architecture in `visual-engine-investigation.md` (revision 3) as a working hypothesis (decision D1 (a)). Nothing here changes the engine (`shared/visual/`), an exercise or a policy.
+> **Status (2026-11-21):** slices 1 and 2 accepted (36 figures; open issues in `open-issues.md`). Rules revision 4 applied (four rules adopted; R4-4, the treatment of unspecified amounts, is built in three forms and waits for your choice: `findings-revision-4.md`). Pass C, behavioural independence, done (`findings-pass-c.md`). Pass E prepared, not run (`pass-e-procedure.md`, `/lab/study/match`). It tests the architecture in `visual-engine-investigation.md` (revision 3) as a working hypothesis (decision D1 (a)). Nothing here changes the engine (`shared/visual/`), an exercise or a policy.
 >
 > **Decided:** D1 (a) the architecture as written · D2 (b) this first slice · D3 (a) throwaway study code under `pages/lab/study/` · D4 (a) spatial, kinetic and field idioms first · D5 (b) you score; the psychology-trained reviewer advises on the two psychology cases. D6 (how Stage 1b begins) is still open.
 

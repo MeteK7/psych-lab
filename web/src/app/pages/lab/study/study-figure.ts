@@ -21,7 +21,7 @@ import { ease } from './kit/paths';
 @Component({
   selector: 'app-study-figure',
   imports: [FrameFigure],
-  host: { role: 'img', '[attr.aria-label]': 'figure().alt' },
+  host: { role: 'img', '[attr.aria-label]': 'label() ?? figure().alt' },
   styles: `
     :host { display: block; }
     .controls { display: flex; flex-wrap: wrap; gap: 0.4rem 0.75rem; align-items: center; margin-top: 0.4rem; font-size: 0.85rem; }
@@ -43,7 +43,7 @@ import { ease } from './kit/paths';
       @case ('viewpoint') {
         <div class="controls">
           <label>Where you look from
-            <input type="range" min="0" [max]="positions().length - 1" step="1" [value]="target()" (input)="goTo($any($event.target).valueAsNumber)"
+            <input type="range" min="0" [max]="positions().length - 1" step="1" [value]="target()" (input)="pick($any($event.target).valueAsNumber)"
                    [attr.aria-valuetext]="positions()[target()]" [attr.data-study-view]="tag()" />
           </label>
           <output>{{ positions()[target()] }}</output>
@@ -60,6 +60,10 @@ export class StudyFigure {
   readonly reduce = input(false);
   /** Names the figure in the overlay and for the measurement script. */
   readonly tag = input.required<string>();
+  /** Pass E: a sequence plays once by itself, and a viewpoint tours its positions once, when shown. */
+  readonly autoplay = input(false);
+  /** Pass E: the accessible name, when the text alternative would give the answer away. */
+  readonly label = input<string | null>(null);
 
   private readonly system = reducedMotion();
   private readonly reduced = computed(() => this.reduce() || this.system());
@@ -81,6 +85,7 @@ export class StudyFigure {
   private view = 0;
   /** Our work for the last frame: composing and resolving, ms. */
   private lastWork = 0;
+  private tourTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     const destroy = inject(DestroyRef);
@@ -95,6 +100,7 @@ export class StudyFigure {
         },
         stats: this.stats,
       });
+      if (this.autoplay()) this.begin();
     });
     // A new figure: drawn where it stands.
     effect(() => {
@@ -102,6 +108,7 @@ export class StudyFigure {
       untracked(() => this.paint());
     });
     destroy.onDestroy(() => {
+      this.endTour();
       this.stop();
       unwatch();
     });
@@ -133,6 +140,37 @@ export class StudyFigure {
     const from = this.at() >= 1 ? 0 : this.at();
     this.at.set(from);
     this.start({ kind: 'play', start: this.clock.now(), from });
+  }
+
+  /** Autoplay: a sequence from its start; a viewpoint held, then moved through each position in turn. */
+  private begin(): void {
+    const m = this.figure().motion;
+    if (m.kind === 'timeline') {
+      this.at.set(0);
+      this.paint();
+      this.play();
+    } else if (m.kind === 'viewpoint') this.tour(1);
+  }
+
+  private tour(k: number): void {
+    const hold = 1600;
+    this.tourTimer = setTimeout(() => {
+      this.tourTimer = null;
+      if (k >= this.positions().length) return;
+      this.goTo(k);
+      this.tour(k + 1);
+    }, k === 1 ? hold : hold + (this.reduced() ? 0 : viewpointMoveMs(1)));
+  }
+
+  private endTour(): void {
+    if (this.tourTimer !== null) clearTimeout(this.tourTimer);
+    this.tourTimer = null;
+  }
+
+  /** The person's own hand on the slider ends a tour. */
+  protected pick(position: number): void {
+    this.endTour();
+    this.goTo(position);
   }
 
   protected scrub(u: number): void {

@@ -34,7 +34,7 @@ Words (an element's name, a possibility's wording) are carried as **content keys
 | Group | Predicates |
 |---|---|
 | Place and nearness | `located-in` (a, place) · `near` (a, b) · `apart` (a, b) |
-| Movement | `passes` (a, b): their paths come close and continue · `moves` (a, from, to) · `approaches` (a, b) · `leaves` (a, b) |
+| Movement | `passes` (a, b, mover?): they come close and the mover goes on; the other is the point of reference, and its own motion is a separate `question` (`asks: motion`). Added in v0.1 after review of P1 · `moves` (a, from, to) · `approaches` (a, b) · `leaves` (a, b) |
 | Exchange | `sends` (a, item, b) · `receives` (b, item) · `exchange-absent` (kind, a, b): an exchange of this kind did not take place |
 | Order and dependency | `precedes` (a, b) · `depends-on` (b, a) · `blocks` (a, b) · `joins` (a, b): a becomes part of b |
 | Flow and change | `flows` (a, from, to) · `transforms` (a, aspect, where): a changes in one aspect, at a place · `cycles` (a, through: places) |

@@ -53,3 +53,19 @@ The watchdog never dropped a figure in either run: all stayed in the full tier.
   - fields regenerated every frame at large sizes (P1's field reveals lines computed once, which is cheap)
   - memory over many recompositions
   - bundle size
+
+## Slice 2 (2026-11-21): the 22 moving new figures
+
+Same method as run 2 (our work: composing and resolving; painting is the backend's). Every figure on both backends at ratios 1, 1.5 and 2: 132 measurements. E2's and P6's fields are still.
+
+| Figure | Highest median (ms) | Highest single frame (ms) |
+|---|---|---|
+| **P6 spatial** (12 standing people, 18 seat blocks: the crowd probe) | **2.4** (canvas ×1) | **5.4** (canvas ×1) |
+| P5 spatial (meeting room, six seated people) | 1.0 | 1.9 |
+| E2 spatial, M2 spatial | 0.9 | 2.0 |
+| Every other new figure | 0.7 or less | 2.7 or less |
+
+- **The watchdog never dropped a figure,** and no frame went over the 8.3 ms budget.
+- **The crowd is the heaviest composition so far, and still well within budget:** a median of 2.4 ms on canvas, against 1.4–1.5 ms for E1's tube. My estimate, from comparing P6 with P1's two-person scene, not a measured fit: the cost grows by about 0.15 ms per standing person.
+- **Measured here, unknown before:** a composition of roughly 150 elements (P6). Fifty to two hundred elements was left unknown in §8.2.
+- **Still unknown:** canvas painting cost for the crowd (it is outside "our work" here), display-paced frame rates, and 120 Hz.

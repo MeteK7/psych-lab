@@ -128,12 +128,14 @@ The texts and the five readings for each are reviewed content (`cs-not-enough.v4
 | U1 | Whether the classmate noticed own | U | not stated |
 | U2 | Whether own said hello | U | not stated |
 | U3 | Why | U | not stated |
+| U4 | Whether own was walking or standing | U | **added in v0.1:** the account says only the classmate walked |
 | P | didnt_see · dont_like · lost_thought · annoyed · awkward | P | reviewed readings |
 
 **Representation**
 - Elements: `own` presence, own, equal · `other` presence, equal
 - Statements:
-  - `s1` passes(own, other) · L · "walks past"
+  - `s1` passes(own, other, mover: other) · L · "walks past": the classmate moved; you are the point of reference
+  - `q4` question(own, motion) · U
   - `s2` exchange-absent(spoken greeting, other, own) · R · "without saying hello"
   - `q1` question(other, attention) · U
   - `q2` question(own, whether greeted) · U
