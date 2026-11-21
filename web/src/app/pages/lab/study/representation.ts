@@ -18,14 +18,20 @@ export interface RepElement {
   salience?: 'primary' | 'equal' | 'secondary';
   /** The viewer's own presence (at most one). */
   own?: boolean;
+  /** Slice 2 (G-04): a plural presence: a number, or `several`, `many`. */
+  count?: number | 'several' | 'many';
 }
 
 /** What a question asks about. */
-export type Asks = 'attention' | 'whether' | 'cause' | 'time' | 'intent' | 'setting' | 'fate';
+export type Asks = 'attention' | 'whether' | 'cause' | 'time' | 'intent' | 'setting' | 'fate' | 'motion';
 
 /** The predicates the four depth cases use (representation-v0.md §3, and two found in pass B). */
 export type Predicate =
-  | { p: 'passes'; a: string; b: string }
+  /**
+   * a and b came close and went on. `mover` (v0.1, after review of P1): the one the account says moved;
+   * the other is the point of reference, whose own motion is not stated.
+   */
+  | { p: 'passes'; a: string; b: string; mover?: string }
   | { p: 'exchange-absent'; kind: string; from: string; to: string }
   | { p: 'sends'; from: string; item: string; to: string }
   | { p: 'receives'; who: string; item: string }
@@ -38,6 +44,8 @@ export type Predicate =
   | { p: 'flows'; what: string; from: string; to: string }
   | { p: 'joins'; what: string; into: string; at: string }
   | { p: 'cycles'; what: string; through: readonly string[] }
+  /** Revision 3 (G-27): a part of a whole. Parts of one whole sit together in every idiom. */
+  | { p: 'part-of'; part: string; whole: string }
   | { p: 'complete'; what: string }
   | { p: 'precedes'; a: string; b: string }
   | { p: 'depends-on'; what: string; on: string }
@@ -45,6 +53,23 @@ export type Predicate =
   | { p: 'waiting'; what: string; for: string }
   | { p: 'question'; about: string; asks: Asks }
   | { p: 'alternatives'; question: string; options: readonly string[]; origin: 'person' | 'content' | 'source' }
+  // Slice 2: predicates the eight new cases need (logs.md G-03, G-06, G-11, G-16), each domain-neutral.
+  /** a responds to an event: `kind` from a closed list. */
+  | { p: 'reacts'; who: string; to: string; kind: 'laughter' | 'none' }
+  /** a touches or holds onto b. */
+  | { p: 'contact'; a: string; b: string }
+  /** a is moved off its place by a force, not by its own will. */
+  | { p: 'displaced'; what: string; by: string }
+  /** a's place in time moves later (or earlier) by someone; the amount may be unknown. */
+  | { p: 'shifts'; what: string; by?: string; later: boolean }
+  /** a exceeds b in one aspect. */
+  | { p: 'exceeds'; a: string; b: string; aspect: string }
+  /** a is behind its plan in time. */
+  | { p: 'behind'; what: string; amount: string }
+  /** R4-2 (G-29): a is above b. */
+  | { p: 'above'; a: string; b: string }
+  /** a changes form from one state to another, at a place. */
+  | { p: 'transforms'; what: string; from: string; to: string; at: string }
   // Predicates an interpreter might propose. They appear only as `inferred` statements: no idiom draws them.
   | { p: 'notices'; who: string; whom: string }
   | { p: 'expects'; who: string; what: string }
@@ -66,10 +91,11 @@ export interface Statement {
 export type Stance = 'own' | 'behind' | 'across' | 'outside' | 'within' | 'above' | 'front' | 'side';
 
 export interface Facets {
-  space?: { setting: 'reported' | 'stand-in'; place?: 'home' | 'open-floor' | 'ground'; viewpoints: readonly Stance[] };
+  space?: { setting: 'reported' | 'stand-in'; place?: 'home' | 'open-floor' | 'ground' | 'meeting-room' | 'carriage'; viewpoints: readonly Stance[] };
   dynamics?: { pace: 'still' | 'slow' | 'moderate' };
   field?: { quality: 'clarity' | 'density' | 'agitation'; source: string; evolves: boolean };
-  metaphor?: { frame: 'path'; stations: readonly string[]; gate: string };
+  /** The `path` frame: stations along a way; a gate on it, if something blocks it. */
+  metaphor?: { frame: 'path'; stations: readonly string[]; gate?: string };
 }
 
 export interface Representation {

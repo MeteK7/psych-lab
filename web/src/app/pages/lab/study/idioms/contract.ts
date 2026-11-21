@@ -75,7 +75,11 @@ function clause(c: StudyCase, s: Statement): string | null {
   const w = (id: string) => word(c, id);
   const say = s.say;
   switch (say.p) {
-    case 'passes': return `${w(say.a)} and ${w(say.b)} pass each other`;
+    case 'passes': {
+      if (!say.mover) return `${w(say.a)} and ${w(say.b)} pass each other`;
+      const by = say.mover === say.a ? say.b : say.a;
+      return `${w(say.mover)} walks past ${w(by)}`;
+    }
     case 'exchange-absent': return `there is no ${say.kind} from ${w(say.from)}`;
     case 'sends': return `${w(say.from)} sends ${w(say.item)} to ${w(say.to)}`;
     case 'receives': return `${w(say.who)} ${say.who === 'own' ? 'read' : 'reads'} it`;
@@ -86,6 +90,15 @@ function clause(c: StudyCase, s: Statement): string | null {
     case 'flows': return `${w(say.what)} goes from ${w(say.from)} to ${w(say.to)}`;
     case 'joins': return `at ${w(say.at)}, ${w(say.what)} joins ${w(say.into)}`;
     case 'cycles': return `${w(say.what)} goes round and back`;
+    case 'reacts': return `${say.kind === 'laughter' ? 'a few of ' + w(say.who) + ' laugh' : w(say.who) + ' respond'}`;
+    case 'contact': return `${w(say.a)} ${say.a === 'own' ? 'catch hold of' : 'catches hold of'} ${w(say.b)}`;
+    case 'displaced': return `${w(say.what)} ${say.what === 'own' ? 'are' : 'is'} thrown off balance`;
+    case 'shifts': return `${say.by ? w(say.by) + ' moves ' : ''}${w(say.what)} ${say.later ? 'later' : 'earlier'}, by an amount not given`;
+    case 'exceeds': return `${w(say.a)} grows taller than ${w(say.b)}`;
+    case 'behind': return `${w(say.what)} is ${say.amount} behind its plan`;
+    case 'transforms': return `at ${w(say.at)}, ${w(say.what)} turns from ${say.from} to ${say.to}`;
+    case 'above': return `${w(say.a)} are above ${w(say.b)}`;
+    case 'part-of': return `${w(say.part)} is part of ${w(say.whole)}`;
     case 'complete': return `${w(say.what)} is finished`;
     case 'precedes': return `${w(say.b)} comes after ${w(say.a)}`;
     case 'depends-on': return `${w(say.what)} depends on ${w(say.on)}`;
@@ -107,6 +120,7 @@ function question(c: StudyCase, s: Statement): string | null {
     case 'intent': return `what ${x} meant`;
     case 'setting': return `where ${x} was`;
     case 'fate': return `what happens to ${x} after that`;
+    case 'motion': return `whether ${x} ${x === 'you' ? 'were' : 'was'} moving too`;
   }
 }
 
@@ -126,6 +140,24 @@ export function altText(c: StudyCase, shown: (id: string) => boolean = () => tru
   if (open.length) parts.push(`Left open: ${open.join('; ')}.`);
   for (const a of sets) if (a.say.p === 'alternatives') parts.push(`${a.say.options.length} explanations fit equally; none is shown as more likely.`);
   return parts.join(' ');
+}
+
+/**
+ * Rule C9 (revision 3, accepted in slice 1 as E1-S1, E1-K1 and E1-F1): places that are parts of one
+ * whole sit together. A cycle through two parts of one whole is laid out as two loops meeting there.
+ */
+export function layoutOf(c: StudyCase): 'loop' | 'figure-eight' {
+  const cycle = drawable(c.rep).find((s) => s.say.p === 'cycles');
+  if (!cycle || cycle.say.p !== 'cycles') return 'loop';
+  const through = cycle.say.through;
+  const wholes = new Map<string, number>();
+  for (const s of drawable(c.rep)) if (s.say.p === 'part-of' && through.includes(s.say.part)) wholes.set(s.say.whole, (wholes.get(s.say.whole) ?? 0) + 1);
+  return [...wholes.values()].some((n) => n >= 2) ? 'figure-eight' : 'loop';
+}
+
+/** The coverage entries for part-of statements: shown by placing the parts together. */
+export function partsShown(c: StudyCase): Record<string, string> {
+  return Object.fromEntries(drawable(c.rep).filter((s) => s.say.p === 'part-of').map((s) => [s.id, 'its parts sit side by side, meeting in the middle (C9)']));
 }
 
 /** A coverage report from what an idiom says it drew. Every drawable statement must be accounted for. */

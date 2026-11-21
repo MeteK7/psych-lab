@@ -2,11 +2,13 @@ import type { SceneElement } from '../../../../shared/visual/composition/scene';
 import { V3, length, place, sub } from '../../../../shared/visual/generation/spatial/camera';
 import { POSES, SEEN_FROM_WITHIN } from '../../../../shared/visual/generation/spatial/figures';
 import type { StudyCase } from '../cases';
+import type { Unscaled } from './kinetic';
 import { label } from '../kit/elements';
 import { Pt, smooth } from '../kit/paths';
-import { Key, Space, cameraOn, groundPlane } from '../kit/spatial';
+import { Key, Space, aimedKey, cameraOn, framedKey, groundPlane } from '../kit/spatial';
 import { Stance, find } from '../representation';
-import { Figure, altText, composed, coverage } from './contract';
+import { Figure, altText, composed, coverage, layoutOf, partsShown } from './contract';
+import { carriage, meetingRoom, pathScene, plants } from './spatial2';
 
 /**
  * STUDY CODE: the spatial scene idiom (docs/visual-study/idioms.md, S1–S9): a constructed place in
@@ -14,9 +16,9 @@ import { Figure, altText, composed, coverage } from './contract';
  * engine's spatial geometry through the study's own builder (kit/spatial.ts).
  */
 export interface SpatialTuning {
-  /** S2: how far apart two passing paths are, metres. */
+  /** S2 (revision 2): how far the mover's course passes from the one passed, metres. */
   passingGap: number;
-  /** S8: where along the passing the still scene stands: 0 is side by side; positive, a step before. */
+  /** S8 (revision 2): how far past the closest point the mover stands: the moment just after the passing. */
   passingOffset: number;
   /** S7: a key per stance; replaced whole by a finish. */
   keys: Partial<Record<Stance, Key>>;
@@ -28,63 +30,130 @@ export interface SpatialTuning {
   layout: 'loop' | 'figure-eight';
   /** C8. */
   labels: boolean;
-  /** Not in the rules (hand finishing only): the room's faint floor edge, the cut edge of walls drawn low, and which wall has the window. */
+  /** The room's faint floor edge, the cut edge of walls drawn low, and which wall has the window (rules since revision 3). */
   floorEdges: boolean;
   cutEdges: boolean;
   window: 'left' | 'front';
+  /** Slice 2: how high a place stands above the ground (none by the rules: v0 can't say "above", G-29). */
+  lift: Readonly<Record<string, number>>;
+  /** Slice 2: how far beside the way something standing next to a station is placed (metres). */
+  aside: number;
+  /** A leaf's length on a plant (metres; R4-5). */
+  leaf: number;
+  /**
+   * R4-4 (open for this idiom): how an amount the text doesn't give is drawn. The constant, provisionally:
+   * it asserts a size the text doesn't give (findings-revision-4.md §3). Only the kinetic idiom adopted `range`.
+   */
+  unscaled: Unscaled;
 }
 
 export const SPATIAL_RULES: SpatialTuning = {
-  passingGap: 1.2,
-  passingOffset: 0,
+  passingGap: 0.95,
+  passingOffset: 0.75,
   keys: {},
   floor: 40,
   tube: 0.07,
   bead: 0.035,
   layout: 'loop',
   labels: true,
-  floorEdges: false,
-  cutEdges: false,
-  window: 'left',
+  // Revision 3 (accepted in slice 1, P2-S2–S4): the home setting draws the room's own devices.
+  floorEdges: true,
+  cutEdges: true,
+  window: 'front',
+  lift: {},
+  aside: 1.3,
+  leaf: 0.2,
+  unscaled: 'constant',
 };
 
 export function spatial(c: StudyCase, finish: Partial<SpatialTuning> = {}): Figure {
-  const t: SpatialTuning = { ...SPATIAL_RULES, ...finish, keys: { ...SPATIAL_RULES.keys, ...finish.keys } };
+  // R4-2: whatever the representation says is above something is lifted (a rule constant: 1.6 m).
+  const above = Object.fromEntries(find(c.rep, 'above').map((s) => [s.say.a, 1.6]));
+  const t: SpatialTuning = { ...SPATIAL_RULES, layout: layoutOf(c), lift: above, ...finish, keys: { ...SPATIAL_RULES.keys, ...finish.keys } };
   if (find(c.rep, 'passes').length) return passing(c, t);
+  if (find(c.rep, 'contact').length) return carriage(c, t);
+  if (find(c.rep, 'reacts').length) return meetingRoom(c, t);
   if (find(c.rep, 'located-in').length) return athome(c, t);
   if (find(c.rep, 'cycles').length) return system(c, t);
-  if (c.rep.facets.metaphor?.frame === 'path') return way(c, t);
+  if (find(c.rep, 'exceeds').length) return plants(c, t);
+  if (c.rep.facets.metaphor?.frame === 'path') return c.rep.facets.metaphor.gate ? way(c, t) : pathScene(c, t);
   throw new Error(`spatial: no pattern for ${c.id}`);
 }
 
-function stances(c: StudyCase): readonly Stance[] {
+/** A box's eight corners. */
+export function corners(min: V3, max: V3): V3[] {
+  const out: V3[] = [];
+  for (const x of [min[0], max[0]]) for (const y of [min[1], max[1]]) for (const z of [min[2], max[2]]) out.push([x, y, z]);
+  return out;
+}
+
+export function centreOf(points: readonly V3[]): V3 {
+  return [0, 1, 2].map((k) => points.reduce((s, p) => s + p[k], 0) / points.length) as unknown as V3;
+}
+
+export function stances(c: StudyCase): readonly Stance[] {
   return c.rep.facets.space?.viewpoints ?? ['across'];
 }
 
-function keysFor(c: StudyCase, t: SpatialTuning, rules: Partial<Record<Stance, Key>>): Key[] {
+export function keysFor(c: StudyCase, t: SpatialTuning, rules: Partial<Record<Stance, Key>>): Key[] {
   return stances(c).map((s) => t.keys[s] ?? rules[s] ?? rules.across!);
 }
 
-const youLabel = (space: Space, head: V3, names: readonly string[], cites: readonly string[]): SceneElement[] => {
+export const youLabel = (space: Space, head: V3, names: readonly string[], cites: readonly string[]): SceneElement[] => {
   const at = space.anchor(head, 0.32);
   return at ? [label('own-label', 'own', at, 'middle', cites, 'Names you, once you are in the picture.', { names, halo: true })] : [];
 };
 
-/** S1 stand-in, S2 passes, S8, C3: two walking figures on an open floor, at the passing. */
+/**
+ * Revision 2 (after review of P1): S1 stand-in, S2 passes, S8, S7's framing rule, C3.
+ * - The encounter, not two people: the mover walks along one way that passes close by the one
+ *   passed (`passingGap`); the way is drawn, because it is the course the account reports.
+ * - Only the mover is drawn walking. A presence whose motion is unknown stands, the declared neutral
+ *   pose, at the way's edge, square to it.
+ * - The moment: one step past the closest point, the first moment at which "past" is visible: the
+ *   mover going on, away from the one passed. Time runs left to right (C5): the mover walks rightwards.
+ * - Every camera comes from the framing rule: the people fill a set share of the frame at human
+ *   scale, with room ahead of the mover (lead room), nothing cropped.
+ */
 function passing(c: StudyCase, t: SpatialTuning): Figure {
   const s1 = find(c.rep, 'passes')[0];
   const set = find(c.rep, 'alternatives')[0];
   const own = c.rep.elements.find((e) => e.id === s1.say.a)!.own ? s1.say.a : s1.say.b;
   const other = own === s1.say.a ? s1.say.b : s1.say.a;
-  const half = t.passingGap / 2;
-  const ownAt: V3 = [-half, 0, -t.passingOffset];
-  const otherAt: V3 = [half, 0, t.passingOffset];
-  const ownHead = place(POSES.walking.head.at, 0, ownAt);
-  const otherHead = place(POSES.walking.head.at, Math.PI, otherAt);
-  // S7 by the rules: from your eyes, looking towards the other person; from across, side-on to both.
+  const motionOpen = c.rep.statements.find((s) => s.say.p === 'question' && s.say.asks === 'motion' && s.say.about === own);
+  const ownMoves = !s1.say.mover || (s1.say.mover === own && !motionOpen);
+  // The one passed stands at the way's near edge, facing across it; the mover walks along it, rightwards.
+  const ownAt: V3 = [0, 0, 0];
+  const ownPose = ownMoves ? POSES.walking : POSES.standing;
+  const ownAngle = ownMoves ? -Math.PI / 2 : 0;
+  const otherAngle = Math.PI / 2;
+  const way = { x0: -9, x1: 9, z0: t.passingGap - 0.95, z1: t.passingGap + 0.95 };
+  const ownHead = place(ownPose.head.at, ownAngle, ownAt);
+  // S8, revision 2: the moment depends on the stance. Through your own eyes the passing itself can't
+  // be seen in one still (one step past, they are a metre from your eyes, then out of view), so that
+  // stance shows them coming along the way; from across, one step past you and going on. Moving the
+  // viewpoint from one to the other completes the passing.
+  const before = -2.6;
+  const moverAt = (view: number): V3 => [before + (t.passingOffset - before) * Math.min(1, Math.max(0, view)), 0, t.passingGap];
+  const headOf = (at: V3) => place(POSES.walking.head.at, otherAngle, at);
+  const figure = (at: V3): V3[] => [[at[0] - 0.35, 0, at[2]], [at[0] + 0.35, 0, at[2]], [headOf(at)[0], headOf(at)[1] + 0.12, headOf(at)[2]]];
+  const ownBox: V3[] = [[ownAt[0] - 0.25, 0, ownAt[2]], [ownAt[0] + 0.25, 0, ownAt[2]], [ownHead[0], ownHead[1] + 0.12, ownHead[2]]];
+  const coming = moverAt(0);
+  const past = moverAt(1);
+  const lead: V3 = [past[0] + 1.4, 1.0, past[2]];
+  // S7, the framing rule. From your eyes: aimed at the mover coming. From across: square to the
+  // mover's course, so it runs left to right across the frame (C5), turned a little to whichever side
+  // separates the two people more, a little above eye height; both people, the way and room ahead
+  // of the mover (lead room) in one view.
+  const separation = (from: V3) => {
+    const right: [number, number] = [-from[2], from[0]];
+    const len = Math.hypot(...right);
+    return Math.abs(((past[0] - ownAt[0]) * right[0] + (past[2] - ownAt[2]) * right[1]) / len);
+  };
+  const turned = ([0.35, -0.35] as const).map((s): V3 => [s, 0.5, -1]).sort((a, b) => separation(b) - separation(a))[0];
   const rules: Partial<Record<Stance, Key>> = {
-    own: { pos: [ownHead[0], ownHead[1] - 0.02, ownHead[2] + 0.06], target: [otherHead[0], otherHead[1] - 0.25, otherHead[2]], f: 520 },
-    across: { pos: [6.2, 2.3, -1.2], target: [0, 0.9, 0], f: 720 },
+    own: aimedKey([ownHead[0], ownHead[1] - 0.02, ownHead[2] + 0.08], figure(coming), 0.42),
+    across: framedKey([...ownBox, ...figure(past), lead], [(ownAt[0] + past[0] + 0.6) / 2, 0.85, (ownAt[2] + past[2]) / 2], turned, 720, 0.5),
   };
   const keys = keysFor(c, t, rules);
   const alt = altText(c);
@@ -97,25 +166,29 @@ function passing(c: StudyCase, t: SpatialTuning): Figure {
     coverage: coverage(
       c.rep,
       {
-        [s1.id]: 'two walking figures side by side on their two ways, at the passing',
-        q1: 'the other person is faceless, and only their walking says which way they face',
+        [s1.id]: 'the classmate walking along one way that passes close by you: coming, through your own eyes; one step past you and going on, from across',
+        q1: 'the classmate is faceless; only the walking says which way they go',
         q2: 'you are faceless too',
         q3: 'nothing in the scene says why',
+        ...(motionOpen ? { [motionOpen.id]: 'you stand, the declared neutral pose: walking would assert that you were moving' } : {}),
       },
       {
-        s2: 'an absent greeting has no form in a still scene: nothing is drawn between them',
+        s2: 'an absent greeting has no form in a still scene: nothing is drawn between you',
         ...(set ? { [set.id]: 'a still scene of the facts has no place for possibilities: they are listed beside it' } : {}),
       },
     ),
     compose(at: number) {
       const cam = cameraOn(keys, at);
       const space = new Space(cam);
-      groundPlane(space, 'floor', t.floor, 'mid', ['base:stand-in'], 'A stand-in floor: the account names no place, so the least specific one.');
+      groundPlane(space, 'floor', t.floor, 'far', ['base:stand-in'], 'A stand-in floor: the account names no place, so the least specific one.');
+      space.face('way', [[way.x0, 0.002, way.z1], [way.x1, 0.002, way.z1], [way.x1, 0.002, way.z0], [way.x0, 0.002, way.z0]], [0, 1, 0], { role: 'mid', material: 'shaded', facing: 'lit' }, [s1.id], 'The way the classmate walked: it passes close by you.', 0);
       const insideOwn = length(sub(cam.pos, ownHead)) < 0.3;
-      const ownPerson = space.person(own, POSES.walking, ownAt, 0, 'subject', [s1.id, 'q2'], 'You, walking your way: faceless, in the area colour.', insideOwn ? SEEN_FROM_WITHIN : undefined);
-      const otherPerson = space.person(other, POSES.walking, otherAt, Math.PI, 'context', [s1.id, 'q1'], 'The other person, walking theirs: faceless, the same build.');
-      if (ownPerson && !insideOwn) space.shadow(`${own}-shadow`, own, ownAt[0], ownAt[2], 0.34, 0.28, [s1.id], 'Grounds you on the floor.');
-      if (otherPerson) space.shadow(`${other}-shadow`, other, otherAt[0], otherAt[2], 0.34, 0.28, [s1.id], 'Grounds the other person on the floor.');
+      // Through your own eyes a standing body is out of view: nothing of you is drawn.
+      const ownPerson = insideOwn && ownPose === POSES.standing ? null : space.person(own, ownPose, ownAt, ownAngle, 'subject', [s1.id, 'q2', ...(motionOpen ? [motionOpen.id] : [])], ownMoves ? 'You, walking: faceless, in the area colour.' : 'You, standing: the neutral pose, because whether you were moving is not said. Faceless, in the area colour.', insideOwn ? SEEN_FROM_WITHIN : undefined);
+      const otherAt = moverAt(at / Math.max(1, keys.length - 1));
+      const otherPerson = space.person(other, POSES.walking, otherAt, otherAngle, 'context', [s1.id, 'q1'], 'The classmate, walking along the way past you: faceless, the same build.');
+      if (ownPerson && !insideOwn) space.shadow(`${own}-shadow`, own, ownAt[0], ownAt[2], 0.32, 0.26, [s1.id], 'Grounds you on the floor.');
+      if (otherPerson) space.shadow(`${other}-shadow`, other, otherAt[0], otherAt[2], 0.34, 0.28, [s1.id], 'Grounds the classmate on the way.');
       const labels = t.labels && ownPerson && !insideOwn ? youLabel(space, ownHead, [own], [s1.id]) : [];
       return composed(c, 'spatial', [
         { id: 'space', plane: 'subject', elements: space.elements() },
@@ -135,11 +208,19 @@ function athome(c: StudyCase, t: SpatialTuning): Figure {
   const seatAt: V3 = [0.4, 0, 1.6];
   const head = place(POSES.seated.head.at, 0, seatAt);
   const W = { x0: -2.4, x1: 2.4, z0: -0.6, z1: 4.0, h: 2.6 };
+  // S7r3, the framing rule for every stance (accepted in slice 1 as P2-S1 and P2-S5): each stance
+  // names what it must show and the direction it looks from; the camera follows.
+  const phone: V3 = [seatAt[0], 0.8, seatAt[2] + 0.56];
+  const windowAhead: V3[] = [[-0.7, 0.9, W.z1], [1.5, 2.1, W.z1]];
+  const you: V3[] = [...corners([seatAt[0] - 0.56, 0, seatAt[2] - 0.62], [seatAt[0] + 0.56, 1.0, seatAt[2] + 0.62]), [head[0], head[1] + 0.13, head[2]], phone];
+  const rooms3: V3[] = corners([-7.2, 0, W.z0], [7.2, 1.05, W.z1]);
   const rules: Partial<Record<Stance, Key>> = {
-    own: { pos: [head[0], head[1], head[2] - 0.02], target: [seatAt[0], 0.7, seatAt[2] + 1.8], f: 720 },
-    behind: { pos: [-0.25, 1.78, 0.7], target: [0.55, 0.78, 2.7], f: 620 },
-    across: { pos: [-1.9, 2.05, 3.7], target: [0.3, 0.72, 1.6], f: 600 },
-    outside: { pos: [-7.4, 10.2, -6.4], target: [0.6, 0, 1.8], f: 900 },
+    // Constants set with sight of the accepted slice-1 figures (revision 3 log): the held object
+    // weighs double in the aim, so it stays in view above the frame's lower edge.
+    own: aimedKey([head[0], head[1], head[2] - 0.02], [phone, phone, ...windowAhead], 0.5),
+    behind: framedKey(you, centreOf(you), [-0.45, 0.5, -0.85], 620, 0.5),
+    across: framedKey(you, centreOf(you), [-0.72, 0.42, 0.68], 620, 0.5),
+    outside: framedKey(rooms3, centreOf(rooms3), [-0.55, 0.78, -0.6], 900, 0.7, 0.92),
   };
   const keys = keysFor(c, t, rules);
   const n = keys.length;
@@ -251,7 +332,8 @@ function system(c: StudyCase, t: SpatialTuning): Figure {
     t.layout === 'figure-eight'
       ? [at[0], [-1.9, 1.2], at[1], [1.9, 1.2], at[2], [1.9, -1.2], at[3], [-1.9, -1.2]]
       : at;
-  const ring = smooth(via.map(([x, z]) => [x, z] as Pt), true, 24).map(([x, z]) => [x, 0.62, z] as V3);
+  const liftAt = (x: number, z: number) => through.reduce((y, id, k) => y + (t.lift[id] ?? 0) * Math.exp(-((x - at[k][0]) ** 2 + (z - at[k][1]) ** 2) / 1.2), 0);
+  const ring = smooth(via.map(([x, z]) => [x, z] as Pt), true, 24).map(([x, z]) => [x, 0.62 + liftAt(x, z), z] as V3);
   // Where each place falls on the ring: the nearest point.
   const index = at.map(([x, z]) => {
     let best = 0;
@@ -273,9 +355,11 @@ function system(c: StudyCase, t: SpatialTuning): Figure {
     }
     return out;
   };
+  // S7r3: the framing rule; everything the cycle passes through, from the front and from the side.
+  const extent: V3[] = at.flatMap(([x, z], k) => corners([x - 0.4, t.lift[through[k]] ?? 0, z - 0.35], [x + 0.4, 0.75 + (t.lift[through[k]] ?? 0), z + 0.35]));
   const rules: Partial<Record<Stance, Key>> = {
-    front: { pos: [0, 3.6, -7.4], target: [0, 0.3, 0.1], f: 640 },
-    side: { pos: [-7.4, 3.2, -0.6], target: [0, 0.3, 0.1], f: 640 },
+    front: framedKey(extent, centreOf(extent), [0, 0.45, -1], 640, 0.55, 0.8),
+    side: framedKey(extent, centreOf(extent), [-1, 0.42, -0.1], 640, 0.55, 0.8),
   };
   const keys = keysFor(c, t, rules);
   const alt = altText(c);
@@ -290,10 +374,12 @@ function system(c: StudyCase, t: SpatialTuning): Figure {
       {
         ...Object.fromEntries(flows.map((f) => [f.id, `the tube from ${f.say.from} to ${f.say.to}`])),
         [s6.id]: 'the tube closes into one loop',
+        ...Object.fromEntries(find(c.rep, 'above').map((x) => [x.id, 'the place above is lifted above the ground (R4-2)'])),
+        ...partsShown(c),
         ...(joins ? { [joins.id]: 'beads on the tube from the lungs on' } : {}),
         ...(fate ? { [fate.id]: 'past the body the beads go on, translucent: kept or lost is not said' } : {}),
       },
-      {},
+      Object.fromEntries(find(c.rep, 'transforms').map((x) => [x.id, 'the tube shows the course, not the change of form (pattern X)'])),
     ),
     compose(v: number) {
       const cam = cameraOn(keys, v);
@@ -302,7 +388,8 @@ function system(c: StudyCase, t: SpatialTuning): Figure {
       through.forEach((id, k) => {
         const [x, z] = at[k];
         const cites = flows.filter((f) => f.say.from === id || f.say.to === id).map((f) => f.id);
-        space.box(`place-${id}`, [x - 0.38, 0, z - 0.3], [x + 0.38, 0.5, z + 0.3], 'near', cites, `${c.words[id] ?? id}: a place the blood passes through.`);
+        const up = t.lift[id] ?? 0;
+        space.box(`place-${id}`, [x - 0.38, up, z - 0.3], [x + 0.38, up + 0.5, z + 0.3], 'near', cites, `${c.words[id] ?? id}: a place the flow passes through.`);
       });
       space.tube('blood', [...ring, ring[0]], t.tube, { role: 'subject', material: 'shaded', facing: 'base' }, [...flows.map((f) => f.id), s6.id], 'The blood’s way: one closed tube.');
       if (joins) {
@@ -315,7 +402,7 @@ function system(c: StudyCase, t: SpatialTuning): Figure {
       }
       const labels: SceneElement[] = t.labels
         ? through.flatMap((id, k) => {
-            const p = space.anchor([at[k][0], 0.5, at[k][1]], 0.34);
+            const p = space.anchor([at[k][0], 0.5 + (t.lift[id] ?? 0), at[k][1]], 0.34);
             return p ? [label(`label-${id}`, id, p, 'middle', flows.filter((f) => f.say.from === id || f.say.to === id).map((f) => f.id), 'Names the place.', { halo: true })] : [];
           })
         : [];
@@ -338,9 +425,11 @@ function way(c: StudyCase, t: SpatialTuning): Figure {
   const q1 = c.rep.statements.find((s) => s.say.p === 'question' && s.say.asks === 'time')!;
   const [a, b] = [s2.say.a, s2.say.b];
   const gateZ = 5;
+  // S7r3 (accepted in slice 1 as M1-S1): the framing rule; from the way itself, low, and from above.
+  const stations: V3[] = [...corners([-2.5, 0, 0.4], [-1.3, 1.0, 1.6]), ...corners([-1.06, 0, gateZ], [1.06, 1.5, gateZ]), ...corners([1.3, 0, 8.4], [2.5, 1.0, 9.6])];
   const rules: Partial<Record<Stance, Key>> = {
-    within: { pos: [0, 1.6, -2.6], target: [0, 1.0, 8], f: 600 },
-    above: { pos: [-9.5, 9.5, 0.5], target: [0, 0, 6.2], f: 720 },
+    within: framedKey(stations, centreOf(stations), [0.08, 0.12, -1], 520, 0.4, 0.82),
+    above: framedKey(stations, centreOf(stations), [-0.75, 0.75, -0.35], 720, 0.62, 0.85),
   };
   const keys = keysFor(c, t, rules);
   const alt = altText(c);

@@ -1,11 +1,13 @@
 import type { SceneElement } from '../../../../shared/visual/composition/scene';
 import type { StudyCase } from '../cases';
+import type { Unscaled } from './kinetic';
 import { label, path, r2, shape } from '../kit/elements';
 import { Area, contour, streamline, thin } from '../kit/field';
 import { FRAME } from '../kit/spatial';
 import { Pt, Track, ease, polyline, smooth } from '../kit/paths';
 import { find } from '../representation';
-import { Figure, SAFE, altText, composed, coverage } from './contract';
+import { Figure, SAFE, altText, composed, coverage, layoutOf, partsShown } from './contract';
+import { crowdField, grownField, heldWait, lateField, openWait, ripples, shiftedField } from './field2';
 import { roundedRect } from './kinetic';
 
 /**
@@ -36,16 +38,22 @@ export interface FieldTuning {
   layout: 'loop' | 'figure-eight';
   /** F3, F7: marks and labels. */
   labels: boolean;
+  /**
+   * R4-4 (open for this idiom): how an amount the text doesn't give is drawn. The constant, provisionally:
+   * it asserts a size the text doesn't give (findings-revision-4.md §3). Only the kinetic idiom adopted `range`.
+   */
+  unscaled: Unscaled;
 }
 
 export const FIELD_RULES: FieldTuning = {
   evolveMs: 6000,
-  reach: 210,
+  reach: 170,
   bundle: 3,
   bundleGap: 6,
-  perHeading: 5,
-  headingStart: 64,
-  turn: 0.28,
+  // R4-1 (revision 4): the accepted P1-F1 values, needed five times, are the rule.
+  perHeading: 4,
+  headingStart: 76,
+  turn: 0.6,
   tightness: 70,
   scales: [1, 1.7, 3, 5.5],
   lanesAfter: 7,
@@ -53,24 +61,35 @@ export const FIELD_RULES: FieldTuning = {
   laneGap: 5,
   layout: 'loop',
   labels: true,
+  unscaled: 'constant',
 };
 
 const CX = FRAME.width / 2;
 const CY = FRAME.height / 2;
-const AREA: Area = { x: SAFE, y: SAFE, width: FRAME.width - 2 * SAFE, height: FRAME.height - 2 * SAFE };
+export const AREA: Area = { x: SAFE, y: SAFE, width: FRAME.width - 2 * SAFE, height: FRAME.height - 2 * SAFE };
 
 export function field(c: StudyCase, finish: Partial<FieldTuning> = {}): Figure {
-  const t: FieldTuning = { ...FIELD_RULES, ...finish };
+  const t: FieldTuning = { ...FIELD_RULES, layout: layoutOf(c), ...finish };
   const f = c.rep.facets.field;
   if (!f) throw new Error(`field: ${c.id} has no field facet`);
-  if (f.quality === 'clarity') return clarity(c, t);
+  const has = (p: Parameters<typeof find>[1]) => find(c.rep, p).length > 0;
+  if (f.quality === 'clarity') {
+    if (has('passes')) return clarity(c, t);
+    if (has('sends') && has('waiting')) return openWait(c, t);
+    if (has('shifts')) return shiftedField(c, t);
+    if (has('exceeds')) return grownField(c, t);
+    if (has('behind')) return lateField(c, t);
+  }
   if (f.quality === 'agitation') return agitation(c, t);
-  if (find(c.rep, 'cycles').length) return flow(c, t);
+  if (has('cycles')) return flow(c, t);
+  if (has('reacts')) return ripples(c, t);
+  if (has('contact')) return crowdField(c, t);
+  if (has('sends') && has('waiting')) return heldWait(c, t);
   return held(c, t);
 }
 
 /** Lines offset sideways from a track, `offset` units to its left. */
-function offsetLine(track: Track, offset: number, u0: number, u1: number, n = 80): Pt[] {
+export function offsetLine(track: Track, offset: number, u0: number, u1: number, n = 80): Pt[] {
   const out: Pt[] = [];
   for (let k = 0; k <= n; k++) {
     const u = u0 + ((u1 - u0) * k) / n;
@@ -89,11 +108,21 @@ function clarity(c: StudyCase, t: FieldTuning): Figure {
   const set = find(c.rep, 'alternatives')[0];
   const own = c.rep.elements.find((e) => e.id === s1.say.a)!.own ? s1.say.a : s1.say.b;
   const other = own === s1.say.a ? s1.say.b : s1.say.a;
-  const gap = 66;
+  // F2r2 (revision 2, after review of P1): when the account names the one who moved and the other's
+  // motion is open, only the mover's way is a bundle; the other is a still mark beside it, which the
+  // way comes close to and leaves, left to right (C5). The gap widens so the open field around the
+  // closest point lies clear between them.
+  const motionOpen = c.rep.statements.find((s) => s.say.p === 'question' && s.say.asks === 'motion' && s.say.about === own);
+  const ownStill = !!s1.say.mover && s1.say.mover !== own && !!motionOpen;
+  const gap = ownStill ? 110 : 66;
   const x0 = SAFE + 60;
   const x1 = FRAME.width - x0;
-  const ownTrack = new Track(smooth([[x0, CY + gap / 2 + 60], [CX, CY + gap / 2], [x1, CY + gap / 2 + 60]], false, 32));
-  const otherTrack = new Track(smooth([[x1, CY - gap / 2 - 60], [CX, CY - gap / 2], [x0, CY - gap / 2 - 60]], false, 32));
+  const ownPoint: Pt = [CX, CY + gap / 2];
+  const ownTrack = new Track(ownStill ? [ownPoint, ownPoint] : smooth([[x0, CY + gap / 2 + 60], [CX, CY + gap / 2], [x1, CY + gap / 2 + 60]], false, 32));
+  const otherTrack = new Track(
+    ownStill ? smooth([[x0, CY - gap / 2 - 30], [CX, CY - gap / 2], [x1, CY - gap / 2 - 30]], false, 32) : smooth([[x1, CY - gap / 2 - 60], [CX, CY - gap / 2], [x0, CY - gap / 2 - 60]], false, 32),
+  );
+  const nearCourse = (p: Pt) => otherTrack.points.some((q) => Math.hypot(q[0] - p[0], q[1] - p[1]) < 14);
   const n = set ? set.say.options.length : 0;
   // F4: n headings of equal strength, each a sector of outward lines with a gentle common turn.
   const sectorLines: Pt[][][] = Array.from({ length: n }, (_, k) => {
@@ -111,7 +140,9 @@ function clarity(c: StudyCase, t: FieldTuning): Figure {
       };
       const pts = streamline(start, vec, AREA, 4, t.reach);
       // Not across the two bundles: what is established stays clear (F4).
-      const clear = pts.filter((p) => Math.abs(p[1] - CY) > gap / 2 + 14 || Math.abs(p[0] - CX) > 90);
+      const clear = ownStill
+        ? pts.filter((p) => !nearCourse(p) && Math.hypot(p[0] - ownPoint[0], p[1] - ownPoint[1]) > 22)
+        : pts.filter((p) => Math.abs(p[1] - CY) > gap / 2 + 14 || Math.abs(p[0] - CX) > 90);
       if (clear.length > 3) lines.push(clear);
     }
     return lines;
@@ -127,13 +158,17 @@ function clarity(c: StudyCase, t: FieldTuning): Figure {
     coverage: coverage(
       c.rep,
       {
-        [s1.id]: 'two coherent bundles of lines that come close and part',
+        [s1.id]: ownStill ? 'one coherent bundle, the classmate’s way, that comes close by your still mark and goes on' : 'two coherent bundles of lines that come close and part',
         q1: 'the other bundle ends in a plain mark, with no direction beyond its own way',
-        q2: 'your bundle ends in a plain mark',
+        q2: ownStill ? 'your mark is plain' : 'your bundle ends in a plain mark',
         q3: 'around the closest point the field stays unresolved, in the tentative dash',
         ...(set ? { [set.id]: `${n} headings of equal strength in the unresolved field` } : {}),
+        ...(motionOpen && ownStill ? { [motionOpen.id]: 'you are a still mark with no way of your own: nothing says you moved' } : {}),
       },
-      { s2: 'an absent greeting has no form in a field: the gap between the bundles stays empty' },
+      {
+        s2: 'an absent greeting has no form in a field: the gap between the bundle and your mark stays empty',
+        ...(motionOpen && !ownStill ? { [motionOpen.id]: 'NOT RESPECTED: your bundle is a way travelled too' } : {}),
+      },
     ),
     compose(at: number) {
       const ms = at * (duration || 1);
@@ -152,9 +187,11 @@ function clarity(c: StudyCase, t: FieldTuning): Figure {
         elements.push(shape(id, { type: 'circle', cx: r2(x), cy: r2(y), r: 5 }, { role: isOwn ? 'subject' : 'context', material: 'solid' }, [s1.id, isOwn ? 'q2' : 'q1'], isOwn ? 'You: a plain mark at the head of your way.' : 'The other person: a plain mark, with no facing.'));
       };
       bundle(other, otherTrack, false);
-      bundle(own, ownTrack, true);
+      if (ownStill)
+        elements.push(shape(own, { type: 'circle', cx: r2(ownPoint[0]), cy: r2(ownPoint[1]), r: 6 }, { role: 'subject', material: 'solid' }, [s1.id, 'q2', motionOpen!.id], 'You: a still mark with no way of its own, because the account doesn’t say you moved.'));
+      else bundle(own, ownTrack, true);
       const [ox, oy] = ownTrack.at(known);
-      const labels = t.labels ? [label('own-label', own, [r2(ox), r2(oy + 26)], 'middle', [s1.id], 'Says which way is yours.', { names: [own, `${own}-bundle`], halo: true })] : [];
+      const labels = t.labels ? [label('own-label', own, [r2(ox), r2(oy + 26)], 'middle', [s1.id], ownStill ? 'Says which mark is you.' : 'Says which way is yours.', { names: ownStill ? [own] : [own, `${own}-bundle`], halo: true })] : [];
       return composed(c, 'field', [
         { id: 'field', plane: 'subject', elements },
         { id: 'labels', plane: 'annotation', elements: labels },
@@ -271,11 +308,18 @@ function flow(c: StudyCase, t: FieldTuning): Figure {
     return { k, a, b };
   });
   const joinK = joins ? through.indexOf(joins.say.at) : -1;
-  const lanesOf = (u0: number, u1: number, count: number) => {
+  const transforms = find(c.rep, 'transforms');
+  // Pattern X: the state after each place is its last change of form there.
+  const changesAt = (k: number) => transforms.filter((x) => x.say.p === 'transforms' && x.say.at === through[k]);
+  const stateAt = (k: number) => {
+    const here = changesAt(k);
+    return here.length ? (here[here.length - 1].say as { to: string }).to : 'liquid';
+  };
+  const lanesOf = (u0: number, u1: number, count: number, gap = t.laneGap) => {
     const pts = (u: number) => (u > 1 ? u - 1 : u);
     const out: string[] = [];
     for (let i = 0; i < count; i++) {
-      const off = (i - (count - 1) / 2) * t.laneGap;
+      const off = (i - (count - 1) / 2) * gap;
       // Shortened at each end, so the lanes meet the places as a flow, not a joined drawing.
       const s = u0 + 0.012;
       const e = u1 - 0.012;
@@ -309,6 +353,9 @@ function flow(c: StudyCase, t: FieldTuning): Figure {
       {
         ...Object.fromEntries(flows.map((f) => [f.id, 'lanes from one place to the next, with a chevron for the direction'])),
         [s6.id]: 'the lanes close into one loop',
+        ...Object.fromEntries(find(c.rep, 'above').map((x) => [x.id, 'drawn higher here, but only because of the loop’s order: no flat rule enforces above (open)'])),
+        ...partsShown(c),
+        ...Object.fromEntries(transforms.map((x) => [x.id, 'the lanes’ spacing changes where the form changes: wide apart as vapour, close otherwise (pattern X)'])),
         ...(joins ? { [joins.id]: `${t.lanesAfter} lanes after the lungs against ${t.lanesBefore} before, and a mark where it joins` } : {}),
         ...(fate ? { [fate.id]: 'past the body the lanes go on in the tentative dash: neither fewer nor the same is claimed' } : {}),
       },
@@ -318,7 +365,13 @@ function flow(c: StudyCase, t: FieldTuning): Figure {
       const elements: SceneElement[] = [];
       let carried = false;
       for (const seg of segments) {
-        const st = segmentStatement(seg.k);
+        const st = segmentStatement(seg.k) ?? changesAt(seg.k)[changesAt(seg.k).length - 1];
+        if (transforms.length) {
+          const state = stateAt(seg.k);
+          elements.push(path(`lanes-${seg.k + 1}`, lanesOf(seg.a, seg.b, t.lanesAfter, state === 'vapour' ? t.laneGap * 3 : t.laneGap), { role: 'subject', line: 'hair' }, [st!.id, ...changesAt(seg.k).map((x) => x.id)], `The water as ${state}: ${state === 'vapour' ? 'lanes wide apart' : 'lanes close together'}.`));
+          elements.push(path(`direction-${seg.k + 1}`, chevron((seg.a + seg.b) / 2), { role: 'context', line: 'fine' }, [st!.id], 'Which way it goes.'));
+          continue;
+        }
         if (seg.k === joinK) carried = true;
         const open = carried && fate && seg.k === (joinK + 2) % through.length;
         const count = carried ? t.lanesAfter : t.lanesBefore;

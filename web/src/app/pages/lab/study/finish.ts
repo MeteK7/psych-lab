@@ -24,38 +24,17 @@ export interface Finishes {
   field: readonly Adjustment<FieldTuning>[];
 }
 
-const SHADOWS = {
-  kind: 'form',
-  what: 'A soft contact shadow under each presence',
-  why: 'Flat forms read as tokens on a page; a contact shadow sets them on a surface, so they read as beings that move across it',
-  set: { shadows: true },
-} as const;
-
-const FIGURE_EIGHT = {
-  kind: 'layout',
-  what: 'The two sides of the heart side by side in the middle, lungs above, body below',
-  why: 'They belong to one heart. The rules put them opposite each other because v0 has no part-of (G-27); side by side, the two circuits read',
-  set: { layout: 'figure-eight' },
-} as const;
-
-export const FINISH: Record<'P1' | 'P2' | 'E1' | 'M1', Finishes> = {
+// Revision 3 (2026-11-21) folded the hand changes that repeated, or that the review showed to be
+// rules, into the rules: P1-K2 and P2-K2 (contact shadows, K2r3); P2-S1, P2-S5 and M1-S1 (cameras, the
+// framing rule S7r3); P2-S2–S4 (the home's window and edges, S1r3); E1-S1, E1-K1 and E1-F1 (the heart's
+// two sides together, part-of and C9). What remains here didn't generalise.
+// Revision 4 (2026-11-21): P1-F1, used five times, became rule F4 (R4-1); E2-S1 became `above` (R4-2);
+// M2-S1 became the placement rule (R4-3); E3-S1 became the leaf shape (R4-5).
+export const FINISH: Record<string, Finishes> = {
   P1: {
-    spatial: [
-      {
-        id: 'P1-S1',
-        kind: 'layout',
-        what: 'The scene a moment before the passing, the other person a few steps ahead',
-        why: 'S8 picks the passing itself, and at the passing the other person is beside you, out of view through your own eyes. The phase has to depend on the stance',
-        set: { passingOffset: 1.6 },
-      },
-      {
-        id: 'P1-S2',
-        kind: 'camera',
-        what: 'From across: further round and higher, with a longer lens',
-        why: 'Side-on, the two figures stood one behind the other; from a quarter turn they separate and fill the middle third',
-        set: { keys: { across: { pos: [5.0, 2.6, -4.2], target: [0, 0.85, 0], f: 860 } } },
-      },
-    ],
+    // Revision 2 of the passing rules replaced the first finishing (P1-S1, P1-S2), which fixed the
+    // look by moving the two people apart and lost the encounter (findings §8).
+    spatial: [],
     kinetic: [
       {
         id: 'P1-K1',
@@ -64,56 +43,11 @@ export const FINISH: Record<'P1' | 'P2' | 'E1' | 'M1', Finishes> = {
         why: 'At the rules’ size two marks sat on your own path, where they read as stops along it',
         set: { ringRadius: 24, ringMark: 6 },
       },
-      { id: 'P1-K2', ...SHADOWS },
     ],
-    field: [
-      {
-        id: 'P1-F1',
-        kind: 'form',
-        what: 'The open headings turn more, start further out and reach less far, with four lines each',
-        why: 'Straight lines radiating from one point read as a burst, close to alarm imagery (visual-policy §7); turned, they read as slow currents',
-        set: { turn: 0.6, headingStart: 76, reach: 170, perHeading: 4 },
-      },
-    ],
+    field: [],
   },
   P2: {
-    spatial: [
-      {
-        id: 'P2-S1',
-        kind: 'camera',
-        what: 'Through your own eyes: looking ahead into the room, the phone low in the view',
-        why: 'Looking down at the phone, the forearms filled the frame and the phone was a sliver; looking ahead, your hands and the phone sit at the bottom and the room is in view',
-        set: { keys: { own: { pos: [0.4, 1.14, 1.56], target: [0.4, 0.74, 3.4], f: 560 } } },
-      },
-      {
-        id: 'P2-S5',
-        kind: 'camera',
-        what: 'From behind: further back and higher',
-        why: 'A metre behind your head, the head filled the frame and the window crowded the top',
-        set: { keys: { behind: { pos: [-0.9, 2.15, -0.35], target: [0.5, 0.75, 2.3], f: 600 } } },
-      },
-      {
-        id: 'P2-S2',
-        kind: 'layout',
-        what: 'The window on the wall you face',
-        why: 'On the left wall it was out of view from every stance but one',
-        set: { window: 'front' },
-      },
-      {
-        id: 'P2-S3',
-        kind: 'form',
-        what: 'A faint line where the floor meets the walls',
-        why: 'The walls and the floor are close in tone and the room didn’t read; the room uses the same line',
-        set: { floorEdges: true },
-      },
-      {
-        id: 'P2-S4',
-        kind: 'form',
-        what: 'The cut top edge of walls drawn low',
-        why: 'From outside, walls drawn low vanished into the ground and the rooms beside yours were armchairs floating in space; the room draws its cut edges for the same reason',
-        set: { cutEdges: true },
-      },
-    ],
+    spatial: [],
     kinetic: [
       {
         id: 'P2-K1',
@@ -122,13 +56,11 @@ export const FINISH: Record<'P1' | 'P2' | 'E1' | 'M1', Finishes> = {
         why: 'The high arc rose and fell like something thrown; low, it reads as a message crossing a distance',
         set: { arcLift: 30 },
       },
-      { id: 'P2-K2', ...SHADOWS },
     ],
     field: [],
   },
   E1: {
     spatial: [
-      { id: 'E1-S1', ...FIGURE_EIGHT },
       {
         id: 'E1-S2',
         kind: 'form',
@@ -137,22 +69,32 @@ export const FINISH: Record<'P1' | 'P2' | 'E1' | 'M1', Finishes> = {
         set: { tube: 0.045, bead: 0.05 },
       },
     ],
-    kinetic: [{ id: 'E1-K1', ...FIGURE_EIGHT }],
-    field: [{ id: 'E1-F1', ...FIGURE_EIGHT }],
+    kinetic: [],
+    field: [],
   },
-  M1: {
+  M1: { spatial: [], kinetic: [], field: [] },
+
+  // ── Slice 2 (2026-11-21) ──────────────────────────────────────────────────────────────────────
+  P3: { spatial: [], kinetic: [], field: [] },
+  P4: { spatial: [], kinetic: [], field: [] },
+  P5: {
     spatial: [
       {
-        id: 'M1-S1',
+        id: 'P5-S1',
         kind: 'camera',
-        what: 'From the way: a step back, a little to the right, with a wider lens',
-        why: 'The design block filled a third of the frame and was cut by its edge; further back, design, the gate and build are in one view',
-        set: { keys: { within: { pos: [0.7, 1.6, -4.6], target: [0, 0.9, 7], f: 520 } } },
+        what: 'Through your own eyes: a wider lens, aimed down the table',
+        why: 'The people beside you filled the edges of the frame, cut in half; wider, the table and everyone round it are in view',
+        set: { keys: { own: { pos: [0, 1.14, 0.53], target: [0, 0.82, 3.3], f: 430 } } },
       },
     ],
     kinetic: [],
     field: [],
   },
+  P6: { spatial: [], kinetic: [], field: [] },
+  E2: { spatial: [], kinetic: [], field: [] },
+  E3: { spatial: [], kinetic: [], field: [] },
+  M2: { spatial: [], kinetic: [], field: [] },
+  M3: { spatial: [], kinetic: [], field: [] },
 };
 
 /** The tuning changes of a list of adjustments, applied in order (camera keys merged by stance). */
