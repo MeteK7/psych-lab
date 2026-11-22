@@ -113,3 +113,42 @@ Each candidate was adopted only after checking that the figures it touches keep 
 | R4-5 | A leaf form in the study kit: nine tapered closed curves on each stem, shaded | E3-S1 | Adopted, for your look: the plants now read as plants; the leaves are dark against the room (`findings-revision-4.md` §2) |
 
 After revision 4, four hand changes remain in 36 figures: P1-K1, P2-K1, E1-S2, P5-S1. None of them repeats.
+
+## Revision 5 (2026-11-22): content independence
+
+Adopted 2026-11-22, after you looked at U1's figures (`findings-revision-5.md` §9). Accepting them doesn't resolve the points questioned there (OI-27 to OI-30).
+
+| # | Rule | Status |
+|---|---|---|
+| R5-1 | **Composition dispatch.** Each pattern declares what it needs. Every able pattern is drawn, and the one leaving the fewest established statements undrawn wins; ties keep the old order. With none able, the idiom refuses and says what each pattern lacked | Adopted. No corpus figure changed (pinned: `golden.spec.ts`) |
+| R5-2 | **Settings by reported place.** The home, the meeting room and the carriage are reached only when the space facet reports that place | Adopted. No corpus figure changed |
+| R5-3 | **Form from `form` statements** (v0.2), never from words; a thing with no known feature gets the neutral form, declared in the coverage | Adopted (`kit/forms.ts`) |
+| R5-4 | **Motion:** a route (a slope where the start is above the end), a meeting marked at its moment, the thing met moving only from then, its extent open where the text gives none (kinetic: R4-4 range), and the mover drawn open after the meeting when the text says nothing more of it. Spatial: the moment just after the meeting (S8). Field: lanes, and rings spreading from the meeting (agitation only) | Adopted, after your look at U1 (its only figure so far). Open: OI-27 to OI-30 |
+
+## Revision 6 (2026-11-22): coverage from the blind cases
+
+Adopted 2026-11-22, after you looked at U2–U4's figures (`findings-revision-6.md` §9). Accepting them doesn't resolve the points questioned there (OI-31 to OI-35).
+
+| # | Rule | Status |
+|---|---|---|
+| R6-1 | **Carrying** (motion pattern): things moved by what flows, with no meeting, ride along with it while their statement holds; a question about its motion in a later phase opens its course; height only from an established `above`; a mover with no form is drawn as the extent of its flow; the field draws carrying as density | Adopted (U3, its only figures so far). Open: OI-33 |
+| R6-2 | **Dependency:** parts of one whole together (C9), a complete part filled, a dependent part outlined (its state not given), the dependency to a member of a group, an open question as an open ring; no `waiting` or `precedes` needed | Adopted (U4, its only figures so far). Open: OI-32; an outline may read as "not started" |
+| R6-3 | **Felt in a place:** the viewer's reported feeling where they are (P2's ring and contours), possibilities after; nothing else placed | Adopted (U2, its only figures so far). Open: OI-32, OI-34, OI-35 |
+
+## Revision 7 (2026-11-22): composition across patterns
+
+Adopted 2026-11-22, after you looked at U5–U7's figures (`findings-revision-7.md` §8). Accepting them doesn't resolve the points questioned there (OI-36, OI-37, OI-39).
+
+| # | Rule | Status |
+|---|---|---|
+| R7-1 | **Composition:** with no able single pattern, a base pattern (motion, dependency or felt) draws its statements and additions draw the rest onto what it placed; a new thing is set in free space beside what it relates to (room, not nearness); nothing inferred is added | Adopted (U5–U7). A thing with no established form is drawn neutral (your decision). Open: OI-36, OI-37 |
+| R7-2 | **Additions:** `located-in`, `part-of`, `depends-on`, `waiting`, `question`, `alternatives`, `form`; in the spatial idiom `waiting`, questions and possibilities stay in the words beside it, and a second place can't go inside a built room | Adopted |
+| R7-3 | **Able means drawn:** a pattern whose needs hold but which fails on a case is refused, the failure named | Adopted. Found by U8–U10 (`findings-revision-7.md` §2); the needs themselves stay open (OI-39) |
+
+## Revision 8 (2026-11-22): patterns that know what they draw
+
+| # | Rule | Status |
+|---|---|---|
+| R8-1 | **Declared lists:** every pattern declares `draws` (the kinds its coverage accounts for: predicates, `question:<asks>` or `question:*`, `alternatives`) and `single` (kinds it takes once). Any drawable statement of another kind, or a repeat of a single kind, is a declared need; inferred statements never count (`draws.ts`) | Adopted under your approved plan; no accepted figure changed |
+| R8-2 | **Structural needs found by the probe:** `jostled` (attention questions only about the one held or the group), `cycle` (a fate question only about what joins), motion (`above` only between the route's ends; one `above`), `felt` (the viewer placed once), `pathScene` (waiting and dependence only within a sending; an absent exchange only with a sending or a shift) | Adopted; each refuses no accepted case |
+

@@ -1,5 +1,7 @@
 # Findings, pass C: behavioural independence (2026-11-21)
 
+> **Since then:** revision 5 changed part of what this describes (the dispatch, D1/D2/D5/D6, the "Blood" leak, U1): `findings-revision-5.md`. This document is kept as it was found.
+
 > **What this shows, and what it doesn't.** Pass C tests the study's own rules and contract (`pages/lab/study/`), which draw through the engine's existing interfaces. It shows how far **the study's interpretation-to-figure layer** depends on any one domain. It says nothing new about the **production engine** (`shared/visual/`), which no change here touches; the engine's own coupling is recorded where it limited the study (§4). Every check is in `pass-c.spec.ts`. Known dependences are pinned there as findings, not passes, so that a change to any of them shows.
 
 ## Summary

@@ -69,3 +69,58 @@ Same method as run 2 (our work: composing and resolving; painting is the backend
 - **The crowd is the heaviest composition so far, and still well within budget:** a median of 2.4 ms on canvas, against 1.4–1.5 ms for E1's tube. My estimate, from comparing P6 with P1's two-person scene, not a measured fit: the cost grows by about 0.15 ms per standing person.
 - **Measured here, unknown before:** a composition of roughly 150 elements (P6). Fifty to two hundred elements was left unknown in §8.2.
 - **Still unknown:** canvas painting cost for the crowd (it is outside "our work" here), display-paced frame rates, and 120 Hz.
+
+## Revision 4 (2026-11-22): the figures whose rules changed
+
+Same method as run 2, on all 33 moving finished figures (198 measurements), because R4-4 and R4-5 changed four of them: E3 spatial (leaves, R4-5) and the kinetic range in P4, E3 and M3 (R4-4).
+
+**Work per frame, median / highest single frame (ms), across both backends and all three ratios:**
+
+| Figure | Before (2026-11-21) | Now |
+|---|---|---|
+| E3 spatial (leaves) | 0.4–0.7 / 1.2 | 0.5–0.8 / 1.3 |
+| P4 kinetic (range) | 0.2 / 0.5 | 0.2 / 0.8 |
+| E3 kinetic (range) | 0.2 / 0.4 | 0.1–0.2 / 0.6 |
+| M3 kinetic (range) | 0.1–0.2 / 0.4 | 0.1–0.2 / 0.4 |
+
+- **The changes cost nothing that matters.** The leaves add about 0.1 ms; the ranges are as cheap as the constants.
+- **No frame of our work went over 8.3 ms.** The heaviest is still P6's spatial crowd: a median of at most 1.8 ms, a highest frame of 4.0 ms.
+
+**A finding about the watchdog, not about the figures.** In this run the watchdog moved most figures to the reduced tier, at 32 fps, while our work stayed at 0.1–1.8 ms. A second run of the affected settings did the same. Checked:
+- **It isn't our code.** A blank page, with none of the app loaded, in the same headless Edge runs at 56–57 fps for about 20 seconds and then at 32 fps for good. On the study page the drop comes at the same time, and stays in every tab after the study page closes.
+- **It isn't the machine's settings,** as far as they can be read: on mains power (96%), the High Performance plan, the display at 60 Hz.
+- **It didn't happen on 2026-11-21,** when every figure stayed in the full tier. What changed in between isn't known (most likely the browser's own power saving; the headed browser wasn't tested, so as not to open windows on your screen).
+
+**Why it matters, for the engine (outside this study):** the watchdog's rule is a fixed 50 fps (`frame-stats.ts`, `WATCHDOG.minFps`). A browser that paces every page at 30 fps, as this one now does, reduces every figure's motion although nothing is missed and our work is a few per cent of a frame. The rule's own comment says that "a display running at its own rate never counts as missing frames, whatever the rate"; at 30 fps that doesn't hold. This bears on M6 stage B's pre-run refresh check, which is to be reported on this machine before it is relied on. Nothing in `shared/visual/` was changed. Recorded as OI-23.
+
+**What this run can't show:** with the browser pacing at 32 fps for most settings, the frame rates say nothing about our figures. The work per frame does, and is the result of record.
+
+## Revision 5 (2026-11-22): U1's figures
+
+Same method, U1's three figures (by the rules) on both backends at ratios 1 and 2. The browser's pacing was checked first (OI-23): a blank page ran at 59.5–60 fps, so the throttling seen earlier that day did not recur.
+
+| Figure | Median / highest frame (ms) |
+|---|---|
+| U1 spatial | 0.4 / 0.7 |
+| U1 kinetic | 0.2 / 0.5 |
+| U1 field | 0.2–0.3 / 0.5 |
+
+Every figure stayed in the full tier, at 60 fps.
+
+## Revision 6 (2026-11-22): U2–U4
+
+Same method, by the rules, both backends at ratios 1 and 2, after confirming the browser ran at 60 fps.
+
+| Figure | Median / highest frame (ms) |
+|---|---|
+| U4 spatial (two parts, four people) | 0.8–1.0 / 1.7 |
+| U3 spatial (a tube with beads) | 0.5–0.6 / 1.2 |
+| U2 spatial | 0.3–0.4 / 0.8 |
+| U2, U3, U4 kinetic | 0.2 / 1.3 |
+
+The field figures are still. Every figure stayed in the full tier.
+
+## Revision 7 (2026-11-22): U5–U7, composed
+
+Same method, after confirming the browser ran at 57–60 fps. U5–U7's moving figures (kinetic, and U6's field): 0.3–0.4 ms median, at most 1.1 ms; every figure stayed in the full tier. Their spatial figures have one viewpoint or none, so there is no movement to measure.
+
