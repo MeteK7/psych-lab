@@ -37,6 +37,8 @@ export interface Key {
 
 /** A camera on a smooth path through keys, at `t` from 0 to keys.length − 1. */
 export function cameraOn(keys: readonly Key[], t: number): Camera {
+  // Revision 7: a figure with one viewpoint holds it (interpolation needs two keys).
+  if (keys.length === 1) keys = [keys[0], keys[0]];
   return camera(alongV(t, keys.map((k) => k.pos)), alongV(t, keys.map((k) => k.target)), along(t, keys.map((k) => k.f)), FRAME.width / 2, FRAME.height / 2);
 }
 

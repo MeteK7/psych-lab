@@ -6,7 +6,7 @@ import { streamline } from '../kit/field';
 import { Pt, Track, ease, polyline, smooth } from '../kit/paths';
 import { FRAME } from '../kit/spatial';
 import { Statement, find } from '../representation';
-import { Figure, SAFE, altText, composed, coverage } from './contract';
+import { Figure, SAFE, altText, composed, coverage, sentence, word } from './contract';
 import { AREA, FieldTuning, offsetLine } from './field';
 import { breakMark, countOf } from './kinetic2';
 
@@ -21,7 +21,7 @@ const question = (c: StudyCase, asks: string, about?: string): Statement | undef
   c.rep.statements.find((s) => s.say.p === 'question' && s.say.asks === asks && (about === undefined || s.say.about === about));
 
 /** F4: `n` headings of equal strength around a point, each a sector of outward lines with a common turn. */
-function headings(centre: Pt, n: number, t: FieldTuning, clear: (p: Pt) => boolean = () => true, reach = t.reach): Pt[][][] {
+export function headings(centre: Pt, n: number, t: FieldTuning, clear: (p: Pt) => boolean = () => true, reach = t.reach): Pt[][][] {
   return Array.from({ length: n }, (_, k) => {
     const mid = -Math.PI / 2 + ((k + 0.5) / n) * Math.PI * 2;
     const width = (Math.PI * 2) / n;
@@ -41,7 +41,7 @@ function headings(centre: Pt, n: number, t: FieldTuning, clear: (p: Pt) => boole
   });
 }
 
-function headingElements(lines: Pt[][][], open: number, set: Statement | undefined, also: readonly string[]): SceneElement[] {
+export function headingElements(lines: Pt[][][], open: number, set: Statement | undefined, also: readonly string[]): SceneElement[] {
   if (open <= 0.002) return [];
   return lines.flatMap((ls, k) =>
     ls.length ? [path(`heading-${k + 1}`, ls.map((l) => polyline(l.slice(0, Math.max(2, Math.round(l.length * open))))).join(''), { role: 'context', line: 'hair', dash: 'tentative' }, [...(set ? [set.id] : []), ...also], 'One possible heading: as many lines and as long as every other, unresolved.')] : [],
@@ -83,8 +83,8 @@ export function openWait(c: StudyCase, t: FieldTuning): Figure {
     coverage: coverage(
       c.rep,
       {
-        [send.id]: 'a coherent bundle from you to the friend',
-        [wait.id]: 'around the friend the field stays unresolved',
+        [send.id]: `a coherent bundle from ${word(c, send.say.from)} to ${word(c, send.say.to)}`,
+        [wait.id]: `around ${word(c, send.say.to)} the field stays unresolved`,
         ...Object.fromEntries(qs.map((q) => [q.id, 'the unresolved field around the receiver'])),
         ...(set ? { [set.id]: `${n} headings of equal strength around the receiver` } : {}),
       },
@@ -97,10 +97,10 @@ export function openWait(c: StudyCase, t: FieldTuning): Figure {
         ...headingElements(lines, open, set, qs.map((q) => q.id)),
         bundleOf('sent', way, sent, t.bundle, t.bundleGap, { role: 'subject', line: 'fine' }, [send.id], 'What you sent: a coherent way, because it is reported.'),
         dot(send.say.from, fromAt, 6, 'subject', [send.id], 'You.'),
-        dot(send.say.to, toAt, 6, 'context', [send.id, ...qs.map((q) => q.id)], 'The friend: a plain mark; what they have seen is open.'),
+        dot(send.say.to, toAt, 6, 'context', [send.id, ...qs.map((q) => q.id)], `${sentence(word(c, send.say.to))}: a plain mark; what they have seen is open.`),
       ];
       const labels = t.labels
-        ? [label('from-label', send.say.from, [fromAt[0], fromAt[1] + 26], 'middle', [send.id], 'Names you.', { halo: true }), label('to-label', send.say.to, [toAt[0], toAt[1] + 28], 'middle', [send.id], 'Names the friend.', { halo: true, tone: 'label-soft' })]
+        ? [label('from-label', send.say.from, [fromAt[0], fromAt[1] + 26], 'middle', [send.id], `Names ${word(c, send.say.from)}.`, { halo: true }), label('to-label', send.say.to, [toAt[0], toAt[1] + 28], 'middle', [send.id], `Names ${word(c, send.say.to)}.`, { halo: true, tone: 'label-soft' })]
         : [];
       return composed(c, 'field', [{ id: 'field', plane: 'subject', elements: els }, { id: 'labels', plane: 'annotation', elements: labels }], alt);
     },
@@ -138,7 +138,7 @@ export function heldWait(c: StudyCase, t: FieldTuning): Figure {
       {
         [dep.id]: 'the lanes of what depends on it run up to an open boundary',
         [wait.id]: 'the lanes close in at the boundary and hold',
-        [send.id]: 'one fine way from the team to the supplier (the two emails are one way: counts are lost, G-02)',
+        [send.id]: `one fine way from ${word(c, send.say.from)} to ${word(c, send.say.to)} (a repeated sending is drawn as one way: counts are lost, G-02)`,
         ...Object.fromEntries(qs.map((q) => [q.id, 'the boundary is drawn only in the tentative dash: nothing shows why or when'])),
       },
       { [absent.id]: 'an exchange that didn’t happen has no form in a field' },
@@ -152,14 +152,14 @@ export function heldWait(c: StudyCase, t: FieldTuning): Figure {
         })
         .join('');
       const els: SceneElement[] = [];
-      if (d) els.push(path('lanes', d, { role: 'subject', line: 'hair' }, [dep.id, wait.id], 'What depends on the confirmation, closing in where it waits.'));
-      els.push(shape('boundary', { type: 'line', x1: boundary, y1: CY - 120, x2: boundary, y2: CY + 40 }, { role: 'context', line: 'fine', dash: 'tentative' }, [wait.id, ...qs.map((q) => q.id)], 'Where the confirmation would come: open, so only in the tentative dash.'));
-      els.push(path('mail', polyline(mail.slice(0, progress(duration, at, 0, 0.5))), { role: 'context', line: 'hair' }, [send.id], 'The emails sent: one fine way to the supplier.'));
-      els.push(dot(send.say.to, supplierAt, 6, 'context', [send.id, ...qs.map((q) => q.id)], 'The supplier: a plain mark.'));
+      if (d) els.push(path('lanes', d, { role: 'subject', line: 'hair' }, [dep.id, wait.id], `What depends on ${word(c, dep.say.on)}, closing in where it waits.`));
+      els.push(shape('boundary', { type: 'line', x1: boundary, y1: CY - 120, x2: boundary, y2: CY + 40 }, { role: 'context', line: 'fine', dash: 'tentative' }, [wait.id, ...qs.map((q) => q.id)], `Where ${word(c, wait.say.for)} would come: open, so only in the tentative dash.`));
+      els.push(path('mail', polyline(mail.slice(0, progress(duration, at, 0, 0.5))), { role: 'context', line: 'hair' }, [send.id], `${sentence(word(c, send.say.item))} sent: one fine way to ${word(c, send.say.to)}.`));
+      els.push(dot(send.say.to, supplierAt, 6, 'context', [send.id, ...qs.map((q) => q.id)], `${sentence(word(c, send.say.to))}: a plain mark.`));
       const labels = t.labels
         ? [
             label('dep-label', dep.say.what, [fromX + 4, CY - 160], 'start', [dep.id], 'Names what waits.'),
-            label('to-label', send.say.to, [supplierAt[0], supplierAt[1] + 28], 'middle', [send.id], 'Names the supplier.', { tone: 'label-soft' }),
+            label('to-label', send.say.to, [supplierAt[0], supplierAt[1] + 28], 'middle', [send.id], `Names ${word(c, send.say.to)}.`, { tone: 'label-soft' }),
           ]
         : [];
       return composed(c, 'field', [{ id: 'field', plane: 'subject', elements: els }, { id: 'labels', plane: 'annotation', elements: labels }], alt);

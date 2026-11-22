@@ -3,9 +3,15 @@ import type { StudyCase } from '../cases';
 import { label, path, r2, shape } from '../kit/elements';
 import { FRAME } from '../kit/spatial';
 import { Pt, Track, ease, polyline, smooth } from '../kit/paths';
-import { find } from '../representation';
-import { Figure, SAFE, altText, composed, coverage, layoutOf, partsShown } from './contract';
+import { drawable, find } from '../representation';
+import { Figure, SAFE, altText, composed, coverage, layoutOf, partsShown, sentence, word } from './contract';
 import { awaiting, compared, jostled, lagging, reacting, shifted } from './kinetic2';
+import { dependencyKinetic, dependencyLacks } from './dependency';
+import { feltKinetic, feltLacks } from './felt';
+import { motionKinetic, motionLacks } from './motion';
+import { Choice, Pattern, Refused, choose, needs } from './registry';
+import { listed } from './draws';
+import { compositionLacks, tryCompose } from './compose';
 
 /**
  * STUDY CODE: the kinetic sequence idiom (docs/visual-study/idioms.md, K1–K11): flat, moving, made
@@ -87,19 +93,77 @@ export function trace(id: string, track: Track, u: number, own: boolean, cites: 
 }
 
 export function kinetic(c: StudyCase, finish: Partial<KineticTuning> = {}): Figure {
+  return kineticChoice(c, finish).figure;
+}
+
+/**
+ * Revision 5: the patterns, in the order that breaks ties, each with what it needs (registry.ts). A
+ * need is what the pattern can't draw without, read from its code: most patterns were written from
+ * one case and need most of that case's statements.
+ */
+/** Revision 8: exported for the hand-written expectations (revision-8.spec.ts). */
+export function kineticPatterns(): Pattern<KineticTuning>[] {
+  return patterns();
+}
+
+function patterns(): Pattern<KineticTuning>[] {
+  const { a, all, plural, own, question } = needs;
+  return listed<KineticTuning>('kinetic', [
+    // D9 (revision 5): encounter names P1's statement ids (s2, q1–q3), so it needs their kinds too.
+    { name: 'encounter', lacks: (c) => all(a(c, 'passes'), a(c, 'exchange-absent'), question(c, 'attention'), question(c, 'whether'), question(c, 'cause')), draw: encounter },
+    // Revision 8 (structural need, found by the probe): it takes attention questions only about the one held and the crowd.
+    {
+      name: 'jostled',
+      lacks: (c) => {
+        const held = find(c.rep, 'contact')[0]?.say.b;
+        const many = c.rep.elements.find((e) => e.count !== undefined)?.id;
+        const stray = drawable(c.rep).some((s) => s.say.p === 'question' && s.say.asks === 'attention' && s.say.about !== held && s.say.about !== many);
+        return all(a(c, 'contact'), a(c, 'displaced'), a(c, 'sends'), a(c, 'exchange-absent'), plural(c), stray ? ['attention questions only about the one held or the crowd'] : []);
+      },
+      draw: jostled,
+    },
+    { name: 'reacting', lacks: (c) => all(a(c, 'reacts'), a(c, 'located-in'), own(c)), draw: reacting },
+    { name: 'awaiting', lacks: (c) => all(a(c, 'sends'), a(c, 'exchange-absent'), a(c, 'waiting')), draw: awaiting },
+    { name: 'transmission', lacks: (c) => all(a(c, 'sends'), a(c, 'receives'), a(c, 'located-in'), a(c, 'apart'), a(c, 'feels'), a(c, 'holds'), question(c, 'intent'), question(c, 'setting')), draw: transmission },
+    { name: 'shifted', lacks: (c) => all(a(c, 'shifts'), a(c, 'exchange-absent')), draw: shifted },
+    { name: 'compared', lacks: (c) => a(c, 'exceeds'), draw: compared },
+    { name: 'lagging', lacks: (c) => a(c, 'behind'), draw: lagging },
+    // Revision 8 (structural need, found by the probe): its fate question is about what joins the cycle.
+    {
+      name: 'cycle',
+      lacks: (c) => {
+        const joined = find(c.rep, 'joins')[0]?.say.what;
+        const stray = drawable(c.rep).some((s) => s.say.p === 'question' && s.say.asks === 'fate' && s.say.about !== joined);
+        return all(a(c, 'cycles'), stray ? ['a fate question only about what joins the cycle'] : []);
+      },
+      draw: cycle,
+    },
+    {
+      name: 'blocked',
+      lacks: (c) => all(a(c, 'complete'), a(c, 'precedes'), a(c, 'depends-on'), a(c, 'absent'), a(c, 'waiting'), a(c, 'exchange-absent'), question(c, 'time')),
+      draw: blocked,
+    },
+    // Revision 5, step 3: things that move, meet and move one another (motion.ts). Under evaluation.
+    { name: 'motion', lacks: motionLacks, draw: motionKinetic },
+    // Revision 6, step 2: a dependency with parts of one whole (dependency.ts).
+    { name: 'dependency', lacks: dependencyLacks, draw: dependencyKinetic },
+    // Revision 6, step 3: a reported feeling in a place, with no exchange (felt.ts).
+    { name: 'felt', lacks: feltLacks, draw: feltKinetic },
+  ]);
+}
+
+/** `without`: patterns left out, for the checks (to show what the idiom does without one). */
+export function kineticChoice(c: StudyCase, finish: Partial<KineticTuning> = {}, only: { without?: readonly string[] } = {}): { figure: Figure; choice: Choice } {
   const t: KineticTuning = { ...KINETIC_RULES, layout: layoutOf(c), ...finish };
-  const rep = c.rep;
-  if (find(rep, 'passes').length) return encounter(c, t);
-  if (find(rep, 'contact').length) return jostled(c, t);
-  if (find(rep, 'reacts').length) return reacting(c, t);
-  if (find(rep, 'sends').length && find(rep, 'waiting').length) return awaiting(c, t);
-  if (find(rep, 'sends').length) return transmission(c, t);
-  if (find(rep, 'shifts').length) return shifted(c, t);
-  if (find(rep, 'exceeds').length) return compared(c, t);
-  if (find(rep, 'behind').length) return lagging(c, t);
-  if (find(rep, 'cycles').length) return cycle(c, t);
-  if (find(rep, 'waiting').length) return blocked(c, t);
-  throw new Error(`kinetic: no pattern for ${c.id}`);
+  try {
+    return choose('kinetic', c, t, patterns().filter((p) => !only.without?.includes(p.name)));
+  } catch (e) {
+    // Revision 7: with no able pattern, a base pattern and additions (compose.ts); else the refusal says why.
+    if (!(e instanceof Refused) || only.without?.includes('composition')) throw e;
+    const f = tryCompose(c, 'kinetic', finish);
+    if (f) return { figure: f, choice: { pattern: `composed: ${f.composition.base} + ${f.composition.added.length}`, undrawn: 0, others: [] } };
+    throw new Refused({ ...e.refusal, tried: [...e.refusal.tried, { pattern: 'composition', lacks: compositionLacks(c, 'kinetic') }] });
+  }
 }
 
 const AXES = { space: 'flat', time: 'moving', substance: 'forms', mode: 'direct', viewpoint: 'fixed' } as const;
@@ -266,6 +330,12 @@ function cycle(c: StudyCase, t: KineticTuning): Figure {
   const fate = c.rep.statements.find((s) => s.say.p === 'question' && s.say.asks === 'fate' && s.say.about === joins?.say.what);
   const transforms = find(c.rep, 'transforms');
   const through = s6.say.through;
+  // Revision 5 (D8): descriptions in the statements' own words, not one case's.
+  const W = (id: string) => word(c, id);
+  const moverW = W(s6.say.what);
+  const atW = joins ? W(joins.say.at) : '';
+  const pastW = joins ? W(through[(through.indexOf(joins.say.at) + 2) % through.length]) : '';
+  const takenW = joins ? W(joins.say.what) : '';
   const places: Pt[] =
     t.layout === 'figure-eight'
       ? [[CX - 60, CY], [CX, SAFE + 70], [CX + 60, CY], [CX, FRAME.height - SAFE - 70]]
@@ -309,8 +379,8 @@ function cycle(c: StudyCase, t: KineticTuning): Figure {
         ...Object.fromEntries(find(c.rep, 'above').map((x) => [x.id, 'drawn higher here, but only because of the loop’s order: no flat rule enforces above (open)'])),
         ...Object.fromEntries(transforms.map((x) => [x.id, 'the travelling form changes shape at the place where it changes form (pattern X)'])),
         ...partsShown(c),
-        ...(joins ? { [joins.id]: 'a small mark joins the form at the lungs and rides with it' } : {}),
-        ...(fate ? { [fate.id]: 'past the body, the mark is drawn only as an outline in the tentative dash: kept or lost is not said' } : {}),
+        ...(joins ? { [joins.id]: `a small mark joins the form at ${atW} and rides with it` } : {}),
+        ...(fate ? { [fate.id]: `past ${pastW}, the mark is drawn only as an outline in the tentative dash: kept or lost is not said` } : {}),
       },
       {},
     ),
@@ -323,13 +393,13 @@ function cycle(c: StudyCase, t: KineticTuning): Figure {
       const formAt = loop.at(f);
       const elements: SceneElement[] = [];
       through.forEach((id, k) => {
-        elements.push(path(`place-${id}`, blob(places[k], 60, 36), { role: 'mid', material: 'tonal' }, cites(id), `${c.words[id] ?? id}: a place the blood passes through.`));
+        elements.push(path(`place-${id}`, blob(places[k], 60, 36), { role: 'mid', material: 'tonal' }, cites(id), `${c.words[id] ?? id}: a place ${moverW} passes through.`));
       });
       if (t.traces && travelled > 0.002) {
         const pts = travelled + start <= 1 ? loop.slice(start, start + travelled) : [...loop.slice(start, 1), ...loop.slice(0, start + travelled - 1)];
-        elements.push(path('route', polyline(pts), { role: 'context', line: 'hair' }, [s6.id], 'The way the blood has gone so far.'));
+        elements.push(path('route', polyline(pts), { role: 'context', line: 'hair' }, [s6.id], `The way ${moverW} has gone so far.`));
       }
-      if (!transforms.length) elements.push(shape('blood', { type: 'circle', cx: r2(formAt[0]), cy: r2(formAt[1]), r: 13 }, { role: 'subject', material: 'lit', line: 'regular' }, [...flows.map((x) => x.id), s6.id], 'The blood: the one thing that moves.'));
+      if (!transforms.length) elements.push(shape('blood', { type: 'circle', cx: r2(formAt[0]), cy: r2(formAt[1]), r: 13 }, { role: 'subject', material: 'lit', line: 'regular' }, [...flows.map((x) => x.id), s6.id], `${sentence(moverW)}: the one thing that moves.`));
       else {
         // Pattern X: the state is set by the last change of form at the last place passed.
         const passed = through.map((_, k) => k).filter((k) => (fractions[k] - start + 1) % 1 <= travelled + 1e-6 || k === 0);
@@ -347,7 +417,7 @@ function cycle(c: StudyCase, t: KineticTuning): Figure {
           const open = !!fate && travelled >= lapToOpen;
           const m: Pt = [formAt[0] + 15, formAt[1] - 15];
           elements.push(
-            shape('oxygen', { type: 'circle', cx: r2(m[0]), cy: r2(m[1]), r: 5 }, open ? { role: 'subject', line: 'fine', dash: 'tentative' } : { role: 'subject', material: 'solid' }, open ? [fate!.id] : [joins.id], open ? 'The oxygen past the body: an outline only, because the text doesn’t say whether it stays.' : 'The oxygen, taken up in the lungs and carried.'),
+            shape('oxygen', { type: 'circle', cx: r2(m[0]), cy: r2(m[1]), r: 5 }, open ? { role: 'subject', line: 'fine', dash: 'tentative' } : { role: 'subject', material: 'solid' }, open ? [fate!.id] : [joins.id], open ? `${sentence(takenW)} past ${pastW}: an outline only, because the text doesn’t say whether it stays.` : `${sentence(takenW)}, taken up at ${atW} and carried.`),
           );
         }
       }

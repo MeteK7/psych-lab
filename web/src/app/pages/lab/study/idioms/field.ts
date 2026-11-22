@@ -6,9 +6,15 @@ import { Area, contour, streamline, thin } from '../kit/field';
 import { FRAME } from '../kit/spatial';
 import { Pt, Track, ease, polyline, smooth } from '../kit/paths';
 import { find } from '../representation';
-import { Figure, SAFE, altText, composed, coverage, layoutOf, partsShown } from './contract';
+import { Figure, SAFE, altText, composed, coverage, layoutOf, partsShown, sentence, word } from './contract';
 import { crowdField, grownField, heldWait, lateField, openWait, ripples, shiftedField } from './field2';
 import { roundedRect } from './kinetic';
+import { dependencyField, dependencyLacks } from './dependency';
+import { feltField, feltLacks } from './felt';
+import { motionField, motionFieldLacks } from './motion';
+import { Choice, Pattern, Refused, choose, needs } from './registry';
+import { listed } from './draws';
+import { compositionLacks, tryCompose } from './compose';
 
 /**
  * STUDY CODE: the field idiom (docs/visual-study/idioms.md, F1–F7): the frame is a field of fine
@@ -69,23 +75,61 @@ const CY = FRAME.height / 2;
 export const AREA: Area = { x: SAFE, y: SAFE, width: FRAME.width - 2 * SAFE, height: FRAME.height - 2 * SAFE };
 
 export function field(c: StudyCase, finish: Partial<FieldTuning> = {}): Figure {
+  return fieldChoice(c, finish).figure;
+}
+
+/**
+ * Revision 5: the patterns, in the order that breaks ties, each with what it needs (registry.ts).
+ * Before revision 5, `held` was the fallback for anything else; it needs the whole of a held
+ * dependency, so it is now one pattern among the others.
+ */
+/** Revision 8: exported for the hand-written expectations (revision-8.spec.ts). */
+export function fieldPatterns(): Pattern<FieldTuning>[] {
+  return patterns();
+}
+
+function patterns(): Pattern<FieldTuning>[] {
+  const { a, all, plural, own, question, quality } = needs;
+  return listed<FieldTuning>('field', [
+    // D9 (revision 5): clarity and agitation name P1's and P2's statement ids (q1–q3, s1–s6) in their
+    // coverage, so they need those statements' kinds too, or they would fail on a case without them.
+    { name: 'clarity', lacks: (c) => all(quality(c, 'clarity'), a(c, 'passes'), a(c, 'exchange-absent'), question(c, 'attention'), question(c, 'whether'), question(c, 'cause')), draw: clarity },
+    { name: 'openWait', lacks: (c) => all(quality(c, 'clarity'), a(c, 'sends'), a(c, 'exchange-absent'), a(c, 'waiting')), draw: openWait },
+    { name: 'shiftedField', lacks: (c) => all(quality(c, 'clarity'), a(c, 'shifts'), a(c, 'exchange-absent')), draw: shiftedField },
+    { name: 'grownField', lacks: (c) => all(quality(c, 'clarity'), a(c, 'exceeds')), draw: grownField },
+    { name: 'lateField', lacks: (c) => all(quality(c, 'clarity'), a(c, 'behind')), draw: lateField },
+    { name: 'agitation', lacks: (c) => all(quality(c, 'agitation'), a(c, 'feels'), a(c, 'sends'), a(c, 'receives'), a(c, 'located-in'), a(c, 'apart'), a(c, 'holds'), question(c, 'intent'), question(c, 'setting')), draw: agitation },
+    { name: 'flow', lacks: (c) => a(c, 'cycles'), draw: flow },
+    { name: 'ripples', lacks: (c) => all(a(c, 'reacts'), a(c, 'located-in'), own(c)), draw: ripples },
+    { name: 'crowdField', lacks: (c) => all(a(c, 'contact'), a(c, 'displaced'), a(c, 'sends'), a(c, 'exchange-absent'), plural(c)), draw: crowdField },
+    { name: 'heldWait', lacks: (c) => all(a(c, 'sends'), a(c, 'waiting'), a(c, 'depends-on'), a(c, 'exchange-absent')), draw: heldWait },
+    {
+      name: 'held',
+      lacks: (c) => all(a(c, 'complete'), a(c, 'precedes'), a(c, 'depends-on'), a(c, 'absent'), a(c, 'waiting'), a(c, 'exchange-absent'), question(c, 'time')),
+      draw: held,
+    },
+    // Revision 5, step 3: a disturbance from a meeting, along a route (motion.ts). Under evaluation.
+    { name: 'motion', lacks: motionFieldLacks, draw: motionField },
+    // Revision 6, step 2: a dependency with parts of one whole, as a field of clarity (dependency.ts).
+    { name: 'dependency', lacks: (c) => all(quality(c, 'clarity'), dependencyLacks(c)), draw: dependencyField },
+    // Revision 6, step 3: a reported feeling in a place, as P2's contours (felt.ts).
+    { name: 'felt', lacks: (c) => all(quality(c, 'agitation'), feltLacks(c)), draw: feltField },
+  ]);
+}
+
+/** `without`: patterns left out, for the checks (to show what the idiom does without one). */
+export function fieldChoice(c: StudyCase, finish: Partial<FieldTuning> = {}, only: { without?: readonly string[] } = {}): { figure: Figure; choice: Choice } {
   const t: FieldTuning = { ...FIELD_RULES, layout: layoutOf(c), ...finish };
-  const f = c.rep.facets.field;
-  if (!f) throw new Error(`field: ${c.id} has no field facet`);
-  const has = (p: Parameters<typeof find>[1]) => find(c.rep, p).length > 0;
-  if (f.quality === 'clarity') {
-    if (has('passes')) return clarity(c, t);
-    if (has('sends') && has('waiting')) return openWait(c, t);
-    if (has('shifts')) return shiftedField(c, t);
-    if (has('exceeds')) return grownField(c, t);
-    if (has('behind')) return lateField(c, t);
+  if (!c.rep.facets.field) throw new Refused({ caseId: c.id, idiom: 'field', tried: [{ pattern: 'every pattern', lacks: ['a field facet'] }] });
+  try {
+    return choose('field', c, t, patterns().filter((p) => !only.without?.includes(p.name)));
+  } catch (e) {
+    // Revision 7: with no able pattern, a base pattern and additions (compose.ts); else the refusal says why.
+    if (!(e instanceof Refused) || only.without?.includes('composition')) throw e;
+    const f = tryCompose(c, 'field', finish);
+    if (f) return { figure: f, choice: { pattern: `composed: ${f.composition.base} + ${f.composition.added.length}`, undrawn: 0, others: [] } };
+    throw new Refused({ ...e.refusal, tried: [...e.refusal.tried, { pattern: 'composition', lacks: compositionLacks(c, 'field') }] });
   }
-  if (f.quality === 'agitation') return agitation(c, t);
-  if (has('cycles')) return flow(c, t);
-  if (has('reacts')) return ripples(c, t);
-  if (has('contact')) return crowdField(c, t);
-  if (has('sends') && has('waiting')) return heldWait(c, t);
-  return held(c, t);
 }
 
 /** Lines offset sideways from a track, `offset` units to its left. */
@@ -278,6 +322,12 @@ function flow(c: StudyCase, t: FieldTuning): Figure {
   const flows = find(c.rep, 'flows');
   const fate = c.rep.statements.find((s) => s.say.p === 'question' && s.say.asks === 'fate');
   const through = s6.say.through;
+  // Revision 5 (D8): descriptions in the statements' own words, not one case's.
+  const W = (id: string) => word(c, id);
+  const moverW = W(s6.say.what);
+  const atW = joins ? W(joins.say.at) : '';
+  const pastW = joins ? W(through[(through.indexOf(joins.say.at) + 2) % through.length]) : '';
+  const takenW = joins ? W(joins.say.what) : '';
   const places: Pt[] =
     t.layout === 'figure-eight'
       ? [[CX - 60, CY], [CX, SAFE + 70], [CX + 60, CY], [CX, FRAME.height - SAFE - 70]]
@@ -356,8 +406,8 @@ function flow(c: StudyCase, t: FieldTuning): Figure {
         ...Object.fromEntries(find(c.rep, 'above').map((x) => [x.id, 'drawn higher here, but only because of the loop’s order: no flat rule enforces above (open)'])),
         ...partsShown(c),
         ...Object.fromEntries(transforms.map((x) => [x.id, 'the lanes’ spacing changes where the form changes: wide apart as vapour, close otherwise (pattern X)'])),
-        ...(joins ? { [joins.id]: `${t.lanesAfter} lanes after the lungs against ${t.lanesBefore} before, and a mark where it joins` } : {}),
-        ...(fate ? { [fate.id]: 'past the body the lanes go on in the tentative dash: neither fewer nor the same is claimed' } : {}),
+        ...(joins ? { [joins.id]: `${t.lanesAfter} lanes after ${atW} against ${t.lanesBefore} before, and a mark where it joins` } : {}),
+        ...(fate ? { [fate.id]: `past ${pastW} the lanes go on in the tentative dash: neither fewer nor the same is claimed` } : {}),
       },
       {},
     ),
@@ -368,7 +418,7 @@ function flow(c: StudyCase, t: FieldTuning): Figure {
         const st = segmentStatement(seg.k) ?? changesAt(seg.k)[changesAt(seg.k).length - 1];
         if (transforms.length) {
           const state = stateAt(seg.k);
-          elements.push(path(`lanes-${seg.k + 1}`, lanesOf(seg.a, seg.b, t.lanesAfter, state === 'vapour' ? t.laneGap * 3 : t.laneGap), { role: 'subject', line: 'hair' }, [st!.id, ...changesAt(seg.k).map((x) => x.id)], `The water as ${state}: ${state === 'vapour' ? 'lanes wide apart' : 'lanes close together'}.`));
+          elements.push(path(`lanes-${seg.k + 1}`, lanesOf(seg.a, seg.b, t.lanesAfter, state === 'vapour' ? t.laneGap * 3 : t.laneGap), { role: 'subject', line: 'hair' }, [st!.id, ...changesAt(seg.k).map((x) => x.id)], `${sentence(moverW)} as ${state}: ${state === 'vapour' ? 'lanes wide apart' : 'lanes close together'}.`));
           elements.push(path(`direction-${seg.k + 1}`, chevron((seg.a + seg.b) / 2), { role: 'context', line: 'fine' }, [st!.id], 'Which way it goes.'));
           continue;
         }
@@ -376,13 +426,13 @@ function flow(c: StudyCase, t: FieldTuning): Figure {
         const open = carried && fate && seg.k === (joinK + 2) % through.length;
         const count = carried ? t.lanesAfter : t.lanesBefore;
         elements.push(
-          path(`lanes-${seg.k + 1}`, lanesOf(seg.a, seg.b, count), open ? { role: 'subject', line: 'hair', dash: 'tentative' } : { role: carried ? 'subject' : 'context', line: 'hair' }, open ? [st!.id, fate!.id] : [st!.id, ...(carried && joins ? [joins.id] : [])], open ? 'Past the body: the lanes go on, open, because the text doesn’t say what happens to the oxygen.' : carried ? 'Blood carrying the oxygen it took up: more lanes.' : 'Blood on its way to the lungs: fewer lanes.'),
+          path(`lanes-${seg.k + 1}`, lanesOf(seg.a, seg.b, count), open ? { role: 'subject', line: 'hair', dash: 'tentative' } : { role: carried ? 'subject' : 'context', line: 'hair' }, open ? [st!.id, fate!.id] : [st!.id, ...(carried && joins ? [joins.id] : [])], open ? `Past ${pastW}: the lanes go on, open, because the text doesn’t say what happens to ${takenW}.` : carried ? `${sentence(moverW)} carrying ${takenW} it took up: more lanes.` : `${sentence(moverW)} on its way${joins ? ' to ' + atW : ''}: fewer lanes.`),
         );
         elements.push(path(`direction-${seg.k + 1}`, chevron((seg.a + seg.b) / 2), { role: 'context', line: 'fine' }, [st!.id], 'Which way it flows.'));
       }
       if (joins) {
         const [x, y] = places[joinK];
-        elements.push(shape('joins', { type: 'circle', cx: r2(x), cy: r2(y), r: 5 }, { role: 'subject', material: 'solid' }, [joins.id], 'Where the oxygen joins the blood.'));
+        elements.push(shape('joins', { type: 'circle', cx: r2(x), cy: r2(y), r: 5 }, { role: 'subject', material: 'solid' }, [joins.id], `Where ${takenW} joins ${W(joins.say.into)}.`));
       }
       const labels: SceneElement[] = t.labels
         ? through.map((id, k) => {

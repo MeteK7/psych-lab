@@ -5,6 +5,8 @@ import type { Figure, IdiomId } from './idioms/contract';
 import { field } from './idioms/field';
 import { kinetic } from './idioms/kinetic';
 import { spatial } from './idioms/spatial';
+import { Refusal, attempt } from './idioms/registry';
+import { UNSEEN } from './unseen';
 
 /** STUDY CODE: every depth figure, by the rules and finished (docs/visual-study/README.md). */
 export interface Direction {
@@ -80,5 +82,18 @@ export function unscaledVariants(): UnscaledVariant[] {
         return { case: c, idiom, treatment, figure };
       }),
     ),
+  );
+}
+
+/** Revision 5: each unseen case in each idiom, by the rules: its figure, or the idiom's refusal. */
+export interface UnseenDirection {
+  case: StudyCase;
+  idiom: IdiomId;
+  drawn: Figure | Refusal;
+}
+
+export function unseenDirections(): UnseenDirection[] {
+  return UNSEEN.flatMap((c) =>
+    IDIOMS.map((idiom): UnseenDirection => ({ case: c, idiom, drawn: attempt(() => (idiom === 'spatial' ? spatial(c) : idiom === 'kinetic' ? kinetic(c) : field(c))) })),
   );
 }

@@ -11,7 +11,8 @@ import { ROOM_WORDS } from '../lab-instrument-sets';
 import { LabOverlay } from '../lab-overlay';
 import { CASES } from './cases';
 import { Axes, Figure } from './idioms/contract';
-import { Direction, directions, PackId, UnscaledVariant, unscaledVariants } from './figures';
+import { Direction, directions, PackId, UnscaledVariant, UnseenDirection, unscaledVariants, unseenDirections } from './figures';
+import { isRefusal } from './idioms/registry';
 import { StudyFigure } from './study-figure';
 
 type Scheme = 'light' | 'dark';
@@ -62,6 +63,7 @@ export function axesApart(a: Axes, b: Axes): number {
     summary { cursor: pointer; }
     ul.tight { margin: 0.25rem 0; padding-left: 1.25rem; }
     .anchors { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .refusal { border: 1px dashed var(--border); padding: 0.5rem 0.75rem; max-width: 960px; }
   `,
   template: `
     <h1>Representation study, first slice</h1>
@@ -90,6 +92,7 @@ export function axesApart(a: Axes, b: Axes): number {
           </select>
         </label>
         <label class="tier"><input type="checkbox" [checked]="unscaled()" (change)="unscaled.set($any($event.target).checked)" data-study-unscaled /> R4-4 evaluation</label>
+        <label class="tier"><input type="checkbox" [checked]="unseen()" (change)="unseen.set($any($event.target).checked)" data-study-unseen /> Unseen cases (revision 5)</label>
         <label class="tier"><input type="checkbox" [checked]="reduce()" (change)="reduce.set($any($event.target).checked)" /> Reduced motion</label>
       </div>
       <app-lab-overlay />
@@ -131,6 +134,49 @@ export function axesApart(a: Axes, b: Axes): number {
             }
             @if (unscaledProblems(v).length) {
               <ul class="problems" aria-label="Validation problems">@for (p of unscaledProblems(v); track p) { <li>{{ p }}</li> }</ul>
+            }
+          }
+        </section>
+      }
+
+      @if (unseen()) {
+        <section class="case" aria-labelledby="study-unseen">
+          <h2 id="study-unseen">Unseen cases (revision 5, under evaluation)</h2>
+          <p class="note muted">Cases the rules were not written from, drawn by the rules with no hand finishing. Where an idiom has no pattern that can draw a case, it refuses and says what each pattern lacked, rather than drawing a figure meant for another case. Nothing here counts as adopted until it has been looked at.</p>
+          @for (u of unseenSet; track $index) {
+            @if (u.idiom === 'spatial') {
+              <h3 [id]="'study-unseen-' + u.case.id">{{ u.case.id }} <span class="meta">· {{ u.case.source }}</span></h3>
+              <p class="text">“{{ u.case.text }}”</p>
+              <details>
+                <summary>Its representation ({{ u.case.rep.statements.length }} statements)</summary>
+                <table><tbody>
+                  @for (s of u.case.rep.statements; track s.id) {
+                    <tr><th scope="row"><code>{{ s.id }}</code></th><td class="cat">{{ s.commitment }}</td><td><code>{{ s.say.p }}</code> {{ describe(s.say) }}</td><td class="muted">{{ s.basis }}</td></tr>
+                  }
+                </tbody></table>
+              </details>
+            }
+            <h4>{{ u.idiom }}</h4>
+            @if (refusalOf(u); as r) {
+              <div class="refusal" role="note" [attr.data-study-refusal]="u.case.id + '-' + u.idiom">
+                <p><strong>Not drawn.</strong> No {{ u.idiom }} pattern can draw this case. What each pattern lacked:</p>
+                <ul class="tight small">@for (x of r.tried; track x.pattern) { <li><code>{{ x.pattern }}</code>: {{ x.lacks.join('; ') }}</li> }</ul>
+              </div>
+            } @else {
+              @for (scheme of schemes(); track scheme) {
+                <div class="panel" [class]="scheme">
+                  <span class="tag">{{ u.case.id }} · {{ u.idiom }} · by the rules · {{ scheme }}</span>
+                  <app-study-figure [figure]="figureOf(u)!" [scheme]="scheme" [backend]="backend()" [reduce]="reduce()" [tag]="u.case.id + '-' + u.idiom + '-unseen-' + scheme" />
+                </div>
+              }
+              <p class="alt"><span class="muted">Text alternative:</span> {{ figureOf(u)!.alt }}</p>
+              <details>
+                <summary>Coverage</summary>
+                <ul class="tight">
+                  @for (x of figureOf(u)!.coverage.shown; track x.id) { <li><code>{{ x.id }}</code> {{ x.how }}</li> }
+                  @for (x of figureOf(u)!.coverage.notShown; track x.id) { <li><code>{{ x.id }}</code> <em>not shown:</em> {{ x.why }}</li> }
+                </ul>
+              </details>
             }
           }
         </section>
@@ -214,6 +260,9 @@ export class StudyPage {
   /** `?unscaled=1` opens the R4-4 evaluation section. */
   protected readonly unscaled = signal(this.query.get('unscaled') === '1');
   protected readonly unscaledSet = unscaledVariants();
+  /** `?unseen=1` opens the unseen cases (revision 5). */
+  protected readonly unseen = signal(this.query.get('unseen') === '1');
+  protected readonly unseenSet = unseenDirections();
   private readonly checkedUnscaled = new Map<UnscaledVariant, string[]>();
   protected readonly roomWords = ROOM_WORDS;
   protected readonly mcii = SCENES.find((s) => s.scene.id === 'mcii.path')!;
@@ -242,6 +291,14 @@ export class StudyPage {
     let p = this.checkedUnscaled.get(v);
     if (!p) this.checkedUnscaled.set(v, (p = problemsOf(v.figure)));
     return p;
+  }
+
+  protected refusalOf(u: UnseenDirection) {
+    return isRefusal(u.drawn) ? u.drawn : null;
+  }
+
+  protected figureOf(u: UnseenDirection): Figure | null {
+    return isRefusal(u.drawn) ? null : u.drawn;
   }
 
   protected axesText(a: Axes): string {

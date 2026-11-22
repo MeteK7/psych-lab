@@ -6,7 +6,7 @@ import type { StudyCase } from '../cases';
 import { label } from '../kit/elements';
 import { Key, Space, aimedKey, cameraOn, framedKey, groundPlane } from '../kit/spatial';
 import { Stance, Statement, find } from '../representation';
-import { Figure, altText, composed, coverage } from './contract';
+import { Figure, altText, composed, coverage, word } from './contract';
 import { countOf } from './kinetic2';
 import { SpatialTuning, centreOf, corners, keysFor, stances, youLabel } from './spatial';
 
@@ -141,7 +141,7 @@ export function pathScene(c: StudyCase, t: SpatialTuning): Figure {
         standing(space, c, send.say.from, [0, 0, 0], 0, [send.id], 'The sender, at the near end.');
         standing(space, c, send.say.to, [0, 0, far], Math.PI, [send.id, ...qs.map((q) => q.id)], 'The receiver, at the far end: faceless.');
         space.box('item', [-0.18, 0, far - 1.2], [0.18, 0.22, far - 0.9], 'near', [send.id], 'What was sent, near the receiver.');
-        if (dep) wire(space, 'dependent', [aside, 0, -0.5], [aside + 1.2, 1.0, 0.7], { role: 'context', line: 'regular' }, [dep.id, ...(wait ? [wait.id] : [])], 'What depends on the reply: only its edges, not started.');
+        if (dep) wire(space, 'dependent', [aside, 0, -0.5], [aside + 1.2, 1.0, 0.7], { role: 'context', line: 'regular' }, [dep.id, ...(wait ? [wait.id] : [])], `What depends on ${word(c, dep.say.on)}: only its edges, not started.`);
         name('from-label', send.say.from, [0, 1.7, 0], 0.3, [send.id]);
         name('to-label', send.say.to, [0, 1.7, far], 0.3, [send.id], true);
         if (dep) name('dep-label', dep.say.what, [aside + 0.6, 1.0, 0.1], 0.3, [dep.id]);

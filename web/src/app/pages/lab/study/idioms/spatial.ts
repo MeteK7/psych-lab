@@ -6,9 +6,15 @@ import type { Unscaled } from './kinetic';
 import { label } from '../kit/elements';
 import { Pt, smooth } from '../kit/paths';
 import { Key, Space, aimedKey, cameraOn, framedKey, groundPlane } from '../kit/spatial';
-import { Stance, find } from '../representation';
-import { Figure, altText, composed, coverage, layoutOf, partsShown } from './contract';
+import { Stance, drawable, find } from '../representation';
+import { Figure, altText, composed, coverage, layoutOf, partsShown, sentence, word } from './contract';
 import { carriage, meetingRoom, pathScene, plants } from './spatial2';
+import { dependencyLacks, dependencySpatial } from './dependency';
+import { feltLacks, feltSpatial } from './felt';
+import { motionLacks, motionSpatial } from './motion';
+import { Choice, Pattern, Refused, choose, needs } from './registry';
+import { listed } from './draws';
+import { compositionLacks, tryCompose } from './compose';
 
 /**
  * STUDY CODE: the spatial scene idiom (docs/visual-study/idioms.md, S1–S9): a constructed place in
@@ -45,6 +51,11 @@ export interface SpatialTuning {
    * it asserts a size the text doesn't give (findings-revision-4.md §3). Only the kinetic idiom adopted `range`.
    */
   unscaled: Unscaled;
+  /**
+   * Revision 7 (composition): additions drawn into a base pattern's scene, given where it placed its
+   * elements. Only compose.ts sets it; unset, a figure is drawn exactly as before.
+   */
+  add3?: (space: Space, anchors: Readonly<Record<string, V3>>) => SceneElement[];
 }
 
 export const SPATIAL_RULES: SpatialTuning = {
@@ -67,17 +78,73 @@ export const SPATIAL_RULES: SpatialTuning = {
 };
 
 export function spatial(c: StudyCase, finish: Partial<SpatialTuning> = {}): Figure {
+  return spatialChoice(c, finish).figure;
+}
+
+/** Revision 5: the patterns, in the order that breaks ties, each with what it needs (registry.ts). */
+/** Revision 8: exported for the hand-written expectations (revision-8.spec.ts). */
+export function spatialPatterns(): Pattern<SpatialTuning>[] {
+  return patterns();
+}
+
+function patterns(): Pattern<SpatialTuning>[] {
+  const { a, all, plural, own, question, place } = needs;
+  const path = (c: StudyCase, gate: boolean): string[] =>
+    c.rep.facets.metaphor?.frame !== 'path' ? ['the path frame'] : !!c.rep.facets.metaphor.gate !== gate ? [gate ? 'a gate on the path' : 'a path without a gate'] : [];
+  // Revision 5, step 2: a built setting is reached by the place the text reports (the space facet),
+  // not by a predicate. Before, `contact` alone led to the carriage, `reacts` to the meeting room.
+  return listed<SpatialTuning>('spatial', [
+    // D9 (revision 5): passing names P1's statement ids (s2, q1–q3), so it needs their kinds too.
+    { name: 'passing', lacks: (c) => all(a(c, 'passes'), a(c, 'exchange-absent'), question(c, 'attention'), question(c, 'whether'), question(c, 'cause')), draw: passing },
+    { name: 'carriage', lacks: (c) => all(place(c, 'carriage'), a(c, 'contact'), a(c, 'displaced'), a(c, 'sends'), a(c, 'exchange-absent'), plural(c)), draw: carriage },
+    { name: 'meetingRoom', lacks: (c) => all(place(c, 'meeting-room'), a(c, 'reacts'), a(c, 'located-in'), own(c)), draw: meetingRoom },
+    { name: 'athome', lacks: (c) => all(place(c, 'home'), a(c, 'located-in'), a(c, 'holds'), a(c, 'receives'), a(c, 'feels')), draw: athome },
+    { name: 'system', lacks: (c) => a(c, 'cycles'), draw: system },
+    { name: 'plants', lacks: (c) => a(c, 'exceeds'), draw: plants },
+    {
+      name: 'way',
+      lacks: (c) => all(path(c, true), a(c, 'complete'), a(c, 'precedes'), a(c, 'depends-on'), a(c, 'absent'), a(c, 'waiting'), a(c, 'exchange-absent'), question(c, 'time')),
+      draw: way,
+    },
+    // Revision 8 (structural need, found by the probe; a first, wider version would have refused P4 and was
+    // withdrawn): it draws waiting and dependence only within a sending, and an absent exchange only with a
+    // sending or a shift.
+    {
+      name: 'pathScene',
+      lacks: (c) => {
+        const has = (p: string) => drawable(c.rep).some((s) => s.say.p === p);
+        const send = has('sends');
+        return all(
+          path(c, false),
+          !send && (has('waiting') || has('depends-on')) ? ['a sending (it draws waiting and dependence only within one)'] : [],
+          !send && !has('shifts') && has('exchange-absent') ? ['a sending or a shift (it draws an absent exchange only with one)'] : [],
+        );
+      },
+      draw: pathScene,
+    },
+    // Revision 5, step 3: things that move, meet and move one another, on ground built from their relations (motion.ts). Under evaluation.
+    { name: 'motion', lacks: motionLacks, draw: motionSpatial },
+    // Revision 6, step 2: a dependency with parts of one whole (dependency.ts).
+    { name: 'dependency', lacks: dependencyLacks, draw: dependencySpatial },
+    // Revision 6, step 3: a reported feeling in a place, with no exchange (felt.ts).
+    { name: 'felt', lacks: feltLacks, draw: feltSpatial },
+  ]);
+}
+
+/** `without`: patterns left out, for the checks (to show what the idiom does without one). */
+export function spatialChoice(c: StudyCase, finish: Partial<SpatialTuning> = {}, only: { without?: readonly string[] } = {}): { figure: Figure; choice: Choice } {
   // R4-2: whatever the representation says is above something is lifted (a rule constant: 1.6 m).
   const above = Object.fromEntries(find(c.rep, 'above').map((s) => [s.say.a, 1.6]));
   const t: SpatialTuning = { ...SPATIAL_RULES, layout: layoutOf(c), lift: above, ...finish, keys: { ...SPATIAL_RULES.keys, ...finish.keys } };
-  if (find(c.rep, 'passes').length) return passing(c, t);
-  if (find(c.rep, 'contact').length) return carriage(c, t);
-  if (find(c.rep, 'reacts').length) return meetingRoom(c, t);
-  if (find(c.rep, 'located-in').length) return athome(c, t);
-  if (find(c.rep, 'cycles').length) return system(c, t);
-  if (find(c.rep, 'exceeds').length) return plants(c, t);
-  if (c.rep.facets.metaphor?.frame === 'path') return c.rep.facets.metaphor.gate ? way(c, t) : pathScene(c, t);
-  throw new Error(`spatial: no pattern for ${c.id}`);
+  try {
+    return choose('spatial', c, t, patterns().filter((p) => !only.without?.includes(p.name)));
+  } catch (e) {
+    // Revision 7: with no able pattern, a base pattern and additions (compose.ts); else the refusal says why.
+    if (!(e instanceof Refused) || only.without?.includes('composition')) throw e;
+    const f = tryCompose(c, 'spatial', finish);
+    if (f) return { figure: f, choice: { pattern: `composed: ${f.composition.base} + ${f.composition.added.length}`, undrawn: 0, others: [] } };
+    throw new Refused({ ...e.refusal, tried: [...e.refusal.tried, { pattern: 'composition', lacks: compositionLacks(c, 'spatial') }] });
+  }
 }
 
 /** A box's eight corners. */
@@ -96,12 +163,14 @@ export function stances(c: StudyCase): readonly Stance[] {
 }
 
 export function keysFor(c: StudyCase, t: SpatialTuning, rules: Partial<Record<Stance, Key>>): Key[] {
-  return stances(c).map((s) => t.keys[s] ?? rules[s] ?? rules.across!);
+  // Revision 7: a stance a pattern has no camera for falls back to its first one (was: across, or nothing).
+  return stances(c).map((s) => t.keys[s] ?? rules[s] ?? rules.across ?? Object.values(rules)[0]!);
 }
 
 export const youLabel = (space: Space, head: V3, names: readonly string[], cites: readonly string[]): SceneElement[] => {
   const at = space.anchor(head, 0.32);
-  return at ? [label('own-label', 'own', at, 'middle', cites, 'Names you, once you are in the picture.', { names, halo: true })] : [];
+  // Revision 5 (D5): the word is the own presence's own (names[0]), not a key fixed as `own`.
+  return at ? [label('own-label', names[0], at, 'middle', cites, 'Names you, once you are in the picture.', { names, halo: true })] : [];
 };
 
 /**
@@ -320,6 +389,12 @@ function system(c: StudyCase, t: SpatialTuning): Figure {
   const flows = find(c.rep, 'flows');
   const fate = c.rep.statements.find((s) => s.say.p === 'question' && s.say.asks === 'fate');
   const through = s6.say.through;
+  // Revision 5 (D8): descriptions in the statements' own words, not one case's.
+  const W = (id: string) => word(c, id);
+  const moverW = W(s6.say.what);
+  const atW = joins ? W(joins.say.at) : '';
+  const pastW = joins ? W(through[(through.indexOf(joins.say.at) + 2) % through.length]) : '';
+  const takenW = joins ? W(joins.say.what) : '';
   // Places on the ground in the cycle's order: by the rules, round one loop from the left.
   const at: [number, number][] =
     t.layout === 'figure-eight'
@@ -376,8 +451,8 @@ function system(c: StudyCase, t: SpatialTuning): Figure {
         [s6.id]: 'the tube closes into one loop',
         ...Object.fromEntries(find(c.rep, 'above').map((x) => [x.id, 'the place above is lifted above the ground (R4-2)'])),
         ...partsShown(c),
-        ...(joins ? { [joins.id]: 'beads on the tube from the lungs on' } : {}),
-        ...(fate ? { [fate.id]: 'past the body the beads go on, translucent: kept or lost is not said' } : {}),
+        ...(joins ? { [joins.id]: `beads on the tube from ${atW} on` } : {}),
+        ...(fate ? { [fate.id]: `past ${pastW} the beads go on, translucent: kept or lost is not said` } : {}),
       },
       Object.fromEntries(find(c.rep, 'transforms').map((x) => [x.id, 'the tube shows the course, not the change of form (pattern X)'])),
     ),
@@ -391,13 +466,13 @@ function system(c: StudyCase, t: SpatialTuning): Figure {
         const up = t.lift[id] ?? 0;
         space.box(`place-${id}`, [x - 0.38, up, z - 0.3], [x + 0.38, up + 0.5, z + 0.3], 'near', cites, `${c.words[id] ?? id}: a place the flow passes through.`);
       });
-      space.tube('blood', [...ring, ring[0]], t.tube, { role: 'subject', material: 'shaded', facing: 'base' }, [...flows.map((f) => f.id), s6.id], 'The blood’s way: one closed tube.');
+      space.tube('blood', [...ring, ring[0]], t.tube, { role: 'subject', material: 'shaded', facing: 'base' }, [...flows.map((f) => f.id), s6.id], `${sentence(moverW)}’s way: one closed tube.`);
       if (joins) {
         const carried = between(joinI, openI >= 0 ? openI : (joinI + ring.length - 1) % ring.length).filter((_, i) => i % 5 === 2);
-        space.beads('oxygen', carried.map((p) => [p[0], p[1] + t.tube + t.bead * 0.6, p[2]] as V3), t.bead, { role: 'subject', material: 'lit', line: 'hair' }, [joins.id], 'The oxygen taken up in the lungs, carried on.');
+        space.beads('oxygen', carried.map((p) => [p[0], p[1] + t.tube + t.bead * 0.6, p[2]] as V3), t.bead, { role: 'subject', material: 'lit', line: 'hair' }, [joins.id], `${sentence(takenW)} taken up at ${atW}, carried on.`);
         if (openI >= 0) {
           const open = between(openI, startI).filter((_, i) => i % 5 === 2);
-          space.beads('oxygen-open', open.map((p) => [p[0], p[1] + t.tube + t.bead * 0.6, p[2]] as V3), t.bead, { role: 'context', material: 'translucent', line: 'hair' }, [fate!.id], 'Past the body: the beads go on, translucent, because the text doesn’t say whether the oxygen stays.');
+          space.beads('oxygen-open', open.map((p) => [p[0], p[1] + t.tube + t.bead * 0.6, p[2]] as V3), t.bead, { role: 'context', material: 'translucent', line: 'hair' }, [fate!.id], `Past ${pastW}: the beads go on, translucent, because the text doesn’t say whether ${takenW} stays.`);
         }
       }
       const labels: SceneElement[] = t.labels

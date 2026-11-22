@@ -5,7 +5,7 @@ import { label, path, r2, shape } from '../kit/elements';
 import { Pt, Track, ease, polyline, smooth } from '../kit/paths';
 import { FRAME } from '../kit/spatial';
 import { Statement, find } from '../representation';
-import { Figure, SAFE, altText, composed, coverage } from './contract';
+import { Figure, SAFE, altText, composed, coverage, word } from './contract';
 import { CX, CY, KineticTuning, contact, presence, roundedRect, trace } from './kinetic';
 
 /**
@@ -25,7 +25,7 @@ const question = (c: StudyCase, asks: string, about?: string): Statement | undef
   c.rep.statements.find((s) => s.say.p === 'question' && s.say.asks === asks && (about === undefined || s.say.about === about));
 
 /** K8: a possibility set as equal translucent marks on a ring, grown in after the movement. */
-function ring(set: Statement | undefined, centre: Pt, radius: number, mark: number, g: number, also: readonly string[]): SceneElement[] {
+export function ring(set: Statement | undefined, centre: Pt, radius: number, mark: number, g: number, also: readonly string[]): SceneElement[] {
   if (!set || set.say.p !== 'alternatives' || g <= 0) return [];
   const n = set.say.options.length;
   return Array.from({ length: n }, (_, k) => {
@@ -103,7 +103,7 @@ export function awaiting(c: StudyCase, t: KineticTuning): Figure {
         [send.id]: 'a mark crosses from sender to receiver on a high arc',
         [absent.id]: 'the way back is only begun, in the tentative dash, and nothing travels on it',
         [wait.id]: 'the way back stops short and holds',
-        ...(dep ? { [dep.id]: 'the launch: an outline beside the team, not started' } : {}),
+        ...(dep ? { [dep.id]: `${word(c, dep.say.what)}: an outline beside ${word(c, from)}, not started` } : {}),
         ...(qTime ? { [qTime.id]: 'the way back stops short: when, if ever, is open' } : {}),
         ...(qCause ? { [qCause.id]: 'the point where the way back stops, where the possibilities gather' } : {}),
         ...(qAttention ? { [qAttention.id]: 'the receiver is round, with no facing' } : {}),
@@ -120,7 +120,7 @@ export function awaiting(c: StudyCase, t: KineticTuning): Figure {
       els.push(...trace('out-trace', out, sent, false, [send.id], 'The way the item went.'));
       if (waiting > 0.002) els.push(path('way-back', polyline(back.slice(0, stop * waiting)), { role: 'context', line: 'hair', dash: 'tentative' }, [absent.id, wait.id, ...(qTime ? [qTime.id] : [])], 'The way back: only begun, and open, because nothing has come back.'));
       els.push(...ring(set, awaited, t.ringRadius * 0.6, t.ringMark * 0.8, g, qCause ? [qCause.id] : []));
-      if (dep) els.push(path('dependent', roundedRect(fromAt[0] - 55, fromAt[1] + 70, 110, 54, 14), { role: 'context', line: 'regular' }, [dep.id, wait.id], 'What depends on the reply: not started, so an outline.'));
+      if (dep) els.push(path('dependent', roundedRect(fromAt[0] - 55, fromAt[1] + 70, 110, 54, 14), { role: 'context', line: 'regular' }, [dep.id, wait.id], `What depends on ${word(c, dep.say.on)}: not started, so an outline.`));
       els.push(...presences(c, from, fromAt, t.radius, [send.id], 'The one who sent it.', t.shadows));
       els.push(...presences(c, to, toAt, t.radius, [send.id, ...(qAttention ? [qAttention.id] : [])], 'The one it went to: round, with no facing, because whether they have seen it is open.', t.shadows));
       if (sent < 1) {

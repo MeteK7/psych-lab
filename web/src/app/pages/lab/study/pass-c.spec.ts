@@ -5,6 +5,8 @@ import { directions, IDIOMS } from './figures';
 import { REWORDINGS, drawn, equivalence, geometry } from './pass-c';
 import { audit, stripComments } from './pass-c-audit';
 import { problemsOf, samples } from './study-page';
+import { Refused } from './idioms/registry';
+import { FORM_FEATURES } from './representation';
 import { U1 } from './unseen';
 
 /**
@@ -29,9 +31,12 @@ describe('pass C: behavioural independence of the study rules', () => {
 
     it('carries no source-domain word into a reworded figure, except the known ones', () => {
       const leaks = REWORDINGS.flatMap((r) => equivalence(r).filter((e) => e.leaks.length).map((e) => `${r.from} ${e.idiom}: ${e.leaks.join(', ')}`));
-      // "You": the own presence is always "you" (a rule, from the `own` flag). "Blood": E1's field
-      // pattern describes its lanes in circulation words (purposes only; nothing drawn).
-      expect(leaks).toEqual(['P3 field: You', 'P4 spatial: You', 'P4 kinetic: You', 'E1 field: Blood']);
+      // "You": the own presence is always "you" (a rule, from the `own` flag). Since revision 5 (D5)
+      // P3's reworded own presence, the team, is "you" by its flag, not "the team" by its id, so P3's
+      // spatial and kinetic figures say "You" too. "Blood": E1's field pattern describes its lanes in
+      // circulation words; revision 5 (D8) builds those descriptions from the statements' own words,
+      // so it no longer leaks.
+      expect(leaks).toEqual(['P3 spatial: You', 'P3 kinetic: You', 'P3 field: You', 'P4 spatial: You', 'P4 kinetic: You']);
     });
   });
 
@@ -48,14 +53,14 @@ describe('pass C: behavioural independence of the study rules', () => {
         stripComments(src)
           .split('\n')
           .flatMap((line) => [...line.matchAll(/(?:===|!==) '([a-z-]+)'/g)].map((m) => ({ file, word: m[1], line })))
-          .filter((b) => !/\.p [!=]== |asks ===|kind ===|layout ===|unscaled ===|grow ===|material ===|n === '/.test(b.line))
-          // The representation's own vocabulary (commitments, field qualities, the path frame) is structure.
-          .filter((b) => !['reported', 'implied', 'possible', 'unknown', 'clarity', 'density', 'agitation', 'path'].includes(b.word))
+          .filter((b) => !/\.p [!=]== |asks ===|kind ===|layout ===|unscaled ===|grow ===|material ===|n === '|stances\(c\)\[\d\] ===|idiom [!=]== |\.name [!=]== |plane [!=]== |type [!=]== |quality [!=]== |kindOf [!=]== /.test(b.line))
+          // The representation's own vocabulary (commitments, field qualities, the path frame, v0.2's
+          // form features) is structure.
+          .filter((b) => !['reported', 'implied', 'inferred', 'possible', 'unknown', 'clarity', 'density', 'agitation', 'path', ...FORM_FEATURES].includes(b.word))
           .map((b) => `${b.file}:${b.word}`),
       );
       expect([...new Set(branches)].sort()).toEqual([
-        'idioms/contract.ts:own', // grammar keyed to the id `own`, not the `own` flag
-        'idioms/contract.ts:team', // word(): "the team"
+        // Revision 5 (D5) removed `own` (grammar keyed to the id) and `team` (word(): "the team").
         'idioms/contract.ts:you',
         'idioms/field.ts:vapour', // E2's states: wider lanes for vapour
         'idioms/kinetic.ts:cloud', // E2's states: a form drawn for each
@@ -83,17 +88,19 @@ describe('pass C: behavioural independence of the study rules', () => {
   });
 
   describe('3. a representation the rules have never seen (U1)', () => {
-    // Recorded, not fixed (the plan: no code changes): every idiom reaches the pattern written for
-    // P6's crowded carriage (`contact`) or P2's feeling (`agitation`) and fails on what U1 lacks.
+    // Pass C found that U1 failed in every idiom: each reached the pattern written for P6's crowded
+    // carriage (`contact`) or P2's feeling (`agitation`). Since revision 5 the dispatch refuses rather
+    // than reaching another case's pattern, and the motion pattern draws U1 (revision-5.spec.ts).
     for (const idiom of IDIOMS)
-      it(`${idiom}: fails (a finding)`, () => {
-        expect(() => drawn(U1, idiom)).toThrow();
+      it(`${idiom}: drawn by the motion pattern, valid (revision 5; pass C found it failed)`, () => {
+        const f = drawn(U1, idiom);
+        expect(problemsOf(f)).toEqual([]);
       });
 
-    it('fails in the field idiom whatever field quality it is given', () => {
-      for (const quality of ['density', 'clarity', 'agitation'] as const) {
+    it('draws in the field idiom only as a field of agitation; given another quality, the field idiom refuses', () => {
+      for (const quality of ['density', 'clarity'] as const) {
         const v = { ...U1, rep: { ...U1.rep, facets: { ...U1.rep.facets, field: { quality, source: 's1', evolves: true } } } };
-        expect(() => drawn(v, 'field'), quality).toThrow();
+        expect(() => drawn(v, 'field'), quality).toThrow(Refused);
       }
     });
   });

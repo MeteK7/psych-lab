@@ -70,6 +70,12 @@ export type Predicate =
   | { p: 'above'; a: string; b: string }
   /** a changes form from one state to another, at a place. */
   | { p: 'transforms'; what: string; from: string; to: string; at: string }
+  /**
+   * v0.2 (revision 5): what a thing's form is, as the text gives it: one feature per statement, with
+   * its commitment and basis like any other. Open: a feature no idiom knows is drawn as the neutral
+   * form, and the coverage says so (FORM_FEATURES lists the ones the kit draws).
+   */
+  | { p: 'form'; what: string; feature: string }
   // Predicates an interpreter might propose. They appear only as `inferred` statements: no idiom draws them.
   | { p: 'notices'; who: string; whom: string }
   | { p: 'expects'; who: string; what: string }
@@ -90,8 +96,15 @@ export interface Statement {
 /** Generic viewpoint stances (G-13: the person-centred names of v0 didn't fit a system). */
 export type Stance = 'own' | 'behind' | 'across' | 'outside' | 'within' | 'above' | 'front' | 'side';
 
+/** v0.2: the form features the study kit draws. Any other feature is drawn as the neutral form. */
+export const FORM_FEATURES = ['round', 'block', 'slope', 'upright', 'flat', 'long'] as const;
+
 export interface Facets {
-  space?: { setting: 'reported' | 'stand-in'; place?: 'home' | 'open-floor' | 'ground' | 'meeting-room' | 'carriage'; viewpoints: readonly Stance[] };
+  /**
+   * `place` is open (v0.2): the kind of place the text reports or the idiom stands in. Some places have
+   * a built setting (home, meeting-room, carriage); any other is built from the statements' relations.
+   */
+  space?: { setting: 'reported' | 'stand-in'; place?: string; viewpoints: readonly Stance[] };
   dynamics?: { pace: 'still' | 'slow' | 'moderate' };
   field?: { quality: 'clarity' | 'density' | 'agitation'; source: string; evolves: boolean };
   /** The `path` frame: stations along a way; a gate on it, if something blocks it. */
