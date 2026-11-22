@@ -42,11 +42,16 @@ import { ease } from './kit/paths';
       }
       @case ('viewpoint') {
         <div class="controls">
-          <label>Where you look from
-            <input type="range" min="0" [max]="positions().length - 1" step="1" [value]="target()" (input)="pick($any($event.target).valueAsNumber)"
-                   [attr.aria-valuetext]="positions()[target()]" [attr.data-study-view]="tag()" />
-          </label>
-          <output>{{ positions()[target()] }}</output>
+          @if (positions().length > 1) {
+            <label>Where you look from
+              <input type="range" min="0" [max]="positions().length - 1" step="1" [value]="target()" (input)="pick($any($event.target).valueAsNumber)"
+                     [attr.aria-valuetext]="positions()[target()]" [attr.data-study-view]="tag()" />
+            </label>
+            <output>{{ positions()[target()] }}</output>
+          } @else {
+            <!-- One viewpoint: nothing to move between, so no slider; the view is named instead. -->
+            <span [attr.data-study-one-view]="tag()">One viewpoint: {{ positions()[0] }}</span>
+          }
         </div>
       }
     }
