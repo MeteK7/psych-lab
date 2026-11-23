@@ -53,16 +53,24 @@ Open `/lab/study/match` in the development build.
    - Switch to matching, then read: "Here are the texts the drawings were made from. For each drawing, choose the text you think it shows. A text can go with more than one drawing."
    - The participant chooses. The facilitator doesn't help.
 5. **Count:** press "Count the matches" only when the participant has finished, and copy the count and each choice onto the record sheet.
-6. **After:** reload the page, so nothing remains.
+6. **After:**
+   - Offer the participant the record of their descriptions to read and correct, and ask whether they may be quoted.
+   - Give them the slip with the session number.
+   - Reload the page, so nothing remains.
 
 ## 4. What to record (on paper or in a document the facilitator keeps, never in the app)
 
 **For the session:**
+- the session number, also written on the slip the participant takes away (`pass-e-information.md`)
 - the date
 - the facilitator
 - the figure set, order number, scheme and framing setting
 - whether descriptions were typed or spoken
+- whether the participant read the record at the end, and any corrections they made
+- whether the participant may be quoted: `yes` or `no`
 - no participant name or other identifying detail
+
+**Keeping the record:** until the pass E report is final, and 6 months at most, then destroyed. A participant who stops during the session: what was written is destroyed then. A participant who withdraws afterwards, by session number, before the report is final: that session's record is destroyed and not used.
 
 **For each unprompted figure (by case and idiom, from the order line):**
 - the description, verbatim
