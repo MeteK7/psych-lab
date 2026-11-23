@@ -7,7 +7,8 @@ import { reducedMotion } from '../../../shared/visual/integration/reduced-motion
 import type { SurfaceScheme } from '../../../shared/visual/integration/scene-figure';
 import { viewpointMoveMs } from '../../../shared/visual/styling/vocabulary';
 import type { Figure } from './idioms/contract';
-import { ease } from './kit/paths';
+import { kit } from '../../../shared/visual';
+const { ease } = kit;
 
 /**
  * STUDY CODE (Visual Lab only): a study figure. It composes its figure again at every frame and hands

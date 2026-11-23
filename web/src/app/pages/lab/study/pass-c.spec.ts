@@ -15,9 +15,18 @@ import { U1 } from './unseen';
  * that a change to any of them shows; they are not passes.
  */
 const dir = 'src/app/pages/lab/study/';
-const read = (sub: string): Record<string, string> =>
-  Object.fromEntries((readdirSync(dir + sub) as string[]).filter((f) => f.endsWith('.ts') && !f.endsWith('.spec.ts')).map((f) => [`${sub}/${f}`, readFileSync(dir + sub + '/' + f, 'utf-8') as string]));
-const rules = { ...read('idioms'), ...read('kit') };
+const read = (sub: string, from = dir, as = sub): Record<string, string> =>
+  Object.fromEntries((readdirSync(from + sub) as string[]).filter((f) => f.endsWith('.ts') && !f.endsWith('.spec.ts')).map((f) => [`${as}/${f}`, readFileSync(from + sub + '/' + f, 'utf-8') as string]));
+// Since Stage 3 M3 the rules the study draws with are partly the engine's: its kit, idioms, general patterns and composition (S12).
+const engine = 'src/app/shared/visual/representation/';
+const drawing = ['compose.ts', 'general.ts', 'needs.ts', 'setting.ts'];
+const rules = {
+  ...read('idioms'),
+  ...Object.fromEntries(drawing.map((f) => [`engine/${f}`, readFileSync(engine + f, 'utf-8') as string])),
+  ...read('kit', engine, 'engine/kit'),
+  ...read('idioms', engine, 'engine/idioms'),
+  ...read('patterns', engine, 'engine/patterns'),
+};
 
 describe('pass C: behavioural independence of the study rules', () => {
   describe('1. equivalent representations, equivalent behaviour', () => {

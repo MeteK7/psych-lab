@@ -10,6 +10,7 @@ export const U5: StudyCase = {
   source: 'Revision 6: written blind (psychology)',
   text: "At the supermarket checkout I realised I'd left my wallet in the car. It felt embarrassing, and I still don't know whether the cashier minded waiting.",
   rep: {
+    v: 1,
     id: 'U5',
     elements: [
       { id: 'me', kind: 'presence', salience: 'primary', own: true },
@@ -84,6 +85,7 @@ export const U6: StudyCase = {
   source: 'Revision 6: written blind (education)',
   text: 'Volcanoes form when molten rock, called magma, rises from deep inside the Earth and escapes through a crack in the crust. Scientists still cannot predict exactly when a volcano will erupt.',
   rep: {
+    v: 1,
     id: 'U6',
     elements: [
       { id: 'magma', kind: 'object', salience: 'primary' },
@@ -161,6 +163,7 @@ export const U7: StudyCase = {
   source: 'Revision 6: written blind (project management)',
   text: "The network cabling in the new office isn't finished, and our move can't start until it is. We could push the move back a month or start with a temporary connection, and we haven't decided which.",
   rep: {
+    v: 1,
     id: 'U7',
     elements: [
       { id: 'move', kind: 'process', salience: 'primary' },

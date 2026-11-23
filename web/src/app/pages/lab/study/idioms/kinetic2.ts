@@ -1,12 +1,14 @@
 import type { Layer, SceneElement } from '../../../../shared/visual/composition/scene';
 import { poissonDisc } from '../../../../shared/visual/generation/distributions';
 import type { StudyCase } from '../cases';
-import { label, path, r2, shape } from '../kit/elements';
-import { Pt, Track, ease, polyline, smooth } from '../kit/paths';
-import { FRAME } from '../kit/spatial';
 import { Statement, find } from '../representation';
 import { Figure, SAFE, altText, composed, coverage, word } from './contract';
-import { CX, CY, KineticTuning, contact, presence, roundedRect, trace } from './kinetic';
+import { contact, trace } from './kinetic';
+import { kit } from '../../../../shared/visual';
+import type { KineticTuning } from './kinetic';
+const { CX, CY, FRAME, Track, countOf, ease, label, openRange, path, polyline, presence, r2, ring, roundedRect, shape, smooth } = kit;
+type Pt = kit.Pt;
+type Track = kit.Track;
 
 /**
  * STUDY CODE: the kinetic idiom's slice-2 patterns (docs/visual-study/idioms.md, "Slice-2
@@ -15,24 +17,10 @@ import { CX, CY, KineticTuning, contact, presence, roundedRect, trace } from './
  */
 const AXES = { space: 'flat', time: 'moving', substance: 'forms', mode: 'direct', viewpoint: 'fixed' } as const;
 
-/** Plural presences: `several` is four forms, `many` twelve (slice-2 common rule). */
-export function countOf(c: StudyCase, id: string): number {
-  const n = c.rep.elements.find((e) => e.id === id)?.count;
-  return n === undefined ? 1 : n === 'several' ? 4 : n === 'many' ? 12 : n;
-}
 
 const question = (c: StudyCase, asks: string, about?: string): Statement | undefined =>
   c.rep.statements.find((s) => s.say.p === 'question' && s.say.asks === asks && (about === undefined || s.say.about === about));
 
-/** K8: a possibility set as equal translucent marks on a ring, grown in after the movement. */
-export function ring(set: Statement | undefined, centre: Pt, radius: number, mark: number, g: number, also: readonly string[]): SceneElement[] {
-  if (!set || set.say.p !== 'alternatives' || g <= 0) return [];
-  const n = set.say.options.length;
-  return Array.from({ length: n }, (_, k) => {
-    const a = -Math.PI / 2 + (k / n) * Math.PI * 2;
-    return shape(`possible-${k + 1}`, { type: 'circle', cx: r2(centre[0] + Math.cos(a) * radius), cy: r2(centre[1] + Math.sin(a) * radius), r: r2(mark * ease.arrive(g)) }, { role: 'context', material: 'translucent', line: 'hair' }, [set.id, ...also], 'One of the possible explanations: equal in size, weight and distance to every other, none chosen.');
-  });
-}
 
 /** A presence that may be plural: one form, or a small cluster of equal forms. */
 function presences(c: StudyCase, id: string, at: Pt, r: number, cites: readonly string[], why: string, shadows: boolean): SceneElement[] {
@@ -51,12 +39,6 @@ function presences(c: StudyCase, id: string, at: Pt, r: number, cites: readonly 
  * R4-4 (c): a break in a line, where an amount isn't to scale: a short gap in the ground colour across
  * the line, with two slanted strokes. Under evaluation: a break may read as interruption.
  */
-/** R4-4 range: a band from `from` toward `to`, its near end rounded and its far end left open. */
-export function openRange(from: number, to: number, top: number, bottom: number, r: number): string {
-  const d = Math.sign(to - from) || 1;
-  const sweep = d > 0 ? 0 : 1;
-  return `M${r2(to)} ${r2(top)}H${r2(from + d * r)}A${r} ${r} 0 0 ${sweep} ${r2(from)} ${r2(top + r)}V${r2(bottom - r)}A${r} ${r} 0 0 ${sweep} ${r2(from + d * r)} ${r2(bottom)}H${r2(to)}`;
-}
 
 export function breakMark(id: string, x: number, y: number, cites: readonly string[], height = 26): SceneElement[] {
   const h = height / 2;
@@ -92,7 +74,6 @@ export function awaiting(c: StudyCase, t: KineticTuning): Figure {
   const duration = 3 * t.stepMs + (set ? 700 : 0);
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'kinetic',
     axes: AXES,
     motion: { kind: 'timeline', duration, steps: ['sent', 'waiting', ...(set ? ['possibilities'] : [])] },
@@ -161,7 +142,6 @@ export function shifted(c: StudyCase, t: KineticTuning): Figure {
   const duration = 2 * t.stepMs + (set ? 700 : 0);
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'kinetic',
     axes: AXES,
     motion: { kind: 'timeline', duration, steps: ['its place', 'moved', ...(set ? ['possibilities'] : [])] },
@@ -228,7 +208,6 @@ export function reacting(c: StudyCase, t: KineticTuning): Figure {
   const qAttention = question(c, 'attention');
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'kinetic',
     axes: AXES,
     motion: { kind: 'timeline', duration, steps: [...sends.map((s) => String(s.say.p === 'sends' ? s.say.item : s.id)), 'reaction'] },
@@ -301,7 +280,6 @@ export function jostled(c: StudyCase, t: KineticTuning): Figure {
   const qCrowd = question(c, 'attention', crowd);
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'kinetic',
     axes: AXES,
     motion: { kind: 'timeline', duration, steps: c.rep.time.phases },
@@ -364,7 +342,6 @@ export function compared(c: StudyCase, t: KineticTuning): Figure {
     path(`${id}-base`, roundedRect(x - 30, base, 60, 26, 6), { role: 'context', line: 'fine' }, cites, 'Where it stands.'),
   ];
   return {
-    caseId: c.id,
     idiom: 'kinetic',
     axes: AXES,
     motion: { kind: 'timeline', duration, steps: ['growing', 'grown', ...(set ? ['possibilities'] : [])] },
@@ -415,7 +392,6 @@ export function lagging(c: StudyCase, t: KineticTuning): Figure {
   const duration = 2 * t.stepMs + (set ? 700 : 0);
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'kinetic',
     axes: AXES,
     motion: { kind: 'timeline', duration, steps: ['under way', 'now', ...(set ? ['possibilities'] : [])] },

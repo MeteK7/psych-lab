@@ -1,64 +1,37 @@
 import type { Composed } from '../../../../shared/visual/composition/compose';
-import { composeScene } from '../../../../shared/visual/composition/compose';
 import type { Layer } from '../../../../shared/visual/composition/scene';
 import type { StudyCase } from '../cases';
-import { FRAME } from '../kit/spatial';
-import { Representation, Statement, drawable, element, isEstablished, statement } from '../representation';
+import { Statement, drawable, element, isEstablished } from '../representation';
+import { Axes as EngineAxes, Coverage as EngineCoverage, Figure as EngineFigure, FigureMotion, Setting, kit } from '../../../../shared/visual';
 
 /**
  * STUDY CODE: the idiom contract (representation-v0.md §6). An idiom turns a representation into a
  * figure: a composition at any moment or viewpoint, a text alternative written from the statements,
- * a coverage report and its values on the five axes.
+ * a coverage report and its values on the five axes. Since Stage 3 M3 the figure is the engine's
+ * (S12); what stays here is the study's: its words (the text alternative, in English) and its setting.
  */
 export type IdiomId = 'spatial' | 'kinetic' | 'field';
 
-export interface Axes {
-  space: 'flat' | 'spatial';
-  time: 'still' | 'moving';
-  substance: 'forms' | 'field';
-  mode: 'direct' | 'metaphorical';
-  viewpoint: 'fixed' | 'movable';
+export type Axes = EngineAxes;
+export type Motion = FigureMotion;
+export type Coverage = EngineCoverage;
+export type Figure = EngineFigure;
+
+export const SAFE = kit.SAFE;
+
+/** The study's setting for a case: its theme and words, its scene ids and seeds, and its English text alternative. */
+export function settingOf(c: StudyCase): Setting {
+  return {
+    theme: c.theme,
+    words: c.words,
+    scene: (idiom) => ({ id: `study.${c.id.toLowerCase()}.${idiom}`, seed: `study-${c.id}-${idiom}` }),
+    alt: (rep) => altText({ ...c, rep }),
+  };
 }
 
-export type Motion =
-  /** Plays once when asked, over `duration` ms; `at` runs 0 to 1. */
-  | { kind: 'timeline'; duration: number; steps: readonly string[] }
-  /** A native slider moves the view between stances; `at` runs 0 to positions − 1. */
-  | { kind: 'viewpoint'; positions: readonly string[] }
-  | { kind: 'still' };
-
-export interface Coverage {
-  shown: { id: string; how: string }[];
-  notShown: { id: string; why: string }[];
-}
-
-export interface Figure {
-  caseId: StudyCase['id'];
-  idiom: IdiomId;
-  axes: Axes;
-  motion: Motion;
-  /** The composition at `at` (see Motion). */
-  compose(at: number): Composed;
-  alt: string;
-  coverage: Coverage;
-}
-
-export const SAFE = Math.round(FRAME.height * 0.06);
-
-/** A composition from layers, in the case's theme, sized to the study frame. */
+/** A composition from layers, in the case's theme, sized to the study frame (the engine's, in the study's setting). */
 export function composed(c: StudyCase, idiom: IdiomId, layers: readonly Layer[], alt: string, text: Record<string, string> = {}): Composed {
-  return composeScene(
-    {
-      id: `study.${c.id.toLowerCase()}.${idiom}`,
-      version: 1,
-      theme: c.theme,
-      size: FRAME,
-      layers,
-      alt,
-      seed: `study-${c.id}-${idiom}`,
-    },
-    { ...c.words, ...text },
-  );
+  return kit.composed({ rep: c.rep, setting: settingOf(c) }, idiom, layers, alt, text);
 }
 
 /** The words for an element, in running text ("you" for the own presence). */
@@ -182,14 +155,7 @@ export function partsShown(c: StudyCase): Record<string, string> {
   return Object.fromEntries(drawable(c.rep).filter((s) => s.say.p === 'part-of').map((s) => [s.id, 'its parts sit side by side, meeting in the middle (C9)']));
 }
 
-/** A coverage report from what an idiom says it drew. Every drawable statement must be accounted for. */
-export function coverage(rep: Representation, shown: Record<string, string>, notShown: Record<string, string>): Coverage {
-  for (const s of drawable(rep)) if (!(s.id in shown) && !(s.id in notShown)) throw new Error(`${rep.id}: statement '${s.id}' is neither shown nor accounted for`);
-  for (const id of [...Object.keys(shown), ...Object.keys(notShown)]) statement(rep, id);
-  return {
-    shown: Object.entries(shown).map(([id, how]) => ({ id, how })),
-    notShown: Object.entries(notShown).map(([id, why]) => ({ id, why })),
-  };
-}
+/** A coverage report from what an idiom says it drew (the engine's). */
+export const coverage = kit.coverage;
 
 export { element };

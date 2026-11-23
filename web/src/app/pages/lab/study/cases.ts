@@ -34,6 +34,7 @@ const P1: StudyCase = {
   framing: 'The drawing isn’t your moment. It’s a stand-in: two people passing, to show what is known and what is open.',
   words: { own: 'You', other: 'Classmate', ...Object.fromEntries(noHello.readings.map((r) => [r.id, r.text])) },
   rep: {
+    v: 1,
     id: 'P1',
     elements: [
       { id: 'own', kind: 'presence', own: true, salience: 'equal' },
@@ -68,6 +69,7 @@ const P2: StudyCase = {
   framing: 'The drawing isn’t your moment. It’s a stand-in: a room at home, to show where you’re looking from.',
   words: { own: 'You', sender: 'Manager', reply: 'Reply', phone: 'Phone', home: 'Home' },
   rep: {
+    v: 1,
     id: 'P2',
     elements: [
       { id: 'own', kind: 'presence', own: true, salience: 'primary' },
@@ -103,6 +105,7 @@ const E1: StudyCase = {
   theme: 'attention',
   words: { right: 'Right side', lungs: 'Lungs', left: 'Left side', body: 'Body', blood: 'Blood', oxygen: 'Oxygen', heart: 'Heart' },
   rep: {
+    v: 1,
     id: 'E1',
     elements: [
       { id: 'heart', kind: 'place' },
@@ -142,12 +145,15 @@ const M1: StudyCase = {
   theme: 'recovery',
   words: { design: 'Design', build: 'Build', licence: 'Licence', procurement: 'Procurement' },
   rep: {
+    v: 1,
     id: 'M1',
     elements: [
       { id: 'design', kind: 'process' },
       { id: 'build', kind: 'process', salience: 'primary' },
       { id: 'licence', kind: 'object' },
       { id: 'procurement', kind: 'presence', salience: 'secondary' },
+      // Stage 3 M1: declared, as the representation's own rule asks (arguments name elements).
+      { id: 'team', kind: 'presence', salience: 'secondary' },
     ],
     statements: [
       { id: 's1', say: { p: 'complete', what: 'design' }, commitment: 'reported', basis: '“Design is finished”' },
@@ -185,6 +191,7 @@ const P3: StudyCase = {
   framing: 'The drawing isn’t your moment. It’s a stand-in: a way between you and a friend, to show what is known and what is open.',
   words: { own: 'You', friend: 'Friend', message: 'Message', reply: 'Reply', ...Object.fromEntries(noReply.readings.map((r) => [r.id, r.text])) },
   rep: {
+    v: 1,
     id: 'P3',
     elements: [
       { id: 'own', kind: 'presence', own: true, salience: 'equal' },
@@ -222,6 +229,7 @@ const P4: StudyCase = {
   framing: 'The drawing isn’t your week. It’s a stand-in: a way through time, to show what is known and what is open.',
   words: { own: 'You', manager: 'Manager', meeting: 'Meeting', ...Object.fromEntries(moved.readings.map((r) => [r.id, r.text])) },
   rep: {
+    v: 1,
     id: 'P4',
     elements: [
       { id: 'own', kind: 'presence', own: true, salience: 'equal' },
@@ -254,12 +262,16 @@ const P5: StudyCase = {
   framing: 'The drawing isn’t your moment. It’s a stand-in: a meeting room, to show where you’re looking from.',
   words: { own: 'You', joker: 'Someone', team: 'The team' },
   rep: {
+    v: 1,
     id: 'P5',
     elements: [
       { id: 'own', kind: 'presence', own: true, salience: 'primary' },
       { id: 'joker', kind: 'presence', salience: 'equal' },
       { id: 'team', kind: 'presence', count: 'several' },
       { id: 'room', kind: 'place' },
+      // Stage 3 M1: declared, as the representation's own rule asks (arguments name elements).
+      { id: 'update', kind: 'object' },
+      { id: 'remark', kind: 'object' },
     ],
     statements: [
       { id: 's1', say: { p: 'located-in', what: 'own', place: 'room' }, commitment: 'reported', basis: '“in the team meeting”' },
@@ -289,12 +301,16 @@ const P6: StudyCase = {
   framing: 'The drawing isn’t your moment. It’s a stand-in: a train carriage, to show where you’re looking from.',
   words: { own: 'You', stranger: 'Stranger', crowd: 'Others', train: 'Train' },
   rep: {
+    v: 1,
     id: 'P6',
     elements: [
       { id: 'own', kind: 'presence', own: true, salience: 'primary' },
       { id: 'stranger', kind: 'presence', salience: 'equal' },
       { id: 'crowd', kind: 'presence', count: 'many' },
       { id: 'train', kind: 'place' },
+      // Stage 3 M1: declared, as the representation's own rule asks (arguments name elements).
+      { id: 'braking', kind: 'process' },
+      { id: 'apology', kind: 'object' },
     ],
     statements: [
       { id: 's1', say: { p: 'located-in', what: 'own', place: 'train' }, commitment: 'reported', basis: '“on a crowded train”' },
@@ -324,12 +340,15 @@ const E2: StudyCase = {
   theme: 'attention',
   words: { sea: 'Sea', sky: 'Clouds', land: 'Land', water: 'Water' },
   rep: {
+    v: 1,
     id: 'E2',
     elements: [
       { id: 'sea', kind: 'place' },
       { id: 'sky', kind: 'place' },
       { id: 'land', kind: 'place' },
       { id: 'water', kind: 'process', salience: 'primary' },
+      // Stage 3 M1: declared, as the representation's own rule asks; only an inferred statement names it.
+      { id: 'sun', kind: 'object' },
     ],
     statements: [
       { id: 's1', say: { p: 'transforms', what: 'water', from: 'liquid', to: 'vapour', at: 'sea' }, commitment: 'reported', phases: ['up'], basis: '“evaporates from the sea”' },
@@ -362,6 +381,7 @@ const E3: StudyCase = {
   possibilities: ['The extra light', 'More water'],
   words: { a: 'Plant by the window', b: 'Plant in the corner', light: 'The extra light', water: 'More water' },
   rep: {
+    v: 1,
     id: 'E3',
     elements: [
       { id: 'a', kind: 'object', salience: 'equal' },
@@ -388,12 +408,15 @@ const M2: StudyCase = {
   theme: 'recovery',
   words: { team: 'Team', supplier: 'Supplier', launch: 'Launch', confirmation: 'Confirmation', email: 'Emails' },
   rep: {
+    v: 1,
     id: 'M2',
     elements: [
       { id: 'team', kind: 'presence', count: 'several' },
       { id: 'supplier', kind: 'presence' },
       { id: 'launch', kind: 'process', salience: 'primary' },
       { id: 'confirmation', kind: 'object' },
+      // Stage 3 M1: declared, as the representation's own rule asks (arguments name elements).
+      { id: 'email', kind: 'object' },
     ],
     statements: [
       { id: 's1', say: { p: 'depends-on', what: 'launch', on: 'confirmation' }, commitment: 'reported', basis: '“depends on the supplier confirming”' },
@@ -423,6 +446,7 @@ const M3: StudyCase = {
   possibilities: ['The flaky test server', 'The new library upgrade', 'Two people off sick'],
   words: { build: 'Build', server: 'The flaky test server', upgrade: 'The new library upgrade', sick: 'Two people off sick' },
   rep: {
+    v: 1,
     id: 'M3',
     elements: [{ id: 'build', kind: 'process', salience: 'primary' }],
     statements: [

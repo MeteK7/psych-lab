@@ -11,6 +11,7 @@ export const U8: StudyCase = {
   text:
     'I went swimming in the lake before breakfast. The water was colder than I expected, and it felt like my whole body woke up at once; I’m not sure why I waited so long to try it.',
   rep: {
+    v: 1,
     id: 'U8',
     elements: [
       { id: 'me', kind: 'presence', salience: 'primary', own: true },
@@ -119,6 +120,7 @@ export const U9: StudyCase = {
   text:
     'The Moon travels around the Earth about once a month, and the same side of it always faces us. Scientists are still not certain how the Moon first formed.',
   rep: {
+    v: 1,
     id: 'U9',
     elements: [
       { id: 'moon', kind: 'object', salience: 'primary' },
@@ -183,6 +185,7 @@ export const U10: StudyCase = {
   text:
     'The staff training programme has already spent most of its budget, and three of its five workshops are still to run. The steering group will decide next month whether to drop a workshop or ask for more funding.',
   rep: {
+    v: 1,
     id: 'U10',
     elements: [
       { id: 'programme', kind: 'process', salience: 'primary' },

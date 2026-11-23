@@ -1,14 +1,15 @@
 import type { SceneElement } from '../../../../shared/visual/composition/scene';
 import { poissonDisc } from '../../../../shared/visual/generation/distributions';
 import type { StudyCase } from '../cases';
-import { label, path, r2, shape } from '../kit/elements';
-import { streamline } from '../kit/field';
-import { Pt, Track, ease, polyline, smooth } from '../kit/paths';
-import { FRAME } from '../kit/spatial';
 import { Statement, find } from '../representation';
 import { Figure, SAFE, altText, composed, coverage, sentence, word } from './contract';
-import { AREA, FieldTuning, offsetLine } from './field';
-import { breakMark, countOf } from './kinetic2';
+import { offsetLine } from './field';
+import { breakMark } from './kinetic2';
+import { kit } from '../../../../shared/visual';
+import type { FieldTuning } from './field';
+const { AREA, FRAME, Track, countOf, ease, headingElements, headings, label, path, polyline, r2, shape, smooth, streamline } = kit;
+type Pt = kit.Pt;
+type Track = kit.Track;
 
 /**
  * STUDY CODE: the field idiom's slice-2 patterns (docs/visual-study/idioms.md): W, T, G, C, D, L.
@@ -20,33 +21,7 @@ const CY = FRAME.height / 2;
 const question = (c: StudyCase, asks: string, about?: string): Statement | undefined =>
   c.rep.statements.find((s) => s.say.p === 'question' && s.say.asks === asks && (about === undefined || s.say.about === about));
 
-/** F4: `n` headings of equal strength around a point, each a sector of outward lines with a common turn. */
-export function headings(centre: Pt, n: number, t: FieldTuning, clear: (p: Pt) => boolean = () => true, reach = t.reach): Pt[][][] {
-  return Array.from({ length: n }, (_, k) => {
-    const mid = -Math.PI / 2 + ((k + 0.5) / n) * Math.PI * 2;
-    const width = (Math.PI * 2) / n;
-    const lines: Pt[][] = [];
-    for (let j = 0; j < t.perHeading; j++) {
-      const a = mid - width * 0.32 + (width * 0.64 * j) / Math.max(1, t.perHeading - 1);
-      const start: Pt = [centre[0] + Math.cos(a) * t.headingStart * 0.6, centre[1] + Math.sin(a) * t.headingStart * 0.6];
-      const vec = (p: Pt) => {
-        if (Math.hypot(p[0] - centre[0], p[1] - centre[1]) > reach) return null;
-        const th = Math.atan2(p[1] - centre[1], p[0] - centre[0]) + t.turn;
-        return [Math.cos(th), Math.sin(th)] as const;
-      };
-      const pts = streamline(start, vec, AREA, 4, reach).filter(clear);
-      if (pts.length > 3) lines.push(pts);
-    }
-    return lines;
-  });
-}
 
-export function headingElements(lines: Pt[][][], open: number, set: Statement | undefined, also: readonly string[]): SceneElement[] {
-  if (open <= 0.002) return [];
-  return lines.flatMap((ls, k) =>
-    ls.length ? [path(`heading-${k + 1}`, ls.map((l) => polyline(l.slice(0, Math.max(2, Math.round(l.length * open))))).join(''), { role: 'context', line: 'hair', dash: 'tentative' }, [...(set ? [set.id] : []), ...also], 'One possible heading: as many lines and as long as every other, unresolved.')] : [],
-  );
-}
 
 const bundleOf = (id: string, track: Track, u: number, n: number, gap: number, style: { role: 'subject' | 'context'; line: 'fine' | 'hair' }, cites: readonly string[], why: string): SceneElement =>
   path(id, Array.from({ length: n }, (_, i) => polyline(offsetLine(track, (i - (n - 1) / 2) * gap, 0, Math.max(0.002, u)))).join(''), style, cites, why);
@@ -75,7 +50,6 @@ export function openWait(c: StudyCase, t: FieldTuning): Figure {
   const duration = timed(c, t);
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'field',
     axes: axes(!!duration),
     motion: duration ? { kind: 'timeline', duration, steps: ['sent', 'what is open'] } : { kind: 'still' },
@@ -128,7 +102,6 @@ export function heldWait(c: StudyCase, t: FieldTuning): Figure {
   const duration = timed(c, t);
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'field',
     axes: axes(!!duration),
     motion: duration ? { kind: 'timeline', duration, steps: ['flowing', 'held'] } : { kind: 'still' },
@@ -190,7 +163,6 @@ export function shiftedField(c: StudyCase, t: FieldTuning): Figure {
     });
   };
   return {
-    caseId: c.id,
     idiom: 'field',
     axes: axes(!!duration),
     motion: duration ? { kind: 'timeline', duration, steps: ['time', 'what is open'] } : { kind: 'still' },
@@ -250,7 +222,6 @@ export function ripples(c: StudyCase, t: FieldTuning): Figure {
   const rings = (id: string, centre: Pt, u: number, count: number, reach: number, cites: readonly string[], why: string, role: 'subject' | 'context') =>
     u > 0.01 ? [path(id, Array.from({ length: count }, (_, k) => { const r = 10 + (reach * (k + 1) * u) / count; return `M${r2(centre[0] - r)} ${r2(centre[1])}A${r2(r)} ${r2(r)} 0 1 0 ${r2(centre[0] + r)} ${r2(centre[1])}A${r2(r)} ${r2(r)} 0 1 0 ${r2(centre[0] - r)} ${r2(centre[1])}Z`; }).join(''), { role, line: 'hair' }, cites, why)] : [];
   return {
-    caseId: c.id,
     idiom: 'field',
     axes: axes(!!duration),
     motion: duration ? { kind: 'timeline', duration, steps: [...sends.map((_, k) => `said ${k + 1}`), 'reaction'] } : { kind: 'still' },
@@ -298,7 +269,6 @@ export function crowdField(c: StudyCase, t: FieldTuning): Figure {
   const d = dots.map(([x, y]) => `M${r2(x - 2.2)} ${r2(y)}A2.2 2.2 0 1 0 ${r2(x + 2.2)} ${r2(y)}A2.2 2.2 0 1 0 ${r2(x - 2.2)} ${r2(y)}Z`).join('');
   const alt = altText(c, (id) => id !== s4.id && id !== s5.id);
   return {
-    caseId: c.id,
     idiom: 'field',
     axes: axes(false),
     motion: { kind: 'still' },
@@ -343,7 +313,6 @@ export function grownField(c: StudyCase, t: FieldTuning): Figure {
   const column = (id: string, x: number, h: number, u: number) =>
     path(id, [-6, 0, 6].map((dx) => polyline([[x + dx, base], [x + dx * 0.6, base - h * u]])).join(''), { role: 'context', line: 'fine' }, [s1.id], 'How tall it grew: a coherent bundle, because it is reported.');
   return {
-    caseId: c.id,
     idiom: 'field',
     axes: axes(!!duration),
     motion: duration ? { kind: 'timeline', duration, steps: ['grown', 'what is open'] } : { kind: 'still' },
@@ -390,7 +359,6 @@ export function lateField(c: StudyCase, t: FieldTuning): Figure {
   const duration = timed(c, t);
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'field',
     axes: axes(!!duration),
     motion: duration ? { kind: 'timeline', duration, steps: ['under way', 'what is open'] } : { kind: 'still' },

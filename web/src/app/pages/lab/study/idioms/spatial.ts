@@ -2,40 +2,36 @@ import type { SceneElement } from '../../../../shared/visual/composition/scene';
 import { V3, length, place, sub } from '../../../../shared/visual/generation/spatial/camera';
 import { POSES, SEEN_FROM_WITHIN } from '../../../../shared/visual/generation/spatial/figures';
 import type { StudyCase } from '../cases';
-import type { Unscaled } from './kinetic';
-import { label } from '../kit/elements';
-import { Pt, smooth } from '../kit/paths';
-import { Key, Space, aimedKey, cameraOn, framedKey, groundPlane } from '../kit/spatial';
 import { Stance, drawable, find } from '../representation';
 import { Figure, altText, composed, coverage, layoutOf, partsShown, sentence, word } from './contract';
 import { carriage, meetingRoom, pathScene, plants } from './spatial2';
-import { dependencyLacks, dependencySpatial } from './dependency';
-import { feltLacks, feltSpatial } from './felt';
-import { motionLacks, motionSpatial } from './motion';
-import { Choice, Pattern, Refused, choose, needs } from './registry';
+import { Pattern, needs } from './registry';
+import { Choice, studyChoice } from './dispatch';
 import { listed } from './draws';
-import { compositionLacks, tryCompose } from './compose';
+import { SPATIAL_RULES as ENGINE_SPATIAL_RULES, kit } from '../../../../shared/visual';
+import type { SpatialTuning as EngineSpatialTuning, Unscaled } from '../../../../shared/visual';
+const { Space, aimedKey, cameraOn, centreOf, corners, framedKey, groundPlane, keysFor, label, smooth, stances } = kit;
+type Key = kit.Key;
+type Pt = kit.Pt;
+type Space = kit.Space;
 
 /**
  * STUDY CODE: the spatial scene idiom (docs/visual-study/idioms.md, S1–S9): a constructed place in
  * perspective, still, made of forms, with a viewpoint the person moves along one path. Built on the
  * engine's spatial geometry through the study's own builder (kit/spatial.ts).
  */
-export interface SpatialTuning {
+/** The spatial tuning: the engine's (S12, what its general patterns read), and what the study's own patterns read. */
+export interface SpatialTuning extends EngineSpatialTuning {
   /** S2 (revision 2): how far the mover's course passes from the one passed, metres. */
   passingGap: number;
   /** S8 (revision 2): how far past the closest point the mover stands: the moment just after the passing. */
   passingOffset: number;
-  /** S7: a key per stance; replaced whole by a finish. */
-  keys: Partial<Record<Stance, Key>>;
   /** The open floor's extent (S1 stand-in). */
   floor: number;
   /** S3: the tube's radius and the beads' (E1). */
   tube: number;
   bead: number;
   layout: 'loop' | 'figure-eight';
-  /** C8. */
-  labels: boolean;
   /** The room's faint floor edge, the cut edge of walls drawn low, and which wall has the window (rules since revision 3). */
   floorEdges: boolean;
   cutEdges: boolean;
@@ -51,22 +47,16 @@ export interface SpatialTuning {
    * it asserts a size the text doesn't give (findings-revision-4.md §3). Only the kinetic idiom adopted `range`.
    */
   unscaled: Unscaled;
-  /**
-   * Revision 7 (composition): additions drawn into a base pattern's scene, given where it placed its
-   * elements. Only compose.ts sets it; unset, a figure is drawn exactly as before.
-   */
-  add3?: (space: Space, anchors: Readonly<Record<string, V3>>) => SceneElement[];
 }
 
 export const SPATIAL_RULES: SpatialTuning = {
+  ...ENGINE_SPATIAL_RULES,
   passingGap: 0.95,
   passingOffset: 0.75,
-  keys: {},
   floor: 40,
   tube: 0.07,
   bead: 0.035,
   layout: 'loop',
-  labels: true,
   // Revision 3 (accepted in slice 1, P2-S2–S4): the home setting draws the room's own devices.
   floorEdges: true,
   cutEdges: true,
@@ -76,7 +66,6 @@ export const SPATIAL_RULES: SpatialTuning = {
   leaf: 0.2,
   unscaled: 'constant',
 };
-
 export function spatial(c: StudyCase, finish: Partial<SpatialTuning> = {}): Figure {
   return spatialChoice(c, finish).figure;
 }
@@ -122,12 +111,7 @@ function patterns(): Pattern<SpatialTuning>[] {
       },
       draw: pathScene,
     },
-    // Revision 5, step 3: things that move, meet and move one another, on ground built from their relations (motion.ts). Under evaluation.
-    { name: 'motion', lacks: motionLacks, draw: motionSpatial },
-    // Revision 6, step 2: a dependency with parts of one whole (dependency.ts).
-    { name: 'dependency', lacks: dependencyLacks, draw: dependencySpatial },
-    // Revision 6, step 3: a reported feeling in a place, with no exchange (felt.ts).
-    { name: 'felt', lacks: feltLacks, draw: feltSpatial },
+    // Then the engine's general patterns (motion, dependency, felt), registered after these (S12, M3: dispatch.ts).
   ]);
 }
 
@@ -136,36 +120,13 @@ export function spatialChoice(c: StudyCase, finish: Partial<SpatialTuning> = {},
   // R4-2: whatever the representation says is above something is lifted (a rule constant: 1.6 m).
   const above = Object.fromEntries(find(c.rep, 'above').map((s) => [s.say.a, 1.6]));
   const t: SpatialTuning = { ...SPATIAL_RULES, layout: layoutOf(c), lift: above, ...finish, keys: { ...SPATIAL_RULES.keys, ...finish.keys } };
-  try {
-    return choose('spatial', c, t, patterns().filter((p) => !only.without?.includes(p.name)));
-  } catch (e) {
-    // Revision 7: with no able pattern, a base pattern and additions (compose.ts); else the refusal says why.
-    if (!(e instanceof Refused) || only.without?.includes('composition')) throw e;
-    const f = tryCompose(c, 'spatial', finish);
-    if (f) return { figure: f, choice: { pattern: `composed: ${f.composition.base} + ${f.composition.added.length}`, undrawn: 0, others: [] } };
-    throw new Refused({ ...e.refusal, tried: [...e.refusal.tried, { pattern: 'composition', lacks: compositionLacks(c, 'spatial') }] });
-  }
+  // Stage 3, M2: through the engine's dispatch, which composes when no single pattern is able (revision 7) and else refuses, saying why.
+  return studyChoice('spatial', c, t, finish, only.without);
 }
 
-/** A box's eight corners. */
-export function corners(min: V3, max: V3): V3[] {
-  const out: V3[] = [];
-  for (const x of [min[0], max[0]]) for (const y of [min[1], max[1]]) for (const z of [min[2], max[2]]) out.push([x, y, z]);
-  return out;
-}
 
-export function centreOf(points: readonly V3[]): V3 {
-  return [0, 1, 2].map((k) => points.reduce((s, p) => s + p[k], 0) / points.length) as unknown as V3;
-}
 
-export function stances(c: StudyCase): readonly Stance[] {
-  return c.rep.facets.space?.viewpoints ?? ['across'];
-}
 
-export function keysFor(c: StudyCase, t: SpatialTuning, rules: Partial<Record<Stance, Key>>): Key[] {
-  // Revision 7: a stance a pattern has no camera for falls back to its first one (was: across, or nothing).
-  return stances(c).map((s) => t.keys[s] ?? rules[s] ?? rules.across ?? Object.values(rules)[0]!);
-}
 
 export const youLabel = (space: Space, head: V3, names: readonly string[], cites: readonly string[]): SceneElement[] => {
   const at = space.anchor(head, 0.32);
@@ -227,7 +188,6 @@ function passing(c: StudyCase, t: SpatialTuning): Figure {
   const keys = keysFor(c, t, rules);
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'spatial',
     axes: { space: 'spatial', time: 'still', substance: 'forms', mode: 'direct', viewpoint: 'movable' },
     motion: { kind: 'viewpoint', positions: stances(c) },
@@ -301,7 +261,6 @@ function athome(c: StudyCase, t: SpatialTuning): Figure {
     { id: 'beside-right', x0: W.x1, x1: 7.2, cites: ['base:surroundings'], why: 'The rooms beside yours, from further back: empty, so they claim nothing about anyone.' },
   ];
   return {
-    caseId: c.id,
     idiom: 'spatial',
     axes: { space: 'spatial', time: 'still', substance: 'forms', mode: 'direct', viewpoint: 'movable' },
     motion: { kind: 'viewpoint', positions: stances(c) },
@@ -439,7 +398,6 @@ function system(c: StudyCase, t: SpatialTuning): Figure {
   const keys = keysFor(c, t, rules);
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'spatial',
     axes: { space: 'spatial', time: 'still', substance: 'forms', mode: 'direct', viewpoint: 'movable' },
     motion: { kind: 'viewpoint', positions: stances(c) },
@@ -521,7 +479,6 @@ function way(c: StudyCase, t: SpatialTuning): Figure {
     ];
   };
   return {
-    caseId: c.id,
     idiom: 'spatial',
     axes: { space: 'spatial', time: 'still', substance: 'forms', mode: 'metaphorical', viewpoint: 'movable' },
     motion: { kind: 'viewpoint', positions: stances(c) },

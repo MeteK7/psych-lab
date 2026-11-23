@@ -23,6 +23,7 @@ export const U1: StudyCase = {
   theme: 'attention',
   words: { ball: 'Ball', ramp: 'Ramp', box: 'Box', floor: 'Floor' },
   rep: {
+    v: 1,
     id: 'U1',
     elements: [
       { id: 'ball', kind: 'object', salience: 'primary' },

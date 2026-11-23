@@ -12,6 +12,7 @@ export const U2: StudyCase = {
     "I sat in the dentist's waiting room with my heart racing, even though it was only a check-up. " +
     "Maybe it's the sound of the drill, maybe it's a bad visit when I was a child; I honestly don't know.",
   rep: {
+    v: 1,
     id: 'U2',
     elements: [
       { id: 'i', kind: 'presence', salience: 'primary', own: true },
@@ -81,6 +82,7 @@ export const U3: StudyCase = {
     'A river starts in the hills and flows down to the sea, carrying sand and stones along with it. ' +
     'Over many years it can change its course, and nobody can say exactly where it will run next.',
   rep: {
+    v: 1,
     id: 'U3',
     elements: [
       { id: 'river', kind: 'object', salience: 'primary' },
@@ -156,6 +158,7 @@ export const U4: StudyCase = {
     'The first phase of the stock count, covering the main warehouse, is complete. ' +
     'The second phase, at the overflow site, needs two people from the sales team, and it is not yet clear whether they can be released for it.',
   rep: {
+    v: 1,
     id: 'U4',
     elements: [
       { id: 'count', kind: 'process', salience: 'secondary' },

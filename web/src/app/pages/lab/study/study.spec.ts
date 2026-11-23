@@ -5,8 +5,9 @@ import type { Figure, IdiomId } from './idioms/contract';
 import { field } from './idioms/field';
 import { spatial } from './idioms/spatial';
 import { kinetic } from './idioms/kinetic';
-import { citesOf } from './kit/elements';
 import { axesApart, problemsOf, samples } from './study-page';
+import { kit } from '../../../shared/visual';
+const { citesOf } = kit;
 
 /**
  * STUDY CODE: the representation study's checks (docs/visual-study). Every figure, by the rules and

@@ -3,12 +3,14 @@ import { V3, onFrame, place, toCamera } from '../../../../shared/visual/generati
 import { POSES, Pose, SEEN_FROM_WITHIN } from '../../../../shared/visual/generation/spatial/figures';
 import { poissonDisc } from '../../../../shared/visual/generation/distributions';
 import type { StudyCase } from '../cases';
-import { label } from '../kit/elements';
-import { Key, Space, aimedKey, cameraOn, framedKey, groundPlane } from '../kit/spatial';
 import { Stance, Statement, find } from '../representation';
 import { Figure, altText, composed, coverage, word } from './contract';
-import { countOf } from './kinetic2';
-import { SpatialTuning, centreOf, corners, keysFor, stances, youLabel } from './spatial';
+import { youLabel } from './spatial';
+import { kit } from '../../../../shared/visual';
+import type { SpatialTuning } from './spatial';
+const { Space, aimedKey, cameraOn, centreOf, corners, countOf, framedKey, groundPlane, keysFor, label, stances } = kit;
+type Key = kit.Key;
+type Space = kit.Space;
 
 /**
  * STUDY CODE: the spatial idiom's slice-2 patterns (docs/visual-study/idioms.md): the `path` frame
@@ -121,7 +123,6 @@ export function pathScene(c: StudyCase, t: SpatialTuning): Figure {
   for (const q of qs) notShown[q.id] = 'nothing in a still scene of the facts says why, or when';
   if (set) notShown[set.id] = 'a still scene of the facts has no place for possibilities: they are listed beside it';
   return {
-    caseId: c.id,
     idiom: 'spatial',
     axes: AXES_PATH,
     motion: { kind: 'viewpoint', positions: stances(c) },
@@ -219,7 +220,6 @@ export function meetingRoom(c: StudyCase, t: SpatialTuning): Figure {
   const keys = keysFor(c, t, rules);
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'spatial',
     axes: AXES_PLACE,
     motion: { kind: 'viewpoint', positions: stances(c) },
@@ -284,7 +284,6 @@ export function carriage(c: StudyCase, t: SpatialTuning): Figure {
   const keys = keysFor(c, t, rules);
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'spatial',
     axes: AXES_PLACE,
     motion: { kind: 'viewpoint', positions: stances(c) },
@@ -370,7 +369,6 @@ export function plants(c: StudyCase, t: SpatialTuning): Figure {
     }
   };
   return {
-    caseId: c.id,
     idiom: 'spatial',
     axes: AXES_PLACE,
     motion: { kind: 'viewpoint', positions: stances(c) },

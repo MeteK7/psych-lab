@@ -1,40 +1,28 @@
 import type { SceneElement } from '../../../../shared/visual/composition/scene';
 import type { StudyCase } from '../cases';
-import type { Unscaled } from './kinetic';
-import { label, path, r2, shape } from '../kit/elements';
-import { Area, contour, streamline, thin } from '../kit/field';
-import { FRAME } from '../kit/spatial';
-import { Pt, Track, ease, polyline, smooth } from '../kit/paths';
 import { find } from '../representation';
 import { Figure, SAFE, altText, composed, coverage, layoutOf, partsShown, sentence, word } from './contract';
 import { crowdField, grownField, heldWait, lateField, openWait, ripples, shiftedField } from './field2';
-import { roundedRect } from './kinetic';
-import { dependencyField, dependencyLacks } from './dependency';
-import { feltField, feltLacks } from './felt';
-import { motionField, motionFieldLacks } from './motion';
-import { Choice, Pattern, Refused, choose, needs } from './registry';
+import { Pattern, Refused, needs } from './registry';
+import { Choice, studyChoice } from './dispatch';
 import { listed } from './draws';
-import { compositionLacks, tryCompose } from './compose';
+import { FIELD_RULES as ENGINE_FIELD_RULES, kit } from '../../../../shared/visual';
+import type { FieldTuning as EngineFieldTuning, Unscaled } from '../../../../shared/visual';
+const { AREA, FRAME, Track, contour, ease, label, path, polyline, r2, roundedRect, shape, smooth, streamline, thin } = kit;
+type Area = kit.Area;
+type Pt = kit.Pt;
+type Track = kit.Track;
 
 /**
  * STUDY CODE: the field idiom (docs/visual-study/idioms.md, F1–F7): the frame is a field of fine
  * lines whose order, spacing and tightness carry the meaning. Flat; moving only when the field
  * facet says it evolves; metaphorical unless the field is the thing itself (a flow).
  */
-export interface FieldTuning {
-  /** F5: how long an evolving field grows, ms. */
-  evolveMs: number;
-  /** F1 with C5: how far from its source the field reaches, so a third of the frame stays calm. */
-  reach: number;
+/** The field tuning: the engine's (S12, what its general patterns read), and what the study's own patterns read. */
+export interface FieldTuning extends EngineFieldTuning {
   /** F2 clarity: established bundles, lines per bundle and their spacing. */
   bundle: number;
   bundleGap: number;
-  /** F4: lines per possible heading, how far from the source they start, and their common turn (radians). */
-  perHeading: number;
-  headingStart: number;
-  turn: number;
-  /** F2 agitation: how tight the contours are near the source (units at the first level). */
-  tightness: number;
   /** F6: the scale at each stance. */
   scales: readonly number[];
   /** F2 density: lanes after something joins, and before. */
@@ -42,8 +30,6 @@ export interface FieldTuning {
   lanesBefore: number;
   laneGap: number;
   layout: 'loop' | 'figure-eight';
-  /** F3, F7: marks and labels. */
-  labels: boolean;
   /**
    * R4-4 (open for this idiom): how an amount the text doesn't give is drawn. The constant, provisionally:
    * it asserts a size the text doesn't give (findings-revision-4.md §3). Only the kinetic idiom adopted `range`.
@@ -52,27 +38,18 @@ export interface FieldTuning {
 }
 
 export const FIELD_RULES: FieldTuning = {
-  evolveMs: 6000,
-  reach: 170,
+  ...ENGINE_FIELD_RULES,
   bundle: 3,
   bundleGap: 6,
-  // R4-1 (revision 4): the accepted P1-F1 values, needed five times, are the rule.
-  perHeading: 4,
-  headingStart: 76,
-  turn: 0.6,
-  tightness: 70,
   scales: [1, 1.7, 3, 5.5],
   lanesAfter: 7,
   lanesBefore: 3,
   laneGap: 5,
   layout: 'loop',
-  labels: true,
   unscaled: 'constant',
 };
-
 const CX = FRAME.width / 2;
 const CY = FRAME.height / 2;
-export const AREA: Area = { x: SAFE, y: SAFE, width: FRAME.width - 2 * SAFE, height: FRAME.height - 2 * SAFE };
 
 export function field(c: StudyCase, finish: Partial<FieldTuning> = {}): Figure {
   return fieldChoice(c, finish).figure;
@@ -108,12 +85,7 @@ function patterns(): Pattern<FieldTuning>[] {
       lacks: (c) => all(a(c, 'complete'), a(c, 'precedes'), a(c, 'depends-on'), a(c, 'absent'), a(c, 'waiting'), a(c, 'exchange-absent'), question(c, 'time')),
       draw: held,
     },
-    // Revision 5, step 3: a disturbance from a meeting, along a route (motion.ts). Under evaluation.
-    { name: 'motion', lacks: motionFieldLacks, draw: motionField },
-    // Revision 6, step 2: a dependency with parts of one whole, as a field of clarity (dependency.ts).
-    { name: 'dependency', lacks: (c) => all(quality(c, 'clarity'), dependencyLacks(c)), draw: dependencyField },
-    // Revision 6, step 3: a reported feeling in a place, as P2's contours (felt.ts).
-    { name: 'felt', lacks: (c) => all(quality(c, 'agitation'), feltLacks(c)), draw: feltField },
+    // Then the engine's general patterns (motion, dependency, felt), registered after these (S12, M3: dispatch.ts).
   ]);
 }
 
@@ -121,15 +93,8 @@ function patterns(): Pattern<FieldTuning>[] {
 export function fieldChoice(c: StudyCase, finish: Partial<FieldTuning> = {}, only: { without?: readonly string[] } = {}): { figure: Figure; choice: Choice } {
   const t: FieldTuning = { ...FIELD_RULES, layout: layoutOf(c), ...finish };
   if (!c.rep.facets.field) throw new Refused({ caseId: c.id, idiom: 'field', tried: [{ pattern: 'every pattern', lacks: ['a field facet'] }] });
-  try {
-    return choose('field', c, t, patterns().filter((p) => !only.without?.includes(p.name)));
-  } catch (e) {
-    // Revision 7: with no able pattern, a base pattern and additions (compose.ts); else the refusal says why.
-    if (!(e instanceof Refused) || only.without?.includes('composition')) throw e;
-    const f = tryCompose(c, 'field', finish);
-    if (f) return { figure: f, choice: { pattern: `composed: ${f.composition.base} + ${f.composition.added.length}`, undrawn: 0, others: [] } };
-    throw new Refused({ ...e.refusal, tried: [...e.refusal.tried, { pattern: 'composition', lacks: compositionLacks(c, 'field') }] });
-  }
+  // Stage 3, M2: through the engine's dispatch, which composes when no single pattern is able (revision 7) and else refuses, saying why.
+  return studyChoice('field', c, t, finish, only.without);
 }
 
 /** Lines offset sideways from a track, `offset` units to its left. */
@@ -194,7 +159,6 @@ function clarity(c: StudyCase, t: FieldTuning): Figure {
   const duration = c.rep.facets.field!.evolves ? t.evolveMs : 0;
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'field',
     axes: { space: 'flat', time: duration ? 'moving' : 'still', substance: 'field', mode: 'metaphorical', viewpoint: 'fixed' },
     motion: duration ? { kind: 'timeline', duration, steps: ['what is known', 'what is open'] } : { kind: 'still' },
@@ -263,7 +227,6 @@ function agitation(c: StudyCase, t: FieldTuning): Figure {
   const reach = Math.max(...rings.flatMap((l) => l.map((p) => Math.hypot(p[0], p[1]))));
   const alt = altText(c, (id) => id === s5.id);
   return {
-    caseId: c.id,
     idiom: 'field',
     axes: { space: 'flat', time: 'still', substance: 'field', mode: 'metaphorical', viewpoint: stances.length > 1 ? 'movable' : 'fixed' },
     motion: stances.length > 1 ? { kind: 'viewpoint', positions: stances } : { kind: 'still' },
@@ -393,7 +356,6 @@ function flow(c: StudyCase, t: FieldTuning): Figure {
   const alt = altText(c);
   const segmentStatement = (k: number) => flows.find((f) => f.say.from === through[k] && f.say.to === through[(k + 1) % through.length]);
   return {
-    caseId: c.id,
     idiom: 'field',
     axes: { space: 'flat', time: 'still', substance: 'field', mode: 'direct', viewpoint: 'fixed' },
     motion: { kind: 'still' },
@@ -479,7 +441,6 @@ function held(c: StudyCase, t: FieldTuning): Figure {
   const duration = c.rep.facets.field!.evolves ? t.evolveMs : 0;
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'field',
     axes: { space: 'flat', time: duration ? 'moving' : 'still', substance: 'field', mode: 'metaphorical', viewpoint: 'fixed' },
     motion: duration ? { kind: 'timeline', duration, steps: ['flowing', 'held'] } : { kind: 'still' },

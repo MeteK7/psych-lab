@@ -1,31 +1,27 @@
 import type { Layer, SceneElement } from '../../../../shared/visual/composition/scene';
 import type { StudyCase } from '../cases';
-import { label, path, r2, shape } from '../kit/elements';
-import { FRAME } from '../kit/spatial';
-import { Pt, Track, ease, polyline, smooth } from '../kit/paths';
 import { drawable, find } from '../representation';
 import { Figure, SAFE, altText, composed, coverage, layoutOf, partsShown, sentence, word } from './contract';
 import { awaiting, compared, jostled, lagging, reacting, shifted } from './kinetic2';
-import { dependencyKinetic, dependencyLacks } from './dependency';
-import { feltKinetic, feltLacks } from './felt';
-import { motionKinetic, motionLacks } from './motion';
-import { Choice, Pattern, Refused, choose, needs } from './registry';
+import { Pattern, needs } from './registry';
+import { Choice, studyChoice } from './dispatch';
 import { listed } from './draws';
-import { compositionLacks, tryCompose } from './compose';
+import { KINETIC_RULES as ENGINE_KINETIC_RULES, kit } from '../../../../shared/visual';
+import type { KineticTuning as EngineKineticTuning, Unscaled } from '../../../../shared/visual';
+const { CX, CY, FRAME, Track, ease, label, path, polyline, presence, r2, roundedRect, shape, smooth } = kit;
+type Pt = kit.Pt;
+type Track = kit.Track;
 
 /**
  * STUDY CODE: the kinetic sequence idiom (docs/visual-study/idioms.md, K1–K11): flat, moving, made
  * of forms, direct, a fixed viewpoint. The rules choose a pattern from the predicates present; the
  * tuning holds every number a rule sets, so hand finishing (finish.ts) is a list of changes to it.
  */
-/** R4-4 candidates: the current fixed size; (a) that size with "not to scale"; (b) a range; (c) a break. */
-export type Unscaled = 'constant' | 'labelled' | 'range' | 'break';
+export type { Unscaled };
 
-export interface KineticTuning {
-  /** K3: one step of a sequence, ms. */
-  stepMs: number;
-  /** K2: a presence's radius; a secondary one's. */
-  radius: number;
+/** The kinetic tuning: the engine's (S12, what its general patterns read), and what the study's own patterns read. */
+export interface KineticTuning extends EngineKineticTuning {
+  /** K2: a secondary presence's radius. */
   secondaryRadius: number;
   /** K5 passes: closest approach, in radii, and how far apart the paths start and end. */
   approach: number;
@@ -37,27 +33,12 @@ export interface KineticTuning {
   arcLift: number;
   /** The cycle's layout: by the rules, places around one loop in the order the cycle names them. */
   layout: 'loop' | 'figure-eight';
-  /** K4: traces of the way so far. */
-  traces: boolean;
-  /** C8: labels on forms that would be ambiguous without them. */
-  labelForms: boolean;
   /** K2r3: a contact shadow under each presence (accepted in slice 1, P1-K2 and P2-K2). */
   shadows: boolean;
-  /**
-   * R4-4, adopted for this idiom (2026-11-21): an amount the text doesn't give is drawn as a range, open
-   * where the amount is unknown. The spatial and field idioms keep the constant, provisionally.
-   */
-  unscaled: Unscaled;
-  /**
-   * The size an unspecified amount takes where one is drawn (the constant, `break`, `labelled`), as a
-   * multiple of the rule constant. Under `range` nothing may depend on it: a spec varies it to prove that.
-   */
-  unspecified: number;
 }
 
 export const KINETIC_RULES: KineticTuning = {
-  stepMs: 1300,
-  radius: 22,
+  ...ENGINE_KINETIC_RULES,
   secondaryRadius: 16,
   approach: 3,
   spread: 60,
@@ -65,27 +46,13 @@ export const KINETIC_RULES: KineticTuning = {
   ringMark: 8,
   arcLift: 90,
   layout: 'loop',
-  traces: true,
-  labelForms: true,
   shadows: true,
-  unscaled: 'range',
-  unspecified: 1,
 };
-
 /** A soft contact shadow under a flat form, on the plane it moves across. */
 export function contact(id: string, at: Pt, r: number, grounds: string): SceneElement {
   return shape(`${id}-shadow`, { type: 'ellipse', cx: r2(at[0] + r * 0.12), cy: r2(at[1] + r * 0.92), rx: r2(r * 0.95), ry: r2(r * 0.32) }, { role: 'ink', material: 'shadow' }, ['base:ground'], 'Sets the form on a surface, so it reads as something that moves across one.', { grounds }, ['understanding']);
 }
 
-export const CX = FRAME.width / 2;
-export const CY = FRAME.height / 2;
-
-/** A presence as a flat form (K2, C2, C3): the own one lit in the area colour; another, the ground with a context line. Round: no facing. */
-export function presence(id: string, at: Pt, r: number, own: boolean, cites: readonly string[], why: string): SceneElement[] {
-  const g = { type: 'circle' as const, cx: r2(at[0]), cy: r2(at[1]), r };
-  if (own) return [shape(id, g, { role: 'subject', material: 'lit', line: 'regular' }, cites, why)];
-  return [shape(`${id}-back`, g, { role: 'ground', material: 'tonal' }, ['base:ground'], 'Keeps the form solid over the traces behind it.', {}, ['understanding']), shape(id, g, { role: 'context', line: 'regular' }, cites, why)];
-}
 
 export function trace(id: string, track: Track, u: number, own: boolean, cites: readonly string[], why: string): SceneElement[] {
   if (u <= 0.002) return [];
@@ -143,27 +110,15 @@ function patterns(): Pattern<KineticTuning>[] {
       lacks: (c) => all(a(c, 'complete'), a(c, 'precedes'), a(c, 'depends-on'), a(c, 'absent'), a(c, 'waiting'), a(c, 'exchange-absent'), question(c, 'time')),
       draw: blocked,
     },
-    // Revision 5, step 3: things that move, meet and move one another (motion.ts). Under evaluation.
-    { name: 'motion', lacks: motionLacks, draw: motionKinetic },
-    // Revision 6, step 2: a dependency with parts of one whole (dependency.ts).
-    { name: 'dependency', lacks: dependencyLacks, draw: dependencyKinetic },
-    // Revision 6, step 3: a reported feeling in a place, with no exchange (felt.ts).
-    { name: 'felt', lacks: feltLacks, draw: feltKinetic },
+    // Then the engine's general patterns (motion, dependency, felt), registered after these (S12, M3: dispatch.ts).
   ]);
 }
 
 /** `without`: patterns left out, for the checks (to show what the idiom does without one). */
 export function kineticChoice(c: StudyCase, finish: Partial<KineticTuning> = {}, only: { without?: readonly string[] } = {}): { figure: Figure; choice: Choice } {
   const t: KineticTuning = { ...KINETIC_RULES, layout: layoutOf(c), ...finish };
-  try {
-    return choose('kinetic', c, t, patterns().filter((p) => !only.without?.includes(p.name)));
-  } catch (e) {
-    // Revision 7: with no able pattern, a base pattern and additions (compose.ts); else the refusal says why.
-    if (!(e instanceof Refused) || only.without?.includes('composition')) throw e;
-    const f = tryCompose(c, 'kinetic', finish);
-    if (f) return { figure: f, choice: { pattern: `composed: ${f.composition.base} + ${f.composition.added.length}`, undrawn: 0, others: [] } };
-    throw new Refused({ ...e.refusal, tried: [...e.refusal.tried, { pattern: 'composition', lacks: compositionLacks(c, 'kinetic') }] });
-  }
+  // Stage 3, M2: through the engine's dispatch, which composes when no single pattern is able (revision 7) and else refuses, saying why.
+  return studyChoice('kinetic', c, t, finish, only.without);
 }
 
 const AXES = { space: 'flat', time: 'moving', substance: 'forms', mode: 'direct', viewpoint: 'fixed' } as const;
@@ -198,7 +153,6 @@ function encounter(c: StudyCase, t: KineticTuning): Figure {
   };
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'kinetic',
     axes: AXES,
     motion: { kind: 'timeline', duration, steps: [...c.rep.time.phases, ...(set ? ['possibilities'] : [])] },
@@ -268,7 +222,6 @@ function transmission(c: StudyCase, t: KineticTuning): Figure {
   const duration = 3 * t.stepMs;
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'kinetic',
     axes: AXES,
     motion: { kind: 'timeline', duration, steps: ['sent', 'read', 'felt'] },
@@ -366,7 +319,6 @@ function cycle(c: StudyCase, t: KineticTuning): Figure {
   const alt = altText(c);
   const cites = (id: string) => flows.filter((f) => f.say.from === id || f.say.to === id).map((f) => f.id);
   return {
-    caseId: c.id,
     idiom: 'kinetic',
     axes: AXES,
     motion: { kind: 'timeline', duration, steps: c.rep.time.phases },
@@ -456,7 +408,6 @@ function blocked(c: StudyCase, t: KineticTuning): Figure {
   const duration = 3 * t.stepMs;
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'kinetic',
     axes: AXES,
     motion: { kind: 'timeline', duration, steps: ['finished', 'to the barrier', 'held'] },
@@ -518,11 +469,6 @@ function formOf(state: string, at: Pt, cites: readonly string[]): SceneElement[]
   return [shape('water', { type: 'circle', cx: r2(x), cy: r2(y), r: 11 }, { role: 'subject', material: 'lit', line: 'regular' }, cites, why)];
 }
 
-export function roundedRect(x: number, y: number, w: number, h: number, r: number): string {
-  const R = Math.min(r, w / 2, h / 2);
-  const f = r2;
-  return `M${f(x + R)} ${f(y)}L${f(x + w - R)} ${f(y)}A${f(R)} ${f(R)} 0 0 1 ${f(x + w)} ${f(y + R)}L${f(x + w)} ${f(y + h - R)}A${f(R)} ${f(R)} 0 0 1 ${f(x + w - R)} ${f(y + h)}L${f(x + R)} ${f(y + h)}A${f(R)} ${f(R)} 0 0 1 ${f(x)} ${f(y + h - R)}L${f(x)} ${f(y + R)}A${f(R)} ${f(R)} 0 0 1 ${f(x + R)} ${f(y)}Z`;
-}
 
 /** A soft place: a rounded form, a little wider than tall. */
 export function blob(c: Pt, rx: number, ry: number): string {

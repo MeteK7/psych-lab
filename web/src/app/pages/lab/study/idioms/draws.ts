@@ -1,3 +1,4 @@
+import { GENERAL_LISTS } from '../../../../shared/visual';
 import type { IdiomId } from './contract';
 import type { Pattern } from './registry';
 
@@ -41,11 +42,8 @@ const SHIFTED: Lists = { draws: ['shifts', 'exchange-absent', 'alternatives', 'q
 const GROUP_REACTS: Lists = { draws: ['located-in', 'reacts', 'sends', 'question:*'], single: ['located-in', 'reacts'] };
 const HELD_ONTO: Lists = { draws: ['contact', 'displaced', 'exchange-absent', 'located-in', 'sends', 'question:*'], single: ['contact', 'displaced', 'exchange-absent', 'sends'] };
 
-/** The general patterns' lists (revision 5–7), shared with composition (compose.ts). */
-// Revision 8: one `above` (found by the probe: it draws the route's height once).
-export const MOTION: Lists = { draws: ['flows', 'above', 'contact', 'displaced', 'form', 'question:*'], single: ['above'] };
-export const DEPENDENCY: Lists = { draws: ['depends-on', 'part-of', 'complete', 'located-in', 'question:*'], single: ['depends-on'] };
-export const FELT: Lists = { draws: ['feels', 'located-in', 'alternatives', 'question:*'], single: ['feels', 'alternatives'] };
+/** The general patterns' lists are the engine's (S12, M3). */
+const { motion: MOTION, dependency: DEPENDENCY, felt: FELT } = GENERAL_LISTS;
 
 export const LISTS: Record<IdiomId, Record<string, Lists>> = {
   kinetic: {
@@ -101,7 +99,7 @@ export const LISTS: Record<IdiomId, Record<string, Lists>> = {
   },
 };
 
-/** Gives each pattern its lists; a pattern without lists is an error, not a silent pass. */
+/** Gives each of the study's patterns its lists; a pattern without lists is an error, not a silent pass. */
 export function listed<T>(idiom: IdiomId, patterns: readonly Omit<Pattern<T>, 'draws' | 'single'>[]): Pattern<T>[] {
   return patterns.map((p) => {
     const lists = LISTS[idiom][p.name];

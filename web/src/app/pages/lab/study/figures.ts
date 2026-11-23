@@ -22,7 +22,7 @@ export const IDIOMS: readonly IdiomId[] = ['spatial', 'kinetic', 'field'];
 /**
  * Style packs (pass C step 4): which of the engine's colour ramps each domain is drawn in. `areas` is
  * the study's own: education and planning borrow psychology's area themes (PL-3). `subjects` is a
- * second pack, named for subjects rather than areas. The engine's theme set is closed (THEMES), so a
+ * second pack, named for subjects rather than areas. Since Stage 3 M0 the themes come from the app's style pack (`app/visual-pack.ts`); this pack still
  * pack can only re-map domains onto its five ramps; a new ramp would be an engine change.
  */
 export const PACKS: Record<'areas' | 'subjects', Record<StudyCase['domain'], ThemeId | null>> = {
