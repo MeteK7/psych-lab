@@ -6,7 +6,7 @@ import { GuideDaysInput, composeGuideDays } from '../instruments/guide-days/guid
 import { RoundsInput, composeRounds } from '../instruments/rounds/rounds';
 import { PreviewInput, composeTrackingPreview } from '../instruments/tracking/tracking';
 import { RoomInput, composeRoom } from '../instruments/camera-room/room';
-import { THEMES } from '../styling/vocabulary';
+import { themeVersion } from '../styling/pack';
 import { SceneFigure, SurfaceScheme } from './scene-figure';
 
 /**
@@ -40,7 +40,7 @@ export function composeInstrument(name: InstrumentName, inputs: Record<string, u
  */
 export function instrumentSourceId(composed: Composed): string {
   const { id, version, theme } = composed.scene;
-  return `instrument:${id}@${version};theme:${theme}@${THEMES[theme]}`;
+  return `instrument:${id}@${version};theme:${theme}@${themeVersion(theme)}`;
 }
 
 /**

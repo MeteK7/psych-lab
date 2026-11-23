@@ -1,6 +1,5 @@
 import { Component, input, signal } from '@angular/core';
 
-import { PURPOSE_LABELS } from '../../shared/visual/composition/scene';
 import { lookupOf } from '../../shared/visual/composition/compose';
 import { spacingWarnings } from '../../shared/visual/composition/spacing';
 import { validateScene } from '../../shared/visual/composition/validate';
@@ -8,7 +7,8 @@ import { ROOM, ROOM_POSITIONS, ROOM_PURPOSES, composeRoom } from '../../shared/v
 import { InstrumentFigure, instrumentSourceId } from '../../shared/visual/integration/instruments';
 import { SurfaceScheme } from '../../shared/visual/integration/scene-figure';
 import { ViewpointFigure } from '../../shared/visual/integration/viewpoint-figure';
-import { THEMES, VIEWPOINT_MOVE } from '../../shared/visual/styling/vocabulary';
+import { VIEWPOINT_MOVE } from '../../shared/visual/styling/vocabulary';
+import { purposeLabel, themeVersion } from '../../shared/visual/styling/pack';
 import { ROOM_POSITION_NAMES, ROOM_WORDS } from './lab-instrument-sets';
 
 /**
@@ -95,7 +95,7 @@ export class LabRoom {
   readonly schemes = input.required<SurfaceScheme[]>();
 
   protected readonly room = ROOM;
-  protected readonly themeVersion = THEMES[ROOM.theme];
+  protected readonly themeVersion = themeVersion(ROOM.theme);
   protected readonly move = VIEWPOINT_MOVE;
   protected readonly last = ROOM_POSITIONS - 1;
   protected readonly words = ROOM_WORDS;
@@ -110,5 +110,5 @@ export class LabRoom {
     const c = composeRoom({ view, words: ROOM_WORDS });
     return [...validateScene(c.scene, lookupOf(c)), ...spacingWarnings(c.scene, lookupOf(c))].map((x) => `view ${view}: ${x}`);
   });
-  protected readonly purposes = Object.entries(ROOM_PURPOSES).map(([id, p]) => ({ id, serves: p.serves.map((s) => PURPOSE_LABELS[s]).join('; '), why: p.why }));
+  protected readonly purposes = Object.entries(ROOM_PURPOSES).map(([id, p]) => ({ id, serves: p.serves.map((s) => purposeLabel(s)).join('; '), why: p.why }));
 }

@@ -8,7 +8,8 @@ import { LiveInput, buildChangeTimeline, buildComposedFrame, buildFrame, buildTi
 import type { ResolvedFrame, ResolvedTimeline } from '../../shared/visual/integration/frame-figure';
 import { SCENES } from '../../shared/visual/scenes';
 import { resolveStyle } from '../../shared/visual/styling/resolve';
-import { INPUT_CHANGE, THEMES, ThemeId } from '../../shared/visual/styling/vocabulary';
+import { INPUT_CHANGE, ThemeId } from '../../shared/visual/styling/vocabulary';
+import { themeIds } from '../../shared/visual/styling/pack';
 import { LAYOUTS, referenceCompositions } from './lab-generators';
 import { CAUSE_AXES, CAUSE_SETS, PREVIEW_LABELS, RING_RADIUS, ROOM_WORDS, ROUNDS_TOTAL, ROUND_SETS, trackingStill } from './lab-instrument-sets';
 import { choiceFigure, fieldFigure, ratingFigure } from './lab-interaction-figures';
@@ -98,7 +99,7 @@ const GUIDE_BAR = 'Days you plan to practise';
 
 export function parityCases(): ParityCase[] {
   const cases: ParityCase[] = [];
-  for (const theme of Object.keys(THEMES) as ThemeId[]) cases.push(still(`calibration.${theme}`, 'Fill colours', `Every fill colour, ${theme}`, swatches(theme)));
+  for (const theme of themeIds() as ThemeId[]) cases.push(still(`calibration.${theme}`, 'Fill colours', `Every fill colour, ${theme}`, swatches(theme)));
   for (const { scene, text } of SCENES) {
     for (const state of Object.keys(scene.states.states))
       cases.push({

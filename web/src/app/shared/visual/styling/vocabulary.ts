@@ -4,10 +4,11 @@
  * The values behind the colour roles are in `tokens.css`.
  */
 
-/** Area themes and their versions. A theme change bumps its version, which is recorded with a shown visual. */
-// cognitive@2 (2026-11-16): soft blue instead of violet (docs/visual-reviews.md, entry 6).
-export const THEMES = { action: 1, cognitive: 2, attention: 1, regulation: 1, recovery: 1 } as const;
-export type ThemeId = keyof typeof THEMES;
+/**
+ * A theme's id. Which themes exist, their versions and their ramps come from the application's
+ * style pack (`styling/pack.ts`, Stage 3 M0), not from the engine; this app's is `app/visual-pack.ts`.
+ */
+export type ThemeId = string;
 
 /**
  * Colour roles (visual-language.md §3.4). `subject-fill` isn't a scene role: a `subject` drawn
