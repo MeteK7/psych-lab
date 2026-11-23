@@ -1,6 +1,6 @@
 # Pass E: procedure (prepared, not run)
 
-> **Status:** preparation only. No one has been recruited, no session has been held, and nothing is collected. Who runs pass E, with whom, and when, waits for your decision. This document says how a session would go if it ran, so the procedure can be reviewed before anyone sees a figure.
+> **Status:** prepared, decided (2026-11-23, §7), not yet run. No one has been recruited, no session has been held, and nothing is collected. You facilitate, with adults you ask yourself. This document says how a session goes, so the procedure can be reviewed before anyone sees a figure.
 
 ## 1. What pass E asks
 
@@ -32,7 +32,7 @@ Open `/lab/study/match` in the development build.
 
 | Setting | Values | Default | Note |
 |---|---|---|---|
-| Figures | One per case (12), All (36), Spatial, Kinetic, Field (12 each) | One per case | One per case gives each participant every case once, in a mix of idioms. Across order numbers 1, 2 and 3, each figure appears once |
+| Figures | One per case (12), All (36), Spatial, Kinetic, Field (12 each), Engine (20) | One per case | One per case gives each participant every case once, in a mix of idioms. Across order numbers 1, 2 and 3, each figure appears once. **Engine** shows the engine's own figures (Stage 3, M3): the seven accepted unseen cases (U1–U7) in every idiom that draws them, 20 figures over 7 texts. The corpus sets don't include them, because every corpus figure is drawn by its case's own pattern (checked by spec) |
 | Order | A number | 1 | The same number gives the same order. The order is shown under the figure as case and idiom (P4-F, E3-S…) for the facilitator's record |
 | Scheme | Light, dark | Light | One scheme per session |
 | Framing words | On, off | On | Rule S1 shows framing words under a stand-in spatial figure. They also hint at the content, so a session fixes one setting and records it |
@@ -109,8 +109,15 @@ Each description is split into **claims**: single things it says ("someone walks
 - **A confusion table:** which texts are taken for which. Confusing the structural twins (P3/M2, P4/M3) is expected and says the figures carry structure. Confusing different structures is a problem.
 - **Labels in the figures** ("Meeting", "Clouds", "Licence") make matching easier than the drawing alone would. The report says so, and doesn't treat a high count as evidence about the drawing.
 
-## 7. What waits for you
+## 7. Your decisions (2026-11-23)
 
-- Whether pass E runs, who facilitates, and who takes part. This document assumes adults who have never seen the study, not people from the app's own audience, but that choice is yours.
-- Any consent or information sheet a session would need. It isn't drafted here, because it depends on who takes part.
-- Whether the framing words are on or off. One setting for all sessions keeps results comparable.
+- **Who:** you facilitate, with adults you ask yourself who have never seen the study. No one is recruited, and nothing about who takes part is kept (§4).
+- **Figures:** the page gains the **Engine** set (§2), so that pass E tests the figures it gates: adopting M3 (`../visual-engine-stage-3-proposal.md` §7). The corpus sets stay as prepared.
+- **Framing words: on,** for every session. They are part of a stand-in spatial figure (rule S1), so the figures are tested as the engine draws them. The report says that they hint at the content.
+- **Information sheet:** drafted for your review, `pass-e-information.md`. Whether a session also needs written consent stays yours.
+
+**Still open:**
+- Which sets each session shows, and in what order (for example the Engine set alone, or a corpus set first). Once a participant has read any texts, they know what kind of thing the figures show, so a session that shows two sets gives both sets' unprompted descriptions before either set's matching.
+- How many people, and the second scorer for the unseen cases (§5). U2 and U5 are psychology cases, so the psychology-trained reviewer scores them (D5).
+
+**For scoring the Engine set (§5):** an unseen case's representation is in `unseen.ts`, `unseen-blind.ts` and `unseen-blind-2.ts`, not `cases.ts`.

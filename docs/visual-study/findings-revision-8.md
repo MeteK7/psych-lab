@@ -9,7 +9,7 @@
 ## 1. What was done
 
 **Lists** (`idioms/draws.ts`):
-- Every pattern in the three idioms, 41 entries in all, declares `draws`: the kinds of statement its coverage accounts for.
+- Every pattern in the three idioms, 38 entries in all, declares `draws`: the kinds of statement its coverage accounts for.
 - Patterns also declare `single`: the kinds they account for only once.
 - **How they were read:** from each pattern's code (which statements it takes, and whether with `[0]`), and from the coverage of its accepted cases.
 - **The general patterns** (motion, dependency, felt) moved onto the same mechanism. Their own "other kinds" checks were removed, and only their structural needs stayed in code.
