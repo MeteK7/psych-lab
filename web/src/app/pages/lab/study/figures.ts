@@ -5,7 +5,7 @@ import type { Figure, IdiomId } from './idioms/contract';
 import { field } from './idioms/field';
 import { kinetic } from './idioms/kinetic';
 import { spatial } from './idioms/spatial';
-import { Refusal, attempt } from './idioms/registry';
+import { Refusal, attempt, isRefusal } from './idioms/registry';
 import { UNSEEN } from './unseen';
 
 /** STUDY CODE: every depth figure, by the rules and finished (docs/visual-study/README.md). */
@@ -96,4 +96,18 @@ export function unseenDirections(): UnseenDirection[] {
   return UNSEEN.flatMap((c) =>
     IDIOMS.map((idiom): UnseenDirection => ({ case: c, idiom, drawn: attempt(() => (idiom === 'spatial' ? spatial(c) : idiom === 'kinetic' ? kinetic(c) : field(c))) })),
   );
+}
+
+/** The unseen cases whose figures were accepted (revisions 5–7) and pinned (golden.spec.ts). */
+export const ACCEPTED_UNSEEN: readonly string[] = ['U1', 'U2', 'U3', 'U4', 'U5', 'U6', 'U7'];
+
+/**
+ * The engine's figures (Stage 3, M3): the accepted unseen cases in every idiom that draws them, as
+ * pinned. Each is drawn by the engine's general patterns or composition, by the rules: an unseen
+ * figure has no finishing pass. An idiom's refusal is left out.
+ */
+export function engineDirections(): Direction[] {
+  return unseenDirections()
+    .filter((u) => ACCEPTED_UNSEEN.includes(u.case.id))
+    .flatMap((u) => (isRefusal(u.drawn) ? [] : [{ case: u.case, idiom: u.idiom, rules: u.drawn, finished: u.drawn, adjustments: [] }]));
 }

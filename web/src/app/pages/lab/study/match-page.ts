@@ -3,10 +3,10 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { AppEnvironment } from '../../../shared/app-environment';
 import { CASES } from './cases';
-import { Direction, directions, IDIOMS } from './figures';
+import { Direction, directions, engineDirections, IDIOMS } from './figures';
 import { StudyFigure } from './study-figure';
 
-type SetId = 'one-per-case' | 'all' | 'spatial' | 'kinetic' | 'field';
+type SetId = 'one-per-case' | 'all' | 'spatial' | 'kinetic' | 'field' | 'engine';
 
 /** A small seeded generator, so an order can be written down and shown again. */
 function seeded(seed: number): () => number {
@@ -30,8 +30,13 @@ export function shuffled<T>(items: readonly T[], seed: number): T[] {
   return out;
 }
 
-/** The figures a set shows. `one-per-case`: twelve figures, the idiom rotating with the seed. */
-export function figureSet(all: readonly Direction[], set: SetId, seed: number): Direction[] {
+/**
+ * The figures a set shows. `one-per-case`: twelve figures, the idiom rotating with the seed.
+ * `engine`: the engine's own figures (Stage 3, M3), the accepted unseen cases, which the corpus sets
+ * don't include: every corpus figure is drawn by its case's own pattern.
+ */
+export function figureSet(all: readonly Direction[], set: SetId, seed: number, engine: readonly Direction[] = []): Direction[] {
+  if (set === 'engine') return [...engine];
   if (set === 'all') return [...all];
   if (set !== 'one-per-case') return all.filter((d) => d.idiom === set);
   return CASES.map((c, k) => all.find((d) => d.case.id === c.id && d.idiom === IDIOMS[(k + seed) % IDIOMS.length])!);
@@ -80,6 +85,7 @@ export function figureSet(all: readonly Direction[], set: SetId, seed: number): 
             <option value="spatial">Spatial (12)</option>
             <option value="kinetic">Kinetic (12)</option>
             <option value="field">Field (12)</option>
+            <option value="engine">Engine (20)</option>
           </select>
         </label>
         <label class="tier">Order
@@ -153,6 +159,7 @@ export function figureSet(all: readonly Direction[], set: SetId, seed: number): 
 export class StudyMatchPage {
   protected readonly env = inject(AppEnvironment);
   private readonly all = directions();
+  private readonly engine = engineDirections();
   private readonly query = inject(ActivatedRoute).snapshot.queryParamMap;
 
   protected readonly set = signal<SetId>((this.query.get('set') as SetId | null) ?? 'one-per-case');
@@ -168,7 +175,7 @@ export class StudyMatchPage {
   /** S1's framing words under a stand-in spatial figure. `?framing=0` hides them (pass-e-procedure.md §3). */
   protected readonly framing = signal(this.query.get('framing') !== '0');
 
-  protected readonly figures = computed(() => shuffled(figureSet(this.all, this.set(), this.seed()), this.seed()));
+  protected readonly figures = computed(() => shuffled(figureSet(this.all, this.set(), this.seed(), this.engine), this.seed()));
   protected readonly current = computed(() => this.figures()[this.index()]);
   /** Matching shows the same figures in a second order, so position doesn't carry over. */
   protected readonly matching = computed(() => shuffled(this.figures(), this.seed() + 7919));
