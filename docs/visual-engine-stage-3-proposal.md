@@ -362,5 +362,5 @@ This proposal includes these three as milestone 0, with no change to any existin
 
 **Where Stage 3 stands:** all four milestones are built and accepted. S12's first version is complete.
 - **Adopting it waits on pass E (§7, S3-2).** Pass E needs its decisions first (`visual-study/pass-e-procedure.md` §7): whether it runs, who facilitates and takes part, any consent or information sheet, and the framing-words setting.
-- **Stage 4 waits on two things:** the offline part of Stage 1b, which needs D6, and the policy decision on typed text.
+- **Stage 4 waits on two things:** the offline part of Stage 1b (D6 decided (a) on 2026-11-23; slice 1 prepared in `interpretation-trial/`), and the policy decision on typed text.
 - **Still open from the milestones:** OI-36 and OI-37 (composition reading as "near" or as a diagram), and the felt pattern's stand-in room in the spatial idiom (above).

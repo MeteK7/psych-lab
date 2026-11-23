@@ -421,6 +421,8 @@ Movement along a path and changing fields do not exist in the engine. The Lab ma
 
 **Decided (2026-11-17):** D1 (a), D2 (b), D3 (a), D4 (a), D5 (b). D6 is still open; it affects only Stage 1b. The first slice's work and results are in `docs/visual-study/`.
 
+**D6 decided (2026-11-23): (a),** the offline part only; model runs wait for a separate approval. Annotators: you and the psychology-trained reviewer. The trial is in `docs/interpretation-trial/`.
+
 **Decisions that can wait until Stage 2 or later:** whether typed text may determine a figure, and where it may be interpreted; whether the layer is named a twelfth capability; when packages are extracted.
 
 ---
