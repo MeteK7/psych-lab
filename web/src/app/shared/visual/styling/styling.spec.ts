@@ -1,6 +1,7 @@
 import { readSource } from '../testing/source-files';
 import { resolveFocus, resolveLabel, resolveStyle } from './resolve';
-import { THEMES, ThemeId } from './vocabulary';
+import { RAMP_STEPS, activeStylePack } from './pack';
+import type { ThemeId } from './vocabulary';
 
 describe('resolveStyle', () => {
   it('draws a line in the role colour at the role weight', () => {
@@ -81,7 +82,8 @@ function tokens(theme: ThemeId, scheme: 'light' | 'dark'): Record<string, string
   const vars: Record<string, string> = {
     ...PAGE[scheme],
     ...declarations(hostBlocks),
-    ...declarations(blockAfter(`:host([data-vis-theme='${theme}'])`)),
+    // Stage 3 M0: a theme's ramp comes from the registered style pack, not tokens.css.
+    ...Object.fromEntries(RAMP_STEPS.map((step) => [`--vis-a-${step}`, activeStylePack().themes[theme].ramp[step]])),
     ...(scheme === 'dark' ? declarations(blockAfter(`:host([data-vis-scheme='dark'])`)) : {}),
   };
   const value = (v: string): string => {
@@ -120,7 +122,8 @@ const PAIRS: [fg: string, bg: string, min: number][] = [
 ];
 
 describe('tokens.css', () => {
-  for (const theme of Object.keys(THEMES) as ThemeId[]) {
+  // Every theme of the registered pack (this app's, in test setup): any application's pack must meet them.
+  for (const theme of Object.keys(activeStylePack().themes) as ThemeId[]) {
     for (const scheme of ['light', 'dark'] as const) {
       it(`meets every contrast pair in ${theme}, ${scheme}`, () => {
         const t = tokens(theme, scheme);
@@ -143,7 +146,9 @@ describe('tokens.css', () => {
       const B = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
       return Math.hypot(A, B);
     };
-    const hex = [...CSS.matchAll(/#[0-9a-f]{6}/gi)].map((m) => m[0]);
+    // tokens.css, and the ramps of the registered pack (Stage 3 M0).
+    const ramps = Object.values(activeStylePack().themes).flatMap((t) => Object.values(t.ramp));
+    const hex = [...[...CSS.matchAll(/#[0-9a-f]{6}/gi)].map((m) => m[0]), ...ramps];
     expect(hex.length).toBeGreaterThan(50);
     const accent = chroma('#2457c5');
     expect(accent).toBeCloseTo(0.181, 2);

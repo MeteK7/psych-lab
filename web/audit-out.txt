@@ -1,0 +1,332 @@
+blood body build classmate clouds confirmation corner crowd design friend heart home joker land launch left licence lungs manager meeting message other others oxygen phone plant procurement reply right room sea sender side sky someone stranger supplier team train water window
+idioms/contract.ts:66 string team | if (id === 'team') return 'the team';
+idioms/contract.ts:66 string team | if (id === 'team') return 'the team';
+idioms/contract.ts:79 string other | if (!say.mover) return `${w(say.a)} and ${w(say.b)} pass each other`;
+idioms/contract.ts:140 string left | if (open.length) parts.push(`Left open: ${open.join('; ')}.`);
+idioms/contract.ts:160 string meeting | return Object.fromEntries(drawable(c.rep).filter((s) => s.say.p === 'part-of').map((s) => [s.id, 'its parts sit side by side, meeting in the
+idioms/contract.ts:160 string side | return Object.fromEntries(drawable(c.rep).filter((s) => s.say.p === 'part-of').map((s) => [s.id, 'its parts sit side by side, meeting in the
+idioms/contract.ts:160 string side | return Object.fromEntries(drawable(c.rep).filter((s) => s.say.p === 'part-of').map((s) => [s.id, 'its parts sit side by side, meeting in the
+idioms/field.ts:107 code other | const other = own === s1.say.a ? s1.say.b : s1.say.a;
+idioms/field.ts:158 string classmate | [s1.id]: ownStill ? 'one coherent bundle, the classmate’s way, that comes close by your still mark and goes on' : 'two coherent bundles of l
+idioms/field.ts:159 string other | q1: 'the other bundle ends in a plain mark, with no direction beyond its own way',
+idioms/field.ts:178 string other | elements.push(path(`heading-${k + 1}`, d, { role: 'context', line: 'hair', dash: 'tentative' }, set ? [set.id, 'q3'] : ['q3'], 'One possible
+idioms/field.ts:182 string other | elements.push(path(`${id}-bundle`, d, { role: isOwn ? 'subject' : 'context', line: 'fine' }, [s1.id], isOwn ? 'Your way: coherent, because i
+idioms/field.ts:184 string other | elements.push(shape(id, { type: 'circle', cx: r2(x), cy: r2(y), r: 5 }, { role: isOwn ? 'subject' : 'context', material: 'solid' }, [s1.id, 
+idioms/field.ts:186 code other | bundle(other, otherTrack, false);
+idioms/field.ts:228 string reply | s1: 'a field carries qualities, not exchanges: the reply has no form here',
+idioms/field.ts:230 string home | s3: 'the field doesn’t show places: your home has no form',
+idioms/field.ts:231 string manager | s4: 'the manager isn’t placed, so the distance isn’t drawn',
+idioms/field.ts:233 string manager | q1: 'the manager has no form here, so neither does what they meant',
+idioms/field.ts:356 string lungs | ...(joins ? { [joins.id]: `${t.lanesAfter} lanes after the lungs against ${t.lanesBefore} before, and a mark where it joins` } : {}),
+idioms/field.ts:357 string body | ...(fate ? { [fate.id]: 'past the body the lanes go on in the tentative dash: neither fewer nor the same is claimed' } : {}),
+idioms/field.ts:368 string water | elements.push(path(`lanes-${seg.k + 1}`, lanesOf(seg.a, seg.b, t.lanesAfter, state === 'vapour' ? t.laneGap * 3 : t.laneGap), { role: 'subje
+idioms/field.ts:376 string blood | path(`lanes-${seg.k + 1}`, lanesOf(seg.a, seg.b, count), open ? { role: 'subject', line: 'hair', dash: 'tentative' } : { role: carried ? 'su
+idioms/field.ts:376 string blood | path(`lanes-${seg.k + 1}`, lanesOf(seg.a, seg.b, count), open ? { role: 'subject', line: 'hair', dash: 'tentative' } : { role: carried ? 'su
+idioms/field.ts:376 string body | path(`lanes-${seg.k + 1}`, lanesOf(seg.a, seg.b, count), open ? { role: 'subject', line: 'hair', dash: 'tentative' } : { role: carried ? 'su
+idioms/field.ts:376 string lungs | path(`lanes-${seg.k + 1}`, lanesOf(seg.a, seg.b, count), open ? { role: 'subject', line: 'hair', dash: 'tentative' } : { role: carried ? 'su
+idioms/field.ts:376 string oxygen | path(`lanes-${seg.k + 1}`, lanesOf(seg.a, seg.b, count), open ? { role: 'subject', line: 'hair', dash: 'tentative' } : { role: carried ? 'su
+idioms/field.ts:376 string oxygen | path(`lanes-${seg.k + 1}`, lanesOf(seg.a, seg.b, count), open ? { role: 'subject', line: 'hair', dash: 'tentative' } : { role: carried ? 'su
+idioms/field.ts:382 string blood | elements.push(shape('joins', { type: 'circle', cx: r2(x), cy: r2(y), r: 5 }, { role: 'subject', material: 'solid' }, [joins.id], 'Where the 
+idioms/field.ts:382 string oxygen | elements.push(shape('joins', { type: 'circle', cx: r2(x), cy: r2(y), r: 5 }, { role: 'subject', material: 'solid' }, [joins.id], 'Where the 
+idioms/field.ts:387 code side | const side = Math.abs(places[k][1] - CY) < 2;
+idioms/field.ts:388 code side | const at: Pt = side ? [places[k][0], places[k][1] + 34] : [places[k][0], places[k][1] + (below ? 34 : -24)];
+idioms/field.ts:437 string design | [s1.id]: 'the lanes start from design’s side, full',
+idioms/field.ts:437 string side | [s1.id]: 'the lanes start from design’s side, full',
+idioms/field.ts:438 string build | [s2.id]: 'design on the left, build on the right',
+idioms/field.ts:438 string design | [s2.id]: 'design on the left, build on the right',
+idioms/field.ts:438 string left | [s2.id]: 'design on the left, build on the right',
+idioms/field.ts:438 string right | [s2.id]: 'design on the left, build on the right',
+idioms/field.ts:440 string licence | [s4.id]: 'the licence: an outline in the tentative dash above the barrier',
+idioms/field.ts:457 string design | if (d) elements.push(path('lanes', d, { role: 'subject', line: 'hair' }, [s1.id, s5.id], 'Work from the finished design, closing in where it
+idioms/field.ts:458 string licence | elements.push(shape('barrier', { type: 'line', x1: r2(barrierX), y1: r2(CY - 70), x2: r2(barrierX), y2: r2(CY + 70) }, { role: 'ink', line: 
+idioms/field.ts:459 string licence | elements.push(path('licence', roundedRect(barrierX - 22, CY - 120, 44, 30, 5), { role: 'context', line: 'fine', dash: 'tentative' }, [s4.id,
+idioms/field.ts:459 string licence | elements.push(path('licence', roundedRect(barrierX - 22, CY - 120, 44, 30, 5), { role: 'context', line: 'fine', dash: 'tentative' }, [s4.id,
+idioms/field.ts:460 string build | elements.push(path('build', roundedRect(FRAME.width - SAFE - 200, CY - 60, 170, 120, 20), { role: 'context', line: 'hair' }, [s2.id, s5.id],
+idioms/field.ts:460 string build | elements.push(path('build', roundedRect(FRAME.width - SAFE - 200, CY - 60, 170, 120, 20), { role: 'context', line: 'hair' }, [s2.id, s5.id],
+idioms/field.ts:463 string design | label('design-label', s2.say.a, [fromX + 4, r2(top - 18)], 'start', [s1.id], 'Names where the work comes from.'),
+idioms/field.ts:464 string build | label('build-label', s2.say.b, [r2(FRAME.width - SAFE - 115), r2(CY + 5)], 'middle', [s2.id], 'Names the step that waits.', { names: ['build
+idioms/field.ts:464 string build | label('build-label', s2.say.b, [r2(FRAME.width - SAFE - 115), r2(CY + 5)], 'middle', [s2.id], 'Names the step that waits.', { names: ['build
+idioms/field.ts:465 string build | label('licence-label', s3.say.on, [r2(barrierX + 34), r2(CY - 100)], 'start', [s4.id], 'Names what build waits for.', { tone: 'label-soft', 
+idioms/field.ts:465 string licence | label('licence-label', s3.say.on, [r2(barrierX + 34), r2(CY - 100)], 'start', [s4.id], 'Names what build waits for.', { tone: 'label-soft', 
+idioms/field.ts:465 string licence | label('licence-label', s3.say.on, [r2(barrierX + 34), r2(CY - 100)], 'start', [s4.id], 'Names what build waits for.', { tone: 'label-soft', 
+idioms/field2.ts:47 string other | ls.length ? [path(`heading-${k + 1}`, ls.map((l) => polyline(l.slice(0, Math.max(2, Math.round(l.length * open))))).join(''), { role: 'conte
+idioms/field2.ts:86 string friend | [send.id]: 'a coherent bundle from you to the friend',
+idioms/field2.ts:87 string friend | [wait.id]: 'around the friend the field stays unresolved',
+idioms/field2.ts:100 string friend | dot(send.say.to, toAt, 6, 'context', [send.id, ...qs.map((q) => q.id)], 'The friend: a plain mark; what they have seen is open.'),
+idioms/field2.ts:103 string friend | ? [label('from-label', send.say.from, [fromAt[0], fromAt[1] + 26], 'middle', [send.id], 'Names you.', { halo: true }), label('to-label', sen
+idioms/field2.ts:141 string supplier | [send.id]: 'one fine way from the team to the supplier (the two emails are one way: counts are lost, G-02)',
+idioms/field2.ts:141 string team | [send.id]: 'one fine way from the team to the supplier (the two emails are one way: counts are lost, G-02)',
+idioms/field2.ts:155 string confirmation | if (d) els.push(path('lanes', d, { role: 'subject', line: 'hair' }, [dep.id, wait.id], 'What depends on the confirmation, closing in where i
+idioms/field2.ts:156 string confirmation | els.push(shape('boundary', { type: 'line', x1: boundary, y1: CY - 120, x2: boundary, y2: CY + 40 }, { role: 'context', line: 'fine', dash: '
+idioms/field2.ts:157 string supplier | els.push(path('mail', polyline(mail.slice(0, progress(duration, at, 0, 0.5))), { role: 'context', line: 'hair' }, [send.id], 'The emails sen
+idioms/field2.ts:158 string supplier | els.push(dot(send.say.to, supplierAt, 6, 'context', [send.id, ...qs.map((q) => q.id)], 'The supplier: a plain mark.'));
+idioms/field2.ts:162 string supplier | label('to-label', send.say.to, [supplierAt[0], supplierAt[1] + 28], 'middle', [send.id], 'Names the supplier.', { tone: 'label-soft' }),
+idioms/field2.ts:215 string left | path('time', d, { role: 'context', line: 'hair' }, [s1.id], 'Time, as parallel lanes running left to right.'),
+idioms/field2.ts:215 string right | path('time', d, { role: 'context', line: 'hair' }, [s1.id], 'Time, as parallel lanes running left to right.'),
+idioms/field2.ts:242 code others | const others = [...new Set(sends.map((s) => s.say.from))].filter((x) => x !== own);
+idioms/field2.ts:244 code others | const otherAt: Pt[] = others.map((_, k) => [CX - 40, CY - 120 + k * 40] as Pt);
+idioms/field2.ts:265 string room | { [at0.id]: 'a field doesn’t show places: the room has no form' },
+idioms/field2.ts:272 code others | const centre = s.say.from === own ? ownAt : otherAt[others.indexOf(s.say.from)];
+idioms/field2.ts:278 code others | others.forEach((o, k) => els.push(dot(o, otherAt[k], 5, 'context', [...sends.filter((s) => s.say.p === 'sends' && s.say.from === o).map((s) 
+idioms/field2.ts:309 string crowd | ...Object.fromEntries(places.map((p) => [p.id, 'a still density of dots: the crowd, everyone in one place'])),
+idioms/field2.ts:311 string other | [s3.id]: 'your mark touches the other’s',
+idioms/field2.ts:318 string crowd | path('crowd', d, { role: 'context', material: 'solid' }, places.map((p) => p.id), 'The others: a still density, the crowd.'),
+idioms/field2.ts:318 string crowd | path('crowd', d, { role: 'context', material: 'solid' }, places.map((p) => p.id), 'The others: a still density, the crowd.'),
+idioms/field2.ts:318 string others | path('crowd', d, { role: 'context', material: 'solid' }, places.map((p) => p.id), 'The others: a still density, the crowd.'),
+idioms/field2.ts:320 string other | dot(s3.say.b, otherAt, 8, 'context', [s3.id, ...qs.map((q) => q.id)], 'The other person: a plain mark.'),
+idioms/field2.ts:354 string window | [s1.id]: 'two bundles, the one by the window a third taller (the amount is a rule constant)',
+idioms/kinetic.ts:103 code other | const other = own === s1.say.a ? s1.say.b : s1.say.a;
+idioms/kinetic.ts:136 string classmate | s1: ownStill ? 'the classmate’s form comes along its course, close by your still form, and goes on, at one constant pace' : 'two paths that 
+idioms/kinetic.ts:138 string other | q1: 'the other form is round, with no facing',
+idioms/kinetic.ts:151 code other | const forms: SceneElement[] = t.shadows ? [contact(other, otherAt, t.radius, other), contact(own, ownAt, t.radius, own)] : [];
+idioms/kinetic.ts:151 code other | const forms: SceneElement[] = t.shadows ? [contact(other, otherAt, t.radius, other), contact(own, ownAt, t.radius, own)] : [];
+idioms/kinetic.ts:154 string classmate | forms.push(...trace('other-trace', otherTrack, u, false, [s1.id], ownStill ? 'The way the classmate came, past you: what any still frame sho
+idioms/kinetic.ts:154 string other | forms.push(...trace('other-trace', otherTrack, u, false, [s1.id], ownStill ? 'The way the classmate came, past you: what any still frame sho
+idioms/kinetic.ts:154 string other | forms.push(...trace('other-trace', otherTrack, u, false, [s1.id], ownStill ? 'The way the classmate came, past you: what any still frame sho
+idioms/kinetic.ts:162 string other | marks.push(shape(`possible-${k + 1}`, { type: 'circle', cx: r2(x), cy: r2(y), r: r2(t.ringMark * ease.arrive(g)) }, { role: 'context', mater
+idioms/kinetic.ts:165 code other | forms.push(...presence(other, otherAt, t.radius, false, [s1.id, 'q1'], 'The other person: round, with no facing, because what they noticed i
+idioms/kinetic.ts:165 string other | forms.push(...presence(other, otherAt, t.radius, false, [s1.id, 'q1'], 'The other person: round, with no facing, because what they noticed i
+idioms/kinetic.ts:166 string other | forms.push(...presence(own, ownAt, t.radius, true, [s1.id, 'q2', ...(ownStill && motionOpen ? [motionOpen.id] : [])], ownStill ? 'You: still
+idioms/kinetic.ts:166 string other | forms.push(...presence(own, ownAt, t.radius, true, [s1.id, 'q2', ...(ownStill && motionOpen ? [motionOpen.id] : [])], ownStill ? 'You: still
+idioms/kinetic.ts:189 code sender | const sender = s1.say.from;
+idioms/kinetic.ts:206 string manager | [s1.id]: 'a small mark crossing from the manager to you',
+idioms/kinetic.ts:207 string phone | [s2.id]: 'the mark reaches your phone, which takes your colour',
+idioms/kinetic.ts:212 string manager | q1: 'the manager’s form is round, with no facing',
+idioms/kinetic.ts:213 string manager | q2: 'the manager’s place is only an outline, in the tentative dash',
+idioms/kinetic.ts:223 string home | path('home', roundedRect(ownAt[0] - 40, ownAt[1] - 70, 190, 140, 28), { role: 'mid', material: 'tonal' }, [s3.id], 'Home: where you were, al
+idioms/kinetic.ts:223 string home | path('home', roundedRect(ownAt[0] - 40, ownAt[1] - 70, 190, 140, 28), { role: 'mid', material: 'tonal' }, [s3.id], 'Home: where you were, al
+idioms/kinetic.ts:224 string manager | path('sender-place', roundedRect(senderAt[0] - 70, senderAt[1] - 50, 140, 100, 24), { role: 'context', line: 'hair', dash: 'tentative' }, ['
+idioms/kinetic.ts:224 string sender | path('sender-place', roundedRect(senderAt[0] - 70, senderAt[1] - 50, 140, 100, 24), { role: 'context', line: 'hair', dash: 'tentative' }, ['
+idioms/kinetic.ts:226 code sender | const forms: SceneElement[] = t.shadows ? [contact(sender, senderAt, t.secondaryRadius, sender), contact(own, ownAt, t.radius, own)] : [];
+idioms/kinetic.ts:226 code sender | const forms: SceneElement[] = t.shadows ? [contact(sender, senderAt, t.secondaryRadius, sender), contact(own, ownAt, t.radius, own)] : [];
+idioms/kinetic.ts:227 string reply | if (t.traces && sent > 0.002) forms.push(path('reply-trace', polyline(arc.slice(0, sent)), { role: 'context', line: 'hair' }, [s1.id, s4.id]
+idioms/kinetic.ts:227 string reply | if (t.traces && sent > 0.002) forms.push(path('reply-trace', polyline(arc.slice(0, sent)), { role: 'context', line: 'hair' }, [s1.id, s4.id]
+idioms/kinetic.ts:228 string manager | forms.push(...presence(sender, senderAt, t.secondaryRadius, false, [s1.id, 'q1'], 'The manager: smaller, because the moment is yours; round,
+idioms/kinetic.ts:228 code sender | forms.push(...presence(sender, senderAt, t.secondaryRadius, false, [s1.id, 'q1'], 'The manager: smaller, because the moment is yours; round,
+idioms/kinetic.ts:231 string home | forms.push(...presence(own, ownAt, t.radius, true, [s2.id, s3.id], 'You, at home.'));
+idioms/kinetic.ts:232 string phone | forms.push(path('phone', roundedRect(phoneAt[0] - 5, phoneAt[1] - 8, 10, 16, 2.5), read ? { role: 'subject', material: 'solid' } : { role: '
+idioms/kinetic.ts:232 string phone | forms.push(path('phone', roundedRect(phoneAt[0] - 5, phoneAt[1] - 8, 10, 16, 2.5), read ? { role: 'subject', material: 'solid' } : { role: '
+idioms/kinetic.ts:232 string reply | forms.push(path('phone', roundedRect(phoneAt[0] - 5, phoneAt[1] - 8, 10, 16, 2.5), read ? { role: 'subject', material: 'solid' } : { role: '
+idioms/kinetic.ts:235 string reply | forms.push(shape('reply', { type: 'circle', cx: r2(x), cy: r2(y), r: 5 }, { role: 'context', material: 'solid' }, [s1.id], 'The reply, on it
+idioms/kinetic.ts:235 string reply | forms.push(shape('reply', { type: 'circle', cx: r2(x), cy: r2(y), r: 5 }, { role: 'context', material: 'solid' }, [s1.id], 'The reply, on it
+idioms/kinetic.ts:239 string home | label('own-label', own, [r2(ownAt[0]), r2(ownAt[1] + 48 + 14)], 'middle', [s3.id], 'Says which form is you.', { names: [own, 'home', ...(fel
+idioms/kinetic.ts:240 string sender | label('sender-label', sender, [r2(senderAt[0]), r2(senderAt[1] + t.secondaryRadius + 22)], 'middle', [s1.id], 'Says who sent it.', { names: 
+idioms/kinetic.ts:240 code sender | label('sender-label', sender, [r2(senderAt[0]), r2(senderAt[1] + t.secondaryRadius + 22)], 'middle', [s1.id], 'Says who sent it.', { names: 
+idioms/kinetic.ts:240 code sender | label('sender-label', sender, [r2(senderAt[0]), r2(senderAt[1] + t.secondaryRadius + 22)], 'middle', [s1.id], 'Says who sent it.', { names: 
+idioms/kinetic.ts:240 string sender | label('sender-label', sender, [r2(senderAt[0]), r2(senderAt[1] + t.secondaryRadius + 22)], 'middle', [s1.id], 'Says who sent it.', { names: 
+idioms/kinetic.ts:303 string lungs | ...(joins ? { [joins.id]: 'a small mark joins the form at the lungs and rides with it' } : {}),
+idioms/kinetic.ts:304 string body | ...(fate ? { [fate.id]: 'past the body, the mark is drawn only as an outline in the tentative dash: kept or lost is not said' } : {}),
+idioms/kinetic.ts:317 string blood | elements.push(path(`place-${id}`, blob(places[k], 60, 36), { role: 'mid', material: 'tonal' }, cites(id), `${c.words[id] ?? id}: a place the
+idioms/kinetic.ts:321 string blood | elements.push(path('route', polyline(pts), { role: 'context', line: 'hair' }, [s6.id], 'The way the blood has gone so far.'));
+idioms/kinetic.ts:323 string blood | if (!transforms.length) elements.push(shape('blood', { type: 'circle', cx: r2(formAt[0]), cy: r2(formAt[1]), r: 13 }, { role: 'subject', mat
+idioms/kinetic.ts:323 string blood | if (!transforms.length) elements.push(shape('blood', { type: 'circle', cx: r2(formAt[0]), cy: r2(formAt[1]), r: 13 }, { role: 'subject', mat
+idioms/kinetic.ts:341 string body | shape('oxygen', { type: 'circle', cx: r2(m[0]), cy: r2(m[1]), r: 5 }, open ? { role: 'subject', line: 'fine', dash: 'tentative' } : { role: 
+idioms/kinetic.ts:341 string lungs | shape('oxygen', { type: 'circle', cx: r2(m[0]), cy: r2(m[1]), r: 5 }, open ? { role: 'subject', line: 'fine', dash: 'tentative' } : { role: 
+idioms/kinetic.ts:341 string oxygen | shape('oxygen', { type: 'circle', cx: r2(m[0]), cy: r2(m[1]), r: 5 }, open ? { role: 'subject', line: 'fine', dash: 'tentative' } : { role: 
+idioms/kinetic.ts:341 string oxygen | shape('oxygen', { type: 'circle', cx: r2(m[0]), cy: r2(m[1]), r: 5 }, open ? { role: 'subject', line: 'fine', dash: 'tentative' } : { role: 
+idioms/kinetic.ts:341 string oxygen | shape('oxygen', { type: 'circle', cx: r2(m[0]), cy: r2(m[1]), r: 5 }, open ? { role: 'subject', line: 'fine', dash: 'tentative' } : { role: 
+idioms/kinetic.ts:388 string design | [s1.id]: 'design: a filled form',
+idioms/kinetic.ts:389 string build | [s2.id]: 'design on the left, build on the right: order runs left to right',
+idioms/kinetic.ts:389 string design | [s2.id]: 'design on the left, build on the right: order runs left to right',
+idioms/kinetic.ts:389 string left | [s2.id]: 'design on the left, build on the right: order runs left to right',
+idioms/kinetic.ts:389 string left | [s2.id]: 'design on the left, build on the right: order runs left to right',
+idioms/kinetic.ts:389 string right | [s2.id]: 'design on the left, build on the right: order runs left to right',
+idioms/kinetic.ts:389 string right | [s2.id]: 'design on the left, build on the right: order runs left to right',
+idioms/kinetic.ts:391 string licence | [s4.id]: 'the licence: an outline in the tentative dash, where it would be',
+idioms/kinetic.ts:393 string licence | [q1.id]: 'the licence’s way in stops short and never arrives',
+idioms/kinetic.ts:395 string procurement | { [s6.id]: 'an exchange that didn’t happen is drawn as nothing (K6); procurement appears only in it, so isn’t drawn (K11)' },
+idioms/kinetic.ts:402 string design | path(a, roundedRect(aAt[0] - w / 2, aAt[1] - h / 2, w, h, 18), { role: 'near', material: 'tonal' }, [s1.id, s2.id], 'Design: finished, so fi
+idioms/kinetic.ts:403 string build | path(b, roundedRect(bAt[0] - w / 2, bAt[1] - h / 2, w, h, 18), { role: 'context', line: 'regular' }, [s2.id, s5.id], 'Build: next, and not s
+idioms/kinetic.ts:404 string build | shape('barrier', { type: 'line', x1: r2(barrierX), y1: r2(aAt[1] - 64), x2: r2(barrierX), y2: r2(aAt[1] + 64) }, { role: 'ink', line: 'bold'
+idioms/kinetic.ts:404 string licence | shape('barrier', { type: 'line', x1: r2(barrierX), y1: r2(aAt[1] - 64), x2: r2(barrierX), y2: r2(aAt[1] + 64) }, { role: 'ink', line: 'bold'
+idioms/kinetic.ts:405 string licence | path('licence', roundedRect(absentAt[0] - 22, absentAt[1] - 15, 44, 30, 5), { role: 'context', line: 'fine', dash: 'tentative' }, [s4.id], '
+idioms/kinetic.ts:405 string licence | path('licence', roundedRect(absentAt[0] - 22, absentAt[1] - 15, 44, 30, 5), { role: 'context', line: 'fine', dash: 'tentative' }, [s4.id], '
+idioms/kinetic.ts:407 string licence | if (comingU > 0.002) elements.push(path('licence-way', polyline(coming.slice(0, comingU)), { role: 'context', line: 'hair', dash: 'tentative
+idioms/kinetic.ts:407 string licence | if (comingU > 0.002) elements.push(path('licence-way', polyline(coming.slice(0, comingU)), { role: 'context', line: 'hair', dash: 'tentative
+idioms/kinetic.ts:415 string build | label('licence-label', s3.say.on, [r2(absentAt[0] + 34), r2(absentAt[1] + 5)], 'start', [s4.id], 'Names what build waits for.', { names: ['l
+idioms/kinetic.ts:415 string licence | label('licence-label', s3.say.on, [r2(absentAt[0] + 34), r2(absentAt[1] + 5)], 'start', [s4.id], 'Names what build waits for.', { names: ['l
+idioms/kinetic.ts:415 string licence | label('licence-label', s3.say.on, [r2(absentAt[0] + 34), r2(absentAt[1] + 5)], 'start', [s4.id], 'Names what build waits for.', { names: ['l
+idioms/kinetic.ts:434 string water | const why = `The water, as ${state}.`;
+idioms/kinetic.ts:436 string water | return [path('water', [[-9, 4], [0, -6], [9, 4]].map(([dx, dy]) => `M${r2(x + dx - 3)} ${r2(y + dy)}A3 3 0 1 0 ${r2(x + dx + 3)} ${r2(y + dy
+idioms/kinetic.ts:437 string water | if (state === 'cloud') return [path('water', blob(at, 24, 14), { role: 'subject', material: 'tonal' }, cites, why)];
+idioms/kinetic.ts:438 string water | if (state === 'rain') return [path('water', [-10, 0, 10].map((dx) => `M${r2(x + dx)} ${r2(y - 9)}L${r2(x + dx - 3)} ${r2(y + 9)}`).join(''),
+idioms/kinetic.ts:439 string water | return [shape('water', { type: 'circle', cx: r2(x), cy: r2(y), r: 11 }, { role: 'subject', material: 'lit', line: 'regular' }, cites, why)];
+idioms/kinetic2.ts:33 string other | return shape(`possible-${k + 1}`, { type: 'circle', cx: r2(centre[0] + Math.cos(a) * radius), cy: r2(centre[1] + Math.sin(a) * radius), r: r
+idioms/kinetic2.ts:96 string sender | [send.id]: 'a mark crosses from sender to receiver on a high arc',
+idioms/kinetic2.ts:99 string launch | ...(dep ? { [dep.id]: 'the launch: an outline beside the team, not started' } : {}),
+idioms/kinetic2.ts:99 string team | ...(dep ? { [dep.id]: 'the launch: an outline beside the team, not started' } : {}),
+idioms/kinetic2.ts:116 string reply | if (dep) els.push(path('dependent', roundedRect(fromAt[0] - 55, fromAt[1] + 70, 110, 54, 14), { role: 'context', line: 'regular' }, [dep.id,
+idioms/kinetic2.ts:126 string sender | label('from-label', from, [r2(fromAt[0]), r2(fromAt[1] - 42)], 'middle', [send.id], 'Names the sender.', { halo: true }),
+idioms/kinetic2.ts:175 string left | shape('time', { type: 'line', x1: x0, y1: y + h / 2 + 18, x2: x1, y2: y + h / 2 + 18 }, { role: 'context', line: 'hair' }, [s1.id], 'Time, r
+idioms/kinetic2.ts:175 string right | shape('time', { type: 'line', x1: x0, y1: y + h / 2 + 18, x2: x1, y2: y + h / 2 + 18 }, { role: 'context', line: 'hair' }, [s1.id], 'Time, r
+idioms/kinetic2.ts:207 code others | const others = [...new Set(sends.map((s) => s.say.from))].filter((x) => x !== own);
+idioms/kinetic2.ts:210 code others | const otherAt: Pt[] = others.map((_, k) => [CX - 70, CY - 95 + k * 60] as Pt);
+idioms/kinetic2.ts:242 code others | const fromAt = s.say.from === own ? ownAt : otherAt[others.indexOf(s.say.from)];
+idioms/kinetic2.ts:255 code others | others.forEach((o, k) => els.push(...presences(c, o, otherAt[k], 18, [...sends.filter((s) => s.say.p === 'sends' && s.say.from === o).map((s
+idioms/kinetic2.ts:261 code others | ...others.map((o, k) => label(`${o}-label`, o, [r2(otherAt[k][0] - 30), r2(otherAt[k][1] + 5)], 'end', [sends[0].id], 'Names who made the re
+idioms/kinetic2.ts:277 code crowd | const crowd = c.rep.elements.find((e) => e.count !== undefined)!.id;
+idioms/kinetic2.ts:279 code other | const other = s3.say.b;
+idioms/kinetic2.ts:285 string crowd | const many = poissonDisc({ x: plane.x + 30, y: plane.y + 25, width: plane.w - 60, height: plane.h - 50, spacing: 52, max: 80 }, `study-${c.i
+idioms/kinetic2.ts:287 code crowd | .slice(0, countOf(c, crowd));
+idioms/kinetic2.ts:289 code other | const qOther = question(c, 'attention', other);
+idioms/kinetic2.ts:290 code crowd | const qCrowd = question(c, 'attention', crowd);
+idioms/kinetic2.ts:303 string other | [s3.id]: 'your form comes to touch the other’s',
+idioms/kinetic2.ts:304 string other | [s4.id]: 'a mark crosses from you to the other',
+idioms/kinetic2.ts:306 string other | ...(qOther ? { [qOther.id]: 'the other form is round, with no facing' } : {}),
+idioms/kinetic2.ts:307 string others | ...(qCrowd ? { [qCrowd.id]: 'the others are still, round, with no facing' } : {}),
+idioms/kinetic2.ts:317 string crowd | many.forEach(([x, y], k) => els.push(...presence(`${crowd}-${k + 1}`, [x, y], 12, false, [places[places.length - 1].id, ...(qCrowd ? [qCrowd
+idioms/kinetic2.ts:317 string others | many.forEach(([x, y], k) => els.push(...presence(`${crowd}-${k + 1}`, [x, y], 12, false, [places[places.length - 1].id, ...(qCrowd ? [qCrowd
+idioms/kinetic2.ts:318 code other | if (t.shadows) els.push(contact(other, otherAt, r, other), contact(own, ownAt, r, own));
+idioms/kinetic2.ts:318 code other | if (t.shadows) els.push(contact(other, otherAt, r, other), contact(own, ownAt, r, own));
+idioms/kinetic2.ts:320 code other | els.push(...presence(other, otherAt, r, false, [s3.id, ...(qOther ? [qOther.id] : [])], 'The other person: round, with no facing.'));
+idioms/kinetic2.ts:320 string other | els.push(...presence(other, otherAt, r, false, [s3.id, ...(qOther ? [qOther.id] : [])], 'The other person: round, with no facing.'));
+idioms/kinetic2.ts:345 code plant | const plant = (id: string, x: number, h: number, cites: readonly string[]): SceneElement[] => [
+idioms/kinetic2.ts:359 string window | [s1.id]: 'both grow; the one by the window ends a third taller (the amount is a rule constant, not measured)',
+idioms/kinetic2.ts:369 code plant | const els = [...plant(s1.say.a, ax, 20 + (tall - 20) * u, [s1.id]), ...plant(s1.say.b, bx, 20 + (short - 20) * u, [s1.id])];
+idioms/kinetic2.ts:369 code plant | const els = [...plant(s1.say.a, ax, 20 + (tall - 20) * u, [s1.id]), ...plant(s1.say.b, bx, 20 + (short - 20) * u, [s1.id])];
+idioms/kinetic2.ts:375 string other | shape(`${s1.say.a}-stem`, { type: 'line', x1: ax, y1: base, x2: ax, y2: r2(base - short - 8) }, { role: 'context', line: 'regular' }, [s1.id
+idioms/kinetic2.ts:377 string other | path(`${s1.say.a}-top`, roundedRect(ax - 26, base - tall - 22, 52, 30, 15), { role: 'context', line: 'fine', dash: 'tentative' }, [s1.id], '
+idioms/kinetic2.ts:426 string left | shape('time', { type: 'line', x1: x0, y1: y + h / 2 + 18, x2: x1, y2: y + h / 2 + 18 }, { role: 'context', line: 'hair' }, [s1.id], 'Time, r
+idioms/kinetic2.ts:426 string right | shape('time', { type: 'line', x1: x0, y1: y + h / 2 + 18, x2: x1, y2: y + h / 2 + 18 }, { role: 'context', line: 'hair' }, [s1.id], 'Time, r
+idioms/spatial.ts:36 string left | window: 'left' | 'front';
+idioms/spatial.ts:36 code window | window: 'left' | 'front';
+idioms/spatial.ts:59 code window | window: 'front',
+idioms/spatial.ts:119 code other | const other = own === s1.say.a ? s1.say.b : s1.say.a;
+idioms/spatial.ts:146 code right | const right: [number, number] = [-from[2], from[0]];
+idioms/spatial.ts:147 code right | const len = Math.hypot(...right);
+idioms/spatial.ts:148 code right | return Math.abs(((past[0] - ownAt[0]) * right[0] + (past[2] - ownAt[2]) * right[1]) / len);
+idioms/spatial.ts:148 code right | return Math.abs(((past[0] - ownAt[0]) * right[0] + (past[2] - ownAt[2]) * right[1]) / len);
+idioms/spatial.ts:166 string classmate | [s1.id]: 'the classmate walking along one way that passes close by you: coming, through your own eyes; one step past you and going on, from 
+idioms/spatial.ts:167 string classmate | q1: 'the classmate is faceless; only the walking says which way they go',
+idioms/spatial.ts:181 string classmate | space.face('way', [[way.x0, 0.002, way.z1], [way.x1, 0.002, way.z1], [way.x1, 0.002, way.z0], [way.x0, 0.002, way.z0]], [0, 1, 0], { role: '
+idioms/spatial.ts:186 string build | const otherPerson = space.person(other, POSES.walking, otherAt, otherAngle, 'context', [s1.id, 'q1'], 'The classmate, walking along the way 
+idioms/spatial.ts:186 string classmate | const otherPerson = space.person(other, POSES.walking, otherAt, otherAngle, 'context', [s1.id, 'q1'], 'The classmate, walking along the way 
+idioms/spatial.ts:186 code other | const otherPerson = space.person(other, POSES.walking, otherAt, otherAngle, 'context', [s1.id, 'q1'], 'The classmate, walking along the way 
+idioms/spatial.ts:188 string classmate | if (otherPerson) space.shadow(`${other}-shadow`, other, otherAt[0], otherAt[2], 0.34, 0.28, [s1.id], 'Grounds the classmate on the way.');
+idioms/spatial.ts:188 string other | if (otherPerson) space.shadow(`${other}-shadow`, other, otherAt[0], otherAt[2], 0.34, 0.28, [s1.id], 'Grounds the classmate on the way.');
+idioms/spatial.ts:188 code other | if (otherPerson) space.shadow(`${other}-shadow`, other, otherAt[0], otherAt[2], 0.34, 0.28, [s1.id], 'Grounds the classmate on the way.');
+idioms/spatial.ts:210 code phone | const phone: V3 = [seatAt[0], 0.8, seatAt[2] + 0.56];
+idioms/spatial.ts:212 code phone | const you: V3[] = [...corners([seatAt[0] - 0.56, 0, seatAt[2] - 0.62], [seatAt[0] + 0.56, 1.0, seatAt[2] + 0.62]), [head[0], head[1] + 0.13,
+idioms/spatial.ts:217 code phone | own: aimedKey([head[0], head[1], head[2] - 0.02], [phone, phone, ...windowAhead], 0.5),
+idioms/spatial.ts:217 code phone | own: aimedKey([head[0], head[1], head[2] - 0.02], [phone, phone, ...windowAhead], 0.5),
+idioms/spatial.ts:227 string home | { id: 'home', x0: W.x0, x1: W.x1, cites: [s3.id], why: 'Your home: the room you were in, alone.' },
+idioms/spatial.ts:227 string home | { id: 'home', x0: W.x0, x1: W.x1, cites: [s3.id], why: 'Your home: the room you were in, alone.' },
+idioms/spatial.ts:227 string room | { id: 'home', x0: W.x0, x1: W.x1, cites: [s3.id], why: 'Your home: the room you were in, alone.' },
+idioms/spatial.ts:228 string left | { id: 'beside-left', x0: -7.2, x1: W.x0, cites: ['base:surroundings'], why: 'The rooms beside yours, from further back: empty, so they claim
+idioms/spatial.ts:229 string right | { id: 'beside-right', x0: W.x1, x1: 7.2, cites: ['base:surroundings'], why: 'The rooms beside yours, from further back: empty, so they claim
+idioms/spatial.ts:240 string room | [s3.id]: 'a room with a window, an armchair and you in it, no one else',
+idioms/spatial.ts:240 string window | [s3.id]: 'a room with a window, an armchair and you in it, no one else',
+idioms/spatial.ts:241 string phone | [s6.id]: 'a phone in your hands',
+idioms/spatial.ts:243 string manager | s4: 'the manager isn’t in the scene: the room holds only you',
+idioms/spatial.ts:243 string room | s4: 'the manager isn’t in the scene: the room holds only you',
+idioms/spatial.ts:244 string manager | q2: 'the manager isn’t placed anywhere: where they were is open',
+idioms/spatial.ts:247 string reply | s1: 'the reply’s journey has no form in a still scene',
+idioms/spatial.ts:249 string manager | q1: 'the manager isn’t drawn, so neither is what they meant',
+idioms/spatial.ts:262 string home | const mine = r.id === 'home';
+idioms/spatial.ts:265 string room | if (t.floorEdges) space.face(`${r.id}-floor-edge`, floor, [0, 1, 0], { role: 'far', line: 'hair', material: 'line' }, r.cites, 'Where the fl
+idioms/spatial.ts:265 string room | if (t.floorEdges) space.face(`${r.id}-floor-edge`, floor, [0, 1, 0], { role: 'far', line: 'hair', material: 'line' }, r.cites, 'Where the fl
+idioms/spatial.ts:275 string left | const windowWall = t.window === 'left' ? 'x0' : 'z1';
+idioms/spatial.ts:275 code window | const windowWall = t.window === 'left' ? 'x0' : 'z1';
+idioms/spatial.ts:279 string left | t.window === 'left'
+idioms/spatial.ts:279 code window | t.window === 'left'
+idioms/spatial.ts:282 string home | space.face('home-window', pane, w.normal, { role: 'ground', material: 'tonal' }, r.cites, 'The window: it makes the room a room.', 0);
+idioms/spatial.ts:282 string room | space.face('home-window', pane, w.normal, { role: 'ground', material: 'tonal' }, r.cites, 'The window: it makes the room a room.', 0);
+idioms/spatial.ts:282 string room | space.face('home-window', pane, w.normal, { role: 'ground', material: 'tonal' }, r.cites, 'The window: it makes the room a room.', 0);
+idioms/spatial.ts:282 string window | space.face('home-window', pane, w.normal, { role: 'ground', material: 'tonal' }, r.cites, 'The window: it makes the room a room.', 0);
+idioms/spatial.ts:282 string window | space.face('home-window', pane, w.normal, { role: 'ground', material: 'tonal' }, r.cites, 'The window: it makes the room a room.', 0);
+idioms/spatial.ts:283 string home | space.face('home-window-frame', pane, w.normal, { role: 'far', line: 'fine', material: 'line' }, r.cites, 'The window’s frame.', 0);
+idioms/spatial.ts:283 string window | space.face('home-window-frame', pane, w.normal, { role: 'far', line: 'fine', material: 'line' }, r.cites, 'The window’s frame.', 0);
+idioms/spatial.ts:283 string window | space.face('home-window-frame', pane, w.normal, { role: 'far', line: 'fine', material: 'line' }, r.cites, 'The window’s frame.', 0);
+idioms/spatial.ts:291 string room | const seat = (id: string, a: V3, b: V3) => space.box(`${r.id}-${id}`, [cx + a[0], a[1], cz + a[2]], [cx + b[0], b[1], cz + b[2]], 'near', r.
+idioms/spatial.ts:300 string phone | space.box('phone', [seatAt[0] - 0.045, 0.79, seatAt[2] + 0.5], [seatAt[0] + 0.045, 0.805, seatAt[2] + 0.62], 'near', [s6.id], 'Your phone, i
+idioms/spatial.ts:300 string phone | space.box('phone', [seatAt[0] - 0.045, 0.79, seatAt[2] + 0.5], [seatAt[0] + 0.045, 0.805, seatAt[2] + 0.62], 'near', [s6.id], 'Your phone, i
+idioms/spatial.ts:301 string phone | space.face('phone-screen', [[seatAt[0] - 0.04, 0.806, seatAt[2] + 0.51], [seatAt[0] + 0.04, 0.806, seatAt[2] + 0.51], [seatAt[0] + 0.04, 0.8
+idioms/spatial.ts:301 string reply | space.face('phone-screen', [[seatAt[0] - 0.04, 0.806, seatAt[2] + 0.51], [seatAt[0] + 0.04, 0.806, seatAt[2] + 0.51], [seatAt[0] + 0.04, 0.8
+idioms/spatial.ts:302 string home | const chair = space.drawn.find((d) => d.element.id.startsWith('home-seat-'));
+idioms/spatial.ts:359 code side | side: framedKey(extent, centreOf(extent), [-1, 0.42, -0.1], 640, 0.55, 0.8),
+idioms/spatial.ts:376 string lungs | ...(joins ? { [joins.id]: 'beads on the tube from the lungs on' } : {}),
+idioms/spatial.ts:377 string body | ...(fate ? { [fate.id]: 'past the body the beads go on, translucent: kept or lost is not said' } : {}),
+idioms/spatial.ts:391 string blood | space.tube('blood', [...ring, ring[0]], t.tube, { role: 'subject', material: 'shaded', facing: 'base' }, [...flows.map((f) => f.id), s6.id],
+idioms/spatial.ts:391 string blood | space.tube('blood', [...ring, ring[0]], t.tube, { role: 'subject', material: 'shaded', facing: 'base' }, [...flows.map((f) => f.id), s6.id],
+idioms/spatial.ts:394 string lungs | space.beads('oxygen', carried.map((p) => [p[0], p[1] + t.tube + t.bead * 0.6, p[2]] as V3), t.bead, { role: 'subject', material: 'lit', line
+idioms/spatial.ts:394 string oxygen | space.beads('oxygen', carried.map((p) => [p[0], p[1] + t.tube + t.bead * 0.6, p[2]] as V3), t.bead, { role: 'subject', material: 'lit', line
+idioms/spatial.ts:394 string oxygen | space.beads('oxygen', carried.map((p) => [p[0], p[1] + t.tube + t.bead * 0.6, p[2]] as V3), t.bead, { role: 'subject', material: 'lit', line
+idioms/spatial.ts:397 string body | space.beads('oxygen-open', open.map((p) => [p[0], p[1] + t.tube + t.bead * 0.6, p[2]] as V3), t.bead, { role: 'context', material: 'transluc
+idioms/spatial.ts:397 string oxygen | space.beads('oxygen-open', open.map((p) => [p[0], p[1] + t.tube + t.bead * 0.6, p[2]] as V3), t.bead, { role: 'context', material: 'transluc
+idioms/spatial.ts:397 string oxygen | space.beads('oxygen-open', open.map((p) => [p[0], p[1] + t.tube + t.bead * 0.6, p[2]] as V3), t.bead, { role: 'context', material: 'transluc
+idioms/spatial.ts:454 string design | [s1.id]: 'design: a solid block beside the way',
+idioms/spatial.ts:455 string build | [s2.id]: 'build further along the same way',
+idioms/spatial.ts:457 string licence | [s4.id]: 'the licence: an outline in the tentative dash at the gate',
+idioms/spatial.ts:461 string procurement | { [s6.id]: 'an exchange that didn’t happen has no form; procurement appears only in it (S9)' },
+idioms/spatial.ts:467 string build | space.face('way', [[-0.9, 0.002, 12.5], [0.9, 0.002, 12.5], [0.9, 0.002, -3.5], [-0.9, 0.002, -3.5]], [0, 1, 0], { role: 'mid', material: 's
+idioms/spatial.ts:467 string design | space.face('way', [[-0.9, 0.002, 12.5], [0.9, 0.002, 12.5], [0.9, 0.002, -3.5], [-0.9, 0.002, -3.5]], [0, 1, 0], { role: 'mid', material: 's
+idioms/spatial.ts:468 string design | space.box(a, [-2.5, 0, 0.4], [-1.3, 1.0, 1.6], 'near', [s1.id], 'Design: finished, so a solid block.');
+idioms/spatial.ts:470 string build | space.outline(`${b}-${i}`, e, { role: 'context', line: 'regular' }, [s2.id, s5.id], 'Build: next, not started, so only its edges.', e.length
+idioms/spatial.ts:471 string build | space.box('gate-post-l', [-1.06, 0, gateZ - 0.06], [-0.94, 1.3, gateZ + 0.06], 'near', [s3.id], 'The gate: build depends on the licence.');
+idioms/spatial.ts:471 string licence | space.box('gate-post-l', [-1.06, 0, gateZ - 0.06], [-0.94, 1.3, gateZ + 0.06], 'near', [s3.id], 'The gate: build depends on the licence.');
+idioms/spatial.ts:472 string build | space.box('gate-post-r', [0.94, 0, gateZ - 0.06], [1.06, 1.3, gateZ + 0.06], 'near', [s3.id], 'The gate: build depends on the licence.');
+idioms/spatial.ts:472 string licence | space.box('gate-post-r', [0.94, 0, gateZ - 0.06], [1.06, 1.3, gateZ + 0.06], 'near', [s3.id], 'The gate: build depends on the licence.');
+idioms/spatial.ts:473 string licence | space.box('gate-bar', [-0.94, 0.9, gateZ - 0.04], [0.94, 1.02, gateZ + 0.04], 'near', [s3.id, s5.id], 'Closed, because the licence isn’t her
+idioms/spatial.ts:475 string licence | space.outline(`licence-${i}`, e, { role: 'context', line: 'fine', dash: 'tentative' }, [s4.id, q1.id], 'The licence: not here, so an outline
+idioms/spatial.ts:475 string licence | space.outline(`licence-${i}`, e, { role: 'context', line: 'fine', dash: 'tentative' }, [s4.id, q1.id], 'The licence: not here, so an outline
+idioms/spatial.ts:477 string design | if (block) space.shadow(`${a}-shadow`, block.element.id, -1.9, 1.0, 0.85, 0.85, [s1.id], 'Grounds the design block.');
+idioms/spatial.ts:485 string build | if (ll) labels.push(label('licence-label', s3.say.on, [ll[0] + 8, ll[1]], 'start', [s4.id], 'Names what build waits for.', { halo: true, ton
+idioms/spatial.ts:485 string licence | if (ll) labels.push(label('licence-label', s3.say.on, [ll[0] + 8, ll[1]], 'start', [s4.id], 'Names what build waits for.', { halo: true, ton
+idioms/spatial2.ts:111 string sender | shown[send.id] = 'the sender at the near end of the way, the receiver at the far end, the item near the receiver';
+idioms/spatial2.ts:114 string sender | if (dep) shown[dep.id] = 'what depends on it: only its edges, beside the sender, not started';
+idioms/spatial2.ts:141 string sender | standing(space, c, send.say.from, [0, 0, 0], 0, [send.id], 'The sender, at the near end.');
+idioms/spatial2.ts:144 string reply | if (dep) wire(space, 'dependent', [aside, 0, -0.5], [aside + 1.2, 1.0, 0.7], { role: 'context', line: 'regular' }, [dep.id, ...(wait ? [wait
+idioms/spatial2.ts:177 code room | function room(space: Space, x0: number, x1: number, z0: number, z1: number, h: number, cites: readonly string[], why: string): void {
+idioms/spatial2.ts:204 code others | const others = [...new Set(sends.map((s) => s.say.from))].filter((x) => x !== own);
+idioms/spatial2.ts:208 code others | others.forEach((o) => seats.push({ id: o, at: [0, 0, 3.35], angle: Math.PI }));
+idioms/spatial2.ts:230 string meeting | [at0.id]: 'a meeting room with a table; you seated at its end',
+idioms/spatial2.ts:230 string room | [at0.id]: 'a meeting room with a table; you seated at its end',
+idioms/spatial2.ts:242 string room | if (h < 2.5) groundPlane(space, 'outside', 40, 'far', ['base:surroundings'], 'The ground around the room, seen only from above.');
+idioms/spatial2.ts:243 string meeting | room(space, -2.4, 2.4, -0.6, 4.4, h, [at0.id], 'The meeting room.');
+idioms/spatial2.ts:243 code room | room(space, -2.4, 2.4, -0.6, 4.4, h, [at0.id], 'The meeting room.');
+idioms/spatial2.ts:243 string room | room(space, -2.4, 2.4, -0.6, 4.4, h, [at0.id], 'The meeting room.');
+idioms/spatial2.ts:249 string someone | space.person(s.id, POSES.seated as Pose, s.at, s.angle, mine ? 'subject' : 'context', mine ? [at0.id] : [at0.id, ...qs.map((q) => q.id)], mi
+idioms/spatial2.ts:269 code other | const other = s3.say.b;
+idioms/spatial2.ts:270 code crowd | const crowd = c.rep.elements.find((e) => e.count !== undefined)!.id;
+idioms/spatial2.ts:276 code crowd | .slice(0, countOf(c, crowd));
+idioms/spatial2.ts:296 string other | [s3.id]: 'you stand a hand’s breadth from the other person',
+idioms/spatial2.ts:310 code room | room(space, -1.5, 1.5, -6, 6, h, places.map((p) => p.id), 'The carriage.');
+idioms/spatial2.ts:312 string side | for (const sx of [-1, 1]) space.box(`seat-${sx > 0 ? 'r' : 'l'}-${Math.round((z + 6) * 10)}`, [sx > 0 ? 1.0 : -1.48, 0, z], [sx > 0 ? 1.48 :
+idioms/spatial2.ts:314 string crowd | const id = `${crowd}-${k + 1}`;
+idioms/spatial2.ts:315 string others | if (space.person(id, POSES.standing, [x, 0, z], 0, 'context', [places[places.length - 1].id, ...qs.map((q) => q.id)], 'One of the others: fa
+idioms/spatial2.ts:318 code other | if (space.person(other, POSES.standing, otherAt, 0, 'context', [s3.id, ...qs.map((q) => q.id)], 'The other person: faceless, facing along th
+idioms/spatial2.ts:318 string other | if (space.person(other, POSES.standing, otherAt, 0, 'context', [s3.id, ...qs.map((q) => q.id)], 'The other person: faceless, facing along th
+idioms/spatial2.ts:318 string other | if (space.person(other, POSES.standing, otherAt, 0, 'context', [s3.id, ...qs.map((q) => q.id)], 'The other person: faceless, facing along th
+idioms/spatial2.ts:318 code other | if (space.person(other, POSES.standing, otherAt, 0, 'context', [s3.id, ...qs.map((q) => q.id)], 'The other person: faceless, facing along th
+idioms/spatial2.ts:341 code side | side: framedKey(content, centreOf(content), [0.9, 0.35, -0.6], 640, 0.6, 0.8),
+idioms/spatial2.ts:345 code plant | const plant = (space: Space, id: string, at: V3, h: number) => {
+idioms/spatial2.ts:355 code side | const side: V3 = [-Math.sin(a), 0, Math.cos(a)];
+idioms/spatial2.ts:361 code side | pts.push([at[0] + dir[0] * len * u + side[0] * w, y + dir[1] * len * u, at[2] + dir[2] * len * u + side[2] * w]);
+idioms/spatial2.ts:361 code side | pts.push([at[0] + dir[0] * len * u + side[0] * w, y + dir[1] * len * u, at[2] + dir[2] * len * u + side[2] * w]);
+idioms/spatial2.ts:366 code side | pts.push([at[0] + dir[0] * len * u - side[0] * w, y + dir[1] * len * u, at[2] + dir[2] * len * u - side[2] * w]);
+idioms/spatial2.ts:366 code side | pts.push([at[0] + dir[0] * len * u - side[0] * w, y + dir[1] * len * u, at[2] + dir[2] * len * u - side[2] * w]);
+idioms/spatial2.ts:368 code side | const normal: V3 = [dir[1] * side[2] - dir[2] * side[1], dir[2] * side[0] - dir[0] * side[2], dir[0] * side[1] - dir[1] * side[0]];
+idioms/spatial2.ts:368 code side | const normal: V3 = [dir[1] * side[2] - dir[2] * side[1], dir[2] * side[0] - dir[0] * side[2], dir[0] * side[1] - dir[1] * side[0]];
+idioms/spatial2.ts:368 code side | const normal: V3 = [dir[1] * side[2] - dir[2] * side[1], dir[2] * side[0] - dir[0] * side[2], dir[0] * side[1] - dir[1] * side[0]];
+idioms/spatial2.ts:368 code side | const normal: V3 = [dir[1] * side[2] - dir[2] * side[1], dir[2] * side[0] - dir[0] * side[2], dir[0] * side[1] - dir[1] * side[0]];
+idioms/spatial2.ts:368 code side | const normal: V3 = [dir[1] * side[2] - dir[2] * side[1], dir[2] * side[0] - dir[0] * side[2], dir[0] * side[1] - dir[1] * side[0]];
+idioms/spatial2.ts:368 code side | const normal: V3 = [dir[1] * side[2] - dir[2] * side[1], dir[2] * side[0] - dir[0] * side[2], dir[0] * side[1] - dir[1] * side[0]];
+idioms/spatial2.ts:380 string window | { [s1.id]: 'two plants, the one by the window a third taller (the amount is a rule constant)' },
+idioms/spatial2.ts:390 string corner | space.face('floor', floor, [0, 1, 0], { role: 'mid', material: 'shaded', facing: 'lit' }, ['base:setting'], 'The floor of the room the text 
+idioms/spatial2.ts:390 string room | space.face('floor', floor, [0, 1, 0], { role: 'mid', material: 'shaded', facing: 'lit' }, ['base:setting'], 'The floor of the room the text 
+idioms/spatial2.ts:390 string window | space.face('floor', floor, [0, 1, 0], { role: 'mid', material: 'shaded', facing: 'lit' }, ['base:setting'], 'The floor of the room the text 
+idioms/spatial2.ts:391 string window | space.face('wall-back', [[-1.6, 0, 3.0], [1.4, 0, 3.0], [1.4, 2.4, 3.0], [-1.6, 2.4, 3.0]], [0, 0, -1], { role: 'far', material: 'shaded' },
+idioms/spatial2.ts:392 string corner | space.face('wall-side', [[-1.6, 0, 0], [-1.6, 0, 3.0], [-1.6, 2.4, 3.0], [-1.6, 2.4, 0]], [1, 0, 0], { role: 'far', material: 'shaded' }, ['
+idioms/spatial2.ts:392 string side | space.face('wall-side', [[-1.6, 0, 0], [-1.6, 0, 3.0], [-1.6, 2.4, 3.0], [-1.6, 2.4, 0]], [1, 0, 0], { role: 'far', material: 'shaded' }, ['
+idioms/spatial2.ts:394 string plant | space.face('window', pane, [0, 0, -1], { role: 'ground', material: 'tonal' }, [s1.id], 'The window one plant stands by.', 0);
+idioms/spatial2.ts:394 string window | space.face('window', pane, [0, 0, -1], { role: 'ground', material: 'tonal' }, [s1.id], 'The window one plant stands by.', 0);
+idioms/spatial2.ts:394 string window | space.face('window', pane, [0, 0, -1], { role: 'ground', material: 'tonal' }, [s1.id], 'The window one plant stands by.', 0);
+idioms/spatial2.ts:395 string window | space.face('window-frame', pane, [0, 0, -1], { role: 'far', line: 'fine', material: 'line' }, [s1.id], 'Its frame.', 0);
+idioms/spatial2.ts:398 code plant | plant(space, s1.say.a, aAt, t.unscaled === 'range' ? short : tall);
+idioms/spatial2.ts:400 code plant | plant(space, s1.say.b, bAt, short);
+kit/field.ts:93 code other | const other = key(a) === key(tip) ? b : a;
+kit/field.ts:94 code other | if (grow === 'end') line.push(other);
+kit/field.ts:95 code other | else line.unshift(other);
+kit/spatial.ts:80 code right | cam.ahead[0] + cam.right[0] * dx - cam.up[0] * dy,
+kit/spatial.ts:81 code right | cam.ahead[1] + cam.right[1] * dx - cam.up[1] * dy,
+kit/spatial.ts:82 code right | cam.ahead[2] + cam.right[2] * dx - cam.up[2] * dy,

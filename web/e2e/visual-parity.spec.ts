@@ -1,6 +1,7 @@
 import { Page, expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { PLATFORM_PACK } from '../src/app/visual-pack';
 
 // Rendering parity (milestone M6, docs/visual-system.md §6.2): the canvas backend draws what the
 // SVG backend draws. Each case is drawn by both at its design size, on an opaque ground, at device
@@ -297,7 +298,7 @@ for (const dpr of [1, 1.5, 2]) {
   });
 }
 
-/** The smallest difference between two distinct colours a fill can take, from tokens.css (largest channel difference). */
+/** The smallest difference between two distinct colours a fill can take, from tokens.css and the app's style pack (largest channel difference). */
 function smallestFillGap(): { gap: number; where: string } {
   const css = readFileSync(join(__dirname, '../src/app/shared/visual/styling/tokens.css'), 'utf8');
   const PAGE = {
@@ -313,9 +314,11 @@ function smallestFillGap(): { gap: number; where: string } {
   const host = [...css.matchAll(/:host\s*\{([^}]*)\}/g)].map((m) => m[1]).join('\n');
   const hex = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
   let best = { gap: 256, where: '' };
-  for (const theme of ['action', 'cognitive', 'attention', 'regulation', 'recovery'])
+  // Since Stage 3 M0 the area ramps come from the application's style pack, not tokens.css.
+  const ramp = (theme: string) => Object.fromEntries(Object.entries(PLATFORM_PACK.themes[theme].ramp).map(([step, v]) => [`--vis-a-${step}`, v]));
+  for (const theme of Object.keys(PLATFORM_PACK.themes))
     for (const scheme of ['light', 'dark'] as const) {
-      const vars: Record<string, string> = { ...PAGE[scheme], ...decls(host), ...decls(block(`:host([data-vis-theme='${theme}'])`)) };
+      const vars: Record<string, string> = { ...PAGE[scheme], ...decls(host), ...ramp(theme) };
       if (scheme === 'dark') Object.assign(vars, decls(block(":host([data-vis-scheme='dark'])")));
       const resolve = (v: string): number[] => {
         const ref = v.match(/^var\((--[\w-]+)\)$/);

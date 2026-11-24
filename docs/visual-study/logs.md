@@ -106,3 +106,44 @@ Filled from the depth pass: see `findings-slice-1.md` §4.
 ## 5. Deviation log (pass B)
 
 Generated from `pages/lab/study/finish.ts` and shown in the Lab under each finished figure; summarised in `findings-slice-1.md` §3.
+
+## Slice 2 additions (2026-11-21)
+
+### Expressiveness
+
+| # | Gap | Cases | Domains | Remedy |
+|---|---|---|---|---|
+| G-29 | **One place above another** ("condenses into clouds" puts them above) can't be said, so every place sits on the ground | E2 | E (and any landscape, building, hierarchy) | A spatial relation `above` (a, b), or a vertical position in the space facet. Hand-fixed in E2-S1 |
+| G-30 | **Pass A missed two changes of form** in E2: "falls as rain" and "in rivers" are changes of form as well as movement | E2 | E | Corrected in slice 2 (`s2b`, `s4b`). The second, "rain becomes river water", rests on the conventional meaning of *river*, a borderline implication that should be reviewed |
+| G-31 | **Unknown amounts** (how much later, how much taller, how wide a two-day shortfall is) must still be drawn at some size | P4, E3, M3 | P E M | A fixed rule constant, said in the coverage report and never presented as measured. Proper remedy: a declared "unscaled" treatment (a break in the course, an ellipsis) |
+| G-32 | **Counts of a repeated act** (two emails) are lost: one mark stands for both | M2 | M | A `count` on event statements (joins G-02) |
+
+### Reuse (slice 2)
+
+| Term | P | E | M | Engine-first |
+|---|---|---|---|---|
+| `waiting` | ● (P3) | | ● (M1, M2) | yes, now in two domains |
+| `shifts` | ● (P4) | | (M-4, not yet drawn) | not yet |
+| `exceeds` | | ● (E3) | | not yet |
+| `behind` | | | ● (M3) | not yet |
+| `transforms` | | ● (E2) | | not yet |
+| `reacts`, `contact`, `displaced` | ● | | | psychology only so far |
+| plural presence | ● (P5, P6) | | ● (M2) | yes |
+| alternatives, origin `source` | | ● (E3) | ● (M3) | yes |
+
+**The twins now share a structure.** P3 ("a friend hasn't replied") and M2 ("the supplier hasn't replied") are both drawn by the same waiting pattern, W, in all three idioms. That closes the inconsistency pass A found. Pass C still has to test it with outside readers.
+
+### Primitives
+
+| # | Gap | Met in | Effect |
+|---|---|---|---|
+| PR-9 | No organic forms in a spatial scene (a leaf, foliage): only boxes, capsules and beads | E3 | The plants read as lollipops, and smaller leaves (E3-S1) didn't fix it |
+| PR-10 | No collision avoidance between things placed by different statements | M2 | "Launch" overlapped the team; moved by hand (M2-S1) |
+| PR-11 | Only four poses, all calm. A stumble, a turn of the head or a gesture can't be drawn | P6, P5 | A stumble and laughter are declared not shown. This is honest, but limits what a spatial scene can carry |
+| PR-12 | The framing rule ignored a place's height until fixed | E2 | A bug in the study's rule, fixed in the rule itself, not by hand |
+
+### Policy
+
+| # | Rule | What it bent | Proposal |
+|---|---|---|---|
+| PL-7 | §3.13, the element budget | P6's crowd: twelve figures, fourteen seat blocks | A crowd counts as one group (as PL-2 proposes for possibility sets) |

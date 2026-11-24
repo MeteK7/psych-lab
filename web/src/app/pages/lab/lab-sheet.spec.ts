@@ -2,14 +2,15 @@ import { lookupOf } from '../../shared/visual/composition/compose';
 import { spacingWarnings } from '../../shared/visual/composition/spacing';
 import { validateScene } from '../../shared/visual/composition/validate';
 import { buildComposedFrame } from '../../shared/visual/integration/pipeline';
-import { LINE_ORDER, MATERIALS, THEMES } from '../../shared/visual/styling/vocabulary';
+import { LINE_ORDER, MATERIALS } from '../../shared/visual/styling/vocabulary';
+import { themeIds } from '../../shared/visual/styling/pack';
 import { AREAS, depthFigure, linesFigure, materialsFigure, shadedFigure, typeFigure } from './lab-sheet-figures';
 
 describe('Visual Lab: the visual-language review sheet (M3 stage C)', () => {
   const figures = [linesFigure(), typeFigure(), ...AREAS.flatMap((a) => [materialsFigure(a.theme), depthFigure(a.theme), shadedFigure(a.theme)])];
 
   it('covers every area', () => {
-    expect(AREAS.map((a) => a.theme).sort()).toEqual(Object.keys(THEMES).sort());
+    expect(AREAS.map((a) => a.theme).sort()).toEqual(themeIds().sort());
   });
 
   it('draws valid figures from the real pipeline', () => {

@@ -1,8 +1,8 @@
-import type { Geometry, Point, Purpose, PurposeKind, SceneElement } from '../../../../shared/visual/composition/scene';
-import type { LabelTone, StyleRef } from '../../../../shared/visual/styling/vocabulary';
+import type { Geometry, Point, Purpose, PurposeKind, SceneElement } from '../../composition/scene';
+import type { LabelTone, StyleRef } from '../../styling/vocabulary';
 
 /**
- * STUDY CODE: element helpers. Every element cites what it stands for (rule C4): statement ids, or
+ * S12 drawing kit (Stage 3, M3; written by the representation study): element helpers. Every element cites what it stands for (rule C4): statement ids, or
  * `base:<what>` for a declared neutral base. The citation leads its purpose's `why`, as
  * `[s1,q3] …`, so the study spec can read it back.
  */

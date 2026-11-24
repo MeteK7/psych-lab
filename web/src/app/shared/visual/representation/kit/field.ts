@@ -1,7 +1,7 @@
 import type { Pt } from './paths';
 
 /**
- * STUDY CODE: fields for the field idiom. The engine's `field.flow` and `field.contours` take their
+ * S12 drawing kit (Stage 3, M3; written by the representation study): fields for the field idiom. The engine's `field.flow` and `field.contours` take their
  * shape from seeded noise; a field that carries meaning needs its shape from a function the idiom
  * defines (primitives log: "fields from a function"). Pure and deterministic.
  */
@@ -90,9 +90,9 @@ export function contour(fn: (x: number, y: number) => number, area: Area, cell: 
         if (next === undefined) break;
         used.add(next);
         const [a, b] = segments[next];
-        const other = key(a) === key(tip) ? b : a;
-        if (grow === 'end') line.push(other);
-        else line.unshift(other);
+        const partner = key(a) === key(tip) ? b : a;
+        if (grow === 'end') line.push(partner);
+        else line.unshift(partner);
       }
     }
     lines.push(line);

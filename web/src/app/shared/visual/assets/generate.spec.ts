@@ -1,5 +1,6 @@
 import { fileFacts, listSources, readSource } from '../testing/source-files';
-import { FRAMES, THEMES } from '../styling/vocabulary';
+import { FRAMES } from '../styling/vocabulary';
+import { themeIds } from '../styling/pack';
 import { BRIEF_VOCABULARY, briefProblems } from './brief';
 import { Candidate, ImageProvider, candidateProblems, generateDrafts } from './generate';
 import { catalogueProblems } from './manifest';
@@ -36,7 +37,7 @@ describe('S8 the brief: fixed lists, never typed text (M7 stage C)', () => {
   });
 
   it('lists the areas and frames the visual language has', () => {
-    expect([...BRIEF_VOCABULARY.area]).toEqual(Object.keys(THEMES));
+    expect([...BRIEF_VOCABULARY.area]).toEqual(themeIds());
     expect([...BRIEF_VOCABULARY.frame]).toEqual(Object.keys(FRAMES));
   });
 });

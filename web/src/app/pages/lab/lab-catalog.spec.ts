@@ -1,7 +1,8 @@
 import { GENERATORS } from '../../shared/visual/generation/registry';
+import { themeIds } from '../../shared/visual/styling/pack';
 import { INSTRUMENTS } from '../../shared/visual/integration/instruments';
 import { SCENES } from '../../shared/visual/scenes';
-import { COLOR_ROLES, DASHES, EXIT_EFFECTS, FRAMES, LABEL_SIZES, LINE_WEIGHTS, MATERIALS, MOTION_EFFECTS, THEMES } from '../../shared/visual/styling/vocabulary';
+import { COLOR_ROLES, DASHES, EXIT_EFFECTS, FRAMES, LABEL_SIZES, LINE_WEIGHTS, MATERIALS, MOTION_EFFECTS } from '../../shared/visual/styling/vocabulary';
 import { fileFacts, listSources, readSource } from '../../shared/visual/testing/source-files';
 import { CATALOG, SECTIONS } from './lab-catalog-data';
 
@@ -21,7 +22,7 @@ async function everything(): Promise<string[]> {
     ...Object.keys(MOTION_EFFECTS).map((n) => `enter:${n}`),
     ...Object.keys(EXIT_EFFECTS).map((n) => `exit:${n}`),
     ...Object.keys(FRAMES).map((n) => `frame:${n}`),
-    ...Object.keys(THEMES).map((n) => `theme:${n}`),
+    ...themeIds().map((n) => `theme:${n}`),
     ...COLOR_ROLES.map((n) => `role:${n}`),
     ...Object.keys(LABEL_SIZES).map((n) => `tone:${n}`),
     ...SCENES.map((s) => `scene:${s.scene.id}`),

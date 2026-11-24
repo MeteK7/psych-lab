@@ -13,7 +13,7 @@
 | Checks | 99 study checks pass: valid scenes at every sampled moment, nothing drawn without a statement, nothing inferred drawn, possibilities only in the possible register, determinism, directions at least two axes apart. The whole unit suite passes (870 tests), including the dependency rules | `pages/lab/study/study.spec.ts` |
 | Measurement | Work per frame for all 11 moving figures, both backends, ratios 1, 1.5 and 2: all within budget, with two single frames near or over it | `measurements.md` |
 
-**Unchanged:** `shared/visual/` (the engine), every exercise, every policy document. **Changed outside the study folder:** one route (`/lab/study`) and one line in the Lab's contents list (`lab-catalog-data.ts`).
+**Unchanged:** `shared/visual/` (the engine), every exercise, every policy document. **Changed outside the study folder:** one route (`/lab/study`), reached by its address. A link in the Lab's contents list was tried and removed: the Lab's contents test pins that list.
 
 ## 2. Pass A: what the representation could and couldn't say
 
@@ -29,11 +29,11 @@ Every hand change is in `pages/lab/study/finish.ts`, and the Lab prints them und
 
 | | Spatial | Kinetic | Field | Total |
 |---|---|---|---|---|
-| P1 (CS3) | 2 | 2 | 1 | 5 |
+| P1 (CS3) | 0 (2 before revision 2, §8) | 2 | 1 | 3 |
 | P2 (camera angle) | 5 | 2 | 0 | 7 |
 | E1 (education) | 2 | 1 | 1 | 4 |
 | M1 (planning) | 1 | 0 | 0 | 1 |
-| **Total** | **10** | **5** | **2** | **17** |
+| **Total** | **8** | **5** | **2** | **15** |
 
 By kind: 4 camera, 5 layout, 8 form. Three figures needed no finishing at all: P2's field, M1's kinetic and M1's field.
 
@@ -111,6 +111,41 @@ The rubric is `visual-policy.md` §9.3–§9.4, plus the two explicit criteria i
 | M1 field | | | | | | | |
 
 The psychology-trained reviewer advises on P1 and P2 (D5), against §5 in particular.
+
+**Your verdict (2026-11-21): all twelve figures accepted**, after the revision of P1's three (§8). No per-criterion scores were recorded. The psychology-trained reviewer's advice on P1 and P2 hasn't been recorded yet.
+
+## 8. Your review of P1's spatial figure (2026-11-21), and revision 2
+
+**What you found:** the figure showed two people in a space, not one person walking past another.
+
+**Why, traced to its causes:**
+1. **The representation was wrong.** `passes(own, other)` was symmetric, so every idiom made both people walk. The account says only that the classmate walked: whether you were moving is not stated. That was an inference drawn as fact, missed by me in pass A and by the spec, because v0 had no way to say who moved.
+2. **The rules couldn't express an encounter.** v0's spatial rules had no course (a way both share), no notion of the moment that makes "past" visible, and no framing. Picking the passing itself put the classmate beside your eyes (by the rules: a cropped giant). My first finishing moved the people 3.2 m apart: it fixed the look and lost the event. That is exactly the concealment the protocol is meant to expose.
+
+**Missing capabilities, now named and added (study code, `idioms.md` S2r2, S7r2, S8r2):**
+
+| Capability | Where | Domain-neutral? |
+|---|---|---|
+| **Who moved**, with the other's motion as an open question | Representation v0.1: `passes` takes `mover`; `asks: motion` | Yes (a delivery passes a depot; a comet passes a planet) |
+| **A course**: the way the mover goes, drawn because the account reports movement along it | Spatial rule S2r2 | Yes |
+| **The moment that makes an event visible**, chosen per stance (one step past, from across; coming, through your own eyes) | Spatial rule S8r2 | Yes: any event in a still needs it |
+| **A framing rule**: the camera computed from what it must show, at human scale, with room ahead of the mover | Spatial rule S7r2, `kit/spatial.ts` (`framedKey`, `aimedKey`) | Yes, and it is a candidate engine capability |
+| **A neutral pose for unknown motion**: standing, declared | Spatial rule S2r2 | Partly: standing is the least specific pose, not a perfectly neutral one |
+
+**Result:**
+- Both views are now the rules' own output, with no hand finishing.
+- **From across:** you stand at the edge of one way; the classmate walks along it, one step past you, going on to the right.
+- **Through your own eyes:** the classmate is coming along the way. Moving the viewpoint completes the passing.
+- Nothing is drawn between you. The classmate is faceless, and only their walking says which way they go, so nothing says they saw you, ignored you, or why.
+
+**Still unresolved, named rather than hidden:**
+- **One still from your own eyes can't show "past".** Only a movement can, or a second viewpoint. The figure uses the viewpoint path for it.
+- **Standing is not a perfectly neutral pose.** It is the least specific one available; a truly neutral rendering of unknown motion doesn't exist in this idiom.
+- **The way is a stand-in.** It asserts a path, not a place, and the framing words say the drawing is a stand-in.
+- **P1's kinetic and field figures:** fixed by the same rule change (K5r2, F2r2, at your go-ahead, 2026-11-21).
+  - **Kinetic:** only the classmate's form moves, along a course that comes close past your still form and goes on, left to right. Your form leaves no trace.
+  - **Field:** only the classmate's way is a bundle; you are a still mark beside it. The closest approach widens to five radii so the possibilities sit clear between you.
+  - **A new risk:** in the field figure, the open headings now surround your mark and may read as turbulence around you, which the account doesn't say. It is for your scoring, not tuned away.
 
 ## 7. What waits
 

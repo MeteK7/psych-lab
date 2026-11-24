@@ -1,21 +1,27 @@
 import type { Layer, SceneElement } from '../../../../shared/visual/composition/scene';
 import type { StudyCase } from '../cases';
-import { label, path, r2, shape } from '../kit/elements';
-import { FRAME } from '../kit/spatial';
-import { Pt, Track, ease, polyline, smooth } from '../kit/paths';
-import { find } from '../representation';
-import { Figure, SAFE, altText, composed, coverage } from './contract';
+import { drawable, find } from '../representation';
+import { Figure, SAFE, altText, composed, coverage, layoutOf, partsShown, sentence, word } from './contract';
+import { awaiting, compared, jostled, lagging, reacting, shifted } from './kinetic2';
+import { Pattern, needs } from './registry';
+import { Choice, studyChoice } from './dispatch';
+import { listed } from './draws';
+import { KINETIC_RULES as ENGINE_KINETIC_RULES, kit } from '../../../../shared/visual';
+import type { KineticTuning as EngineKineticTuning, Unscaled } from '../../../../shared/visual';
+const { CX, CY, FRAME, Track, ease, label, path, polyline, presence, r2, roundedRect, shape, smooth } = kit;
+type Pt = kit.Pt;
+type Track = kit.Track;
 
 /**
  * STUDY CODE: the kinetic sequence idiom (docs/visual-study/idioms.md, K1–K11): flat, moving, made
  * of forms, direct, a fixed viewpoint. The rules choose a pattern from the predicates present; the
  * tuning holds every number a rule sets, so hand finishing (finish.ts) is a list of changes to it.
  */
-export interface KineticTuning {
-  /** K3: one step of a sequence, ms. */
-  stepMs: number;
-  /** K2: a presence's radius; a secondary one's. */
-  radius: number;
+export type { Unscaled };
+
+/** The kinetic tuning: the engine's (S12, what its general patterns read), and what the study's own patterns read. */
+export interface KineticTuning extends EngineKineticTuning {
+  /** K2: a secondary presence's radius. */
   secondaryRadius: number;
   /** K5 passes: closest approach, in radii, and how far apart the paths start and end. */
   approach: number;
@@ -27,17 +33,12 @@ export interface KineticTuning {
   arcLift: number;
   /** The cycle's layout: by the rules, places around one loop in the order the cycle names them. */
   layout: 'loop' | 'figure-eight';
-  /** K4: traces of the way so far. */
-  traces: boolean;
-  /** C8: labels on forms that would be ambiguous without them. */
-  labelForms: boolean;
-  /** Not in the rules: a contact shadow under each presence (added by hand finishing only). */
+  /** K2r3: a contact shadow under each presence (accepted in slice 1, P1-K2 and P2-K2). */
   shadows: boolean;
 }
 
 export const KINETIC_RULES: KineticTuning = {
-  stepMs: 1300,
-  radius: 22,
+  ...ENGINE_KINETIC_RULES,
   secondaryRadius: 16,
   approach: 3,
   spread: 60,
@@ -45,39 +46,79 @@ export const KINETIC_RULES: KineticTuning = {
   ringMark: 8,
   arcLift: 90,
   layout: 'loop',
-  traces: true,
-  labelForms: true,
-  shadows: false,
+  shadows: true,
 };
-
 /** A soft contact shadow under a flat form, on the plane it moves across. */
-function contact(id: string, at: Pt, r: number, grounds: string): SceneElement {
+export function contact(id: string, at: Pt, r: number, grounds: string): SceneElement {
   return shape(`${id}-shadow`, { type: 'ellipse', cx: r2(at[0] + r * 0.12), cy: r2(at[1] + r * 0.92), rx: r2(r * 0.95), ry: r2(r * 0.32) }, { role: 'ink', material: 'shadow' }, ['base:ground'], 'Sets the form on a surface, so it reads as something that moves across one.', { grounds }, ['understanding']);
 }
 
-const CX = FRAME.width / 2;
-const CY = FRAME.height / 2;
 
-/** A presence as a flat form (K2, C2, C3): the own one lit in the area colour; another, the ground with a context line. Round: no facing. */
-function presence(id: string, at: Pt, r: number, own: boolean, cites: readonly string[], why: string): SceneElement[] {
-  const g = { type: 'circle' as const, cx: r2(at[0]), cy: r2(at[1]), r };
-  if (own) return [shape(id, g, { role: 'subject', material: 'lit', line: 'regular' }, cites, why)];
-  return [shape(`${id}-back`, g, { role: 'ground', material: 'tonal' }, ['base:ground'], 'Keeps the form solid over the traces behind it.', {}, ['understanding']), shape(id, g, { role: 'context', line: 'regular' }, cites, why)];
-}
-
-function trace(id: string, track: Track, u: number, own: boolean, cites: readonly string[], why: string): SceneElement[] {
+export function trace(id: string, track: Track, u: number, own: boolean, cites: readonly string[], why: string): SceneElement[] {
   if (u <= 0.002) return [];
   return [path(id, polyline(track.slice(0, u)), { role: own ? 'subject' : 'context', line: 'hair' }, cites, why)];
 }
 
 export function kinetic(c: StudyCase, finish: Partial<KineticTuning> = {}): Figure {
-  const t: KineticTuning = { ...KINETIC_RULES, ...finish };
-  const rep = c.rep;
-  if (find(rep, 'passes').length) return encounter(c, t);
-  if (find(rep, 'sends').length) return transmission(c, t);
-  if (find(rep, 'cycles').length) return cycle(c, t);
-  if (find(rep, 'waiting').length) return blocked(c, t);
-  throw new Error(`kinetic: no pattern for ${c.id}`);
+  return kineticChoice(c, finish).figure;
+}
+
+/**
+ * Revision 5: the patterns, in the order that breaks ties, each with what it needs (registry.ts). A
+ * need is what the pattern can't draw without, read from its code: most patterns were written from
+ * one case and need most of that case's statements.
+ */
+/** Revision 8: exported for the hand-written expectations (revision-8.spec.ts). */
+export function kineticPatterns(): Pattern<KineticTuning>[] {
+  return patterns();
+}
+
+function patterns(): Pattern<KineticTuning>[] {
+  const { a, all, plural, own, question } = needs;
+  return listed<KineticTuning>('kinetic', [
+    // D9 (revision 5): encounter names P1's statement ids (s2, q1–q3), so it needs their kinds too.
+    { name: 'encounter', lacks: (c) => all(a(c, 'passes'), a(c, 'exchange-absent'), question(c, 'attention'), question(c, 'whether'), question(c, 'cause')), draw: encounter },
+    // Revision 8 (structural need, found by the probe): it takes attention questions only about the one held and the crowd.
+    {
+      name: 'jostled',
+      lacks: (c) => {
+        const held = find(c.rep, 'contact')[0]?.say.b;
+        const many = c.rep.elements.find((e) => e.count !== undefined)?.id;
+        const stray = drawable(c.rep).some((s) => s.say.p === 'question' && s.say.asks === 'attention' && s.say.about !== held && s.say.about !== many);
+        return all(a(c, 'contact'), a(c, 'displaced'), a(c, 'sends'), a(c, 'exchange-absent'), plural(c), stray ? ['attention questions only about the one held or the crowd'] : []);
+      },
+      draw: jostled,
+    },
+    { name: 'reacting', lacks: (c) => all(a(c, 'reacts'), a(c, 'located-in'), own(c)), draw: reacting },
+    { name: 'awaiting', lacks: (c) => all(a(c, 'sends'), a(c, 'exchange-absent'), a(c, 'waiting')), draw: awaiting },
+    { name: 'transmission', lacks: (c) => all(a(c, 'sends'), a(c, 'receives'), a(c, 'located-in'), a(c, 'apart'), a(c, 'feels'), a(c, 'holds'), question(c, 'intent'), question(c, 'setting')), draw: transmission },
+    { name: 'shifted', lacks: (c) => all(a(c, 'shifts'), a(c, 'exchange-absent')), draw: shifted },
+    { name: 'compared', lacks: (c) => a(c, 'exceeds'), draw: compared },
+    { name: 'lagging', lacks: (c) => a(c, 'behind'), draw: lagging },
+    // Revision 8 (structural need, found by the probe): its fate question is about what joins the cycle.
+    {
+      name: 'cycle',
+      lacks: (c) => {
+        const joined = find(c.rep, 'joins')[0]?.say.what;
+        const stray = drawable(c.rep).some((s) => s.say.p === 'question' && s.say.asks === 'fate' && s.say.about !== joined);
+        return all(a(c, 'cycles'), stray ? ['a fate question only about what joins the cycle'] : []);
+      },
+      draw: cycle,
+    },
+    {
+      name: 'blocked',
+      lacks: (c) => all(a(c, 'complete'), a(c, 'precedes'), a(c, 'depends-on'), a(c, 'absent'), a(c, 'waiting'), a(c, 'exchange-absent'), question(c, 'time')),
+      draw: blocked,
+    },
+    // Then the engine's general patterns (motion, dependency, felt), registered after these (S12, M3: dispatch.ts).
+  ]);
+}
+
+/** `without`: patterns left out, for the checks (to show what the idiom does without one). */
+export function kineticChoice(c: StudyCase, finish: Partial<KineticTuning> = {}, only: { without?: readonly string[] } = {}): { figure: Figure; choice: Choice } {
+  const t: KineticTuning = { ...KINETIC_RULES, layout: layoutOf(c), ...finish };
+  // Stage 3, M2: through the engine's dispatch, which composes when no single pattern is able (revision 7) and else refuses, saying why.
+  return studyChoice('kinetic', c, t, finish, only.without);
 }
 
 const AXES = { space: 'flat', time: 'moving', substance: 'forms', mode: 'direct', viewpoint: 'fixed' } as const;
@@ -88,13 +129,21 @@ function encounter(c: StudyCase, t: KineticTuning): Figure {
   const set = find(c.rep, 'alternatives')[0];
   const own = c.rep.elements.find((e) => e.id === s1.say.a)!.own ? s1.say.a : s1.say.b;
   const other = own === s1.say.a ? s1.say.b : s1.say.a;
-  const gap = t.approach * t.radius;
+  // K5r2 (revision 2, after review of P1): when the account names the one who moved and the other's
+  // motion is open, only the mover moves; the other is a still point beside the course, which comes
+  // close to it and goes on, left to right (C5). The closest approach widens to five radii, so the
+  // point the question is about lies clear between the two.
+  const motionOpen = c.rep.statements.find((s) => s.say.p === 'question' && s.say.asks === 'motion' && s.say.about === own);
+  const ownStill = !!s1.say.mover && s1.say.mover !== own && !!motionOpen;
+  const gap = (ownStill ? 5 : t.approach) * t.radius;
   const x0 = SAFE + t.radius + 40;
   const x1 = FRAME.width - x0;
   const lower = CY + gap / 2;
   const upper = CY - gap / 2;
-  const ownTrack = new Track(smooth([[x0, lower + t.spread], [CX, lower], [x1, lower + t.spread]], false, 32));
-  const otherTrack = new Track(smooth([[x1, upper - t.spread], [CX, upper], [x0, upper - t.spread]], false, 32));
+  const ownTrack = new Track(ownStill ? [[CX, lower], [CX, lower]] : smooth([[x0, lower + t.spread], [CX, lower], [x1, lower + t.spread]], false, 32));
+  const otherTrack = new Track(
+    ownStill ? smooth([[x0, upper - t.spread / 2], [CX, upper], [x1, upper - t.spread / 2]], false, 32) : smooth([[x1, upper - t.spread], [CX, upper], [x0, upper - t.spread]], false, 32),
+  );
   const moveMs = c.rep.time.phases.length * t.stepMs;
   const tailMs = set ? 700 : 0;
   const duration = moveMs + tailMs;
@@ -104,7 +153,6 @@ function encounter(c: StudyCase, t: KineticTuning): Figure {
   };
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'kinetic',
     axes: AXES,
     motion: { kind: 'timeline', duration, steps: [...c.rep.time.phases, ...(set ? ['possibilities'] : [])] },
@@ -112,14 +160,15 @@ function encounter(c: StudyCase, t: KineticTuning): Figure {
     coverage: coverage(
       c.rep,
       {
-        s1: 'two paths that come close and go on, at one constant pace',
+        s1: ownStill ? 'the classmate’s form comes along its course, close by your still form, and goes on, at one constant pace' : 'two paths that come close and go on, at one constant pace',
         s2: 'nothing is drawn between the two forms at their closest',
         q1: 'the other form is round, with no facing',
         q2: 'your form is round, with no facing',
         q3: 'the point of closest approach, where the possibilities gather',
         ...(set ? { [set.id]: 'equal translucent marks on a ring around that point, after the movement' } : {}),
+        ...(motionOpen && ownStill ? { [motionOpen.id]: 'your form stays where it is, with no trace: nothing says you moved' } : {}),
       },
-      {},
+      motionOpen && !ownStill ? { [motionOpen.id]: 'NOT RESPECTED: your form moves too' } : {},
     ),
     compose(at: number) {
       const ms = at * duration;
@@ -128,8 +177,8 @@ function encounter(c: StudyCase, t: KineticTuning): Figure {
       const otherAt = otherTrack.at(u);
       const forms: SceneElement[] = t.shadows ? [contact(other, otherAt, t.radius, other), contact(own, ownAt, t.radius, own)] : [];
       if (t.traces) {
-        forms.push(...trace('own-trace', ownTrack, u, true, [s1.id], 'The way you came: what any still frame shows of the passing.'));
-        forms.push(...trace('other-trace', otherTrack, u, false, [s1.id], 'The way the other person came.'));
+        if (!ownStill) forms.push(...trace('own-trace', ownTrack, u, true, [s1.id], 'The way you came: what any still frame shows of the passing.'));
+        forms.push(...trace('other-trace', otherTrack, u, false, [s1.id], ownStill ? 'The way the classmate came, past you: what any still frame shows of the passing.' : 'The way the other person came.'));
       }
       const marks: SceneElement[] = [];
       const g = set ? Math.min(1, Math.max(0, (ms - moveMs) / tailMs)) : 0;
@@ -141,7 +190,7 @@ function encounter(c: StudyCase, t: KineticTuning): Figure {
         }
       }
       forms.push(...presence(other, otherAt, t.radius, false, [s1.id, 'q1'], 'The other person: round, with no facing, because what they noticed is open.'));
-      forms.push(...presence(own, ownAt, t.radius, true, [s1.id, 'q2'], 'You: the area colour, the same size as the other; round, because what you did is open.'));
+      forms.push(...presence(own, ownAt, t.radius, true, [s1.id, 'q2', ...(ownStill && motionOpen ? [motionOpen.id] : [])], ownStill ? 'You: still, with no trace, because the account doesn’t say you moved; the same size as the other; round, because what you did is open.' : 'You: the area colour, the same size as the other; round, because what you did is open.'));
       const labels: SceneElement[] = t.labelForms
         ? [label('own-label', own, [r2(ownAt[0]), r2(ownAt[1] + t.radius + 20)], 'middle', [s1.id], 'Says which form is you.', { names: [own], halo: true })]
         : [];
@@ -173,7 +222,6 @@ function transmission(c: StudyCase, t: KineticTuning): Figure {
   const duration = 3 * t.stepMs;
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'kinetic',
     axes: AXES,
     motion: { kind: 'timeline', duration, steps: ['sent', 'read', 'felt'] },
@@ -233,7 +281,14 @@ function cycle(c: StudyCase, t: KineticTuning): Figure {
   const joins = find(c.rep, 'joins')[0];
   const flows = find(c.rep, 'flows');
   const fate = c.rep.statements.find((s) => s.say.p === 'question' && s.say.asks === 'fate' && s.say.about === joins?.say.what);
+  const transforms = find(c.rep, 'transforms');
   const through = s6.say.through;
+  // Revision 5 (D8): descriptions in the statements' own words, not one case's.
+  const W = (id: string) => word(c, id);
+  const moverW = W(s6.say.what);
+  const atW = joins ? W(joins.say.at) : '';
+  const pastW = joins ? W(through[(through.indexOf(joins.say.at) + 2) % through.length]) : '';
+  const takenW = joins ? W(joins.say.what) : '';
   const places: Pt[] =
     t.layout === 'figure-eight'
       ? [[CX - 60, CY], [CX, SAFE + 70], [CX + 60, CY], [CX, FRAME.height - SAFE - 70]]
@@ -264,7 +319,6 @@ function cycle(c: StudyCase, t: KineticTuning): Figure {
   const alt = altText(c);
   const cites = (id: string) => flows.filter((f) => f.say.from === id || f.say.to === id).map((f) => f.id);
   return {
-    caseId: c.id,
     idiom: 'kinetic',
     axes: AXES,
     motion: { kind: 'timeline', duration, steps: c.rep.time.phases },
@@ -274,8 +328,11 @@ function cycle(c: StudyCase, t: KineticTuning): Figure {
       {
         ...Object.fromEntries(flows.map((f) => [f.id, `the form travels from ${f.say.from} to ${f.say.to}`])),
         [s6.id]: 'one lap of a closed way, back to where it began',
-        ...(joins ? { [joins.id]: 'a small mark joins the form at the lungs and rides with it' } : {}),
-        ...(fate ? { [fate.id]: 'past the body, the mark is drawn only as an outline in the tentative dash: kept or lost is not said' } : {}),
+        ...Object.fromEntries(find(c.rep, 'above').map((x) => [x.id, 'drawn higher here, but only because of the loop’s order: no flat rule enforces above (open)'])),
+        ...Object.fromEntries(transforms.map((x) => [x.id, 'the travelling form changes shape at the place where it changes form (pattern X)'])),
+        ...partsShown(c),
+        ...(joins ? { [joins.id]: `a small mark joins the form at ${atW} and rides with it` } : {}),
+        ...(fate ? { [fate.id]: `past ${pastW}, the mark is drawn only as an outline in the tentative dash: kept or lost is not said` } : {}),
       },
       {},
     ),
@@ -288,13 +345,22 @@ function cycle(c: StudyCase, t: KineticTuning): Figure {
       const formAt = loop.at(f);
       const elements: SceneElement[] = [];
       through.forEach((id, k) => {
-        elements.push(path(`place-${id}`, blob(places[k], 60, 36), { role: 'mid', material: 'tonal' }, cites(id), `${c.words[id] ?? id}: a place the blood passes through.`));
+        elements.push(path(`place-${id}`, blob(places[k], 60, 36), { role: 'mid', material: 'tonal' }, cites(id), `${c.words[id] ?? id}: a place ${moverW} passes through.`));
       });
       if (t.traces && travelled > 0.002) {
         const pts = travelled + start <= 1 ? loop.slice(start, start + travelled) : [...loop.slice(start, 1), ...loop.slice(0, start + travelled - 1)];
-        elements.push(path('route', polyline(pts), { role: 'context', line: 'hair' }, [s6.id], 'The way the blood has gone so far.'));
+        elements.push(path('route', polyline(pts), { role: 'context', line: 'hair' }, [s6.id], `The way ${moverW} has gone so far.`));
       }
-      elements.push(shape('blood', { type: 'circle', cx: r2(formAt[0]), cy: r2(formAt[1]), r: 13 }, { role: 'subject', material: 'lit', line: 'regular' }, [...flows.map((x) => x.id), s6.id], 'The blood: the one thing that moves.'));
+      if (!transforms.length) elements.push(shape('blood', { type: 'circle', cx: r2(formAt[0]), cy: r2(formAt[1]), r: 13 }, { role: 'subject', material: 'lit', line: 'regular' }, [...flows.map((x) => x.id), s6.id], `${sentence(moverW)}: the one thing that moves.`));
+      else {
+        // Pattern X: the state is set by the last change of form at the last place passed.
+        const passed = through.map((_, k) => k).filter((k) => (fractions[k] - start + 1) % 1 <= travelled + 1e-6 || k === 0);
+        const last = passed[passed.length - 1];
+        const here = transforms.filter((x) => x.say.p === 'transforms' && x.say.at === through[last]);
+        const state = here.length ? (here[here.length - 1].say as { to: string }).to : 'liquid';
+        const cites = [...flows.map((x) => x.id), ...here.map((x) => x.id), s6.id];
+        elements.push(...formOf(state, formAt, cites));
+      }
       // The joined mark: from the lungs on; past the place after next (the body), its fate is open.
       if (joins) {
         const lapFromJoin = (joinAt - start + 1) % 1;
@@ -303,7 +369,7 @@ function cycle(c: StudyCase, t: KineticTuning): Figure {
           const open = !!fate && travelled >= lapToOpen;
           const m: Pt = [formAt[0] + 15, formAt[1] - 15];
           elements.push(
-            shape('oxygen', { type: 'circle', cx: r2(m[0]), cy: r2(m[1]), r: 5 }, open ? { role: 'subject', line: 'fine', dash: 'tentative' } : { role: 'subject', material: 'solid' }, open ? [fate!.id] : [joins.id], open ? 'The oxygen past the body: an outline only, because the text doesn’t say whether it stays.' : 'The oxygen, taken up in the lungs and carried.'),
+            shape('oxygen', { type: 'circle', cx: r2(m[0]), cy: r2(m[1]), r: 5 }, open ? { role: 'subject', line: 'fine', dash: 'tentative' } : { role: 'subject', material: 'solid' }, open ? [fate!.id] : [joins.id], open ? `${sentence(takenW)} past ${pastW}: an outline only, because the text doesn’t say whether it stays.` : `${sentence(takenW)}, taken up at ${atW} and carried.`),
           );
         }
       }
@@ -342,7 +408,6 @@ function blocked(c: StudyCase, t: KineticTuning): Figure {
   const duration = 3 * t.stepMs;
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'kinetic',
     axes: AXES,
     motion: { kind: 'timeline', duration, steps: ['finished', 'to the barrier', 'held'] },
@@ -388,14 +453,25 @@ function blocked(c: StudyCase, t: KineticTuning): Figure {
   };
 }
 
-export function roundedRect(x: number, y: number, w: number, h: number, r: number): string {
-  const R = Math.min(r, w / 2, h / 2);
-  const f = r2;
-  return `M${f(x + R)} ${f(y)}L${f(x + w - R)} ${f(y)}A${f(R)} ${f(R)} 0 0 1 ${f(x + w)} ${f(y + R)}L${f(x + w)} ${f(y + h - R)}A${f(R)} ${f(R)} 0 0 1 ${f(x + w - R)} ${f(y + h)}L${f(x + R)} ${f(y + h)}A${f(R)} ${f(R)} 0 0 1 ${f(x)} ${f(y + h - R)}L${f(x)} ${f(y + R)}A${f(R)} ${f(R)} 0 0 1 ${f(x + R)} ${f(y)}Z`;
+/**
+ * Pattern X: one travelling form in a given state, drawn by its shape, never by the tentative dash
+ * or translucency, which keep their register meanings: dots (vapour), a soft cloud, short falling
+ * strokes (rain), a solid drop otherwise.
+ */
+function formOf(state: string, at: Pt, cites: readonly string[]): SceneElement[] {
+  const [x, y] = at;
+  const style = { role: 'subject', material: 'solid' } as const;
+  const why = `The water, as ${state}.`;
+  if (state === 'vapour')
+    return [path('water', [[-9, 4], [0, -6], [9, 4]].map(([dx, dy]) => `M${r2(x + dx - 3)} ${r2(y + dy)}A3 3 0 1 0 ${r2(x + dx + 3)} ${r2(y + dy)}A3 3 0 1 0 ${r2(x + dx - 3)} ${r2(y + dy)}Z`).join(''), style, cites, why)];
+  if (state === 'cloud') return [path('water', blob(at, 24, 14), { role: 'subject', material: 'tonal' }, cites, why)];
+  if (state === 'rain') return [path('water', [-10, 0, 10].map((dx) => `M${r2(x + dx)} ${r2(y - 9)}L${r2(x + dx - 3)} ${r2(y + 9)}`).join(''), { role: 'subject', line: 'regular' }, cites, why)];
+  return [shape('water', { type: 'circle', cx: r2(x), cy: r2(y), r: 11 }, { role: 'subject', material: 'lit', line: 'regular' }, cites, why)];
 }
 
+
 /** A soft place: a rounded form, a little wider than tall. */
-function blob(c: Pt, rx: number, ry: number): string {
+export function blob(c: Pt, rx: number, ry: number): string {
   return polyline(
     smooth(
       Array.from({ length: 16 }, (_, i) => {

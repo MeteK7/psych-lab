@@ -3,7 +3,8 @@ import { Component, inject, signal, viewChildren } from '@angular/core';
 import { AppEnvironment } from '../../shared/app-environment';
 import { FRAME_CLOCK, FrameClock, FrameFigure, FrameItem, ResolvedFrame, ResolvedTimeline } from '../../shared/visual/integration/frame-figure';
 import { ExportFacts, ExportScope } from '../../shared/visual/integration/export-scope';
-import { THEMES, ThemeId } from '../../shared/visual/styling/vocabulary';
+import { ThemeId } from '../../shared/visual/styling/vocabulary';
+import { themeIds, themeVersion } from '../../shared/visual/styling/pack';
 import { LabOverlay } from './lab-overlay';
 import { ParityCase, parityCases } from './lab-parity-cases';
 
@@ -172,7 +173,7 @@ export class LabParityPage {
   protected readonly schemes: Scheme[] = ['light', 'dark'];
   protected readonly harness = typeof location !== 'undefined' && new URLSearchParams(location.search).has('harness');
   private readonly cases = parityCases();
-  protected readonly themes = Object.keys(THEMES) as ThemeId[];
+  protected readonly themes = themeIds() as ThemeId[];
   /** Every case that is a composition or a scene state: what can be exported. */
   protected readonly exportable = this.cases.filter((c) => c.source);
   private readonly scopes = viewChildren(ExportScope);
@@ -202,7 +203,7 @@ export class LabParityPage {
   }
 
   private facts(c: ParityCase & { source: NonNullable<ParityCase['source']> }, scheme: Scheme): ExportFacts {
-    return { ...c.source, theme: c.frame.theme, themeVersion: THEMES[c.frame.theme as ThemeId], scheme };
+    return { ...c.source, theme: c.frame.theme, themeVersion: themeVersion(c.frame.theme), scheme };
   }
 
   /** The case as a standalone SVG. */

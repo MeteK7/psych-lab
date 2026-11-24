@@ -11,11 +11,11 @@ import {
   PLANE_ROLES,
   SHADED_ROLES,
   StyleRef,
-  THEMES,
 } from '../styling/vocabulary';
 import { GENERATORS, generatorProblems } from '../generation/registry';
 import { Box, atLeast, boundsOf, boxesOverlap } from './bounds';
 import { PURPOSE_KINDS, Purpose, SceneDefinition, SceneElement, TextLookup, elementsOf } from './scene';
+import { knownTheme } from '../styling/pack';
 
 /** Any raw colour value: scenes use roles only (docs/visual-system.md §4.3). */
 const RAW_COLOUR = /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch|color)\(/i;
@@ -231,7 +231,7 @@ function strings(value: unknown): string[] {
 /** Every problem with a scene; empty when it's valid. Pure: runs in unit tests and the Visual Lab. */
 export function validateScene(scene: SceneDefinition, text: TextLookup): string[] {
   const problems: string[] = [];
-  if (!Object.hasOwn(THEMES, scene.theme)) problems.push(`unknown theme '${scene.theme}'`);
+  if (!knownTheme(scene.theme)) problems.push(`unknown theme '${scene.theme}'`);
   if (typeof scene.frame === 'string') {
     if (!Object.hasOwn(FRAMES, scene.frame)) problems.push(`unknown frame '${scene.frame}'`);
   } else if (!(scene.frame.width > 0 && scene.frame.height > 0)) problems.push('a frame size must be positive');

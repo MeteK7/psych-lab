@@ -1,32 +1,28 @@
 import type { SceneElement } from '../../../../shared/visual/composition/scene';
 import type { StudyCase } from '../cases';
-import { label, path, r2, shape } from '../kit/elements';
-import { Area, contour, streamline, thin } from '../kit/field';
-import { FRAME } from '../kit/spatial';
-import { Pt, Track, ease, polyline, smooth } from '../kit/paths';
 import { find } from '../representation';
-import { Figure, SAFE, altText, composed, coverage } from './contract';
-import { roundedRect } from './kinetic';
+import { Figure, SAFE, altText, composed, coverage, layoutOf, partsShown, sentence, word } from './contract';
+import { crowdField, grownField, heldWait, lateField, openWait, ripples, shiftedField } from './field2';
+import { Pattern, Refused, needs } from './registry';
+import { Choice, studyChoice } from './dispatch';
+import { listed } from './draws';
+import { FIELD_RULES as ENGINE_FIELD_RULES, kit } from '../../../../shared/visual';
+import type { FieldTuning as EngineFieldTuning, Unscaled } from '../../../../shared/visual';
+const { AREA, FRAME, Track, contour, ease, label, path, polyline, r2, roundedRect, shape, smooth, streamline, thin } = kit;
+type Area = kit.Area;
+type Pt = kit.Pt;
+type Track = kit.Track;
 
 /**
  * STUDY CODE: the field idiom (docs/visual-study/idioms.md, F1–F7): the frame is a field of fine
  * lines whose order, spacing and tightness carry the meaning. Flat; moving only when the field
  * facet says it evolves; metaphorical unless the field is the thing itself (a flow).
  */
-export interface FieldTuning {
-  /** F5: how long an evolving field grows, ms. */
-  evolveMs: number;
-  /** F1 with C5: how far from its source the field reaches, so a third of the frame stays calm. */
-  reach: number;
+/** The field tuning: the engine's (S12, what its general patterns read), and what the study's own patterns read. */
+export interface FieldTuning extends EngineFieldTuning {
   /** F2 clarity: established bundles, lines per bundle and their spacing. */
   bundle: number;
   bundleGap: number;
-  /** F4: lines per possible heading, how far from the source they start, and their common turn (radians). */
-  perHeading: number;
-  headingStart: number;
-  turn: number;
-  /** F2 agitation: how tight the contours are near the source (units at the first level). */
-  tightness: number;
   /** F6: the scale at each stance. */
   scales: readonly number[];
   /** F2 density: lanes after something joins, and before. */
@@ -34,43 +30,75 @@ export interface FieldTuning {
   lanesBefore: number;
   laneGap: number;
   layout: 'loop' | 'figure-eight';
-  /** F3, F7: marks and labels. */
-  labels: boolean;
+  /**
+   * R4-4 (open for this idiom): how an amount the text doesn't give is drawn. The constant, provisionally:
+   * it asserts a size the text doesn't give (findings-revision-4.md §3). Only the kinetic idiom adopted `range`.
+   */
+  unscaled: Unscaled;
 }
 
 export const FIELD_RULES: FieldTuning = {
-  evolveMs: 6000,
-  reach: 210,
+  ...ENGINE_FIELD_RULES,
   bundle: 3,
   bundleGap: 6,
-  perHeading: 5,
-  headingStart: 64,
-  turn: 0.28,
-  tightness: 70,
   scales: [1, 1.7, 3, 5.5],
   lanesAfter: 7,
   lanesBefore: 3,
   laneGap: 5,
   layout: 'loop',
-  labels: true,
+  unscaled: 'constant',
 };
-
 const CX = FRAME.width / 2;
 const CY = FRAME.height / 2;
-const AREA: Area = { x: SAFE, y: SAFE, width: FRAME.width - 2 * SAFE, height: FRAME.height - 2 * SAFE };
 
 export function field(c: StudyCase, finish: Partial<FieldTuning> = {}): Figure {
-  const t: FieldTuning = { ...FIELD_RULES, ...finish };
-  const f = c.rep.facets.field;
-  if (!f) throw new Error(`field: ${c.id} has no field facet`);
-  if (f.quality === 'clarity') return clarity(c, t);
-  if (f.quality === 'agitation') return agitation(c, t);
-  if (find(c.rep, 'cycles').length) return flow(c, t);
-  return held(c, t);
+  return fieldChoice(c, finish).figure;
+}
+
+/**
+ * Revision 5: the patterns, in the order that breaks ties, each with what it needs (registry.ts).
+ * Before revision 5, `held` was the fallback for anything else; it needs the whole of a held
+ * dependency, so it is now one pattern among the others.
+ */
+/** Revision 8: exported for the hand-written expectations (revision-8.spec.ts). */
+export function fieldPatterns(): Pattern<FieldTuning>[] {
+  return patterns();
+}
+
+function patterns(): Pattern<FieldTuning>[] {
+  const { a, all, plural, own, question, quality } = needs;
+  return listed<FieldTuning>('field', [
+    // D9 (revision 5): clarity and agitation name P1's and P2's statement ids (q1–q3, s1–s6) in their
+    // coverage, so they need those statements' kinds too, or they would fail on a case without them.
+    { name: 'clarity', lacks: (c) => all(quality(c, 'clarity'), a(c, 'passes'), a(c, 'exchange-absent'), question(c, 'attention'), question(c, 'whether'), question(c, 'cause')), draw: clarity },
+    { name: 'openWait', lacks: (c) => all(quality(c, 'clarity'), a(c, 'sends'), a(c, 'exchange-absent'), a(c, 'waiting')), draw: openWait },
+    { name: 'shiftedField', lacks: (c) => all(quality(c, 'clarity'), a(c, 'shifts'), a(c, 'exchange-absent')), draw: shiftedField },
+    { name: 'grownField', lacks: (c) => all(quality(c, 'clarity'), a(c, 'exceeds')), draw: grownField },
+    { name: 'lateField', lacks: (c) => all(quality(c, 'clarity'), a(c, 'behind')), draw: lateField },
+    { name: 'agitation', lacks: (c) => all(quality(c, 'agitation'), a(c, 'feels'), a(c, 'sends'), a(c, 'receives'), a(c, 'located-in'), a(c, 'apart'), a(c, 'holds'), question(c, 'intent'), question(c, 'setting')), draw: agitation },
+    { name: 'flow', lacks: (c) => a(c, 'cycles'), draw: flow },
+    { name: 'ripples', lacks: (c) => all(a(c, 'reacts'), a(c, 'located-in'), own(c)), draw: ripples },
+    { name: 'crowdField', lacks: (c) => all(a(c, 'contact'), a(c, 'displaced'), a(c, 'sends'), a(c, 'exchange-absent'), plural(c)), draw: crowdField },
+    { name: 'heldWait', lacks: (c) => all(a(c, 'sends'), a(c, 'waiting'), a(c, 'depends-on'), a(c, 'exchange-absent')), draw: heldWait },
+    {
+      name: 'held',
+      lacks: (c) => all(a(c, 'complete'), a(c, 'precedes'), a(c, 'depends-on'), a(c, 'absent'), a(c, 'waiting'), a(c, 'exchange-absent'), question(c, 'time')),
+      draw: held,
+    },
+    // Then the engine's general patterns (motion, dependency, felt), registered after these (S12, M3: dispatch.ts).
+  ]);
+}
+
+/** `without`: patterns left out, for the checks (to show what the idiom does without one). */
+export function fieldChoice(c: StudyCase, finish: Partial<FieldTuning> = {}, only: { without?: readonly string[] } = {}): { figure: Figure; choice: Choice } {
+  const t: FieldTuning = { ...FIELD_RULES, layout: layoutOf(c), ...finish };
+  if (!c.rep.facets.field) throw new Refused({ caseId: c.id, idiom: 'field', tried: [{ pattern: 'every pattern', lacks: ['a field facet'] }] });
+  // Stage 3, M2: through the engine's dispatch, which composes when no single pattern is able (revision 7) and else refuses, saying why.
+  return studyChoice('field', c, t, finish, only.without);
 }
 
 /** Lines offset sideways from a track, `offset` units to its left. */
-function offsetLine(track: Track, offset: number, u0: number, u1: number, n = 80): Pt[] {
+export function offsetLine(track: Track, offset: number, u0: number, u1: number, n = 80): Pt[] {
   const out: Pt[] = [];
   for (let k = 0; k <= n; k++) {
     const u = u0 + ((u1 - u0) * k) / n;
@@ -89,11 +117,21 @@ function clarity(c: StudyCase, t: FieldTuning): Figure {
   const set = find(c.rep, 'alternatives')[0];
   const own = c.rep.elements.find((e) => e.id === s1.say.a)!.own ? s1.say.a : s1.say.b;
   const other = own === s1.say.a ? s1.say.b : s1.say.a;
-  const gap = 66;
+  // F2r2 (revision 2, after review of P1): when the account names the one who moved and the other's
+  // motion is open, only the mover's way is a bundle; the other is a still mark beside it, which the
+  // way comes close to and leaves, left to right (C5). The gap widens so the open field around the
+  // closest point lies clear between them.
+  const motionOpen = c.rep.statements.find((s) => s.say.p === 'question' && s.say.asks === 'motion' && s.say.about === own);
+  const ownStill = !!s1.say.mover && s1.say.mover !== own && !!motionOpen;
+  const gap = ownStill ? 110 : 66;
   const x0 = SAFE + 60;
   const x1 = FRAME.width - x0;
-  const ownTrack = new Track(smooth([[x0, CY + gap / 2 + 60], [CX, CY + gap / 2], [x1, CY + gap / 2 + 60]], false, 32));
-  const otherTrack = new Track(smooth([[x1, CY - gap / 2 - 60], [CX, CY - gap / 2], [x0, CY - gap / 2 - 60]], false, 32));
+  const ownPoint: Pt = [CX, CY + gap / 2];
+  const ownTrack = new Track(ownStill ? [ownPoint, ownPoint] : smooth([[x0, CY + gap / 2 + 60], [CX, CY + gap / 2], [x1, CY + gap / 2 + 60]], false, 32));
+  const otherTrack = new Track(
+    ownStill ? smooth([[x0, CY - gap / 2 - 30], [CX, CY - gap / 2], [x1, CY - gap / 2 - 30]], false, 32) : smooth([[x1, CY - gap / 2 - 60], [CX, CY - gap / 2], [x0, CY - gap / 2 - 60]], false, 32),
+  );
+  const nearCourse = (p: Pt) => otherTrack.points.some((q) => Math.hypot(q[0] - p[0], q[1] - p[1]) < 14);
   const n = set ? set.say.options.length : 0;
   // F4: n headings of equal strength, each a sector of outward lines with a gentle common turn.
   const sectorLines: Pt[][][] = Array.from({ length: n }, (_, k) => {
@@ -111,7 +149,9 @@ function clarity(c: StudyCase, t: FieldTuning): Figure {
       };
       const pts = streamline(start, vec, AREA, 4, t.reach);
       // Not across the two bundles: what is established stays clear (F4).
-      const clear = pts.filter((p) => Math.abs(p[1] - CY) > gap / 2 + 14 || Math.abs(p[0] - CX) > 90);
+      const clear = ownStill
+        ? pts.filter((p) => !nearCourse(p) && Math.hypot(p[0] - ownPoint[0], p[1] - ownPoint[1]) > 22)
+        : pts.filter((p) => Math.abs(p[1] - CY) > gap / 2 + 14 || Math.abs(p[0] - CX) > 90);
       if (clear.length > 3) lines.push(clear);
     }
     return lines;
@@ -119,7 +159,6 @@ function clarity(c: StudyCase, t: FieldTuning): Figure {
   const duration = c.rep.facets.field!.evolves ? t.evolveMs : 0;
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'field',
     axes: { space: 'flat', time: duration ? 'moving' : 'still', substance: 'field', mode: 'metaphorical', viewpoint: 'fixed' },
     motion: duration ? { kind: 'timeline', duration, steps: ['what is known', 'what is open'] } : { kind: 'still' },
@@ -127,13 +166,17 @@ function clarity(c: StudyCase, t: FieldTuning): Figure {
     coverage: coverage(
       c.rep,
       {
-        [s1.id]: 'two coherent bundles of lines that come close and part',
+        [s1.id]: ownStill ? 'one coherent bundle, the classmate’s way, that comes close by your still mark and goes on' : 'two coherent bundles of lines that come close and part',
         q1: 'the other bundle ends in a plain mark, with no direction beyond its own way',
-        q2: 'your bundle ends in a plain mark',
+        q2: ownStill ? 'your mark is plain' : 'your bundle ends in a plain mark',
         q3: 'around the closest point the field stays unresolved, in the tentative dash',
         ...(set ? { [set.id]: `${n} headings of equal strength in the unresolved field` } : {}),
+        ...(motionOpen && ownStill ? { [motionOpen.id]: 'you are a still mark with no way of your own: nothing says you moved' } : {}),
       },
-      { s2: 'an absent greeting has no form in a field: the gap between the bundles stays empty' },
+      {
+        s2: 'an absent greeting has no form in a field: the gap between the bundle and your mark stays empty',
+        ...(motionOpen && !ownStill ? { [motionOpen.id]: 'NOT RESPECTED: your bundle is a way travelled too' } : {}),
+      },
     ),
     compose(at: number) {
       const ms = at * (duration || 1);
@@ -152,9 +195,11 @@ function clarity(c: StudyCase, t: FieldTuning): Figure {
         elements.push(shape(id, { type: 'circle', cx: r2(x), cy: r2(y), r: 5 }, { role: isOwn ? 'subject' : 'context', material: 'solid' }, [s1.id, isOwn ? 'q2' : 'q1'], isOwn ? 'You: a plain mark at the head of your way.' : 'The other person: a plain mark, with no facing.'));
       };
       bundle(other, otherTrack, false);
-      bundle(own, ownTrack, true);
+      if (ownStill)
+        elements.push(shape(own, { type: 'circle', cx: r2(ownPoint[0]), cy: r2(ownPoint[1]), r: 6 }, { role: 'subject', material: 'solid' }, [s1.id, 'q2', motionOpen!.id], 'You: a still mark with no way of its own, because the account doesn’t say you moved.'));
+      else bundle(own, ownTrack, true);
       const [ox, oy] = ownTrack.at(known);
-      const labels = t.labels ? [label('own-label', own, [r2(ox), r2(oy + 26)], 'middle', [s1.id], 'Says which way is yours.', { names: [own, `${own}-bundle`], halo: true })] : [];
+      const labels = t.labels ? [label('own-label', own, [r2(ox), r2(oy + 26)], 'middle', [s1.id], ownStill ? 'Says which mark is you.' : 'Says which way is yours.', { names: ownStill ? [own] : [own, `${own}-bundle`], halo: true })] : [];
       return composed(c, 'field', [
         { id: 'field', plane: 'subject', elements },
         { id: 'labels', plane: 'annotation', elements: labels },
@@ -182,7 +227,6 @@ function agitation(c: StudyCase, t: FieldTuning): Figure {
   const reach = Math.max(...rings.flatMap((l) => l.map((p) => Math.hypot(p[0], p[1]))));
   const alt = altText(c, (id) => id === s5.id);
   return {
-    caseId: c.id,
     idiom: 'field',
     axes: { space: 'flat', time: 'still', substance: 'field', mode: 'metaphorical', viewpoint: stances.length > 1 ? 'movable' : 'fixed' },
     motion: stances.length > 1 ? { kind: 'viewpoint', positions: stances } : { kind: 'still' },
@@ -241,6 +285,12 @@ function flow(c: StudyCase, t: FieldTuning): Figure {
   const flows = find(c.rep, 'flows');
   const fate = c.rep.statements.find((s) => s.say.p === 'question' && s.say.asks === 'fate');
   const through = s6.say.through;
+  // Revision 5 (D8): descriptions in the statements' own words, not one case's.
+  const W = (id: string) => word(c, id);
+  const moverW = W(s6.say.what);
+  const atW = joins ? W(joins.say.at) : '';
+  const pastW = joins ? W(through[(through.indexOf(joins.say.at) + 2) % through.length]) : '';
+  const takenW = joins ? W(joins.say.what) : '';
   const places: Pt[] =
     t.layout === 'figure-eight'
       ? [[CX - 60, CY], [CX, SAFE + 70], [CX + 60, CY], [CX, FRAME.height - SAFE - 70]]
@@ -271,11 +321,18 @@ function flow(c: StudyCase, t: FieldTuning): Figure {
     return { k, a, b };
   });
   const joinK = joins ? through.indexOf(joins.say.at) : -1;
-  const lanesOf = (u0: number, u1: number, count: number) => {
+  const transforms = find(c.rep, 'transforms');
+  // Pattern X: the state after each place is its last change of form there.
+  const changesAt = (k: number) => transforms.filter((x) => x.say.p === 'transforms' && x.say.at === through[k]);
+  const stateAt = (k: number) => {
+    const here = changesAt(k);
+    return here.length ? (here[here.length - 1].say as { to: string }).to : 'liquid';
+  };
+  const lanesOf = (u0: number, u1: number, count: number, gap = t.laneGap) => {
     const pts = (u: number) => (u > 1 ? u - 1 : u);
     const out: string[] = [];
     for (let i = 0; i < count; i++) {
-      const off = (i - (count - 1) / 2) * t.laneGap;
+      const off = (i - (count - 1) / 2) * gap;
       // Shortened at each end, so the lanes meet the places as a flow, not a joined drawing.
       const s = u0 + 0.012;
       const e = u1 - 0.012;
@@ -299,7 +356,6 @@ function flow(c: StudyCase, t: FieldTuning): Figure {
   const alt = altText(c);
   const segmentStatement = (k: number) => flows.find((f) => f.say.from === through[k] && f.say.to === through[(k + 1) % through.length]);
   return {
-    caseId: c.id,
     idiom: 'field',
     axes: { space: 'flat', time: 'still', substance: 'field', mode: 'direct', viewpoint: 'fixed' },
     motion: { kind: 'still' },
@@ -309,8 +365,11 @@ function flow(c: StudyCase, t: FieldTuning): Figure {
       {
         ...Object.fromEntries(flows.map((f) => [f.id, 'lanes from one place to the next, with a chevron for the direction'])),
         [s6.id]: 'the lanes close into one loop',
-        ...(joins ? { [joins.id]: `${t.lanesAfter} lanes after the lungs against ${t.lanesBefore} before, and a mark where it joins` } : {}),
-        ...(fate ? { [fate.id]: 'past the body the lanes go on in the tentative dash: neither fewer nor the same is claimed' } : {}),
+        ...Object.fromEntries(find(c.rep, 'above').map((x) => [x.id, 'drawn higher here, but only because of the loop’s order: no flat rule enforces above (open)'])),
+        ...partsShown(c),
+        ...Object.fromEntries(transforms.map((x) => [x.id, 'the lanes’ spacing changes where the form changes: wide apart as vapour, close otherwise (pattern X)'])),
+        ...(joins ? { [joins.id]: `${t.lanesAfter} lanes after ${atW} against ${t.lanesBefore} before, and a mark where it joins` } : {}),
+        ...(fate ? { [fate.id]: `past ${pastW} the lanes go on in the tentative dash: neither fewer nor the same is claimed` } : {}),
       },
       {},
     ),
@@ -318,18 +377,24 @@ function flow(c: StudyCase, t: FieldTuning): Figure {
       const elements: SceneElement[] = [];
       let carried = false;
       for (const seg of segments) {
-        const st = segmentStatement(seg.k);
+        const st = segmentStatement(seg.k) ?? changesAt(seg.k)[changesAt(seg.k).length - 1];
+        if (transforms.length) {
+          const state = stateAt(seg.k);
+          elements.push(path(`lanes-${seg.k + 1}`, lanesOf(seg.a, seg.b, t.lanesAfter, state === 'vapour' ? t.laneGap * 3 : t.laneGap), { role: 'subject', line: 'hair' }, [st!.id, ...changesAt(seg.k).map((x) => x.id)], `${sentence(moverW)} as ${state}: ${state === 'vapour' ? 'lanes wide apart' : 'lanes close together'}.`));
+          elements.push(path(`direction-${seg.k + 1}`, chevron((seg.a + seg.b) / 2), { role: 'context', line: 'fine' }, [st!.id], 'Which way it goes.'));
+          continue;
+        }
         if (seg.k === joinK) carried = true;
         const open = carried && fate && seg.k === (joinK + 2) % through.length;
         const count = carried ? t.lanesAfter : t.lanesBefore;
         elements.push(
-          path(`lanes-${seg.k + 1}`, lanesOf(seg.a, seg.b, count), open ? { role: 'subject', line: 'hair', dash: 'tentative' } : { role: carried ? 'subject' : 'context', line: 'hair' }, open ? [st!.id, fate!.id] : [st!.id, ...(carried && joins ? [joins.id] : [])], open ? 'Past the body: the lanes go on, open, because the text doesn’t say what happens to the oxygen.' : carried ? 'Blood carrying the oxygen it took up: more lanes.' : 'Blood on its way to the lungs: fewer lanes.'),
+          path(`lanes-${seg.k + 1}`, lanesOf(seg.a, seg.b, count), open ? { role: 'subject', line: 'hair', dash: 'tentative' } : { role: carried ? 'subject' : 'context', line: 'hair' }, open ? [st!.id, fate!.id] : [st!.id, ...(carried && joins ? [joins.id] : [])], open ? `Past ${pastW}: the lanes go on, open, because the text doesn’t say what happens to ${takenW}.` : carried ? `${sentence(moverW)} carrying ${takenW} it took up: more lanes.` : `${sentence(moverW)} on its way${joins ? ' to ' + atW : ''}: fewer lanes.`),
         );
         elements.push(path(`direction-${seg.k + 1}`, chevron((seg.a + seg.b) / 2), { role: 'context', line: 'fine' }, [st!.id], 'Which way it flows.'));
       }
       if (joins) {
         const [x, y] = places[joinK];
-        elements.push(shape('joins', { type: 'circle', cx: r2(x), cy: r2(y), r: 5 }, { role: 'subject', material: 'solid' }, [joins.id], 'Where the oxygen joins the blood.'));
+        elements.push(shape('joins', { type: 'circle', cx: r2(x), cy: r2(y), r: 5 }, { role: 'subject', material: 'solid' }, [joins.id], `Where ${takenW} joins ${W(joins.say.into)}.`));
       }
       const labels: SceneElement[] = t.labels
         ? through.map((id, k) => {
@@ -376,7 +441,6 @@ function held(c: StudyCase, t: FieldTuning): Figure {
   const duration = c.rep.facets.field!.evolves ? t.evolveMs : 0;
   const alt = altText(c);
   return {
-    caseId: c.id,
     idiom: 'field',
     axes: { space: 'flat', time: duration ? 'moving' : 'still', substance: 'field', mode: 'metaphorical', viewpoint: 'fixed' },
     motion: duration ? { kind: 'timeline', duration, steps: ['flowing', 'held'] } : { kind: 'still' },

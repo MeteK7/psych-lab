@@ -1,0 +1,514 @@
+{
+ "P1 spatial rules": {
+  "full": "ae119436199f773f",
+  "shape": "4a5b84f81b114b39"
+ },
+ "P1 spatial finished": {
+  "full": "ae119436199f773f",
+  "shape": "4a5b84f81b114b39"
+ },
+ "P1 kinetic rules": {
+  "full": "0c7195e87f7e591e",
+  "shape": "6d351e7a73453d13"
+ },
+ "P1 kinetic finished": {
+  "full": "560cd1134f408408",
+  "shape": "866ee5756b7e629b"
+ },
+ "P1 field rules": {
+  "full": "00084e3e0e351894",
+  "shape": "e5c8c74d2299fe3d"
+ },
+ "P1 field finished": {
+  "full": "00084e3e0e351894",
+  "shape": "e5c8c74d2299fe3d"
+ },
+ "P2 spatial rules": {
+  "full": "ab06b4921f5e7efb",
+  "shape": "f0e0d1d0721d237e"
+ },
+ "P2 spatial finished": {
+  "full": "ab06b4921f5e7efb",
+  "shape": "f0e0d1d0721d237e"
+ },
+ "P2 kinetic rules": {
+  "full": "1dd5d7af6eb68927",
+  "shape": "c46dfa547e7eafc5"
+ },
+ "P2 kinetic finished": {
+  "full": "b47962f05c95fb39",
+  "shape": "f391dc857a11dc20"
+ },
+ "P2 field rules": {
+  "full": "fcaddd45ac2ce3e7",
+  "shape": "290844ca0bc33cee"
+ },
+ "P2 field finished": {
+  "full": "fcaddd45ac2ce3e7",
+  "shape": "290844ca0bc33cee"
+ },
+ "E1 spatial rules": {
+  "full": "50e3b293c21e45cf",
+  "shape": "c98ba6e0d740d440"
+ },
+ "E1 spatial finished": {
+  "full": "b36d4d25a99611d1",
+  "shape": "dedeb2485f234524"
+ },
+ "E1 kinetic rules": {
+  "full": "05297b4eb3d2a090",
+  "shape": "ac94c0ca1c73b381"
+ },
+ "E1 kinetic finished": {
+  "full": "05297b4eb3d2a090",
+  "shape": "ac94c0ca1c73b381"
+ },
+ "E1 field rules": {
+  "full": "595163afcd4050a0",
+  "shape": "317d5d48df3d2f46"
+ },
+ "E1 field finished": {
+  "full": "595163afcd4050a0",
+  "shape": "317d5d48df3d2f46"
+ },
+ "M1 spatial rules": {
+  "full": "96dc4038cf0e829d",
+  "shape": "d09b92c676baa840"
+ },
+ "M1 spatial finished": {
+  "full": "96dc4038cf0e829d",
+  "shape": "d09b92c676baa840"
+ },
+ "M1 kinetic rules": {
+  "full": "fa10a12a0fdb0b7e",
+  "shape": "6b6b08344797cbfb"
+ },
+ "M1 kinetic finished": {
+  "full": "fa10a12a0fdb0b7e",
+  "shape": "6b6b08344797cbfb"
+ },
+ "M1 field rules": {
+  "full": "11e87bcd5192ebbc",
+  "shape": "d4e9d47da78458f4"
+ },
+ "M1 field finished": {
+  "full": "11e87bcd5192ebbc",
+  "shape": "d4e9d47da78458f4"
+ },
+ "P3 spatial rules": {
+  "full": "4ee734bb7fc09497",
+  "shape": "ad6c735dc6418dac"
+ },
+ "P3 spatial finished": {
+  "full": "4ee734bb7fc09497",
+  "shape": "ad6c735dc6418dac"
+ },
+ "P3 kinetic rules": {
+  "full": "5114f98f24424a95",
+  "shape": "26662e8143e5bd92"
+ },
+ "P3 kinetic finished": {
+  "full": "5114f98f24424a95",
+  "shape": "26662e8143e5bd92"
+ },
+ "P3 field rules": {
+  "full": "e0aeddb4bc5fbcfa",
+  "shape": "facf3214aa358c6d"
+ },
+ "P3 field finished": {
+  "full": "e0aeddb4bc5fbcfa",
+  "shape": "facf3214aa358c6d"
+ },
+ "P4 spatial rules": {
+  "full": "eb5b643f6159d81d",
+  "shape": "fccad87790da580c"
+ },
+ "P4 spatial finished": {
+  "full": "eb5b643f6159d81d",
+  "shape": "fccad87790da580c"
+ },
+ "P4 kinetic rules": {
+  "full": "e7b1caf1c9c74798",
+  "shape": "7963a208ae560e1c"
+ },
+ "P4 kinetic finished": {
+  "full": "e7b1caf1c9c74798",
+  "shape": "7963a208ae560e1c"
+ },
+ "P4 field rules": {
+  "full": "86132796ef8ce0a7",
+  "shape": "ae39a4c9b2d69dbb"
+ },
+ "P4 field finished": {
+  "full": "86132796ef8ce0a7",
+  "shape": "ae39a4c9b2d69dbb"
+ },
+ "P5 spatial rules": {
+  "full": "016815f3505a03e4",
+  "shape": "5db557b552e09fce"
+ },
+ "P5 spatial finished": {
+  "full": "5591724721f928dc",
+  "shape": "770ab67268547081"
+ },
+ "P5 kinetic rules": {
+  "full": "3d032b267e7e2c8f",
+  "shape": "332b0abae708b206"
+ },
+ "P5 kinetic finished": {
+  "full": "3d032b267e7e2c8f",
+  "shape": "332b0abae708b206"
+ },
+ "P5 field rules": {
+  "full": "c0466599858541a9",
+  "shape": "ff45dda3115453dc"
+ },
+ "P5 field finished": {
+  "full": "c0466599858541a9",
+  "shape": "ff45dda3115453dc"
+ },
+ "P6 spatial rules": {
+  "full": "77f31bf9d7cc80d3",
+  "shape": "7287eaa87658bd85"
+ },
+ "P6 spatial finished": {
+  "full": "77f31bf9d7cc80d3",
+  "shape": "7287eaa87658bd85"
+ },
+ "P6 kinetic rules": {
+  "full": "a252cc5668322d29",
+  "shape": "4a7afcd136a2c2bc"
+ },
+ "P6 kinetic finished": {
+  "full": "a252cc5668322d29",
+  "shape": "4a7afcd136a2c2bc"
+ },
+ "P6 field rules": {
+  "full": "8b66c9e4c9501f83",
+  "shape": "15733e4876e734ce"
+ },
+ "P6 field finished": {
+  "full": "8b66c9e4c9501f83",
+  "shape": "15733e4876e734ce"
+ },
+ "E2 spatial rules": {
+  "full": "b8aa3dcd39883d7e",
+  "shape": "053e0f00b5230ff1"
+ },
+ "E2 spatial finished": {
+  "full": "b8aa3dcd39883d7e",
+  "shape": "053e0f00b5230ff1"
+ },
+ "E2 kinetic rules": {
+  "full": "6f9911eaa2a003e1",
+  "shape": "27710b455e381358"
+ },
+ "E2 kinetic finished": {
+  "full": "6f9911eaa2a003e1",
+  "shape": "27710b455e381358"
+ },
+ "E2 field rules": {
+  "full": "66bbe1a64b9fafeb",
+  "shape": "9bc9d2d465ba1aba"
+ },
+ "E2 field finished": {
+  "full": "66bbe1a64b9fafeb",
+  "shape": "9bc9d2d465ba1aba"
+ },
+ "E3 spatial rules": {
+  "full": "36b5c8d562e0dd23",
+  "shape": "b68600eaac2817bc"
+ },
+ "E3 spatial finished": {
+  "full": "36b5c8d562e0dd23",
+  "shape": "b68600eaac2817bc"
+ },
+ "E3 kinetic rules": {
+  "full": "8beeb57f73d6520a",
+  "shape": "970032133ddbc89b"
+ },
+ "E3 kinetic finished": {
+  "full": "8beeb57f73d6520a",
+  "shape": "970032133ddbc89b"
+ },
+ "E3 field rules": {
+  "full": "dddb41ce220103dc",
+  "shape": "5364b46c49c56482"
+ },
+ "E3 field finished": {
+  "full": "dddb41ce220103dc",
+  "shape": "5364b46c49c56482"
+ },
+ "M2 spatial rules": {
+  "full": "cb4bb8fdb2261c11",
+  "shape": "7cee8c2effda6066"
+ },
+ "M2 spatial finished": {
+  "full": "cb4bb8fdb2261c11",
+  "shape": "7cee8c2effda6066"
+ },
+ "M2 kinetic rules": {
+  "full": "eccaed309afce7eb",
+  "shape": "2663095728a8acfe"
+ },
+ "M2 kinetic finished": {
+  "full": "eccaed309afce7eb",
+  "shape": "2663095728a8acfe"
+ },
+ "M2 field rules": {
+  "full": "5e2dbdafc1ddd4c2",
+  "shape": "96bc475fa3ef1f48"
+ },
+ "M2 field finished": {
+  "full": "5e2dbdafc1ddd4c2",
+  "shape": "96bc475fa3ef1f48"
+ },
+ "M3 spatial rules": {
+  "full": "e5bcad796a9cc138",
+  "shape": "ccea78ec19255cb2"
+ },
+ "M3 spatial finished": {
+  "full": "e5bcad796a9cc138",
+  "shape": "ccea78ec19255cb2"
+ },
+ "M3 kinetic rules": {
+  "full": "72446dffdc2e4459",
+  "shape": "539eea3bb38050ca"
+ },
+ "M3 kinetic finished": {
+  "full": "72446dffdc2e4459",
+  "shape": "539eea3bb38050ca"
+ },
+ "M3 field rules": {
+  "full": "37a88015937e996a",
+  "shape": "3c21c7b3256433b9"
+ },
+ "M3 field finished": {
+  "full": "37a88015937e996a",
+  "shape": "3c21c7b3256433b9"
+ },
+ "P4 spatial R4-4 constant": {
+  "full": "eb5b643f6159d81d",
+  "shape": "fccad87790da580c"
+ },
+ "P4 spatial R4-4 labelled": {
+  "full": "7d2529f06364d19c",
+  "shape": "607392a6a9f7271c"
+ },
+ "P4 spatial R4-4 range": {
+  "full": "5bd4a0e39e4c1e4d",
+  "shape": "540b86b3efa6129f"
+ },
+ "P4 spatial R4-4 break": {
+  "full": "fd1548001ea054d4",
+  "shape": "29a8fd8cb18afc1f"
+ },
+ "P4 kinetic R4-4 constant": {
+  "full": "4f60c235efa72d0e",
+  "shape": "f1b467dceb083fc5"
+ },
+ "P4 kinetic R4-4 labelled": {
+  "full": "067c5161dd142fcb",
+  "shape": "3cd4bec91015e4cd"
+ },
+ "P4 kinetic R4-4 range": {
+  "full": "e7b1caf1c9c74798",
+  "shape": "7963a208ae560e1c"
+ },
+ "P4 kinetic R4-4 break": {
+  "full": "455d70c6601e4aec",
+  "shape": "4a9cc73369a1afa5"
+ },
+ "P4 field R4-4 constant": {
+  "full": "86132796ef8ce0a7",
+  "shape": "ae39a4c9b2d69dbb"
+ },
+ "P4 field R4-4 labelled": {
+  "full": "cbc19141a7c4732b",
+  "shape": "0b5c19a80982f042"
+ },
+ "P4 field R4-4 range": {
+  "full": "00911a48e6677d41",
+  "shape": "c7eb651e02a67e20"
+ },
+ "P4 field R4-4 break": {
+  "full": "f8147bbfc00b9f48",
+  "shape": "4d276c9a9f0d14cf"
+ },
+ "E3 spatial R4-4 constant": {
+  "full": "36b5c8d562e0dd23",
+  "shape": "b68600eaac2817bc"
+ },
+ "E3 spatial R4-4 labelled": {
+  "full": "4a7d4af1f54aa487",
+  "shape": "6c1716704a7f49cc"
+ },
+ "E3 spatial R4-4 range": {
+  "full": "fe8d8aaa1c33642b",
+  "shape": "5aa3f58872278001"
+ },
+ "E3 spatial R4-4 break": {
+  "full": "36b5c8d562e0dd23",
+  "shape": "b68600eaac2817bc"
+ },
+ "E3 kinetic R4-4 constant": {
+  "full": "b4b58e6e76122814",
+  "shape": "d859b519520d8f09"
+ },
+ "E3 kinetic R4-4 labelled": {
+  "full": "92ee2ee785a8e097",
+  "shape": "506edbc795f5a706"
+ },
+ "E3 kinetic R4-4 range": {
+  "full": "8beeb57f73d6520a",
+  "shape": "970032133ddbc89b"
+ },
+ "E3 kinetic R4-4 break": {
+  "full": "edb3786282b25a13",
+  "shape": "fb833cbd744c7892"
+ },
+ "E3 field R4-4 constant": {
+  "full": "dddb41ce220103dc",
+  "shape": "5364b46c49c56482"
+ },
+ "E3 field R4-4 labelled": {
+  "full": "58c8f7f390f25f07",
+  "shape": "95006dbe617cd3cc"
+ },
+ "E3 field R4-4 range": {
+  "full": "cc2dfe7d946c980c",
+  "shape": "8c8cbfa056136342"
+ },
+ "E3 field R4-4 break": {
+  "full": "43334065689faaab",
+  "shape": "ad5a163dc5603bb7"
+ },
+ "M3 spatial R4-4 constant": {
+  "full": "e5bcad796a9cc138",
+  "shape": "ccea78ec19255cb2"
+ },
+ "M3 spatial R4-4 labelled": {
+  "full": "aa0107acd7e8c314",
+  "shape": "ccea78ec19255cb2"
+ },
+ "M3 spatial R4-4 range": {
+  "full": "5cf48a9b9f5c89cf",
+  "shape": "2d2c8f597adea59e"
+ },
+ "M3 spatial R4-4 break": {
+  "full": "eecd3925ec5fdcad",
+  "shape": "f4b27a3d6317f1fa"
+ },
+ "M3 kinetic R4-4 constant": {
+  "full": "738db8562d34f685",
+  "shape": "9735c0cc5ddccd9f"
+ },
+ "M3 kinetic R4-4 labelled": {
+  "full": "757fffd44fb58b5a",
+  "shape": "9735c0cc5ddccd9f"
+ },
+ "M3 kinetic R4-4 range": {
+  "full": "72446dffdc2e4459",
+  "shape": "539eea3bb38050ca"
+ },
+ "M3 kinetic R4-4 break": {
+  "full": "7517f525dbe927ff",
+  "shape": "8ae1f63e2ce05bcf"
+ },
+ "M3 field R4-4 constant": {
+  "full": "37a88015937e996a",
+  "shape": "3c21c7b3256433b9"
+ },
+ "M3 field R4-4 labelled": {
+  "full": "6e60e0d64743a366",
+  "shape": "3c21c7b3256433b9"
+ },
+ "M3 field R4-4 range": {
+  "full": "2163bacdee273731",
+  "shape": "37282fd394838ce5"
+ },
+ "M3 field R4-4 break": {
+  "full": "abf92e22d568c69d",
+  "shape": "b8a9c706f7d475d8"
+ },
+ "U1 spatial unseen": {
+  "full": "97a18c9dc7226296",
+  "shape": "efa98d7263784c1d"
+ },
+ "U1 kinetic unseen": {
+  "full": "4091a9bc1d9547e2",
+  "shape": "098392a8ad55f9e4"
+ },
+ "U1 field unseen": {
+  "full": "f03d3771d79b7ac9",
+  "shape": "d635421018d9a28a"
+ },
+ "U2 spatial unseen": {
+  "full": "9f4b86d8a453c834",
+  "shape": "a454eba53554649b"
+ },
+ "U2 kinetic unseen": {
+  "full": "947a069ff1040453",
+  "shape": "a28962828c37675b"
+ },
+ "U2 field unseen": {
+  "full": "89d44d7b9f664784",
+  "shape": "dbfddcf5434996a2"
+ },
+ "U3 spatial unseen": {
+  "full": "ad7965ccc3fce9c8",
+  "shape": "e1a1d2175451a662"
+ },
+ "U3 kinetic unseen": {
+  "full": "57b11bc0894b6354",
+  "shape": "d27bd116bc7e5d18"
+ },
+ "U3 field unseen": {
+  "full": "ef6a50cd056b709d",
+  "shape": "04135c92240db222"
+ },
+ "U4 spatial unseen": {
+  "full": "64fcc1e5d1652233",
+  "shape": "10ec39b7a22ba38d"
+ },
+ "U4 kinetic unseen": {
+  "full": "dc6acc3e96225c85",
+  "shape": "11180c2b1566e148"
+ },
+ "U4 field unseen": {
+  "full": "9409971021f61360",
+  "shape": "a82fa574fd8bd450"
+ },
+ "U5 kinetic unseen": {
+  "full": "84eadc84d4ed600f",
+  "shape": "3c3180ee41c40d03"
+ },
+ "U5 field unseen": {
+  "full": "79d5f99160cc9960",
+  "shape": "ab0dfe8a9c32b2e3"
+ },
+ "U6 spatial unseen": {
+  "full": "7f3f8ee964219397",
+  "shape": "c7b6e961c8632c85"
+ },
+ "U6 kinetic unseen": {
+  "full": "b2682d6e044dae03",
+  "shape": "7878b3361f22fa94"
+ },
+ "U6 field unseen": {
+  "full": "3bb75bc32fff6f18",
+  "shape": "68f3c2c4e6a7f8c0"
+ },
+ "U7 spatial unseen": {
+  "full": "08c31d78f84e2c59",
+  "shape": "7c2a81b2caed169f"
+ },
+ "U7 kinetic unseen": {
+  "full": "2b0edf420cca0e28",
+  "shape": "1c92fc4be0fb1640"
+ },
+ "U7 field unseen": {
+  "full": "8c20805ea6852b58",
+  "shape": "3082708bdf187a94"
+ }
+}

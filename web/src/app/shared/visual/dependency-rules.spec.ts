@@ -1,3 +1,6 @@
+import { audit } from '../../pages/lab/study/pass-c-audit';
+import { ASKS, COMMITMENTS, PREDICATES, STANCES } from './representation/contract';
+import { PINNED_DEEP_IMPORTS } from './testing/pinned-deep-imports';
 import { listSources, readSource } from './testing/source-files';
 
 /**
@@ -149,6 +152,55 @@ describe('Visual System dependency rules', () => {
     // The one canvas an exercise owns is the dot game's, and the system's own surface draws on it.
     expect(canvases).toEqual([`${APP}/experiences/state-reset/tracking-game.ts`]);
     expect(await readSource(canvases[0])).toContain("from '../../shared/visual/integration/tracking'");
+  });
+
+  it('10. code outside the engine reaches it through its entry points (index.ts, start.ts); deep imports only as pinned, a list that may only shrink (Stage 3, M0)', () => {
+    const entry = [ROOT, `${ROOT}/index`, `${ROOT}/start`];
+    const deep = [
+      ...new Set(
+        app
+          .filter((s) => !s.path.startsWith(`${ROOT}/`))
+          .flatMap(({ path, imports }) => imports.filter((i) => i.startsWith(`${ROOT}/`) && !entry.includes(i)).map((i) => `${path} -> ${i.slice(ROOT.length + 1)}`)),
+      ),
+    ].sort();
+    // A new deep import fails here: import from `shared/visual` (or `shared/visual/start`) instead.
+    expect(deep.filter((d) => !PINNED_DEEP_IMPORTS.includes(d))).toEqual([]);
+    // A pinned import that no longer exists fails here too: take it off the list, so it only shrinks.
+    expect(PINNED_DEEP_IMPORTS.filter((d) => !deep.includes(d))).toEqual([]);
+  });
+
+  it('12a. representation (S12) imports only composition, styling, generation and itself: no Angular, no DOM, no backend, nothing from the app (Stage 3, M1)', () => {
+    const files = inFolder('representation');
+    expect(files.length).toBeGreaterThan(0);
+    expect(outside(files, ['representation', 'composition', 'styling', 'generation'])).toEqual([]);
+  });
+
+  it('12b. nothing else in the engine imports representation (S12): it sits above S1–S11', () => {
+    const others = visual.filter((s) => !s.path.startsWith(`${ROOT}/representation/`) && s.path !== `${ROOT}/index.ts`);
+    expect(others.flatMap(({ path, imports }) => imports.filter((i) => area(i) === 'representation').map((i) => `${path} imports ${i}`))).toEqual([]);
+  });
+
+  it('12d. representation (S12) names no domain: no case id and no word of the study corpus in its code (the pass C audit)', async () => {
+    const files = Object.fromEntries(await Promise.all(inFolder('representation').map(async (s) => [s.path, await readSource(s.path)] as const)));
+    // Comments may cite the study's findings by name (G-17, P1 …); the audit strips them and reads only code.
+    // The contract's own vocabulary (stances, question kinds, commitments, predicates) is structure, not a domain.
+    const vocabulary = new Set<string>([...STANCES, ...ASKS, ...COMMITMENTS, ...Object.keys(PREDICATES)]);
+    // Plain words, allowed in their plain sense only (Stage 3 M3, the user's decision; proposal §14):
+    // `other`, `left` and `right` as contrasts and directions (pass C treats them as generic), `room` as
+    // space, `meeting` as two things meeting, `land` as coming to rest. A plain word used to name a
+    // domain thing is still a finding. The list may only shrink: a word no longer used fails.
+    const plain = ['other', 'left', 'right', 'room', 'meeting', 'land'];
+    const hits = audit(files).filter((h) => !vocabulary.has(h.word));
+    expect(hits.filter((h) => !plain.includes(h.word)).map((h) => `${h.file}:${h.line} ${h.word} (${h.where})`)).toEqual([]);
+    expect(plain.filter((w) => !hits.some((h) => h.word === w))).toEqual([]);
+  });
+
+  it('10b. the start-up entry point holds no component, so the initial bundle stays small', () => {
+    const start = visual.find((s) => s.path === `${ROOT}/start.ts`)!;
+    expect(start.imports.map((i) => area(i)).sort()).toEqual(['integration', 'styling']);
+    const reached = visual.filter((s) => start.imports.includes(s.path.replace(/\.ts$/, '')));
+    expect(reached.length).toBe(2);
+    expect(reached.flatMap((s) => s.imports).filter((i) => i.startsWith('@angular'))).toEqual([]);
   });
 });
 

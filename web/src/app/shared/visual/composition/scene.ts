@@ -22,13 +22,8 @@ export type PlaneRole = 'backdrop' | 'far' | 'mid' | 'near' | 'subject' | 'annot
  */
 export const PURPOSE_KINDS = ['concept', 'understanding', 'interaction', 'feedback', 'identity'] as const;
 export type PurposeKind = (typeof PURPOSE_KINDS)[number];
-export const PURPOSE_LABELS: Record<PurposeKind, string> = {
-  concept: 'Communicates a psychological concept',
-  understanding: 'Helps understand information or relationships',
-  interaction: 'Supports an interaction',
-  feedback: 'Gives feedback about a change of state',
-  identity: 'Establishes visual identity without compromising clarity',
-};
+// The words reviewers read for each kind come from the application's style pack
+// (`styling/pack.ts` purposeLabel, Stage 3 M0), not from the engine.
 
 export interface Purpose {
   serves: readonly PurposeKind[];

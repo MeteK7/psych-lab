@@ -58,7 +58,6 @@ export const SECTIONS: readonly Where[] = [
   at('lab-room', 'camera-angle.room'),
   at('lab-catalog', 'Catalog of capabilities'),
   PARITY_PAGE,
-  { route: '/lab/study', label: 'Representation study, first slice (its own page; study code)' },
 ];
 
 export const CATALOG: readonly Subsystem[] = [

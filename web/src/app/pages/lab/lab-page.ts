@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 
 import { CS_WHY_IT_HAPPENED, STATE_RESET } from '../../../content';
 import { AppEnvironment } from '../../shared/app-environment';
-import { PURPOSE_LABELS, SceneDefinition, elementsOf } from '../../shared/visual/composition/scene';
+import { SceneDefinition, elementsOf } from '../../shared/visual/composition/scene';
 import { lookupOf } from '../../shared/visual/composition/compose';
 import { spacingWarnings } from '../../shared/visual/composition/spacing';
 import { validateScene } from '../../shared/visual/composition/validate';
@@ -13,7 +13,7 @@ import { InstrumentFigure } from '../../shared/visual/integration/instruments';
 import { QualityTier, SceneFigure, SurfaceScheme } from '../../shared/visual/integration/scene-figure';
 import { motionProblems, movers } from '../../shared/visual/motion/plan-motion';
 import { SCENES } from '../../shared/visual/scenes';
-import { THEMES } from '../../shared/visual/styling/vocabulary';
+import { purposeLabel, themeVersion } from '../../shared/visual/styling/pack';
 import { LabAssets } from './lab-assets';
 import { LabCatalog, LabContents } from './lab-catalog';
 import { LabGenerators } from './lab-generators';
@@ -274,7 +274,7 @@ export class LabPage {
   protected readonly causeMap = CAUSE_MAP;
   protected readonly rounds = ROUNDS;
   protected readonly roundSets = ROUND_SETS;
-  protected readonly roundsPurposes = ROUNDS_PURPOSES.map(({ id, purpose }) => ({ id, serves: purpose.serves.map((k) => PURPOSE_LABELS[k]).join('; '), why: purpose.why }));
+  protected readonly roundsPurposes = ROUNDS_PURPOSES.map(({ id, purpose }) => ({ id, serves: purpose.serves.map((k) => purposeLabel(k)).join('; '), why: purpose.why }));
   protected readonly tracking = TRACKING;
   protected readonly ringRadius = RING_RADIUS;
   protected readonly previewLabels = PREVIEW_LABELS;
@@ -283,7 +283,7 @@ export class LabPage {
     { key: 'inside', name: 'The game: pointer inside the ring', alt: 'The dot game, pointer inside the ring', state: trackingStill(true) },
     { key: 'preview', name: '"How the game works"', alt: STATE_RESET.how_it_works.illustration_alt, state: null },
   ];
-  protected readonly trackingPurposes = TRACKING_PURPOSES.map(({ id, purpose }) => ({ id, serves: purpose.serves.map((k) => PURPOSE_LABELS[k]).join('; '), why: purpose.why }));
+  protected readonly trackingPurposes = TRACKING_PURPOSES.map(({ id, purpose }) => ({ id, serves: purpose.serves.map((k) => purposeLabel(k)).join('; '), why: purpose.why }));
   protected readonly chartLabel = CS_WHY_IT_HAPPENED.map.chart_label;
   protected readonly axes = CAUSE_AXES;
   /** Answer sets covering every case the map has to draw. */
@@ -303,7 +303,7 @@ export class LabPage {
   })();
   protected readonly causeMapPurposes = CAUSE_MAP_PURPOSES.map(({ id, purpose }) => ({
     id,
-    serves: purpose.serves.map((k) => PURPOSE_LABELS[k]).join('; '),
+    serves: purpose.serves.map((k) => purposeLabel(k)).join('; '),
     why: purpose.why,
   }));
   /** Bumped by Replay: a new run re-creates the figures, which then play the change again. */
@@ -335,13 +335,13 @@ export class LabPage {
   }
 
   protected themeVersion(theme: string): number {
-    return THEMES[theme as keyof typeof THEMES];
+    return themeVersion(theme);
   }
 
   private purposes(scene: SceneDefinition) {
     return elementsOf(scene).map(({ element }) => ({
       id: element.id,
-      serves: element.purpose.serves.map((k) => PURPOSE_LABELS[k]).join('; '),
+      serves: element.purpose.serves.map((k) => purposeLabel(k)).join('; '),
       why: element.purpose.why,
     }));
   }

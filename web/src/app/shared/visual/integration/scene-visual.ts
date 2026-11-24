@@ -1,5 +1,5 @@
 import { SCENES } from '../scenes';
-import { THEMES } from '../styling/vocabulary';
+import { themeVersion } from '../styling/pack';
 import { NO_VISUAL, Visual, VisualRequest } from '../visual';
 import { SceneFigure } from './scene-figure';
 
@@ -11,7 +11,7 @@ export function sceneVisual(sceneId: string, prefix: string, { scene: requested,
   const entry = SCENES.find((e) => e.scene.id === sceneId);
   if (!entry) throw new Error(`No scene '${sceneId}' is registered`);
   const { scene, text } = entry;
-  const id = `scene:${scene.id}@${scene.version};theme:${scene.theme}@${THEMES[scene.theme]}`;
+  const id = `scene:${scene.id}@${scene.version};theme:${scene.theme}@${themeVersion(scene.theme)}`;
 
   const stateOf = (name: string | undefined) => {
     if (!name?.startsWith(`${prefix}.`)) return null;

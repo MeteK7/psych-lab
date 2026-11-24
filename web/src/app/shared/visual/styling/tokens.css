@@ -4,7 +4,8 @@
  * pair. Used as the host styles of a figure surface; the page's own tokens are only read
  * (--bg, --text, --muted), never changed.
  *
- * - Ramps: --vis-n-<step> is the neutral ramp; the theme attribute sets --vis-a-<step>, the area ramp.
+ * - Ramps: --vis-n-<step> is the neutral ramp; the theme attribute selects --vis-a-<step>, the area ramp,
+ *   from the application's style pack (styling/pack.ts).
  * - Roles: set once per scheme from ramp steps. Scenes and backends use roles only.
  * - Scheme: data-vis-scheme="auto" follows the page; "light" or "dark" pins it (the Visual Lab).
  */
@@ -13,33 +14,9 @@
   --vis-n-400: #a1a5ab; --vis-n-500: #82868e; --vis-n-600: #686c73; --vis-n-700: #52555b;
   --vis-n-800: #3d4044; --vis-n-900: #2a2b2e; --vis-n-950: #1d1e20;
 }
-:host([data-vis-theme='action']) {
-  --vis-a-050: #f3f7ff; --vis-a-100: #e4edff; --vis-a-200: #c8dbff; --vis-a-300: #a0c1ff;
-  --vis-a-400: #76a3fa; --vis-a-600: #3766c7; --vis-a-700: #274fa4; --vis-a-800: #1d3c7c;
-  --vis-a-900: #152953; --vis-a-950: #0f1d39;
-}
-/* Cognitive shifts, version 2 (2026-11-16): a calm, soft blue instead of violet, at about hue 210,
-   lighter and less saturated than Action's blue and bluer than Attention's grey teal. */
-:host([data-vis-theme='cognitive']) {
-  --vis-a-050: #f4f8fc; --vis-a-100: #e6eff8; --vis-a-200: #cddff0; --vis-a-300: #a9c7e4;
-  --vis-a-400: #84abd2; --vis-a-600: #4a78a8; --vis-a-700: #3a6190; --vis-a-800: #2d4b6f;
-  --vis-a-900: #20354f; --vis-a-950: #172638;
-}
-:host([data-vis-theme='attention']) {
-  --vis-a-050: #f2f8fb; --vis-a-100: #e4eff4; --vis-a-200: #cbdee8; --vis-a-300: #a9c6d5;
-  --vis-a-400: #84abbf; --vis-a-600: #457388; --vis-a-700: #345b6e; --vis-a-800: #264452;
-  --vis-a-900: #1b2e37; --vis-a-950: #132026;
-}
-:host([data-vis-theme='regulation']) {
-  --vis-a-050: #effaf7; --vis-a-100: #def2ed; --vis-a-200: #c0e4db; --vis-a-300: #96cfc1;
-  --vis-a-400: #65b6a5; --vis-a-600: #007e6c; --vis-a-700: #006455; --vis-a-800: #004b40;
-  --vis-a-900: #05332b; --vis-a-950: #07241e;
-}
-:host([data-vis-theme='recovery']) {
-  --vis-a-050: #fef5ed; --vis-a-100: #f9eadb; --vis-a-200: #f1d6ba; --vis-a-300: #e1b88d;
-  --vis-a-400: #cf985b; --vis-a-600: #975d00; --vis-a-700: #784900; --vis-a-800: #5b3600;
-  --vis-a-900: #3f2503; --vis-a-950: #2b1a05;
-}
+/* The area ramps (--vis-a-<step>) are not here: since Stage 3 M0 they come from the application's
+   style pack (styling/pack.ts), put on the page by integration/style-pack.ts as one rule per theme,
+   selected by the same data-vis-theme attribute. This app's pack is app/visual-pack.ts. */
 
 /* Roles, light. */
 :host {

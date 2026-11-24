@@ -1,6 +1,5 @@
 import { Component, computed, input, signal } from '@angular/core';
 
-import { PURPOSE_LABELS } from '../../shared/visual/composition/scene';
 import { lookupOf } from '../../shared/visual/composition/compose';
 import { spacingWarnings } from '../../shared/visual/composition/spacing';
 import { validateScene } from '../../shared/visual/composition/validate';
@@ -9,7 +8,7 @@ import { InstrumentSlot } from '../../shared/visual/integration/instrument-slot'
 import { composeInstrument, instrumentSourceId } from '../../shared/visual/integration/instruments';
 import { InteractiveFigure, Values } from '../../shared/visual/integration/interactive-figure';
 import { SurfaceScheme } from '../../shared/visual/integration/scene-figure';
-import { THEMES } from '../../shared/visual/styling/vocabulary';
+import { purposeLabel, themeVersion } from '../../shared/visual/styling/pack';
 
 /** The words an exercise would take from its versioned content. */
 const WORDS = { bar: 'Days you plan to practise', days: (n: number) => `${n} of ${WEEK} days` };
@@ -89,7 +88,7 @@ export class LabGuide {
   readonly schemes = input.required<SurfaceScheme[]>();
 
   protected readonly guide = GUIDE_DAYS;
-  protected readonly themeVersion = THEMES[GUIDE_DAYS.theme];
+  protected readonly themeVersion = themeVersion(GUIDE_DAYS.theme);
   protected readonly week = WEEK;
   protected readonly words = WORDS;
   /** The exercise's own value. */
@@ -102,7 +101,7 @@ export class LabGuide {
     const c = this.composed();
     return [...validateScene(c.scene, lookupOf(c)), ...spacingWarnings(c.scene, lookupOf(c))];
   });
-  protected readonly purposes = GUIDE_DAYS_PURPOSES.map((p) => ({ id: p.id, serves: p.purpose.serves.map((s) => PURPOSE_LABELS[s]).join('; '), why: p.purpose.why }));
+  protected readonly purposes = GUIDE_DAYS_PURPOSES.map((p) => ({ id: p.id, serves: p.purpose.serves.map((s) => purposeLabel(s)).join('; '), why: p.purpose.why }));
 
   /** The figure reports values; the exercise keeps its own. */
   protected take(values: Values): void {

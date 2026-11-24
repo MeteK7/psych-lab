@@ -36,6 +36,12 @@ export const routes: Routes = [
   },
   // The representation study (docs/visual-study): study code, development build only (the page checks).
   {
+    path: 'lab/study/match',
+    loadComponent: () => import('./pages/lab/study/match-page').then((m) => m.StudyMatchPage),
+    title: 'Representation study: pass E',
+    canActivate: [notInBooth],
+  },
+  {
     path: 'lab/study',
     loadComponent: () => import('./pages/lab/study/study-page').then((m) => m.StudyPage),
     title: 'Representation study',

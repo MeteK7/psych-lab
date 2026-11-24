@@ -1,7 +1,7 @@
 import { r2 } from './elements';
 
 /**
- * STUDY CODE: flat paths for the kinetic and field idioms. A track is a smooth curve through
+ * S12 drawing kit (Stage 3, M3; written by the representation study): flat paths for the kinetic and field idioms. A track is a smooth curve through
  * points, sampled densely, so a form can be placed at any fraction of its length and a trace drawn
  * up to it.
  */
