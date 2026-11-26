@@ -1,0 +1,194 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "AI-generated exploratory interpretation, not a reference annotation.",
+ "textId": "D002",
+ "text": "Rana invited a colleague to a group activity. No reply arrived by evening. Rana wondered whether the invitation had been overlooked or the colleague was simply busy.",
+ "provider": "gemini",
+ "model": "gemini-3.5-flash-lite",
+ "date": "2026-11-26",
+ "promptHash": "e857721b49bcac7387fad449f1a0e4f72e8e60a7dd44db0f1231f997747cd04f",
+ "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+ "stepHashes": {
+  "candidate": "e949517b29b860e0b9e5bd2acbddfd965b111a5cd84db4b05fe39f48ce1c52fb"
+ },
+ "checksHash": "3dd07b337ed3ede6af55fae93f838e138a95419897e6f6239ccfa8fda97fd23c",
+ "stages": [],
+ "requests": 1,
+ "durationMs": 8408,
+ "outcome": "complete",
+ "calls": [
+  {
+   "step": "candidate",
+   "model": "gemini-3.5-flash-lite",
+   "complete": true,
+   "finish": "STOP",
+   "usage": {
+    "input": 4746,
+    "output": 374,
+    "total": 5120
+   },
+   "durationMs": 2687,
+   "reply": "{\n  \"statements\": [\n    {\n      \"id\": \"S1\",\n      \"statement\": \"Rana invited a colleague to a group activity\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"Rana invited a colleague to a group activity.\"\n      ],\n      \"basis\": \"\\\"Rana invited a colleague to a group activity\\\"\"\n    },\n    {\n      \"id\": \"S2\",\n      \"statement\": \"No reply arrived by evening\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"No reply arrived by evening.\"\n      ],\n      \"basis\": \"\\\"No reply arrived by evening\\\"\"\n    },\n    {\n      \"id\": \"S3\",\n      \"statement\": \"Rana considers that the invitation had been overlooked or the colleague was simply busy\",\n      \"derivation\": \"alternative\",\n      \"quotes\": [\n        \"whether the invitation had been overlooked or the colleague was simply busy\"\n      ],\n      \"basis\": \"\\\"whether the invitation had been overlooked or the colleague was simply busy\\\"\",\n      \"options\": [\n        \"the invitation had been overlooked\",\n        \"the colleague was simply busy\"\n      ],\n      \"uncertainty\": \"\",\n      \"competing\": []\n    },\n    {\n      \"id\": \"S4\",\n      \"statement\": \"Whether there will be a reply later\",\n      \"derivation\": \"open question\",\n      \"quotes\": [],\n      \"basis\": \"the text leaves it open whether a reply will come after evening\"\n    }\n  ],\n  \"decline\": {\n    \"decline\": false\n  }\n}"
+  }
+ ],
+ "lowered": [],
+ "rejected": [],
+ "proposed": {
+  "statements": [
+   {
+    "id": "S1",
+    "statement": "Rana invited a colleague to a group activity",
+    "derivation": "restatement",
+    "quotes": [
+     "Rana invited a colleague to a group activity."
+    ],
+    "basis": "\"Rana invited a colleague to a group activity\""
+   },
+   {
+    "id": "S2",
+    "statement": "No reply arrived by evening",
+    "derivation": "restatement",
+    "quotes": [
+     "No reply arrived by evening."
+    ],
+    "basis": "\"No reply arrived by evening\""
+   },
+   {
+    "id": "S3",
+    "statement": "Rana considers that the invitation had been overlooked or the colleague was simply busy",
+    "derivation": "alternative",
+    "quotes": [
+     "whether the invitation had been overlooked or the colleague was simply busy"
+    ],
+    "basis": "\"whether the invitation had been overlooked or the colleague was simply busy\"",
+    "options": [
+     "the invitation had been overlooked",
+     "the colleague was simply busy"
+    ],
+    "uncertainty": "",
+    "competing": []
+   },
+   {
+    "id": "S4",
+    "statement": "Whether there will be a reply later",
+    "derivation": "open question",
+    "quotes": [],
+    "basis": "the text leaves it open whether a reply will come after evening"
+   }
+  ],
+  "decline": {
+   "decline": false
+  }
+ },
+ "schema": {
+  "ok": true,
+  "problems": []
+ },
+ "candidate": {
+  "v": 1,
+  "textId": "D002",
+  "text": "Rana invited a colleague to a group activity. No reply arrived by evening. Rana wondered whether the invitation had been overlooked or the colleague was simply busy.",
+  "statements": [
+   {
+    "id": "S1",
+    "statement": "Rana invited a colleague to a group activity",
+    "derivation": "restatement",
+    "quotes": [
+     "Rana invited a colleague to a group activity."
+    ],
+    "basis": "\"Rana invited a colleague to a group activity\""
+   },
+   {
+    "id": "S2",
+    "statement": "No reply arrived by evening",
+    "derivation": "restatement",
+    "quotes": [
+     "No reply arrived by evening."
+    ],
+    "basis": "\"No reply arrived by evening\""
+   },
+   {
+    "id": "S3",
+    "statement": "Rana considers that the invitation had been overlooked or the colleague was simply busy",
+    "derivation": "alternative",
+    "quotes": [
+     "whether the invitation had been overlooked or the colleague was simply busy"
+    ],
+    "basis": "\"whether the invitation had been overlooked or the colleague was simply busy\"",
+    "options": [
+     "the invitation had been overlooked",
+     "the colleague was simply busy"
+    ],
+    "uncertainty": "",
+    "competing": []
+   },
+   {
+    "id": "S4",
+    "statement": "Whether there will be a reply later",
+    "derivation": "open question",
+    "quotes": [],
+    "basis": "the text leaves it open whether a reply will come after evening"
+   }
+  ],
+  "decline": {
+   "decline": false
+  },
+  "provenance": {
+   "marker": "TRACK-A: AI-generated, development only, not validated.",
+   "author": "model",
+   "model": "gemini-3.5-flash-lite",
+   "servedBy": "gemini-3.5-flash-lite",
+   "promptHash": "e857721b49bcac7387fad449f1a0e4f72e8e60a7dd44db0f1231f997747cd04f",
+   "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+   "date": "2026-11-26"
+  }
+ },
+ "validation": {
+  "textId": "D002",
+  "statements": [
+   {
+    "id": "S1",
+    "statement": "Rana invited a colleague to a group activity",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R1",
+    "demotions": []
+   },
+   {
+    "id": "S2",
+    "statement": "No reply arrived by evening",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R2",
+    "demotions": []
+   },
+   {
+    "id": "S3",
+    "statement": "Rana considers that the invitation had been overlooked or the colleague was simply busy",
+    "derivation": "alternative",
+    "ceiling": "P",
+    "category": "P",
+    "label": "P1",
+    "demotions": []
+   },
+   {
+    "id": "S4",
+    "statement": "Whether there will be a reply later",
+    "derivation": "open question",
+    "ceiling": "U",
+    "category": "U",
+    "label": "U1",
+    "demotions": []
+   }
+  ],
+  "problems": [],
+  "flags": [
+   "D002 S3: a possibility set that doesn't say whose possibilities they are"
+  ],
+  "decline": {
+   "decline": false
+  }
+ }
+}

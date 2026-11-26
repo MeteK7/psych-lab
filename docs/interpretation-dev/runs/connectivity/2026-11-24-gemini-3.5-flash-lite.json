@@ -1,0 +1,23 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "Connectivity check: one request, no study text.",
+ "provider": "gemini",
+ "model": "gemini-3.5-flash-lite",
+ "date": "2026-11-24",
+ "requests": 1,
+ "ok": true,
+ "durationMs": 1040,
+ "call": {
+  "step": "connectivity",
+  "model": "gemini-3.5-flash-lite",
+  "complete": true,
+  "finish": "STOP",
+  "usage": {
+   "input": 19,
+   "output": 5,
+   "total": 24
+  },
+  "durationMs": 1039,
+  "reply": "{\"ok\": true}"
+ }
+}

@@ -1,0 +1,328 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "AI-generated exploratory interpretation, not a reference annotation.",
+ "textId": "D001",
+ "text": "During a drawing workshop, Alia handed Deniz a pencil. Deniz nodded and placed it beside the sketchbook without saying anything.",
+ "provider": "gemini",
+ "model": "gemini-3.5-flash-lite",
+ "date": "2026-11-26",
+ "promptHash": "35b2e72f9858fe698d4b4be3d5feae55a6d84d081e805d0453a51836083fad44",
+ "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+ "stepHashes": {
+  "candidate": "a2fb3bb4320684d657df3223e1be4ffd0c9010cc34b53e391640fdc1dab633ee"
+ },
+ "checksHash": "2cd94b4e94f2bc12c9ff272bac0a8e15ea3fa9ad580828b80f0643c5dc7eb4d0",
+ "stages": [],
+ "requests": 1,
+ "durationMs": 6644,
+ "outcome": "complete",
+ "calls": [
+  {
+   "step": "candidate",
+   "model": "gemini-3.5-flash-lite",
+   "complete": true,
+   "finish": "STOP",
+   "usage": {
+    "input": 4751,
+    "output": 343,
+    "total": 5094
+   },
+   "durationMs": 6638,
+   "reply": "{\"statements\":[{\"id\":\"S1\",\"statement\":\"Alia handed Deniz a pencil during a drawing workshop\",\"derivation\":\"restatement\",\"quotes\":[\"During a drawing workshop, Alia handed Deniz a pencil\"],\"basis\":\"\\\"During a drawing workshop, Alia handed Deniz a pencil.\\\"\",\"holder\":\"\"},{\"id\":\"S2\",\"statement\":\"Deniz nodded\",\"derivation\":\"restatement\",\"quotes\":[\"Deniz nodded\"],\"basis\":\"\\\"Deniz nodded\\\"\",\"holder\":\"\"},{\"id\":\"S3\",\"statement\":\"Deniz placed it beside the sketchbook without saying anything\",\"derivation\":\"restatement\",\"quotes\":[\"placed it beside the sketchbook without saying anything\"],\"basis\":\"\\\"placed it beside the sketchbook without saying anything\\\"\",\"holder\":\"\"},{\"id\":\"S4\",\"statement\":\"Deniz took the pencil\",\"derivation\":\"entailment\",\"quotes\":[\"handed Deniz a pencil\"],\"basis\":\"takes up / picks up\",\"holder\":\"\",\"licence\":\"takes up\"},{\"id\":\"S5\",\"statement\":\"Alia was in the drawing workshop\",\"derivation\":\"entailment\",\"quotes\":[\"During a drawing workshop, Alia handed Deniz a pencil\"],\"basis\":\"entailed by the time and setting of the event\",\"holder\":\"\"},{\"id\":\"S6\",\"statement\":\"Deniz was in the drawing workshop\",\"derivation\":\"entailment\",\"quotes\":[\"During a drawing workshop, Alia handed Deniz a pencil\"],\"basis\":\"entailed by the time and setting of the event\",\"holder\":\"\"},{\"id\":\"S7\",\"statement\":\"Why Deniz did not say anything\",\"derivation\":\"open question\",\"quotes\":[\"without saying anything\"],\"basis\":\"the text mentions the silence without explaining it\",\"holder\":\"\"}],\"decline\":{\"decline\":false}}"
+  }
+ ],
+ "lowered": [
+  {
+   "id": "S4",
+   "from": "L",
+   "to": "I",
+   "rule": "licence",
+   "why": "unknown licence 'takes up'"
+  },
+  {
+   "id": "S5",
+   "from": "L",
+   "to": "I",
+   "rule": "unlicensed",
+   "why": "no licensed pattern covers it"
+  },
+  {
+   "id": "S6",
+   "from": "L",
+   "to": "I",
+   "rule": "unlicensed",
+   "why": "no licensed pattern covers it"
+  }
+ ],
+ "rejected": [
+  "D001 S4: licence 'takes up' isn't in the registry"
+ ],
+ "proposed": {
+  "statements": [
+   {
+    "id": "S1",
+    "statement": "Alia handed Deniz a pencil during a drawing workshop",
+    "derivation": "restatement",
+    "quotes": [
+     "During a drawing workshop, Alia handed Deniz a pencil"
+    ],
+    "basis": "\"During a drawing workshop, Alia handed Deniz a pencil.\"",
+    "holder": ""
+   },
+   {
+    "id": "S2",
+    "statement": "Deniz nodded",
+    "derivation": "restatement",
+    "quotes": [
+     "Deniz nodded"
+    ],
+    "basis": "\"Deniz nodded\"",
+    "holder": ""
+   },
+   {
+    "id": "S3",
+    "statement": "Deniz placed it beside the sketchbook without saying anything",
+    "derivation": "restatement",
+    "quotes": [
+     "placed it beside the sketchbook without saying anything"
+    ],
+    "basis": "\"placed it beside the sketchbook without saying anything\"",
+    "holder": ""
+   },
+   {
+    "id": "S4",
+    "statement": "Deniz took the pencil",
+    "derivation": "entailment",
+    "quotes": [
+     "handed Deniz a pencil"
+    ],
+    "basis": "takes up / picks up",
+    "holder": "",
+    "licence": "takes up"
+   },
+   {
+    "id": "S5",
+    "statement": "Alia was in the drawing workshop",
+    "derivation": "entailment",
+    "quotes": [
+     "During a drawing workshop, Alia handed Deniz a pencil"
+    ],
+    "basis": "entailed by the time and setting of the event",
+    "holder": ""
+   },
+   {
+    "id": "S6",
+    "statement": "Deniz was in the drawing workshop",
+    "derivation": "entailment",
+    "quotes": [
+     "During a drawing workshop, Alia handed Deniz a pencil"
+    ],
+    "basis": "entailed by the time and setting of the event",
+    "holder": ""
+   },
+   {
+    "id": "S7",
+    "statement": "Why Deniz did not say anything",
+    "derivation": "open question",
+    "quotes": [
+     "without saying anything"
+    ],
+    "basis": "the text mentions the silence without explaining it",
+    "holder": ""
+   }
+  ],
+  "decline": {
+   "decline": false
+  }
+ },
+ "schema": {
+  "ok": true,
+  "problems": []
+ },
+ "candidate": {
+  "v": 1,
+  "textId": "D001",
+  "text": "During a drawing workshop, Alia handed Deniz a pencil. Deniz nodded and placed it beside the sketchbook without saying anything.",
+  "statements": [
+   {
+    "id": "S1",
+    "statement": "Alia handed Deniz a pencil during a drawing workshop",
+    "derivation": "restatement",
+    "quotes": [
+     "During a drawing workshop, Alia handed Deniz a pencil"
+    ],
+    "basis": "\"During a drawing workshop, Alia handed Deniz a pencil.\"",
+    "holder": ""
+   },
+   {
+    "id": "S2",
+    "statement": "Deniz nodded",
+    "derivation": "restatement",
+    "quotes": [
+     "Deniz nodded"
+    ],
+    "basis": "\"Deniz nodded\"",
+    "holder": ""
+   },
+   {
+    "id": "S3",
+    "statement": "Deniz placed it beside the sketchbook without saying anything",
+    "derivation": "restatement",
+    "quotes": [
+     "placed it beside the sketchbook without saying anything"
+    ],
+    "basis": "\"placed it beside the sketchbook without saying anything\"",
+    "holder": ""
+   },
+   {
+    "id": "S4",
+    "statement": "Deniz took the pencil",
+    "derivation": "entailment",
+    "quotes": [
+     "handed Deniz a pencil"
+    ],
+    "basis": "takes up / picks up",
+    "holder": "",
+    "licence": "takes up"
+   },
+   {
+    "id": "S5",
+    "statement": "Alia was in the drawing workshop",
+    "derivation": "entailment",
+    "quotes": [
+     "During a drawing workshop, Alia handed Deniz a pencil"
+    ],
+    "basis": "entailed by the time and setting of the event",
+    "holder": ""
+   },
+   {
+    "id": "S6",
+    "statement": "Deniz was in the drawing workshop",
+    "derivation": "entailment",
+    "quotes": [
+     "During a drawing workshop, Alia handed Deniz a pencil"
+    ],
+    "basis": "entailed by the time and setting of the event",
+    "holder": ""
+   },
+   {
+    "id": "S7",
+    "statement": "Why Deniz did not say anything",
+    "derivation": "open question",
+    "quotes": [
+     "without saying anything"
+    ],
+    "basis": "the text mentions the silence without explaining it",
+    "holder": ""
+   }
+  ],
+  "decline": {
+   "decline": false
+  },
+  "provenance": {
+   "marker": "TRACK-A: AI-generated, development only, not validated.",
+   "author": "model",
+   "model": "gemini-3.5-flash-lite",
+   "servedBy": "gemini-3.5-flash-lite",
+   "promptHash": "35b2e72f9858fe698d4b4be3d5feae55a6d84d081e805d0453a51836083fad44",
+   "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+   "date": "2026-11-26"
+  }
+ },
+ "validation": {
+  "textId": "D001",
+  "statements": [
+   {
+    "id": "S1",
+    "statement": "Alia handed Deniz a pencil during a drawing workshop",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R1",
+    "demotions": []
+   },
+   {
+    "id": "S2",
+    "statement": "Deniz nodded",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R2",
+    "demotions": []
+   },
+   {
+    "id": "S3",
+    "statement": "Deniz placed it beside the sketchbook without saying anything",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R3",
+    "demotions": []
+   },
+   {
+    "id": "S4",
+    "statement": "Deniz took the pencil",
+    "derivation": "entailment",
+    "ceiling": "L",
+    "category": "I",
+    "label": "I1",
+    "demotions": [
+     {
+      "from": "L",
+      "to": "I",
+      "rule": "licence",
+      "why": "unknown licence 'takes up'"
+     }
+    ]
+   },
+   {
+    "id": "S5",
+    "statement": "Alia was in the drawing workshop",
+    "derivation": "entailment",
+    "ceiling": "L",
+    "category": "I",
+    "label": "I2",
+    "demotions": [
+     {
+      "from": "L",
+      "to": "I",
+      "rule": "unlicensed",
+      "why": "no licensed pattern covers it"
+     }
+    ]
+   },
+   {
+    "id": "S6",
+    "statement": "Deniz was in the drawing workshop",
+    "derivation": "entailment",
+    "ceiling": "L",
+    "category": "I",
+    "label": "I3",
+    "demotions": [
+     {
+      "from": "L",
+      "to": "I",
+      "rule": "unlicensed",
+      "why": "no licensed pattern covers it"
+     }
+    ]
+   },
+   {
+    "id": "S7",
+    "statement": "Why Deniz did not say anything",
+    "derivation": "open question",
+    "ceiling": "U",
+    "category": "U",
+    "label": "U1",
+    "demotions": []
+   }
+  ],
+  "problems": [
+   "D001 S4: licence 'takes up' isn't in the registry"
+  ],
+  "flags": [],
+  "decline": {
+   "decline": false
+  }
+ }
+}

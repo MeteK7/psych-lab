@@ -1,0 +1,193 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "AI-generated exploratory interpretation, not a reference annotation.",
+ "textId": "D004",
+ "text": "A volunteer told the visitors that the garden gate would close at six, but the sign beside the entrance listed seven. Nobody had confirmed which time was correct.",
+ "provider": "gemini",
+ "model": "gemini-3.5-flash-lite",
+ "date": "2026-11-25",
+ "promptHash": "7b465c08bf03be823d9814ca894e6e744738c14ed5fe64c164b6a87f89ae7abd",
+ "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+ "stages": [],
+ "requests": 1,
+ "durationMs": 6671,
+ "outcome": "complete",
+ "calls": [
+  {
+   "step": "candidate",
+   "model": "gemini-3.5-flash-lite",
+   "complete": true,
+   "finish": "STOP",
+   "usage": {
+    "input": 4410,
+    "output": 349,
+    "total": 4759
+   },
+   "durationMs": 2860,
+   "reply": "{\n  \"statements\": [\n    {\n      \"id\": \"R1\",\n      \"statement\": \"A volunteer told the visitors that the garden gate would close at six\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"A volunteer told the visitors that the garden gate would close at six\"\n      ]\n    },\n    {\n      \"id\": \"R2\",\n      \"statement\": \"The sign beside the entrance listed seven\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"the sign beside the entrance listed seven\"\n      ]\n    },\n    {\n      \"id\": \"L1\",\n      \"statement\": \"The writer marks a contrast between what the volunteer said and what the sign listed\",\n      \"derivation\": \"conventional meaning\",\n      \"quotes\": [\n        \"but\"\n      ],\n      \"licence\": \"but\"\n    },\n    {\n      \"id\": \"R3\",\n      \"statement\": \"Nobody had confirmed which time was correct\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"Nobody had confirmed which time was correct.\"\n      ]\n    },\n    {\n      \"id\": \"U1\",\n      \"statement\": \"Whether the garden gate closes at six or seven\",\n      \"derivation\": \"open question\",\n      \"quotes\": [\n        \"Nobody had confirmed which time was correct.\"\n      ]\n    }\n  ],\n  \"decline\": {\n    \"decline\": false\n  }\n}"
+  }
+ ],
+ "lowered": [],
+ "rejected": [],
+ "proposed": {
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "A volunteer told the visitors that the garden gate would close at six",
+    "derivation": "restatement",
+    "quotes": [
+     "A volunteer told the visitors that the garden gate would close at six"
+    ]
+   },
+   {
+    "id": "R2",
+    "statement": "The sign beside the entrance listed seven",
+    "derivation": "restatement",
+    "quotes": [
+     "the sign beside the entrance listed seven"
+    ]
+   },
+   {
+    "id": "L1",
+    "statement": "The writer marks a contrast between what the volunteer said and what the sign listed",
+    "derivation": "conventional meaning",
+    "quotes": [
+     "but"
+    ],
+    "licence": "but"
+   },
+   {
+    "id": "R3",
+    "statement": "Nobody had confirmed which time was correct",
+    "derivation": "restatement",
+    "quotes": [
+     "Nobody had confirmed which time was correct."
+    ]
+   },
+   {
+    "id": "U1",
+    "statement": "Whether the garden gate closes at six or seven",
+    "derivation": "open question",
+    "quotes": [
+     "Nobody had confirmed which time was correct."
+    ]
+   }
+  ],
+  "decline": {
+   "decline": false
+  }
+ },
+ "schema": {
+  "ok": true,
+  "problems": []
+ },
+ "candidate": {
+  "v": 1,
+  "textId": "D004",
+  "text": "A volunteer told the visitors that the garden gate would close at six, but the sign beside the entrance listed seven. Nobody had confirmed which time was correct.",
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "A volunteer told the visitors that the garden gate would close at six",
+    "derivation": "restatement",
+    "quotes": [
+     "A volunteer told the visitors that the garden gate would close at six"
+    ]
+   },
+   {
+    "id": "R2",
+    "statement": "The sign beside the entrance listed seven",
+    "derivation": "restatement",
+    "quotes": [
+     "the sign beside the entrance listed seven"
+    ]
+   },
+   {
+    "id": "L1",
+    "statement": "The writer marks a contrast between what the volunteer said and what the sign listed",
+    "derivation": "conventional meaning",
+    "quotes": [
+     "but"
+    ],
+    "licence": "but"
+   },
+   {
+    "id": "R3",
+    "statement": "Nobody had confirmed which time was correct",
+    "derivation": "restatement",
+    "quotes": [
+     "Nobody had confirmed which time was correct."
+    ]
+   },
+   {
+    "id": "U1",
+    "statement": "Whether the garden gate closes at six or seven",
+    "derivation": "open question",
+    "quotes": [
+     "Nobody had confirmed which time was correct."
+    ]
+   }
+  ],
+  "decline": {
+   "decline": false
+  },
+  "provenance": {
+   "marker": "TRACK-A: AI-generated, development only, not validated.",
+   "author": "model",
+   "model": "gemini-3.5-flash-lite",
+   "servedBy": "gemini-3.5-flash-lite",
+   "promptHash": "7b465c08bf03be823d9814ca894e6e744738c14ed5fe64c164b6a87f89ae7abd",
+   "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+   "date": "2026-11-25"
+  }
+ },
+ "validation": {
+  "textId": "D004",
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "A volunteer told the visitors that the garden gate would close at six",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "R2",
+    "statement": "The sign beside the entrance listed seven",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "L1",
+    "statement": "The writer marks a contrast between what the volunteer said and what the sign listed",
+    "derivation": "conventional meaning",
+    "ceiling": "L",
+    "category": "L",
+    "demotions": []
+   },
+   {
+    "id": "R3",
+    "statement": "Nobody had confirmed which time was correct",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "U1",
+    "statement": "Whether the garden gate closes at six or seven",
+    "derivation": "open question",
+    "ceiling": "U",
+    "category": "U",
+    "demotions": []
+   }
+  ],
+  "problems": [],
+  "decline": {
+   "decline": false
+  }
+ }
+}

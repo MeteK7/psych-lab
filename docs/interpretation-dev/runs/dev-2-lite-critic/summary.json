@@ -1,0 +1,30 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "AI-generated exploratory interpretation, not a reference annotation.",
+ "provider": "gemini",
+ "model": "gemini-3.5-flash-lite",
+ "limit": 10,
+ "stages": [
+  "critic"
+ ],
+ "requests": 6,
+ "texts": [
+  {
+   "id": "D001",
+   "outcome": "complete"
+  },
+  {
+   "id": "D002",
+   "outcome": "complete"
+  },
+  {
+   "id": "D003",
+   "outcome": "stopped"
+  }
+ ],
+ "skipped": [],
+ "refused": [],
+ "stoppedBecause": "failure (503): {\"error\":{\"code\":503,\"message\":\"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\"status\":\"UNAVAILABLE\"}}",
+ "date": "2026-11-25",
+ "at": "2026-11-25T23:31:42.193Z"
+}

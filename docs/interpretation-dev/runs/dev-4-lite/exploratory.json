@@ -1,0 +1,49 @@
+{
+ "round": "dev-4-lite",
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "Exploratory counts. AI-generated exploratory interpretation, not a reference annotation. Not agreement, accuracy or reliability.",
+ "texts": 5,
+ "outcomes": {
+  "complete": 5,
+  "schema-failed": 0,
+  "reply-failed": 0,
+  "stopped": 0
+ },
+ "categories": {
+  "candidate": {
+   "R": 15,
+   "L": 1,
+   "I": 3,
+   "P": 1,
+   "U": 4
+  },
+  "critic": {
+   "R": 0,
+   "L": 0,
+   "I": 0,
+   "P": 0,
+   "U": 0
+  }
+ },
+ "loweredByRule": {
+  "licence": 1
+ },
+ "rejected": 0,
+ "flags": [
+  "D002 S3: a possibility set that doesn't say whose possibilities they are",
+  "D005 R2: it doesn't make sense on its own: it opens with \"otherwise\", which points back to another statement"
+ ],
+ "schemaProblems": [],
+ "declined": [],
+ "obeyedInstruction": [],
+ "otherModel": [],
+ "requests": 5,
+ "requestsSent": 5,
+ "attempts": 5,
+ "usage": {
+  "input": 23726,
+  "output": 2030,
+  "total": 25756
+ },
+ "errors": []
+}
