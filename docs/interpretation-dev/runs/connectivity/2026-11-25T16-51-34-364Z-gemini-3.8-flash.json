@@ -1,0 +1,16 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "Connectivity check: one request, no study text.",
+ "provider": "gemini",
+ "model": "gemini-3.8-flash",
+ "date": "2026-11-25",
+ "requests": 1,
+ "ok": false,
+ "durationMs": 7487,
+ "error": {
+  "kind": "failure",
+  "message": "{\"error\":{\"code\":503,\"message\":\"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\"status\":\"UNAVAILABLE\"}}",
+  "status": 503
+ },
+ "at": "2026-11-25T16:51:34.364Z"
+}

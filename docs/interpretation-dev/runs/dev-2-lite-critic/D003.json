@@ -1,0 +1,210 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "AI-generated exploratory interpretation, not a reference annotation.",
+ "textId": "D003",
+ "text": "When the paper tower collapsed during the experiment, the instructor said, \"Well, that went perfectly.\" One student laughed, while another was unsure whether the instructor was serious.",
+ "provider": "gemini",
+ "model": "gemini-3.5-flash-lite",
+ "date": "2026-11-25",
+ "promptHash": "7b465c08bf03be823d9814ca894e6e744738c14ed5fe64c164b6a87f89ae7abd",
+ "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+ "stages": [
+  "critic"
+ ],
+ "requests": 2,
+ "durationMs": 24353,
+ "outcome": "stopped",
+ "calls": [
+  {
+   "step": "candidate",
+   "model": "gemini-3.5-flash-lite",
+   "complete": true,
+   "finish": "STOP",
+   "usage": {
+    "input": 4413,
+    "output": 323,
+    "total": 4736
+   },
+   "durationMs": 6794,
+   "reply": "{\n  \"statements\": [\n    {\n      \"id\": \"R1\",\n      \"statement\": \"The paper tower collapsed during the experiment\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"When the paper tower collapsed during the experiment\"\n      ]\n    },\n    {\n      \"id\": \"R2\",\n      \"statement\": \"The instructor said Well, that went perfectly\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"the instructor said, \\\"Well, that went perfectly.\\\"\"\n      ]\n    },\n    {\n      \"id\": \"R3\",\n      \"statement\": \"One student laughed\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"One student laughed\"\n      ]\n    },\n    {\n      \"id\": \"R4\",\n      \"statement\": \"Another student was unsure whether the instructor was serious\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"another was unsure whether the instructor was serious\"\n      ]\n    },\n    {\n      \"id\": \"I1\",\n      \"statement\": \"The instructor was being sarcastic\",\n      \"derivation\": \"pragmatic inference\",\n      \"quotes\": [\n        \"Well, that went perfectly.\"\n      ]\n    }\n  ],\n  \"decline\": {\n    \"decline\": false\n  }\n}"
+  },
+  {
+   "step": "critic",
+   "model": "gemini-3.5-flash-lite",
+   "complete": false,
+   "durationMs": 1675,
+   "error": {
+    "kind": "failure",
+    "message": "{\"error\":{\"code\":503,\"message\":\"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\"status\":\"UNAVAILABLE\"}}",
+    "status": 503
+   }
+  }
+ ],
+ "lowered": [],
+ "rejected": [],
+ "proposed": {
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "The paper tower collapsed during the experiment",
+    "derivation": "restatement",
+    "quotes": [
+     "When the paper tower collapsed during the experiment"
+    ]
+   },
+   {
+    "id": "R2",
+    "statement": "The instructor said Well, that went perfectly",
+    "derivation": "restatement",
+    "quotes": [
+     "the instructor said, \"Well, that went perfectly.\""
+    ]
+   },
+   {
+    "id": "R3",
+    "statement": "One student laughed",
+    "derivation": "restatement",
+    "quotes": [
+     "One student laughed"
+    ]
+   },
+   {
+    "id": "R4",
+    "statement": "Another student was unsure whether the instructor was serious",
+    "derivation": "restatement",
+    "quotes": [
+     "another was unsure whether the instructor was serious"
+    ]
+   },
+   {
+    "id": "I1",
+    "statement": "The instructor was being sarcastic",
+    "derivation": "pragmatic inference",
+    "quotes": [
+     "Well, that went perfectly."
+    ]
+   }
+  ],
+  "decline": {
+   "decline": false
+  }
+ },
+ "schema": {
+  "ok": true,
+  "problems": []
+ },
+ "candidate": {
+  "v": 1,
+  "textId": "D003",
+  "text": "When the paper tower collapsed during the experiment, the instructor said, \"Well, that went perfectly.\" One student laughed, while another was unsure whether the instructor was serious.",
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "The paper tower collapsed during the experiment",
+    "derivation": "restatement",
+    "quotes": [
+     "When the paper tower collapsed during the experiment"
+    ]
+   },
+   {
+    "id": "R2",
+    "statement": "The instructor said Well, that went perfectly",
+    "derivation": "restatement",
+    "quotes": [
+     "the instructor said, \"Well, that went perfectly.\""
+    ]
+   },
+   {
+    "id": "R3",
+    "statement": "One student laughed",
+    "derivation": "restatement",
+    "quotes": [
+     "One student laughed"
+    ]
+   },
+   {
+    "id": "R4",
+    "statement": "Another student was unsure whether the instructor was serious",
+    "derivation": "restatement",
+    "quotes": [
+     "another was unsure whether the instructor was serious"
+    ]
+   },
+   {
+    "id": "I1",
+    "statement": "The instructor was being sarcastic",
+    "derivation": "pragmatic inference",
+    "quotes": [
+     "Well, that went perfectly."
+    ]
+   }
+  ],
+  "decline": {
+   "decline": false
+  },
+  "provenance": {
+   "marker": "TRACK-A: AI-generated, development only, not validated.",
+   "author": "model",
+   "model": "gemini-3.5-flash-lite",
+   "servedBy": "gemini-3.5-flash-lite",
+   "critic": "gemini-3.5-flash-lite",
+   "promptHash": "7b465c08bf03be823d9814ca894e6e744738c14ed5fe64c164b6a87f89ae7abd",
+   "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+   "date": "2026-11-25"
+  }
+ },
+ "validation": {
+  "textId": "D003",
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "The paper tower collapsed during the experiment",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "R2",
+    "statement": "The instructor said Well, that went perfectly",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "R3",
+    "statement": "One student laughed",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "R4",
+    "statement": "Another student was unsure whether the instructor was serious",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "I1",
+    "statement": "The instructor was being sarcastic",
+    "derivation": "pragmatic inference",
+    "ceiling": "I",
+    "category": "I",
+    "demotions": []
+   }
+  ],
+  "problems": [],
+  "decline": {
+   "decline": false
+  }
+ },
+ "error": {
+  "kind": "failure",
+  "message": "{\"error\":{\"code\":503,\"message\":\"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\"status\":\"UNAVAILABLE\"}}",
+  "status": 503
+ }
+}

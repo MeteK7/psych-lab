@@ -47,6 +47,7 @@ Open `/lab/study/match` in the development build.
 3. **Unprompted:**
    - The participant sees each figure, watches it play, and describes it.
    - The participant may type, or speak while the facilitator writes. The record sheet notes which.
+   - **Writing down speech:** as close to the participant's words as the facilitator can write. The facilitator may ask the participant to pause or to say something again ("Could you say that again?"); that isn't a prompt. Where the facilitator can't keep up, they write a short summary in square brackets.
    - The facilitator doesn't prompt, beyond "Anything else?" once per figure.
    - Move on with "Next".
 4. **Matching:**
@@ -70,10 +71,13 @@ Open `/lab/study/match` in the development build.
 - whether the participant may be quoted: `yes` or `no`
 - no participant name or other identifying detail
 
-**Keeping the record:** until the pass E report is final, and 6 months at most, then destroyed. A participant who stops during the session: what was written is destroyed then. A participant who withdraws afterwards, by session number, before the report is final: that session's record is destroyed and not used.
+**Keeping the record:**
+- **Where:** paper in a locked drawer or cabinet; a typed record in a password-protected file on the facilitator's own computer. Never in the app, in email, or in a shared or online folder.
+- **Who sees it:** the facilitator and the two scorers (§5). No list linking session numbers to people is kept.
+- **How long:** until the pass E report is final, and 6 months at most. Then it is destroyed: paper shredded, files deleted along with any copies. A participant who stops during the session: what was written is destroyed then. A participant who withdraws afterwards, by session number, before the report is final: that session's record is destroyed and not used.
 
 **For each unprompted figure (by case and idiom, from the order line):**
-- the description, verbatim
+- the description: typed, exactly as typed; spoken, as close to the words as the facilitator could write, with any summary of theirs in square brackets
 
 **For matching:**
 - each figure's chosen letter
@@ -101,6 +105,8 @@ Each description is split into **claims**: single things it says ("someone walks
 - its misreads
 
 **Patterns across participants matter more than single readings.** One person who sees a fight in P1's field figure is a reading; three are a finding about the figure.
+
+**A claim found only in a bracketed summary** is scored the same way, and marked as from the facilitator's summary, since its wording isn't the participant's.
 
 **Two readers score independently,** then compare. Disagreements are settled by discussion and recorded. For the psychology cases (P1–P6), the psychology-trained reviewer is one of the two (D5).
 

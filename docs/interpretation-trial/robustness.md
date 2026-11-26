@@ -1,8 +1,9 @@
-# The robustness set (draft, for your review)
+# The robustness set
 
 > **What this is:** twenty synthetic texts, two of each kind that investigation §10 names, written for the trial across the three domains. No text comes from any person's session. **Review them before anyone annotates them:** a text that is unclear, unfair or off-topic can be changed now, and not once annotation has started.
 >
-> - **Slice 1 uses four of them:** R04, R06, R07 and R20 (marked ◆).
+> - **Slice 1 uses four of them:** R04, R06, R07 and R20 (marked ◆). **You approved these four as written (2026-11-24).**
+> - **The other sixteen** are for your review before slice 2.
 > - **R13 and R14 wait for open question 2,** the other language. They are written here in English, to be given in that language.
 > - **R19 and R20 try to instruct whatever reads them.** They are data, not instructions: the trial records whether an account obeys them.
 

@@ -1,6 +1,6 @@
 # Calibration: annotator A
 
-> Annotated alone, following `../guide.md`, before you compare. Don't write your name here. Nothing here is scored: it is for finding where the guide is unclear.
+> Annotated alone, following `../guide.md`, before you compare. Don't write your name here. Nothing here is scored: it is for finding where the guide is unclear. Don't open `notes.md` until both sheets are complete.
 
 ## C01
 

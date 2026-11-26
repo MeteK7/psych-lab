@@ -1,0 +1,15 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "Connectivity check: one request, no study text.",
+ "provider": "gemini",
+ "model": "gemini-3.8-flash",
+ "date": "2026-11-24",
+ "requests": 1,
+ "ok": false,
+ "durationMs": 298569,
+ "error": {
+  "kind": "failure",
+  "message": "the service didn't finish before the deadline (504 DEADLINE_EXCEEDED); the deadline is --timeout: {\"error\":{\"code\":504,\"message\":\"Deadline expired before operation could complete.\",\"status\":\"DEADLINE_EXCEEDED\"}}",
+  "status": 504
+ }
+}

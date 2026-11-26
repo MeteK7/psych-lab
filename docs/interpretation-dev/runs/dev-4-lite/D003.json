@@ -1,0 +1,211 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "AI-generated exploratory interpretation, not a reference annotation.",
+ "textId": "D003",
+ "text": "When the paper tower collapsed during the experiment, the instructor said, \"Well, that went perfectly.\" One student laughed, while another was unsure whether the instructor was serious.",
+ "provider": "gemini",
+ "model": "gemini-3.5-flash-lite",
+ "date": "2026-11-26",
+ "promptHash": "e857721b49bcac7387fad449f1a0e4f72e8e60a7dd44db0f1231f997747cd04f",
+ "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+ "stepHashes": {
+  "candidate": "e949517b29b860e0b9e5bd2acbddfd965b111a5cd84db4b05fe39f48ce1c52fb"
+ },
+ "checksHash": "3dd07b337ed3ede6af55fae93f838e138a95419897e6f6239ccfa8fda97fd23c",
+ "stages": [],
+ "requests": 1,
+ "durationMs": 14693,
+ "outcome": "complete",
+ "calls": [
+  {
+   "step": "candidate",
+   "model": "gemini-3.5-flash-lite",
+   "complete": true,
+   "finish": "STOP",
+   "usage": {
+    "input": 4749,
+    "output": 409,
+    "total": 5158
+   },
+   "durationMs": 5379,
+   "reply": "{\n  \"statements\": [\n    {\n      \"id\": \"R1\",\n      \"statement\": \"The paper tower collapsed during the experiment\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"When the paper tower collapsed during the experiment\"\n      ],\n      \"basis\": \"When the paper tower collapsed during the experiment\"\n    },\n    {\n      \"id\": \"R2\",\n      \"statement\": \"The instructor said, \\\"Well, that went perfectly.\\\"\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"the instructor said, \\\"Well, that went perfectly.\\\"\"\n      ],\n      \"basis\": \"the instructor said, \\\"Well, that went perfectly.\\\"\"\n    },\n    {\n      \"id\": \"R3\",\n      \"statement\": \"One student laughed\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"One student laughed\"\n      ],\n      \"basis\": \"One student laughed\"\n    },\n    {\n      \"id\": \"R4\",\n      \"statement\": \"Another student was unsure whether the instructor was serious\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"another was unsure whether the instructor was serious\"\n      ],\n      \"basis\": \"another was unsure whether the instructor was serious\"\n    },\n    {\n      \"id\": \"I1\",\n      \"statement\": \"The instructor was being sarcastic\",\n      \"derivation\": \"pragmatic inference\",\n      \"quotes\": [\n        \"Well, that went perfectly.\"\n      ],\n      \"basis\": \"sarcasm: \\\"Well, that went perfectly\\\" in the context of a collapsed tower\"\n    }\n  ],\n  \"decline\": {\n    \"decline\": false\n  }\n}"
+  }
+ ],
+ "lowered": [],
+ "rejected": [],
+ "proposed": {
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "The paper tower collapsed during the experiment",
+    "derivation": "restatement",
+    "quotes": [
+     "When the paper tower collapsed during the experiment"
+    ],
+    "basis": "When the paper tower collapsed during the experiment"
+   },
+   {
+    "id": "R2",
+    "statement": "The instructor said, \"Well, that went perfectly.\"",
+    "derivation": "restatement",
+    "quotes": [
+     "the instructor said, \"Well, that went perfectly.\""
+    ],
+    "basis": "the instructor said, \"Well, that went perfectly.\""
+   },
+   {
+    "id": "R3",
+    "statement": "One student laughed",
+    "derivation": "restatement",
+    "quotes": [
+     "One student laughed"
+    ],
+    "basis": "One student laughed"
+   },
+   {
+    "id": "R4",
+    "statement": "Another student was unsure whether the instructor was serious",
+    "derivation": "restatement",
+    "quotes": [
+     "another was unsure whether the instructor was serious"
+    ],
+    "basis": "another was unsure whether the instructor was serious"
+   },
+   {
+    "id": "I1",
+    "statement": "The instructor was being sarcastic",
+    "derivation": "pragmatic inference",
+    "quotes": [
+     "Well, that went perfectly."
+    ],
+    "basis": "sarcasm: \"Well, that went perfectly\" in the context of a collapsed tower"
+   }
+  ],
+  "decline": {
+   "decline": false
+  }
+ },
+ "schema": {
+  "ok": true,
+  "problems": []
+ },
+ "candidate": {
+  "v": 1,
+  "textId": "D003",
+  "text": "When the paper tower collapsed during the experiment, the instructor said, \"Well, that went perfectly.\" One student laughed, while another was unsure whether the instructor was serious.",
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "The paper tower collapsed during the experiment",
+    "derivation": "restatement",
+    "quotes": [
+     "When the paper tower collapsed during the experiment"
+    ],
+    "basis": "When the paper tower collapsed during the experiment"
+   },
+   {
+    "id": "R2",
+    "statement": "The instructor said, \"Well, that went perfectly.\"",
+    "derivation": "restatement",
+    "quotes": [
+     "the instructor said, \"Well, that went perfectly.\""
+    ],
+    "basis": "the instructor said, \"Well, that went perfectly.\""
+   },
+   {
+    "id": "R3",
+    "statement": "One student laughed",
+    "derivation": "restatement",
+    "quotes": [
+     "One student laughed"
+    ],
+    "basis": "One student laughed"
+   },
+   {
+    "id": "R4",
+    "statement": "Another student was unsure whether the instructor was serious",
+    "derivation": "restatement",
+    "quotes": [
+     "another was unsure whether the instructor was serious"
+    ],
+    "basis": "another was unsure whether the instructor was serious"
+   },
+   {
+    "id": "I1",
+    "statement": "The instructor was being sarcastic",
+    "derivation": "pragmatic inference",
+    "quotes": [
+     "Well, that went perfectly."
+    ],
+    "basis": "sarcasm: \"Well, that went perfectly\" in the context of a collapsed tower"
+   }
+  ],
+  "decline": {
+   "decline": false
+  },
+  "provenance": {
+   "marker": "TRACK-A: AI-generated, development only, not validated.",
+   "author": "model",
+   "model": "gemini-3.5-flash-lite",
+   "servedBy": "gemini-3.5-flash-lite",
+   "promptHash": "e857721b49bcac7387fad449f1a0e4f72e8e60a7dd44db0f1231f997747cd04f",
+   "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+   "date": "2026-11-26"
+  }
+ },
+ "validation": {
+  "textId": "D003",
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "The paper tower collapsed during the experiment",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R1",
+    "demotions": []
+   },
+   {
+    "id": "R2",
+    "statement": "The instructor said, \"Well, that went perfectly.\"",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R2",
+    "demotions": []
+   },
+   {
+    "id": "R3",
+    "statement": "One student laughed",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R3",
+    "demotions": []
+   },
+   {
+    "id": "R4",
+    "statement": "Another student was unsure whether the instructor was serious",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R4",
+    "demotions": []
+   },
+   {
+    "id": "I1",
+    "statement": "The instructor was being sarcastic",
+    "derivation": "pragmatic inference",
+    "ceiling": "I",
+    "category": "I",
+    "label": "I1",
+    "demotions": []
+   }
+  ],
+  "problems": [],
+  "flags": [],
+  "decline": {
+   "decline": false
+  }
+ }
+}

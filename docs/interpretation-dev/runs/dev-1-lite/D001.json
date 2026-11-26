@@ -1,0 +1,221 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "AI-generated exploratory interpretation, not a reference annotation.",
+ "textId": "D001",
+ "text": "During a drawing workshop, Alia handed Deniz a pencil. Deniz nodded and placed it beside the sketchbook without saying anything.",
+ "provider": "gemini",
+ "model": "gemini-3.5-flash-lite",
+ "date": "2026-11-25",
+ "requests": 1,
+ "durationMs": 2478,
+ "outcome": "complete",
+ "calls": [
+  {
+   "step": "candidate",
+   "model": "gemini-3.5-flash-lite",
+   "complete": true,
+   "finish": "STOP",
+   "usage": {
+    "input": 4402,
+    "output": 339,
+    "total": 4741
+   },
+   "durationMs": 2474,
+   "reply": "{\n  \"statements\": [\n    {\n      \"id\": \"S1\",\n      \"statement\": \"During a drawing workshop, Alia handed Deniz a pencil\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"During a drawing workshop, Alia handed Deniz a pencil.\"\n      ]\n    },\n    {\n      \"id\": \"S2\",\n      \"statement\": \"Deniz nodded\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"Deniz nodded\"\n      ]\n    },\n    {\n      \"id\": \"S3\",\n      \"statement\": \"Deniz placed it beside the sketchbook without saying anything\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"placed it beside the sketchbook without saying anything.\"\n      ]\n    },\n    {\n      \"id\": \"S4\",\n      \"statement\": \"Deniz took the pencil\",\n      \"derivation\": \"entailment\",\n      \"quotes\": [\n        \"handed Deniz a pencil\"\n      ],\n      \"licence\": \"takes-up\"\n    },\n    {\n      \"id\": \"S5\",\n      \"statement\": \"Deniz did not speak\",\n      \"derivation\": \"entailment\",\n      \"quotes\": [\n        \"without saying anything\"\n      ],\n      \"licence\": \"not-done\"\n    }\n  ],\n  \"decline\": {\n    \"decline\": false\n  }\n}"
+  }
+ ],
+ "lowered": [
+  {
+   "id": "S4",
+   "from": "L",
+   "to": "I",
+   "rule": "licence",
+   "why": "takes-up doesn't fire on its quotes"
+  },
+  {
+   "id": "S5",
+   "from": "L",
+   "to": "I",
+   "rule": "licence",
+   "why": "not-done doesn't fire on its quotes"
+  }
+ ],
+ "rejected": [],
+ "proposed": {
+  "statements": [
+   {
+    "id": "S1",
+    "statement": "During a drawing workshop, Alia handed Deniz a pencil",
+    "derivation": "restatement",
+    "quotes": [
+     "During a drawing workshop, Alia handed Deniz a pencil."
+    ]
+   },
+   {
+    "id": "S2",
+    "statement": "Deniz nodded",
+    "derivation": "restatement",
+    "quotes": [
+     "Deniz nodded"
+    ]
+   },
+   {
+    "id": "S3",
+    "statement": "Deniz placed it beside the sketchbook without saying anything",
+    "derivation": "restatement",
+    "quotes": [
+     "placed it beside the sketchbook without saying anything."
+    ]
+   },
+   {
+    "id": "S4",
+    "statement": "Deniz took the pencil",
+    "derivation": "entailment",
+    "quotes": [
+     "handed Deniz a pencil"
+    ],
+    "licence": "takes-up"
+   },
+   {
+    "id": "S5",
+    "statement": "Deniz did not speak",
+    "derivation": "entailment",
+    "quotes": [
+     "without saying anything"
+    ],
+    "licence": "not-done"
+   }
+  ],
+  "decline": {
+   "decline": false
+  }
+ },
+ "schema": {
+  "ok": true,
+  "problems": []
+ },
+ "candidate": {
+  "v": 1,
+  "textId": "D001",
+  "text": "During a drawing workshop, Alia handed Deniz a pencil. Deniz nodded and placed it beside the sketchbook without saying anything.",
+  "statements": [
+   {
+    "id": "S1",
+    "statement": "During a drawing workshop, Alia handed Deniz a pencil",
+    "derivation": "restatement",
+    "quotes": [
+     "During a drawing workshop, Alia handed Deniz a pencil."
+    ]
+   },
+   {
+    "id": "S2",
+    "statement": "Deniz nodded",
+    "derivation": "restatement",
+    "quotes": [
+     "Deniz nodded"
+    ]
+   },
+   {
+    "id": "S3",
+    "statement": "Deniz placed it beside the sketchbook without saying anything",
+    "derivation": "restatement",
+    "quotes": [
+     "placed it beside the sketchbook without saying anything."
+    ]
+   },
+   {
+    "id": "S4",
+    "statement": "Deniz took the pencil",
+    "derivation": "entailment",
+    "quotes": [
+     "handed Deniz a pencil"
+    ],
+    "licence": "takes-up"
+   },
+   {
+    "id": "S5",
+    "statement": "Deniz did not speak",
+    "derivation": "entailment",
+    "quotes": [
+     "without saying anything"
+    ],
+    "licence": "not-done"
+   }
+  ],
+  "decline": {
+   "decline": false
+  },
+  "provenance": {
+   "marker": "TRACK-A: AI-generated, development only, not validated.",
+   "author": "model",
+   "model": "gemini-3.5-flash-lite",
+   "servedBy": "gemini-3.5-flash-lite",
+   "promptHash": "7b465c08bf03be823d9814ca894e6e744738c14ed5fe64c164b6a87f89ae7abd",
+   "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+   "date": "2026-11-25"
+  }
+ },
+ "validation": {
+  "textId": "D001",
+  "statements": [
+   {
+    "id": "S1",
+    "statement": "During a drawing workshop, Alia handed Deniz a pencil",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "S2",
+    "statement": "Deniz nodded",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "S3",
+    "statement": "Deniz placed it beside the sketchbook without saying anything",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "S4",
+    "statement": "Deniz took the pencil",
+    "derivation": "entailment",
+    "ceiling": "L",
+    "category": "I",
+    "demotions": [
+     {
+      "from": "L",
+      "to": "I",
+      "rule": "licence",
+      "why": "takes-up doesn't fire on its quotes"
+     }
+    ]
+   },
+   {
+    "id": "S5",
+    "statement": "Deniz did not speak",
+    "derivation": "entailment",
+    "ceiling": "L",
+    "category": "I",
+    "demotions": [
+     {
+      "from": "L",
+      "to": "I",
+      "rule": "licence",
+      "why": "not-done doesn't fire on its quotes"
+     }
+    ]
+   }
+  ],
+  "problems": [],
+  "decline": {
+   "decline": false
+  }
+ }
+}

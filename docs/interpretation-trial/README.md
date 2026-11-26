@@ -1,6 +1,6 @@
 # Stage 1b: the interpretation trial (offline part)
 
-> **Status (2026-11-23): slice 1 prepared, corrected before annotation; calibration next, then the freeze, then annotation.** No interpreter or model has run, and none may without your separate approval, which names the service and sends synthetic text only. Every text here is synthetic: none comes from any person's session.
+> **Status (2026-11-24): slice 1 prepared and corrected; its four robustness texts approved. Calibration is under way; then the freeze, then annotation.** No interpreter or model has run, and none may without your separate approval, which names the service and sends synthetic text only. Every text here is synthetic: none comes from any person's session.
 
 ## What it asks
 
@@ -24,7 +24,7 @@ The offline part makes the yardstick before anything is measured with it:
 | File | What | Who |
 |---|---|---|
 | `guide.md` | How to annotate: splitting, the five categories, the licensed patterns, the sheet | Both annotators read it first |
-| `robustness.md` | The 20 robustness texts | **You review it before annotation** |
+| `robustness.md` | The 20 robustness texts | Slice 1's four approved by you (2026-11-24); the other sixteen reviewed before slice 2 |
 | `slice-1/texts.md` | The 16 texts under neutral ids, for reading or printing | Annotators |
 | `slice-1/annotator-a.md`, `annotator-b.md` | Each annotator's sheet, filled alone | One each |
 | `calibration/texts.md`, `annotator-a.md`, `annotator-b.md`, `notes.md` | Five practice texts, annotated alone, then compared; what you found and the guide changes you agree. Not scored | Both, before slice 1 |
@@ -57,7 +57,8 @@ The offline part makes the yardstick before anything is measured with it:
 
 ## Before annotation: calibration, then the freeze
 
-1. **Calibration.** You and the reviewer each annotate the five texts in `calibration/` alone, then compare. In `calibration/notes.md`, write where you read the guide differently, and any change you agree. Nothing here is scored or reported. The spec checks that no calibration text is a trial, robustness, unseen or guide text.
+1. **Calibration.** You and the reviewer each annotate the five texts in `calibration/` alone, then compare. Open `calibration/notes.md` only once both sheets are complete, and write there where you read the guide differently, and any change you agree. Nothing here is scored or reported, and no answers, reference annotations or suggested classifications are prepared for these texts (your decision, 2026-11-24), so the two sheets stay independent. The spec checks that no calibration text is a trial, robustness, unseen or guide text.
+   - **The guide's definitions stay as they are until calibration is done:** calibration shows whether they need clarifying, before anything is changed.
 2. **Guide changes,** if calibration leads to any: you agree them, I make them, and they are listed below.
 3. **The freeze,** on your word: a spec pins the hashes of `guide.md`, `robustness.md`, `slice-1/texts.md`, `slice-1/key.md` and the scoring code (`pages/lab/trial/`). After that, any change to them fails the tests until you approve a re-pin.
 4. **Then slice 1 is annotated.**
@@ -76,6 +77,13 @@ The offline part makes the yardstick before anything is measured with it:
 - **Corpus and robustness texts reported apart,** with what each can show.
 - **Calibration and the freeze,** above.
 - **Pass E's information sheet:** the drawings, not the participant, are tested; and it now covers transcription, retention (6 months at most), withdrawal and quotations. Procedure §4 and §3 step 6 match it.
+
+## Track A, and what it means for this trial (2026-11-24)
+
+AI-assisted interpretation development runs separately, in `../interpretation-dev/` (`../interpretation-tracks-proposal.md`). Nothing from it enters these files, and nothing it produces is agreement, κ or a human reference.
+- **The contamination rule:** whoever has seen Track A's output for a text can't annotate that text blind here. Record it under "Seen before".
+- **The sealed held-out set** (`../interpretation-dev/held-out/`) is never interpreted, so future annotators can use it whatever Track A has run on.
+- **Limitation:** until two people have annotated, it is not established that careful people apply the five categories consistently.
 
 ## Open question
 

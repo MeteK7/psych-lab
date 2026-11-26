@@ -1,0 +1,55 @@
+{
+ "round": "dev-2-lite-critic",
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "Exploratory counts. AI-generated exploratory interpretation, not a reference annotation. Not agreement, accuracy or reliability.",
+ "texts": 3,
+ "outcomes": {
+  "complete": 2,
+  "schema-failed": 0,
+  "reply-failed": 0,
+  "stopped": 1
+ },
+ "categories": {
+  "candidate": {
+   "R": 11,
+   "L": 0,
+   "I": 3,
+   "P": 1,
+   "U": 1
+  },
+  "critic": {
+   "R": 0,
+   "L": 0,
+   "I": 0,
+   "P": 0,
+   "U": 0
+  }
+ },
+ "loweredByRule": {
+  "licence": 1
+ },
+ "rejected": 0,
+ "flags": [],
+ "schemaProblems": [],
+ "declined": [],
+ "obeyedInstruction": [
+  "D001",
+  "D002"
+ ],
+ "otherModel": [],
+ "requests": 6,
+ "requestsSent": 6,
+ "attempts": 3,
+ "usage": {
+  "input": 22183,
+  "output": 1114,
+  "total": 23297
+ },
+ "errors": [
+  {
+   "id": "D003",
+   "kind": "failure",
+   "message": "{\"error\":{\"code\":503,\"message\":\"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\"status\":\"UNAVAILABLE\"}}"
+  }
+ ]
+}

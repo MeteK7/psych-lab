@@ -1,0 +1,188 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "AI-generated exploratory interpretation, not a reference annotation.",
+ "textId": "D005",
+ "text": "If the projector works tomorrow, the team will display its diagrams on the wall. Otherwise, they will distribute printed copies. The projector has not yet been tested.",
+ "provider": "gemini",
+ "model": "gemini-3.5-flash-lite",
+ "date": "2026-11-26",
+ "promptHash": "35b2e72f9858fe698d4b4be3d5feae55a6d84d081e805d0453a51836083fad44",
+ "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+ "stepHashes": {
+  "candidate": "a2fb3bb4320684d657df3223e1be4ffd0c9010cc34b53e391640fdc1dab633ee"
+ },
+ "checksHash": "2cd94b4e94f2bc12c9ff272bac0a8e15ea3fa9ad580828b80f0643c5dc7eb4d0",
+ "stages": [],
+ "requests": 1,
+ "durationMs": 2580,
+ "outcome": "complete",
+ "calls": [
+  {
+   "step": "candidate",
+   "model": "gemini-3.5-flash-lite",
+   "complete": true,
+   "finish": "STOP",
+   "usage": {
+    "input": 4760,
+    "output": 365,
+    "total": 5125
+   },
+   "durationMs": 2572,
+   "reply": "{\n  \"statements\": [\n    {\n      \"id\": \"S1\",\n      \"statement\": \"If the projector works tomorrow, the team will display its diagrams on the wall\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"If the projector works tomorrow, the team will display its diagrams on the wall.\"\n      ],\n      \"basis\": \"\\\"If the projector works tomorrow, the team will display its diagrams on the wall.\\\"\",\n      \"holder\": \"\"\n    },\n    {\n      \"id\": \"S2\",\n      \"statement\": \"If the projector does not work tomorrow, the team will distribute printed copies\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"Otherwise, they will distribute printed copies.\"\n      ],\n      \"basis\": \"\\\"Otherwise, they will distribute printed copies.\\\"\",\n      \"holder\": \"\"\n    },\n    {\n      \"id\": \"S3\",\n      \"statement\": \"The projector has not yet been tested\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"The projector has not yet been tested.\"\n      ],\n      \"basis\": \"\\\"The projector has not yet been tested.\\\"\",\n      \"holder\": \"\"\n    },\n    {\n      \"id\": \"S4\",\n      \"statement\": \"Whether the projector will work tomorrow\",\n      \"derivation\": \"open question\",\n      \"quotes\": [],\n      \"basis\": \"the text leaves it as a conditional possibility\",\n      \"holder\": \"\"\n    }\n  ],\n  \"decline\": {\n    \"decline\": false\n  }\n}"
+  }
+ ],
+ "lowered": [],
+ "rejected": [],
+ "proposed": {
+  "statements": [
+   {
+    "id": "S1",
+    "statement": "If the projector works tomorrow, the team will display its diagrams on the wall",
+    "derivation": "restatement",
+    "quotes": [
+     "If the projector works tomorrow, the team will display its diagrams on the wall."
+    ],
+    "basis": "\"If the projector works tomorrow, the team will display its diagrams on the wall.\"",
+    "holder": ""
+   },
+   {
+    "id": "S2",
+    "statement": "If the projector does not work tomorrow, the team will distribute printed copies",
+    "derivation": "restatement",
+    "quotes": [
+     "Otherwise, they will distribute printed copies."
+    ],
+    "basis": "\"Otherwise, they will distribute printed copies.\"",
+    "holder": ""
+   },
+   {
+    "id": "S3",
+    "statement": "The projector has not yet been tested",
+    "derivation": "restatement",
+    "quotes": [
+     "The projector has not yet been tested."
+    ],
+    "basis": "\"The projector has not yet been tested.\"",
+    "holder": ""
+   },
+   {
+    "id": "S4",
+    "statement": "Whether the projector will work tomorrow",
+    "derivation": "open question",
+    "quotes": [],
+    "basis": "the text leaves it as a conditional possibility",
+    "holder": ""
+   }
+  ],
+  "decline": {
+   "decline": false
+  }
+ },
+ "schema": {
+  "ok": true,
+  "problems": []
+ },
+ "candidate": {
+  "v": 1,
+  "textId": "D005",
+  "text": "If the projector works tomorrow, the team will display its diagrams on the wall. Otherwise, they will distribute printed copies. The projector has not yet been tested.",
+  "statements": [
+   {
+    "id": "S1",
+    "statement": "If the projector works tomorrow, the team will display its diagrams on the wall",
+    "derivation": "restatement",
+    "quotes": [
+     "If the projector works tomorrow, the team will display its diagrams on the wall."
+    ],
+    "basis": "\"If the projector works tomorrow, the team will display its diagrams on the wall.\"",
+    "holder": ""
+   },
+   {
+    "id": "S2",
+    "statement": "If the projector does not work tomorrow, the team will distribute printed copies",
+    "derivation": "restatement",
+    "quotes": [
+     "Otherwise, they will distribute printed copies."
+    ],
+    "basis": "\"Otherwise, they will distribute printed copies.\"",
+    "holder": ""
+   },
+   {
+    "id": "S3",
+    "statement": "The projector has not yet been tested",
+    "derivation": "restatement",
+    "quotes": [
+     "The projector has not yet been tested."
+    ],
+    "basis": "\"The projector has not yet been tested.\"",
+    "holder": ""
+   },
+   {
+    "id": "S4",
+    "statement": "Whether the projector will work tomorrow",
+    "derivation": "open question",
+    "quotes": [],
+    "basis": "the text leaves it as a conditional possibility",
+    "holder": ""
+   }
+  ],
+  "decline": {
+   "decline": false
+  },
+  "provenance": {
+   "marker": "TRACK-A: AI-generated, development only, not validated.",
+   "author": "model",
+   "model": "gemini-3.5-flash-lite",
+   "servedBy": "gemini-3.5-flash-lite",
+   "promptHash": "35b2e72f9858fe698d4b4be3d5feae55a6d84d081e805d0453a51836083fad44",
+   "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+   "date": "2026-11-26"
+  }
+ },
+ "validation": {
+  "textId": "D005",
+  "statements": [
+   {
+    "id": "S1",
+    "statement": "If the projector works tomorrow, the team will display its diagrams on the wall",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R1",
+    "demotions": []
+   },
+   {
+    "id": "S2",
+    "statement": "If the projector does not work tomorrow, the team will distribute printed copies",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R2",
+    "demotions": []
+   },
+   {
+    "id": "S3",
+    "statement": "The projector has not yet been tested",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R3",
+    "demotions": []
+   },
+   {
+    "id": "S4",
+    "statement": "Whether the projector will work tomorrow",
+    "derivation": "open question",
+    "ceiling": "U",
+    "category": "U",
+    "label": "U1",
+    "demotions": []
+   }
+  ],
+  "problems": [],
+  "flags": [],
+  "decline": {
+   "decline": false
+  }
+ }
+}

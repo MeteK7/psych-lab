@@ -423,6 +423,8 @@ Movement along a path and changing fields do not exist in the engine. The Lab ma
 
 **D6 decided (2026-11-23): (a),** the offline part only; model runs wait for a separate approval. Annotators: you and the psychology-trained reviewer. The trial is in `docs/interpretation-trial/`.
 
+**D6 under revision (2026-11-24), at your request:** Stage 1b split into Track A, AI-assisted interpretation development, and Track B, independent human validation kept for later (`interpretation-tracks-proposal.md`). **Scope approved (2026-11-24),** with its first step, A1 (no model call); A1 is built (`interpretation-dev/`). The Anthropic service approved on 2026-11-24 was never used. On 2026-11-25 you replaced it with Google's Gemini API on the free tier, behind a provider interface, on a synthetic development set you write. It is built and tested offline. **Update (2026-11-26):** live rounds were run with your approval on 2026-11-24 to 2026-11-26, and Gemini runs are now paused (`interpretation-dev/README.md`). **Limitation, whatever is decided:** no two people have yet annotated the texts, so it is not established that careful people apply the five categories consistently.
+
 **Decisions that can wait until Stage 2 or later:** whether typed text may determine a figure, and where it may be interpreted; whether the layer is named a twelfth capability; when packages are extracted.
 
 ---

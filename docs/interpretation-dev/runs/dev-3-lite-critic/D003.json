@@ -1,0 +1,41 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "AI-generated exploratory interpretation, not a reference annotation.",
+ "textId": "D003",
+ "text": "When the paper tower collapsed during the experiment, the instructor said, \"Well, that went perfectly.\" One student laughed, while another was unsure whether the instructor was serious.",
+ "provider": "gemini",
+ "model": "gemini-3.5-flash-lite",
+ "date": "2026-11-25",
+ "promptHash": "7b465c08bf03be823d9814ca894e6e744738c14ed5fe64c164b6a87f89ae7abd",
+ "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+ "stepHashes": {
+  "candidate": "323f97774e9f22018bed20eacbe1bbbb444770ba415661bf6ea0f7375890ed9e",
+  "critic": "30ca87be41d88c81f3b35334d3486628cb8deb95282972e189242d89f4f923d9"
+ },
+ "stages": [
+  "critic"
+ ],
+ "requests": 1,
+ "durationMs": 13582,
+ "outcome": "stopped",
+ "calls": [
+  {
+   "step": "candidate",
+   "model": "gemini-3.5-flash-lite",
+   "complete": false,
+   "durationMs": 4741,
+   "error": {
+    "kind": "failure",
+    "message": "{\"error\":{\"code\":503,\"message\":\"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\"status\":\"UNAVAILABLE\"}}",
+    "status": 503
+   }
+  }
+ ],
+ "lowered": [],
+ "rejected": [],
+ "error": {
+  "kind": "failure",
+  "message": "{\"error\":{\"code\":503,\"message\":\"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\"status\":\"UNAVAILABLE\"}}",
+  "status": 503
+ }
+}

@@ -1,0 +1,35 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "AI-generated exploratory interpretation, not a reference annotation.",
+ "provider": "gemini",
+ "model": "gemini-3.5-flash-lite",
+ "limit": 5,
+ "stages": [],
+ "requests": 5,
+ "texts": [
+  {
+   "id": "D001",
+   "outcome": "complete"
+  },
+  {
+   "id": "D002",
+   "outcome": "complete"
+  },
+  {
+   "id": "D003",
+   "outcome": "complete"
+  },
+  {
+   "id": "D004",
+   "outcome": "complete"
+  },
+  {
+   "id": "D005",
+   "outcome": "complete"
+  }
+ ],
+ "skipped": [],
+ "refused": [],
+ "date": "2026-11-26",
+ "at": "2026-11-26T09:59:38.971Z"
+}

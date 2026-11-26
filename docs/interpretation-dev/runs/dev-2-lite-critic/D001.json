@@ -1,0 +1,352 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "AI-generated exploratory interpretation, not a reference annotation.",
+ "textId": "D001",
+ "text": "During a drawing workshop, Alia handed Deniz a pencil. Deniz nodded and placed it beside the sketchbook without saying anything.",
+ "provider": "gemini",
+ "model": "gemini-3.5-flash-lite",
+ "date": "2026-11-25",
+ "promptHash": "7b465c08bf03be823d9814ca894e6e744738c14ed5fe64c164b6a87f89ae7abd",
+ "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+ "stages": [
+  "critic"
+ ],
+ "requests": 2,
+ "durationMs": 18634,
+ "outcome": "complete",
+ "calls": [
+  {
+   "step": "candidate",
+   "model": "gemini-3.5-flash-lite",
+   "complete": true,
+   "finish": "STOP",
+   "usage": {
+    "input": 4402,
+    "output": 421,
+    "total": 4823
+   },
+   "durationMs": 6118,
+   "reply": "{\n  \"statements\": [\n    {\n      \"id\": \"R1\",\n      \"statement\": \"Alia handed Deniz a pencil during a drawing workshop\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"During a drawing workshop, Alia handed Deniz a pencil.\"\n      ]\n    },\n    {\n      \"id\": \"R2\",\n      \"statement\": \"Deniz nodded\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"Deniz nodded\"\n      ]\n    },\n    {\n      \"id\": \"R3\",\n      \"statement\": \"Deniz placed the pencil beside the sketchbook\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"placed it beside the sketchbook\"\n      ]\n    },\n    {\n      \"id\": \"R4\",\n      \"statement\": \"Deniz said nothing while doing so\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"without saying anything.\"\n      ]\n    },\n    {\n      \"id\": \"L1\",\n      \"statement\": \"Deniz took the pencil from Alia\",\n      \"derivation\": \"entailment\",\n      \"quotes\": [\n        \"handed Deniz a pencil\"\n      ],\n      \"licence\": \"takes-up\",\n      \"wouldLicense\": true\n    },\n    {\n      \"id\": \"I1\",\n      \"statement\": \"The workshop is taking place indoors\",\n      \"derivation\": \"world knowledge\",\n      \"quotes\": []\n    },\n    {\n      \"id\": \"U1\",\n      \"statement\": \"Why Deniz nodded and said nothing\",\n      \"derivation\": \"open question\",\n      \"quotes\": []\n    }\n  ],\n  \"decline\": {\n    \"decline\": false\n  }\n}"
+  },
+  {
+   "step": "critic",
+   "model": "gemini-3.5-flash-lite",
+   "complete": true,
+   "finish": "STOP",
+   "usage": {
+    "input": 4578,
+    "output": 27,
+    "total": 4605
+   },
+   "durationMs": 6622,
+   "reply": "{\n \"demote\": [],\n \"add\": [],\n \"concerns\": [],\n \"obeyedInstruction\": true\n}"
+  }
+ ],
+ "lowered": [
+  {
+   "id": "L1",
+   "from": "L",
+   "to": "I",
+   "rule": "licence",
+   "why": "takes-up doesn't fire on its quotes"
+  }
+ ],
+ "rejected": [],
+ "proposed": {
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "Alia handed Deniz a pencil during a drawing workshop",
+    "derivation": "restatement",
+    "quotes": [
+     "During a drawing workshop, Alia handed Deniz a pencil."
+    ]
+   },
+   {
+    "id": "R2",
+    "statement": "Deniz nodded",
+    "derivation": "restatement",
+    "quotes": [
+     "Deniz nodded"
+    ]
+   },
+   {
+    "id": "R3",
+    "statement": "Deniz placed the pencil beside the sketchbook",
+    "derivation": "restatement",
+    "quotes": [
+     "placed it beside the sketchbook"
+    ]
+   },
+   {
+    "id": "R4",
+    "statement": "Deniz said nothing while doing so",
+    "derivation": "restatement",
+    "quotes": [
+     "without saying anything."
+    ]
+   },
+   {
+    "id": "L1",
+    "statement": "Deniz took the pencil from Alia",
+    "derivation": "entailment",
+    "quotes": [
+     "handed Deniz a pencil"
+    ],
+    "licence": "takes-up",
+    "wouldLicense": true
+   },
+   {
+    "id": "I1",
+    "statement": "The workshop is taking place indoors",
+    "derivation": "world knowledge",
+    "quotes": []
+   },
+   {
+    "id": "U1",
+    "statement": "Why Deniz nodded and said nothing",
+    "derivation": "open question",
+    "quotes": []
+   }
+  ],
+  "decline": {
+   "decline": false
+  }
+ },
+ "schema": {
+  "ok": true,
+  "problems": []
+ },
+ "candidate": {
+  "v": 1,
+  "textId": "D001",
+  "text": "During a drawing workshop, Alia handed Deniz a pencil. Deniz nodded and placed it beside the sketchbook without saying anything.",
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "Alia handed Deniz a pencil during a drawing workshop",
+    "derivation": "restatement",
+    "quotes": [
+     "During a drawing workshop, Alia handed Deniz a pencil."
+    ]
+   },
+   {
+    "id": "R2",
+    "statement": "Deniz nodded",
+    "derivation": "restatement",
+    "quotes": [
+     "Deniz nodded"
+    ]
+   },
+   {
+    "id": "R3",
+    "statement": "Deniz placed the pencil beside the sketchbook",
+    "derivation": "restatement",
+    "quotes": [
+     "placed it beside the sketchbook"
+    ]
+   },
+   {
+    "id": "R4",
+    "statement": "Deniz said nothing while doing so",
+    "derivation": "restatement",
+    "quotes": [
+     "without saying anything."
+    ]
+   },
+   {
+    "id": "L1",
+    "statement": "Deniz took the pencil from Alia",
+    "derivation": "entailment",
+    "quotes": [
+     "handed Deniz a pencil"
+    ],
+    "licence": "takes-up",
+    "wouldLicense": true
+   },
+   {
+    "id": "I1",
+    "statement": "The workshop is taking place indoors",
+    "derivation": "world knowledge",
+    "quotes": []
+   },
+   {
+    "id": "U1",
+    "statement": "Why Deniz nodded and said nothing",
+    "derivation": "open question",
+    "quotes": []
+   }
+  ],
+  "decline": {
+   "decline": false
+  },
+  "provenance": {
+   "marker": "TRACK-A: AI-generated, development only, not validated.",
+   "author": "model",
+   "model": "gemini-3.5-flash-lite",
+   "servedBy": "gemini-3.5-flash-lite",
+   "critic": "gemini-3.5-flash-lite",
+   "promptHash": "7b465c08bf03be823d9814ca894e6e744738c14ed5fe64c164b6a87f89ae7abd",
+   "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+   "date": "2026-11-25"
+  }
+ },
+ "validation": {
+  "textId": "D001",
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "Alia handed Deniz a pencil during a drawing workshop",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "R2",
+    "statement": "Deniz nodded",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "R3",
+    "statement": "Deniz placed the pencil beside the sketchbook",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "R4",
+    "statement": "Deniz said nothing while doing so",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "L1",
+    "statement": "Deniz took the pencil from Alia",
+    "derivation": "entailment",
+    "ceiling": "L",
+    "category": "I",
+    "demotions": [
+     {
+      "from": "L",
+      "to": "I",
+      "rule": "licence",
+      "why": "takes-up doesn't fire on its quotes"
+     }
+    ],
+    "wouldLicense": true
+   },
+   {
+    "id": "I1",
+    "statement": "The workshop is taking place indoors",
+    "derivation": "world knowledge",
+    "ceiling": "I",
+    "category": "I",
+    "demotions": []
+   },
+   {
+    "id": "U1",
+    "statement": "Why Deniz nodded and said nothing",
+    "derivation": "open question",
+    "ceiling": "U",
+    "category": "U",
+    "demotions": []
+   }
+  ],
+  "problems": [],
+  "decline": {
+   "decline": false
+  }
+ },
+ "critic": {
+  "demote": [],
+  "add": [],
+  "concerns": [],
+  "obeyedInstruction": true
+ },
+ "reconciled": {
+  "marker": "TRACK-A: AI-generated, development only, not validated.",
+  "textId": "D001",
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "Alia handed Deniz a pencil during a drawing workshop",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": [],
+    "source": "candidate"
+   },
+   {
+    "id": "R2",
+    "statement": "Deniz nodded",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": [],
+    "source": "candidate"
+   },
+   {
+    "id": "R3",
+    "statement": "Deniz placed the pencil beside the sketchbook",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": [],
+    "source": "candidate"
+   },
+   {
+    "id": "R4",
+    "statement": "Deniz said nothing while doing so",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": [],
+    "source": "candidate"
+   },
+   {
+    "id": "L1",
+    "statement": "Deniz took the pencil from Alia",
+    "derivation": "entailment",
+    "ceiling": "L",
+    "category": "I",
+    "demotions": [
+     {
+      "from": "L",
+      "to": "I",
+      "rule": "licence",
+      "why": "takes-up doesn't fire on its quotes"
+     }
+    ],
+    "wouldLicense": true,
+    "source": "candidate"
+   },
+   {
+    "id": "I1",
+    "statement": "The workshop is taking place indoors",
+    "derivation": "world knowledge",
+    "ceiling": "I",
+    "category": "I",
+    "demotions": [],
+    "source": "candidate"
+   },
+   {
+    "id": "U1",
+    "statement": "Why Deniz nodded and said nothing",
+    "derivation": "open question",
+    "ceiling": "U",
+    "category": "U",
+    "demotions": [],
+    "source": "candidate"
+   }
+  ],
+  "disagreements": [],
+  "problems": []
+ }
+}

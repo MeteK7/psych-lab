@@ -1,0 +1,258 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "AI-generated exploratory interpretation, not a reference annotation.",
+ "textId": "D001",
+ "text": "During a drawing workshop, Alia handed Deniz a pencil. Deniz nodded and placed it beside the sketchbook without saying anything.",
+ "provider": "gemini",
+ "model": "gemini-3.5-flash-lite",
+ "date": "2026-11-26",
+ "promptHash": "e857721b49bcac7387fad449f1a0e4f72e8e60a7dd44db0f1231f997747cd04f",
+ "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+ "stepHashes": {
+  "candidate": "e949517b29b860e0b9e5bd2acbddfd965b111a5cd84db4b05fe39f48ce1c52fb"
+ },
+ "checksHash": "3dd07b337ed3ede6af55fae93f838e138a95419897e6f6239ccfa8fda97fd23c",
+ "stages": [],
+ "requests": 1,
+ "durationMs": 6286,
+ "outcome": "complete",
+ "calls": [
+  {
+   "step": "candidate",
+   "model": "gemini-3.5-flash-lite",
+   "complete": true,
+   "finish": "STOP",
+   "usage": {
+    "input": 4738,
+    "output": 494,
+    "total": 5232
+   },
+   "durationMs": 6280,
+   "reply": "{\n  \"statements\": [\n    {\n      \"id\": \"R1\",\n      \"statement\": \"During a drawing workshop, Alia handed Deniz a pencil\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"During a drawing workshop, Alia handed Deniz a pencil.\"\n      ],\n      \"basis\": \"\\\"During a drawing workshop, Alia handed Deniz a pencil.\\\"\"\n    },\n    {\n      \"id\": \"R2\",\n      \"statement\": \"Deniz nodded\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"Deniz nodded\"\n      ],\n      \"basis\": \"\\\"Deniz nodded\\\"\"\n    },\n    {\n      \"id\": \"R3\",\n      \"statement\": \"Deniz placed the pencil beside the sketchbook without saying anything\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"placed it beside the sketchbook without saying anything\"\n      ],\n      \"basis\": \"\\\"placed it beside the sketchbook without saying anything\\\"\"\n    },\n    {\n      \"id\": \"L1\",\n      \"statement\": \"Deniz took the pencil\",\n      \"derivation\": \"entailment\",\n      \"quotes\": [\n        \"Alia handed Deniz a pencil\"\n      ],\n      \"basis\": \"takes up / picks up\",\n      \"licence\": \"takes-up\",\n      \"wouldLicense\": true\n    },\n    {\n      \"id\": \"I1\",\n      \"statement\": \"Deniz understood Alia or acknowledged the action by nodding\",\n      \"derivation\": \"pragmatic inference\",\n      \"quotes\": [\n        \"Deniz nodded\"\n      ],\n      \"basis\": \"nodding typically signifies acknowledgement or understanding\"\n    },\n    {\n      \"id\": \"U1\",\n      \"statement\": \"Why Deniz placed the pencil down without using it\",\n      \"derivation\": \"open question\",\n      \"quotes\": [\n        \"placed it beside the sketchbook without saying anything\"\n      ],\n      \"basis\": \"the text leaves Deniz's exact motivation unstated\"\n    }\n  ],\n  \"decline\": {\n    \"decline\": false\n  }\n}"
+  }
+ ],
+ "lowered": [
+  {
+   "id": "L1",
+   "from": "L",
+   "to": "I",
+   "rule": "licence",
+   "why": "takes-up doesn't fire on its quotes"
+  }
+ ],
+ "rejected": [],
+ "proposed": {
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "During a drawing workshop, Alia handed Deniz a pencil",
+    "derivation": "restatement",
+    "quotes": [
+     "During a drawing workshop, Alia handed Deniz a pencil."
+    ],
+    "basis": "\"During a drawing workshop, Alia handed Deniz a pencil.\""
+   },
+   {
+    "id": "R2",
+    "statement": "Deniz nodded",
+    "derivation": "restatement",
+    "quotes": [
+     "Deniz nodded"
+    ],
+    "basis": "\"Deniz nodded\""
+   },
+   {
+    "id": "R3",
+    "statement": "Deniz placed the pencil beside the sketchbook without saying anything",
+    "derivation": "restatement",
+    "quotes": [
+     "placed it beside the sketchbook without saying anything"
+    ],
+    "basis": "\"placed it beside the sketchbook without saying anything\""
+   },
+   {
+    "id": "L1",
+    "statement": "Deniz took the pencil",
+    "derivation": "entailment",
+    "quotes": [
+     "Alia handed Deniz a pencil"
+    ],
+    "basis": "takes up / picks up",
+    "licence": "takes-up",
+    "wouldLicense": true
+   },
+   {
+    "id": "I1",
+    "statement": "Deniz understood Alia or acknowledged the action by nodding",
+    "derivation": "pragmatic inference",
+    "quotes": [
+     "Deniz nodded"
+    ],
+    "basis": "nodding typically signifies acknowledgement or understanding"
+   },
+   {
+    "id": "U1",
+    "statement": "Why Deniz placed the pencil down without using it",
+    "derivation": "open question",
+    "quotes": [
+     "placed it beside the sketchbook without saying anything"
+    ],
+    "basis": "the text leaves Deniz's exact motivation unstated"
+   }
+  ],
+  "decline": {
+   "decline": false
+  }
+ },
+ "schema": {
+  "ok": true,
+  "problems": []
+ },
+ "candidate": {
+  "v": 1,
+  "textId": "D001",
+  "text": "During a drawing workshop, Alia handed Deniz a pencil. Deniz nodded and placed it beside the sketchbook without saying anything.",
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "During a drawing workshop, Alia handed Deniz a pencil",
+    "derivation": "restatement",
+    "quotes": [
+     "During a drawing workshop, Alia handed Deniz a pencil."
+    ],
+    "basis": "\"During a drawing workshop, Alia handed Deniz a pencil.\""
+   },
+   {
+    "id": "R2",
+    "statement": "Deniz nodded",
+    "derivation": "restatement",
+    "quotes": [
+     "Deniz nodded"
+    ],
+    "basis": "\"Deniz nodded\""
+   },
+   {
+    "id": "R3",
+    "statement": "Deniz placed the pencil beside the sketchbook without saying anything",
+    "derivation": "restatement",
+    "quotes": [
+     "placed it beside the sketchbook without saying anything"
+    ],
+    "basis": "\"placed it beside the sketchbook without saying anything\""
+   },
+   {
+    "id": "L1",
+    "statement": "Deniz took the pencil",
+    "derivation": "entailment",
+    "quotes": [
+     "Alia handed Deniz a pencil"
+    ],
+    "basis": "takes up / picks up",
+    "licence": "takes-up",
+    "wouldLicense": true
+   },
+   {
+    "id": "I1",
+    "statement": "Deniz understood Alia or acknowledged the action by nodding",
+    "derivation": "pragmatic inference",
+    "quotes": [
+     "Deniz nodded"
+    ],
+    "basis": "nodding typically signifies acknowledgement or understanding"
+   },
+   {
+    "id": "U1",
+    "statement": "Why Deniz placed the pencil down without using it",
+    "derivation": "open question",
+    "quotes": [
+     "placed it beside the sketchbook without saying anything"
+    ],
+    "basis": "the text leaves Deniz's exact motivation unstated"
+   }
+  ],
+  "decline": {
+   "decline": false
+  },
+  "provenance": {
+   "marker": "TRACK-A: AI-generated, development only, not validated.",
+   "author": "model",
+   "model": "gemini-3.5-flash-lite",
+   "servedBy": "gemini-3.5-flash-lite",
+   "promptHash": "e857721b49bcac7387fad449f1a0e4f72e8e60a7dd44db0f1231f997747cd04f",
+   "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+   "date": "2026-11-26"
+  }
+ },
+ "validation": {
+  "textId": "D001",
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "During a drawing workshop, Alia handed Deniz a pencil",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R1",
+    "demotions": []
+   },
+   {
+    "id": "R2",
+    "statement": "Deniz nodded",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R2",
+    "demotions": []
+   },
+   {
+    "id": "R3",
+    "statement": "Deniz placed the pencil beside the sketchbook without saying anything",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R3",
+    "demotions": []
+   },
+   {
+    "id": "L1",
+    "statement": "Deniz took the pencil",
+    "derivation": "entailment",
+    "ceiling": "L",
+    "category": "I",
+    "label": "I1",
+    "demotions": [
+     {
+      "from": "L",
+      "to": "I",
+      "rule": "licence",
+      "why": "takes-up doesn't fire on its quotes"
+     }
+    ],
+    "wouldLicense": true
+   },
+   {
+    "id": "I1",
+    "statement": "Deniz understood Alia or acknowledged the action by nodding",
+    "derivation": "pragmatic inference",
+    "ceiling": "I",
+    "category": "I",
+    "label": "I2",
+    "demotions": []
+   },
+   {
+    "id": "U1",
+    "statement": "Why Deniz placed the pencil down without using it",
+    "derivation": "open question",
+    "ceiling": "U",
+    "category": "U",
+    "label": "U1",
+    "demotions": []
+   }
+  ],
+  "problems": [],
+  "flags": [],
+  "decline": {
+   "decline": false
+  }
+ }
+}

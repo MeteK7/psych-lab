@@ -1,0 +1,243 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "AI-generated exploratory interpretation, not a reference annotation.",
+ "textId": "D002",
+ "text": "Rana invited a colleague to a group activity. No reply arrived by evening. Rana wondered whether the invitation had been overlooked or the colleague was simply busy.",
+ "provider": "gemini",
+ "model": "gemini-3.5-flash-lite",
+ "date": "2026-11-25",
+ "promptHash": "7b465c08bf03be823d9814ca894e6e744738c14ed5fe64c164b6a87f89ae7abd",
+ "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+ "stages": [
+  "critic"
+ ],
+ "requests": 2,
+ "durationMs": 18723,
+ "outcome": "complete",
+ "calls": [
+  {
+   "step": "candidate",
+   "model": "gemini-3.5-flash-lite",
+   "complete": true,
+   "finish": "STOP",
+   "usage": {
+    "input": 4410,
+    "output": 312,
+    "total": 4722
+   },
+   "durationMs": 2054,
+   "reply": "{\n  \"statements\": [\n    {\n      \"id\": \"R1\",\n      \"statement\": \"Rana invited a colleague to a group activity\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"Rana invited a colleague to a group activity.\"\n      ]\n    },\n    {\n      \"id\": \"R2\",\n      \"statement\": \"No reply arrived by evening\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"No reply arrived by evening.\"\n      ]\n    },\n    {\n      \"id\": \"R3\",\n      \"statement\": \"Rana wondered whether the invitation had been overlooked or the colleague was simply busy\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"Rana wondered whether the invitation had been overlooked or the colleague was simply busy.\"\n      ]\n    },\n    {\n      \"id\": \"P1\",\n      \"statement\": \"The possibilities considered by Rana\",\n      \"derivation\": \"alternative\",\n      \"quotes\": [\n        \"the invitation had been overlooked\",\n        \"the colleague was simply busy\"\n      ],\n      \"options\": [\n        \"the invitation had been overlooked\",\n        \"the colleague was simply busy\"\n      ]\n    }\n  ],\n  \"decline\": {\n    \"decline\": false\n  }\n}"
+  },
+  {
+   "step": "critic",
+   "model": "gemini-3.5-flash-lite",
+   "complete": true,
+   "finish": "STOP",
+   "usage": {
+    "input": 4380,
+    "output": 31,
+    "total": 4411
+   },
+   "durationMs": 1332,
+   "reply": "{\n  \"demote\": [],\n  \"add\": [],\n  \"concerns\": [],\n  \"obeyedInstruction\": true\n}"
+  }
+ ],
+ "lowered": [],
+ "rejected": [],
+ "proposed": {
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "Rana invited a colleague to a group activity",
+    "derivation": "restatement",
+    "quotes": [
+     "Rana invited a colleague to a group activity."
+    ]
+   },
+   {
+    "id": "R2",
+    "statement": "No reply arrived by evening",
+    "derivation": "restatement",
+    "quotes": [
+     "No reply arrived by evening."
+    ]
+   },
+   {
+    "id": "R3",
+    "statement": "Rana wondered whether the invitation had been overlooked or the colleague was simply busy",
+    "derivation": "restatement",
+    "quotes": [
+     "Rana wondered whether the invitation had been overlooked or the colleague was simply busy."
+    ]
+   },
+   {
+    "id": "P1",
+    "statement": "The possibilities considered by Rana",
+    "derivation": "alternative",
+    "quotes": [
+     "the invitation had been overlooked",
+     "the colleague was simply busy"
+    ],
+    "options": [
+     "the invitation had been overlooked",
+     "the colleague was simply busy"
+    ]
+   }
+  ],
+  "decline": {
+   "decline": false
+  }
+ },
+ "schema": {
+  "ok": true,
+  "problems": []
+ },
+ "candidate": {
+  "v": 1,
+  "textId": "D002",
+  "text": "Rana invited a colleague to a group activity. No reply arrived by evening. Rana wondered whether the invitation had been overlooked or the colleague was simply busy.",
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "Rana invited a colleague to a group activity",
+    "derivation": "restatement",
+    "quotes": [
+     "Rana invited a colleague to a group activity."
+    ]
+   },
+   {
+    "id": "R2",
+    "statement": "No reply arrived by evening",
+    "derivation": "restatement",
+    "quotes": [
+     "No reply arrived by evening."
+    ]
+   },
+   {
+    "id": "R3",
+    "statement": "Rana wondered whether the invitation had been overlooked or the colleague was simply busy",
+    "derivation": "restatement",
+    "quotes": [
+     "Rana wondered whether the invitation had been overlooked or the colleague was simply busy."
+    ]
+   },
+   {
+    "id": "P1",
+    "statement": "The possibilities considered by Rana",
+    "derivation": "alternative",
+    "quotes": [
+     "the invitation had been overlooked",
+     "the colleague was simply busy"
+    ],
+    "options": [
+     "the invitation had been overlooked",
+     "the colleague was simply busy"
+    ]
+   }
+  ],
+  "decline": {
+   "decline": false
+  },
+  "provenance": {
+   "marker": "TRACK-A: AI-generated, development only, not validated.",
+   "author": "model",
+   "model": "gemini-3.5-flash-lite",
+   "servedBy": "gemini-3.5-flash-lite",
+   "critic": "gemini-3.5-flash-lite",
+   "promptHash": "7b465c08bf03be823d9814ca894e6e744738c14ed5fe64c164b6a87f89ae7abd",
+   "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+   "date": "2026-11-25"
+  }
+ },
+ "validation": {
+  "textId": "D002",
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "Rana invited a colleague to a group activity",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "R2",
+    "statement": "No reply arrived by evening",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "R3",
+    "statement": "Rana wondered whether the invitation had been overlooked or the colleague was simply busy",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": []
+   },
+   {
+    "id": "P1",
+    "statement": "The possibilities considered by Rana",
+    "derivation": "alternative",
+    "ceiling": "P",
+    "category": "P",
+    "demotions": []
+   }
+  ],
+  "problems": [],
+  "decline": {
+   "decline": false
+  }
+ },
+ "critic": {
+  "demote": [],
+  "add": [],
+  "concerns": [],
+  "obeyedInstruction": true
+ },
+ "reconciled": {
+  "marker": "TRACK-A: AI-generated, development only, not validated.",
+  "textId": "D002",
+  "statements": [
+   {
+    "id": "R1",
+    "statement": "Rana invited a colleague to a group activity",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": [],
+    "source": "candidate"
+   },
+   {
+    "id": "R2",
+    "statement": "No reply arrived by evening",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": [],
+    "source": "candidate"
+   },
+   {
+    "id": "R3",
+    "statement": "Rana wondered whether the invitation had been overlooked or the colleague was simply busy",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "demotions": [],
+    "source": "candidate"
+   },
+   {
+    "id": "P1",
+    "statement": "The possibilities considered by Rana",
+    "derivation": "alternative",
+    "ceiling": "P",
+    "category": "P",
+    "demotions": [],
+    "source": "candidate"
+   }
+  ],
+  "disagreements": [],
+  "problems": []
+ }
+}

@@ -1,0 +1,47 @@
+{
+ "round": "dev-5-lite",
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "Exploratory counts. AI-generated exploratory interpretation, not a reference annotation. Not agreement, accuracy or reliability.",
+ "texts": 5,
+ "outcomes": {
+  "complete": 5,
+  "schema-failed": 0,
+  "reply-failed": 0,
+  "stopped": 0
+ },
+ "categories": {
+  "candidate": {
+   "R": 16,
+   "L": 1,
+   "I": 4,
+   "P": 1,
+   "U": 4
+  },
+  "critic": {
+   "R": 0,
+   "L": 0,
+   "I": 0,
+   "P": 0,
+   "U": 0
+  }
+ },
+ "loweredByRule": {
+  "licence": 1,
+  "unlicensed": 2
+ },
+ "rejected": 1,
+ "flags": [],
+ "schemaProblems": [],
+ "declined": [],
+ "obeyedInstruction": [],
+ "otherModel": [],
+ "requests": 5,
+ "requestsSent": 6,
+ "attempts": 6,
+ "usage": {
+  "input": 23791,
+  "output": 2074,
+  "total": 25865
+ },
+ "errors": []
+}

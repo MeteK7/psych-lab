@@ -1,0 +1,229 @@
+{
+ "marker": "TRACK-A: AI-generated, development only, not validated.",
+ "label": "AI-generated exploratory interpretation, not a reference annotation.",
+ "textId": "D002",
+ "text": "Rana invited a colleague to a group activity. No reply arrived by evening. Rana wondered whether the invitation had been overlooked or the colleague was simply busy.",
+ "provider": "gemini",
+ "model": "gemini-3.5-flash-lite",
+ "date": "2026-11-26",
+ "promptHash": "35b2e72f9858fe698d4b4be3d5feae55a6d84d081e805d0453a51836083fad44",
+ "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+ "stepHashes": {
+  "candidate": "a2fb3bb4320684d657df3223e1be4ffd0c9010cc34b53e391640fdc1dab633ee"
+ },
+ "checksHash": "2cd94b4e94f2bc12c9ff272bac0a8e15ea3fa9ad580828b80f0643c5dc7eb4d0",
+ "stages": [],
+ "requests": 1,
+ "durationMs": 10421,
+ "outcome": "complete",
+ "calls": [
+  {
+   "step": "candidate",
+   "model": "gemini-3.5-flash-lite",
+   "complete": true,
+   "finish": "STOP",
+   "usage": {
+    "input": 4759,
+    "output": 488,
+    "total": 5247
+   },
+   "durationMs": 5050,
+   "reply": "{\n  \"statements\": [\n    {\n      \"id\": \"S1\",\n      \"statement\": \"Rana invited a colleague to a group activity\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"Rana invited a colleague to a group activity.\"\n      ],\n      \"basis\": \"\\\"Rana invited a colleague to a group activity.\\\"\",\n      \"holder\": \"\"\n    },\n    {\n      \"id\": \"S2\",\n      \"statement\": \"No reply arrived by evening\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"No reply arrived by evening.\"\n      ],\n      \"basis\": \"\\\"No reply arrived by evening.\\\"\",\n      \"holder\": \"\"\n    },\n    {\n      \"id\": \"S3\",\n      \"statement\": \"Rana wondered whether the invitation had been overlooked or the colleague was simply busy\",\n      \"derivation\": \"restatement\",\n      \"quotes\": [\n        \"Rana wondered whether the invitation had been overlooked or the colleague was simply busy.\"\n      ],\n      \"basis\": \"\\\"Rana wondered whether the invitation had been overlooked or the colleague was simply busy.\\\"\",\n      \"holder\": \"\"\n    },\n    {\n      \"id\": \"S4\",\n      \"statement\": \"The invitation had been overlooked or the colleague was simply busy\",\n      \"derivation\": \"alternative\",\n      \"quotes\": [\n        \"whether the invitation had been overlooked or the colleague was simply busy\"\n      ],\n      \"basis\": \"offered as possibilities by Rana\",\n      \"holder\": \"Rana\",\n      \"options\": [\n        \"the invitation had been overlooked\",\n        \"the colleague was simply busy\"\n      ]\n    },\n    {\n      \"id\": \"S5\",\n      \"statement\": \"Whether the colleague will eventually reply\",\n      \"derivation\": \"open question\",\n      \"quotes\": [\n        \"No reply arrived by evening.\"\n      ],\n      \"basis\": \"the text leaves open if a reply will come later\",\n      \"holder\": \"\"\n    }\n  ],\n  \"decline\": {\n    \"decline\": false\n  }\n}"
+  }
+ ],
+ "lowered": [],
+ "rejected": [],
+ "proposed": {
+  "statements": [
+   {
+    "id": "S1",
+    "statement": "Rana invited a colleague to a group activity",
+    "derivation": "restatement",
+    "quotes": [
+     "Rana invited a colleague to a group activity."
+    ],
+    "basis": "\"Rana invited a colleague to a group activity.\"",
+    "holder": ""
+   },
+   {
+    "id": "S2",
+    "statement": "No reply arrived by evening",
+    "derivation": "restatement",
+    "quotes": [
+     "No reply arrived by evening."
+    ],
+    "basis": "\"No reply arrived by evening.\"",
+    "holder": ""
+   },
+   {
+    "id": "S3",
+    "statement": "Rana wondered whether the invitation had been overlooked or the colleague was simply busy",
+    "derivation": "restatement",
+    "quotes": [
+     "Rana wondered whether the invitation had been overlooked or the colleague was simply busy."
+    ],
+    "basis": "\"Rana wondered whether the invitation had been overlooked or the colleague was simply busy.\"",
+    "holder": ""
+   },
+   {
+    "id": "S4",
+    "statement": "The invitation had been overlooked or the colleague was simply busy",
+    "derivation": "alternative",
+    "quotes": [
+     "whether the invitation had been overlooked or the colleague was simply busy"
+    ],
+    "basis": "offered as possibilities by Rana",
+    "holder": "Rana",
+    "options": [
+     "the invitation had been overlooked",
+     "the colleague was simply busy"
+    ]
+   },
+   {
+    "id": "S5",
+    "statement": "Whether the colleague will eventually reply",
+    "derivation": "open question",
+    "quotes": [
+     "No reply arrived by evening."
+    ],
+    "basis": "the text leaves open if a reply will come later",
+    "holder": ""
+   }
+  ],
+  "decline": {
+   "decline": false
+  }
+ },
+ "schema": {
+  "ok": true,
+  "problems": []
+ },
+ "candidate": {
+  "v": 1,
+  "textId": "D002",
+  "text": "Rana invited a colleague to a group activity. No reply arrived by evening. Rana wondered whether the invitation had been overlooked or the colleague was simply busy.",
+  "statements": [
+   {
+    "id": "S1",
+    "statement": "Rana invited a colleague to a group activity",
+    "derivation": "restatement",
+    "quotes": [
+     "Rana invited a colleague to a group activity."
+    ],
+    "basis": "\"Rana invited a colleague to a group activity.\"",
+    "holder": ""
+   },
+   {
+    "id": "S2",
+    "statement": "No reply arrived by evening",
+    "derivation": "restatement",
+    "quotes": [
+     "No reply arrived by evening."
+    ],
+    "basis": "\"No reply arrived by evening.\"",
+    "holder": ""
+   },
+   {
+    "id": "S3",
+    "statement": "Rana wondered whether the invitation had been overlooked or the colleague was simply busy",
+    "derivation": "restatement",
+    "quotes": [
+     "Rana wondered whether the invitation had been overlooked or the colleague was simply busy."
+    ],
+    "basis": "\"Rana wondered whether the invitation had been overlooked or the colleague was simply busy.\"",
+    "holder": ""
+   },
+   {
+    "id": "S4",
+    "statement": "The invitation had been overlooked or the colleague was simply busy",
+    "derivation": "alternative",
+    "quotes": [
+     "whether the invitation had been overlooked or the colleague was simply busy"
+    ],
+    "basis": "offered as possibilities by Rana",
+    "holder": "Rana",
+    "options": [
+     "the invitation had been overlooked",
+     "the colleague was simply busy"
+    ]
+   },
+   {
+    "id": "S5",
+    "statement": "Whether the colleague will eventually reply",
+    "derivation": "open question",
+    "quotes": [
+     "No reply arrived by evening."
+    ],
+    "basis": "the text leaves open if a reply will come later",
+    "holder": ""
+   }
+  ],
+  "decline": {
+   "decline": false
+  },
+  "provenance": {
+   "marker": "TRACK-A: AI-generated, development only, not validated.",
+   "author": "model",
+   "model": "gemini-3.5-flash-lite",
+   "servedBy": "gemini-3.5-flash-lite",
+   "promptHash": "35b2e72f9858fe698d4b4be3d5feae55a6d84d081e805d0453a51836083fad44",
+   "guideHash": "6ce965845bfc0960f108c9f0d143a7c6ecaf689a26fde7bd792b764988315379",
+   "date": "2026-11-26"
+  }
+ },
+ "validation": {
+  "textId": "D002",
+  "statements": [
+   {
+    "id": "S1",
+    "statement": "Rana invited a colleague to a group activity",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R1",
+    "demotions": []
+   },
+   {
+    "id": "S2",
+    "statement": "No reply arrived by evening",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R2",
+    "demotions": []
+   },
+   {
+    "id": "S3",
+    "statement": "Rana wondered whether the invitation had been overlooked or the colleague was simply busy",
+    "derivation": "restatement",
+    "ceiling": "R",
+    "category": "R",
+    "label": "R3",
+    "demotions": []
+   },
+   {
+    "id": "S4",
+    "statement": "The invitation had been overlooked or the colleague was simply busy",
+    "derivation": "alternative",
+    "ceiling": "P",
+    "category": "P",
+    "label": "P1",
+    "demotions": []
+   },
+   {
+    "id": "S5",
+    "statement": "Whether the colleague will eventually reply",
+    "derivation": "open question",
+    "ceiling": "U",
+    "category": "U",
+    "label": "U1",
+    "demotions": []
+   }
+  ],
+  "problems": [],
+  "flags": [],
+  "decline": {
+   "decline": false
+  }
+ }
+}
